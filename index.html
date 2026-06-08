@@ -1,12 +1,117 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>RASEEN</title>
+<title>Hex Island</title>
+
+<style>
+body{
+    margin:0;
+    background:#0c3d57;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.map{
+    position:relative;
+}
+
+.row{
+    display:flex;
+    justify-content:center;
+    margin-top:-28px;
+}
+
+.row:first-child{
+    margin-top:0;
+}
+
+.hex{
+    width:120px;
+    height:138px;
+    margin:0 4px;
+    position:relative;
+
+    clip-path: polygon(
+        25% 0%,
+        75% 0%,
+        100% 50%,
+        75% 100%,
+        25% 100%,
+        0% 50%
+    );
+
+    background:url('https://picsum.photos/200');
+    background-size:cover;
+
+    border:2px solid #222;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.number{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#e7d39a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.fog{
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(circle,#fff 35%,#ddd 36%,#fff 70%);
+    opacity:.85;
+    pointer-events:none;
+}
+</style>
 </head>
+
 <body>
-<div id="app"></div>
-<script src="app.min.js"></script>
+
+<div class="map">
+
+    <div class="row">
+        <div class="hex"><div class="fog"></div><div class="number">3</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">2</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">6</div></div>
+    </div>
+
+    <div class="row">
+        <div class="hex"><div class="fog"></div><div class="number">3</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">9</div></div>
+
+        <div class="hex" style="background:url('https://images.unsplash.com/photo-1511497584788-876760111969?w=500');background-size:cover;">
+            <div class="number">8</div>
+        </div>
+
+        <div class="hex"><div class="fog"></div><div class="number">8</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">10</div></div>
+    </div>
+
+    <div class="row">
+        <div class="hex"><div class="fog"></div><div class="number">6</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">4</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">11</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">4</div></div>
+    </div>
+
+    <div class="row">
+        <div class="hex"><div class="fog"></div><div class="number">11</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">9</div></div>
+        <div class="hex"><div class="fog"></div><div class="number">12</div></div>
+    </div>
+
+</div>
+
 </body>
 </html>
