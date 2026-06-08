@@ -2,108 +2,110 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hex Island</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Island Game</title>
 
 <style>
 
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
 body{
-    margin:0;
-    background:#08354d;
-    color:white;
-    font-family:Arial;
+background:#0b4a6e;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:15px;
+color:white;
 }
 
 .topbar{
-    padding:15px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
+width:100%;
+max-width:900px;
+background:white;
+color:#111;
+padding:15px;
+border-radius:15px;
+display:flex;
+justify-content:space-between;
+font-size:22px;
+font-weight:bold;
+margin-bottom:20px;
 }
 
-.map{
-    width:900px;
-    margin:auto;
-    margin-top:20px;
+.island-container{
+position:relative;
+width:900px;
+max-width:100%;
 }
 
-.row{
-    display:flex;
-    justify-content:center;
-    margin-top:-25px;
+.island{
+width:100%;
+display:block;
+border-radius:20px;
 }
 
-.row:first-child{
-    margin-top:0;
+.plot{
+position:absolute;
+width:120px;
+height:120px;
+border:3px dashed rgba(255,255,255,.9);
+border-radius:15px;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(255,255,255,.1);
+backdrop-filter:blur(3px);
 }
 
-.hex{
-    width:140px;
-    height:160px;
-    margin:5px;
-    cursor:pointer;
-    position:relative;
-
-    clip-path:polygon(
-        25% 0%,
-        75% 0%,
-        100% 50%,
-        75% 100%,
-        25% 100%,
-        0% 50%
-    );
-
-    background:#cfd8dc;
-    overflow:hidden;
-    border:3px solid #222;
+.plot:hover{
+transform:scale(1.05);
 }
 
-.hex img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+.plus{
+font-size:50px;
+font-weight:bold;
+color:white;
 }
 
-.fog{
-    position:absolute;
-    inset:0;
-    background:
-    radial-gradient(circle,#fff 35%,#ddd 36%,#fff 70%);
+.asset{
+width:100%;
+height:100%;
+border-radius:15px;
+overflow:hidden;
+position:relative;
 }
 
-.number{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    background:#e7d39a;
-    color:black;
-    font-weight:bold;
-    font-size:24px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.asset img{
+width:100%;
+height:100%;
+object-fit:cover;
 }
 
-.info{
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    background:rgba(0,0,0,.7);
-    text-align:center;
-    padding:4px;
-    font-size:12px;
+.asset-info{
+position:absolute;
+left:0;
+right:0;
+bottom:0;
+background:rgba(0,0,0,.7);
+padding:5px;
+font-size:12px;
+text-align:center;
 }
 
-button{
-    margin-top:4px;
-    border:none;
-    padding:4px 8px;
-    cursor:pointer;
+.upgrade-btn{
+margin-top:4px;
+background:#29a329;
+color:white;
+border:none;
+padding:4px 8px;
+border-radius:5px;
+cursor:pointer;
 }
 
 </style>
@@ -112,201 +114,192 @@ button{
 <body>
 
 <div class="topbar">
-💰 Coins: <span id="coins">999999999</span>
+<div>💰 Coins: <span id="coins"></span></div>
 </div>
 
-<div class="map" id="map"></div>
+<div class="island-container">
+
+<img class="island"
+src="island.jpg">
+
+<div class="plot" style="top:18%;left:18%" data-id="0"></div>
+<div class="plot" style="top:18%;left:42%" data-id="1"></div>
+<div class="plot" style="top:18%;left:66%" data-id="2"></div>
+
+<div class="plot" style="top:40%;left:18%" data-id="3"></div>
+<div class="plot" style="top:40%;left:42%" data-id="4"></div>
+<div class="plot" style="top:40%;left:66%" data-id="5"></div>
+
+<div class="plot" style="top:62%;left:18%" data-id="6"></div>
+<div class="plot" style="top:62%;left:42%" data-id="7"></div>
+<div class="plot" style="top:62%;left:66%" data-id="8"></div>
+
+<div class="plot" style="top:82%;left:18%" data-id="9"></div>
+<div class="plot" style="top:82%;left:42%" data-id="10"></div>
+<div class="plot" style="top:82%;left:66%" data-id="11"></div>
+
+</div>
 
 <script>
 
-let coins = 999999999;
+const assetImages = [
 
-const assets = [
+"https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=500",
+"https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500",
+"https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=500",
+"https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500",
+"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500",
+"https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=500",
+"https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=500",
+"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500",
+"https://images.unsplash.com/photo-1519046904884-53103b34b206?w=500",
+"https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=500",
+"https://images.unsplash.com/photo-1500534623283-312aade485b7?w=500"
 
-{
-name:"Coconut Tree",
-price:100,
-level:1,
+];
+
+let game = JSON.parse(localStorage.getItem("islandGame"));
+
+if(!game){
+
+game = {
+
+coins:999999,
+
+plots:Array(12).fill().map((_,i)=>({
+
 owned:false,
-image:"https://picsum.photos/300/300?1"
-},
-
-{
-name:"Farm",
-price:200,
 level:1,
-owned:false,
-image:"https://picsum.photos/300/300?2"
-},
+name:"Asset "+(i+1)
 
-{
-name:"Mine",
-price:300,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?3"
-},
+}))
 
-{
-name:"Port",
-price:400,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?4"
-},
+};
 
-{
-name:"Fishing Dock",
-price:500,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?5"
-},
-
-{
-name:"Market",
-price:600,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?6"
-},
-
-{
-name:"Volcano",
-price:700,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?7"
-},
-
-{
-name:"Crystal Cave",
-price:800,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?8"
-},
-
-{
-name:"Shipyard",
-price:900,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?9"
-},
-
-{
-name:"Village",
-price:1000,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?10"
-},
-
-{
-name:"Obsidian Mine",
-price:1200,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?11"
-},
-
-{
-name:"Lighthouse",
-price:1500,
-level:1,
-owned:false,
-image:"https://picsum.photos/300/300?12"
 }
 
-];
+const coinsEl = document.getElementById("coins");
 
-const rows = [
-[0,1,2],
-[3,4,5,6,7],
-[8,9,10,11]
-];
+function save(){
+localStorage.setItem(
+"islandGame",
+JSON.stringify(game)
+);
+}
+
+function buyPlot(index){
+
+let plot = game.plots[index];
+
+if(plot.owned) return;
+
+let cost = 1000;
+
+if(game.coins < cost){
+
+alert("Not enough coins");
+
+return;
+
+}
+
+game.coins -= cost;
+
+plot.owned = true;
+
+save();
+
+render();
+
+}
+
+function upgradePlot(index){
+
+let plot = game.plots[index];
+
+let cost = plot.level * 500;
+
+if(game.coins < cost){
+
+alert("Not enough coins");
+
+return;
+
+}
+
+game.coins -= cost;
+
+plot.level++;
+
+save();
+
+render();
+
+}
 
 function render(){
 
-document.getElementById("coins").innerText = coins;
+coinsEl.textContent =
+game.coins.toLocaleString();
 
-let html = "";
+document
+.querySelectorAll(".plot")
+.forEach((el,index)=>{
 
-rows.forEach(row=>{
+let plot = game.plots[index];
 
-html += `<div class="row">`;
+if(!plot.owned){
 
-row.forEach(index=>{
+el.innerHTML=
+`<div class="plus">+</div>`;
 
-let item = assets[index];
-
-if(!item.owned){
-
-html += `
-<div class="hex"
-onclick="buy(${index})">
-
-<div class="fog"></div>
-
-<div class="number">
-${item.price}
-</div>
-
-</div>
-`;
+el.onclick=()=>buyPlot(index);
 
 }else{
 
-html += `
-<div class="hex">
+el.innerHTML=`
 
-<img src="${item.image}">
+<div class="asset">
 
-<div class="info">
+<img src="${assetImages[index]}">
 
-<b>${item.name}</b><br>
+<div class="asset-info">
 
-Level ${item.level}<br>
+${plot.name}<br>
 
-<button onclick="upgrade(${index})">
+Level ${plot.level}
+
+<br>
+
+<button
+class="upgrade-btn">
+
 Upgrade
+
 </button>
 
 </div>
 
 </div>
+
 `;
 
+el.onclick=null;
+
+el.querySelector("button")
+.onclick=(e)=>{
+
+e.stopPropagation();
+
+upgradePlot(index);
+
+};
+
 }
 
 });
 
-html += `</div>`;
-
-});
-
-document.getElementById("map").innerHTML = html;
-}
-
-function buy(index){
-
-let item = assets[index];
-
-if(coins < item.price) return;
-
-coins -= item.price;
-
-item.owned = true;
-
-render();
-}
-
-function upgrade(index){
-
-assets[index].level++;
-
-render();
 }
 
 render();
