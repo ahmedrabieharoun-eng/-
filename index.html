@@ -1,12 +1,586 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RASEEN</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Island King</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --coin:#f5b316;--ton:#0098ea;
+  --green:#3a8a2a;--green2:#5cb432;
+  --ink:#1a2a14;--muted:#5a6d80;--red:#e44e4e;
+}
+html,body{background:#0a1f35;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
+body{padding-bottom:70px}
+
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px 8px;
+  background:linear-gradient(180deg,#0d2840,#0f3355);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  position:sticky;top:0;z-index:20;
+}
+.av{width:38px;height:38px;border-radius:50%;background:#1a4060;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.uname{font-weight:800;font-size:13px;color:#fff;flex:1}
+.chips{display:flex;gap:6px}
+.chip{display:flex;align-items:center;gap:4px;border-radius:20px;padding:5px 10px;font-weight:800;font-size:12px;color:#fff;cursor:pointer}
+.chip.c{background:rgba(245,179,22,.2);border:1.5px solid rgba(245,179,22,.5)}
+.chip.t{background:rgba(0,152,234,.2);border:1.5px solid rgba(0,152,234,.5)}
+.chip-plus{background:#2a7a2a;border:none;color:#fff;border-radius:50%;width:18px;height:18px;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+
+/* ── STAT CARDS ── */
+.stat-row{display:flex;gap:8px;padding:10px 12px 0}
+.stat-card{
+  flex:1;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;padding:8px 12px;color:#fff;
+}
+.stat-card .lbl{font-size:10px;opacity:.65;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:4px}
+.stat-card .val{font-size:15px;font-weight:800;display:flex;align-items:center;gap:5px}
+.info-btn{background:none;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.6);border-radius:50%;width:14px;height:14px;font-size:9px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.upg-btn{background:linear-gradient(180deg,#5cb432,#3a8a2a);border:none;color:#fff;border-radius:6px;width:20px;height:20px;font-size:14px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:2px;box-shadow:0 2px 0 #2d6b20}
+
+/* ── COLLECT BAR ── */
+.collect-bar{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.cinfo{
+  flex:1;background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;padding:9px 13px;color:#fff;
+}
+.cinfo .ck{font-size:10px;opacity:.65;font-weight:700;display:flex;align-items:center;gap:4px}
+.cinfo .cv{font-size:17px;font-weight:800;display:flex;align-items:center;gap:6px;margin-top:2px}
+.collect-btn{
+  background:linear-gradient(180deg,#f5c32a,#d6920a);
+  border:none;border-radius:16px;
+  padding:12px 20px;
+  font-weight:800;font-size:15px;color:#fff;
+  cursor:pointer;
+  box-shadow:0 4px 0 #9a6a08;
+  position:relative;white-space:nowrap;
+  display:flex;align-items:center;gap:6px;
+  transition:transform .1s,box-shadow .1s;
+}
+.collect-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #9a6a08}
+.collect-btn:disabled{filter:grayscale(.5);opacity:.7;box-shadow:none;cursor:default}
+.notif-dot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;background:#e44e4e;border-radius:50%;border:2px solid #0f3355}
+
+/* ── ISLAND WRAPPER ── */
+.island-wrap{
+  position:relative;
+  width:100%;
+  /* keep aspect ratio of island.png — typically ~4:3 landscape */
+  padding-bottom:80%;
+  margin:4px 0 0;
+  overflow:hidden;
+}
+.island-bg{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+
+/* ── HEXAGON NODES ── */
+/* Each node is absolute-positioned by % of island-wrap */
+.hex-node{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;z-index:3;
+  --hsz:17vw; /* hex size, clamped */
+}
+.hex-node:active{transform:translate(-50%,-50%) scale(.9)}
+
+/* SVG clip hexagon */
+.hex-clip{
+  width:var(--hsz);height:var(--hsz);
+  position:relative;flex:none;
+}
+.hex-clip svg.hex-bg{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+.hex-clip .hex-img{
+  position:absolute;
+  inset:8%;
+  width:84%;height:84%;
+  border-radius:50%;
+  object-fit:cover;
+  transition:filter .3s;
+}
+.hex-node.locked .hex-img{filter:grayscale(1) brightness(.45)}
+.hex-node.buyable .hex-img{animation:buyGlow 2s ease-in-out infinite}
+@keyframes buyGlow{
+  0%,100%{filter:drop-shadow(0 0 0px rgba(245,179,22,0))}
+  50%{filter:drop-shadow(0 0 8px rgba(245,179,22,.95)) brightness(1.1)}
+}
+
+.hex-lock{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--hsz)*.32);
+  pointer-events:none;z-index:2;
+}
+.hex-node:not(.locked) .hex-lock{display:none}
+
+/* number badge */
+.hex-num{
+  position:absolute;top:0;left:0;
+  width:calc(var(--hsz)*.32);height:calc(var(--hsz)*.32);
+  background:#1a1a1a;border:2px solid rgba(255,255,255,.4);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:calc(var(--hsz)*.14);font-weight:900;color:#fff;
+  z-index:4;
+}
+
+/* name + level label */
+.hex-label{
+  margin-top:3px;
+  background:rgba(0,0,0,.72);
+  border-radius:8px;padding:2px 7px;
+  text-align:center;
+  line-height:1.25;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.hex-label .hname{font-size:9px;font-weight:700;color:#fff;display:block;white-space:nowrap}
+.hex-label .hlv{font-size:9px;font-weight:800;display:block}
+.hex-label .hlv.owned{color:#f5b316}
+.hex-label .hlv.buy-lbl{color:#5cb432}
+.hex-label .hlv.lock-lbl{color:rgba(255,255,255,.4)}
+
+/* buy pulse ring */
+@keyframes ring{0%{r:45%;opacity:.7}100%{r:54%;opacity:0}}
+.buy-ring{animation:ring 1.8s ease-out infinite}
+
+/* ── NAV BAR ── */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;
+  background:#0d2840;
+  border-top:1px solid rgba(255,255,255,.08);
+  z-index:20;
+}
+.nav-item{
+  flex:1;padding:8px 4px 10px;
+  text-align:center;cursor:pointer;
+  color:#5a7a9a;font-size:10px;font-weight:700;
+  transition:color .2s;
+}
+.nav-item.active{color:#f5b316}
+.nav-ico{font-size:22px;display:block;margin-bottom:2px}
+.nav-item.active .nav-ico{filter:drop-shadow(0 0 4px rgba(245,179,22,.6))}
+
+/* ── MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.65);
+  display:none;align-items:flex-end;justify-content:center;
+  z-index:50;
+}
+.modal-bg.open{display:flex}
+.modal-sheet{
+  background:#fff;
+  border-radius:22px 22px 0 0;
+  max-width:480px;width:100%;
+  padding:6px 18px 32px;
+  animation:slideUp .22s ease-out;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.m-handle{width:36px;height:4px;background:#dde3ea;border-radius:4px;margin:10px auto 14px}
+.m-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.m-title{font-weight:800;font-size:17px;color:var(--ink)}
+.m-close{background:#f0f2f5;border:none;font-size:16px;cursor:pointer;color:var(--muted);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+.m-img{display:flex;justify-content:center;margin-bottom:12px}
+.m-img img{width:90px;height:90px;object-fit:contain}
+.m-stat-row{display:flex;justify-content:space-around;margin-bottom:14px}
+.m-stat{text-align:center}
+.m-stat .mk{font-size:11px;color:var(--muted);margin-bottom:2px}
+.m-stat .mv{font-weight:800;font-size:20px;color:var(--ink)}
+.m-price{text-align:center;font-size:22px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.m-sub{text-align:center;font-size:13px;color:var(--muted);margin-bottom:14px}
+.btn{
+  width:100%;
+  background:linear-gradient(180deg,#5cb432,#3a8a2a);
+  border:none;border-radius:14px;
+  padding:13px;color:#fff;font-weight:800;font-size:15px;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 3px 0 #2d6b20;
+  transition:transform .1s;
+}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #2d6b20}
+.btn:disabled{opacity:.45;cursor:default;box-shadow:none;transform:none}
+.btn.gold{background:linear-gradient(180deg,#f5c32a,#d6920a);box-shadow:0 3px 0 #9a6a08}
+.btn.gold:active{box-shadow:0 1px 0 #9a6a08}
+.m-need{text-align:center;font-size:12px;color:var(--red);margin-top:8px}
+.prog-bar-wrap{width:100%;height:12px;background:#e5eaef;border-radius:10px;overflow:hidden;margin:8px 0 4px}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,#5cb432,#3a8a2a);border-radius:10px;transition:width .4s}
+.prog-lbl{text-align:center;font-size:12px;color:var(--muted)}
+
+/* toast */
+.toast{
+  position:fixed;bottom:82px;left:50%;transform:translateX(-50%);
+  background:#1a2a14;color:#fff;
+  padding:10px 20px;border-radius:12px;
+  font-weight:700;font-size:13px;
+  z-index:100;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
+  pointer-events:none;opacity:0;
+  transition:opacity .2s;
+}
+.toast.show{opacity:1}
+</style>
 </head>
 <body>
-<div id="app"></div>
-<script src="app.min.js"></script>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="av">👤</div>
+  <span class="uname">Abo Rabie</span>
+  <div class="chips">
+    <div class="chip c">🪙 <span id="uCoins">12,450</span></div>
+    <div class="chip t">💎 <span>1.25</span> TON</div>
+    <button class="chip-plus" onclick="showToast('Buy TON')">+</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="lbl">⚡ Income / h <button class="info-btn">i</button></div>
+    <div class="val">🪙 <span id="incomeDisp">4,250</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="lbl">⏱ Offline Time <button class="info-btn">i</button></div>
+    <div class="val"><span id="offlineDisp">8h</span><button class="upg-btn" onclick="showToast('Upgrade offline cap')">+</button></div>
+  </div>
+</div>
+
+<!-- COLLECT BAR -->
+<div class="collect-bar">
+  <div class="cinfo">
+    <div class="ck">Profit Accumulated <button class="info-btn" style="border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.5)">i</button></div>
+    <div class="cv">🪙 <span id="pendDisp">2,845</span> Coins</div>
+  </div>
+  <button class="collect-btn" id="btnCollect" onclick="doCollect()">
+    💰 Collect
+    <span class="notif-dot" id="collectDot"></span>
+  </button>
+</div>
+
+<!-- ISLAND MAP -->
+<div class="island-wrap" id="islWrap">
+  <img class="island-bg" id="islBg" src="images/island.png" alt="Island"
+       onerror="this.style.background='linear-gradient(160deg,#3a8a2a,#2d6b20,#1a4a10)';this.style.borderRadius='50% 50% 50% 50%/45% 45% 55% 55%'">
+  <!-- Hex nodes injected by JS -->
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-item active" onclick="setTab(this,'island')"><span class="nav-ico">🏝️</span>Island</div>
+  <div class="nav-item" onclick="setTab(this,'market')"><span class="nav-ico">🏪</span>Market</div>
+  <div class="nav-item" onclick="setTab(this,'friends')"><span class="nav-ico">👥</span>Friends</div>
+  <div class="nav-item" onclick="setTab(this,'wallet')"><span class="nav-ico">💼</span>Wallet</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet">
+    <div class="m-handle"></div>
+    <div class="m-head">
+      <span class="m-title" id="mTitle"></span>
+      <button class="m-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   STATE  (replace with real API data in production)
+───────────────────────────────────────────────────────────── */
+var IMG_BASE = "images/";
+var state = {
+  user: {
+    coins: 12450,
+    offlineHours: 8,
+    collectTs: Date.now() - 2430000,
+    assets: {
+      coconut_tree:   3,
+      banana_tree:    3,
+      mango_tree:     0,
+      fishing_dock:   4,
+      fisher_house:   1,
+      seafood_market: 2,
+      small_hut:      1,
+      beach_shop:     2,
+      fruit_market:   0,
+      potion_shop:    1,
+      resort_hotel:   1,
+      vip_island_club:1
+    }
+  },
+  island:  { incomePerHour:4250, pendingCoins:2845, offlineCapSec:28800 },
+  maxLv:   30,
+  catalog: [
+    { n:1,  type:"coconut_tree",    name:"Coconut Tree",    img:"Coconut Tree.png",    base:80,   cost:500,   unlock:0    },
+    { n:2,  type:"banana_tree",     name:"Banana Tree",     img:"Banana Tree.png",     base:120,  cost:800,   unlock:0    },
+    { n:3,  type:"mango_tree",      name:"Mango Tree",      img:"Mango Tree.png",      base:180,  cost:1500,  unlock:300  },
+    { n:4,  type:"fishing_dock",    name:"Fishing Dock",    img:"Fishing Dock.png",    base:350,  cost:3000,  unlock:500  },
+    { n:5,  type:"fisher_house",    name:"Fisher House",    img:"Fisher House.png",    base:500,  cost:5000,  unlock:800  },
+    { n:6,  type:"seafood_market",  name:"Seafood Market",  img:"Seafood Market.png",  base:750,  cost:8000,  unlock:1500 },
+    { n:7,  type:"small_hut",       name:"Small Hut",       img:"Small Hut.png",       base:420,  cost:4000,  unlock:700  },
+    { n:8,  type:"beach_shop",      name:"Beach Shop",      img:"Beach Shop.png",      base:620,  cost:7000,  unlock:1200 },
+    { n:9,  type:"fruit_market",    name:"Fruit Market",    img:"Fruit Market.png",    base:900,  cost:10000, unlock:2000 },
+    { n:10, type:"potion_shop",     name:"Potion Shop",     img:"Potion Shop.png",     base:1100, cost:13000, unlock:2800 },
+    { n:11, type:"resort_hotel",    name:"Resort Hotel",    img:"Resort Hotel.png",    base:1800, cost:20000, unlock:4000 },
+    { n:12, type:"vip_island_club", name:"VIP Island Club", img:"VIP Island Club.png", base:3200, cost:40000, unlock:8000 }
+  ]
+};
+
+/* hex positions as % of island-wrap (left, top)
+   Laid out to match the 3-row reference image on the island */
+var HEX_POS = {
+  coconut_tree:    { l:22, t:22 },
+  banana_tree:     { l:50, t:16 },
+  mango_tree:      { l:77, t:22 },
+  fishing_dock:    { l:12, t:48 },
+  fisher_house:    { l:34, t:43 },
+  seafood_market:  { l:56, t:43 },
+  small_hut:       { l:78, t:48 },
+  beach_shop:      { l:23, t:70 },
+  fruit_market:    { l:42, t:68 },
+  potion_shop:     { l:61, t:68 },
+  resort_hotel:    { l:79, t:72 },
+  vip_island_club: { l:50, t:87 }
+};
+
+/* ─── helpers ─── */
+function fmt(n){ return (Math.round(n)||0).toLocaleString('en-US'); }
+function cat(type){ return state.catalog.find(function(x){ return x.type===type; }); }
+function lvIncome(type,k){ var c=cat(type); return c?Math.round(c.base*Math.pow(1.2,Math.max(0,k-1))):0; }
+function totalIncome(type,lv){ var s=0; for(var k=1;k<=lv;k++) s+=lvIncome(type,k); return s; }
+function upgCost(type,lv){ var c=cat(type); return c?Math.round(c.cost*Math.pow(1.5,Math.max(0,lv-1))):0; }
+
+/* hex SVG border colours */
+function hexBorderColor(state_){ 
+  if(state_==='owned')   return '#f5b316';
+  if(state_==='buyable') return '#5cb432';
+  return 'rgba(255,255,255,0.25)';
+}
+function hexFillColor(state_){
+  if(state_==='owned')   return 'rgba(245,179,22,.18)';
+  if(state_==='buyable') return 'rgba(92,180,50,.18)';
+  return 'rgba(0,0,0,.45)';
+}
+
+/* ─── BUILD ISLAND ─── */
+function buildIsland(){
+  var wrap = document.getElementById('islWrap');
+  // remove old nodes
+  wrap.querySelectorAll('.hex-node').forEach(function(n){ n.remove(); });
+
+  var per = state.island.incomePerHour;
+
+  state.catalog.forEach(function(a){
+    var lv      = (state.user.assets||{})[a.type]||0;
+    var owned   = lv>0;
+    var buyable = !owned && per>=a.unlock;
+    var locked  = !owned && !buyable;
+    var status  = owned?'owned':buyable?'buyable':'locked';
+    var pos     = HEX_POS[a.type]||{l:50,t:50};
+
+    var border  = hexBorderColor(status);
+    var fill    = hexFillColor(status);
+
+    // buy-ring animation circle inside SVG for buyable
+    var buyRing = buyable
+      ? '<circle class="buy-ring" cx="50" cy="50" r="45" fill="none" stroke="#5cb432" stroke-width="2.5" stroke-dasharray="4 3" opacity=".8"/>'
+      : '';
+
+    var svgHex =
+      '<svg class="hex-bg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+
+        '<polygon points="50,3 93,26 93,74 50,97 7,74 7,26" fill="'+fill+'" stroke="'+border+'" stroke-width="3.5" stroke-linejoin="round"/>'+
+        buyRing+
+      '</svg>';
+
+    var lvText = owned
+      ? '<span class="hlv owned">Level '+lv+'</span>'
+      : buyable
+        ? '<span class="hlv buy-lbl">Tap to Buy</span>'
+        : '<span class="hlv lock-lbl">Locked</span>';
+
+    var node = document.createElement('div');
+    node.className = 'hex-node'+(locked?' locked':buyable?' buyable':'');
+    node.style.left  = pos.l+'%';
+    node.style.top   = pos.t+'%';
+    node.dataset.type = a.type;
+
+    node.innerHTML =
+      '<div class="hex-clip">'+
+        svgHex+
+        '<img class="hex-img" src="'+IMG_BASE+encodeURIComponent(a.img)+'" alt="'+a.name+'"'+
+          ' onerror="this.style.display=\'none\'">'+
+        '<div class="hex-lock">🔒</div>'+
+        '<div class="hex-num">'+a.n+'</div>'+
+      '</div>'+
+      '<div class="hex-label">'+
+        '<span class="hname">'+a.name+'</span>'+
+        lvText+
+      '</div>';
+
+    node.onclick = function(){
+      if(owned)        openUpgrade(a.type);
+      else if(buyable) openBuy(a.type);
+      else             openLocked(a.type);
+    };
+    wrap.appendChild(node);
+  });
+}
+
+/* ─── MODALS ─── */
+function openModal(title,body){
+  document.getElementById('mTitle').textContent = title;
+  document.getElementById('mBody').innerHTML = body;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+function imgTag(a,gray){
+  return '<div class="m-img"><img src="'+IMG_BASE+encodeURIComponent(a.img)+'" alt="'+a.name+'"'+(gray?' style="filter:grayscale(1) brightness(.5)"':'')+' onerror="this.parentNode.innerHTML=\'<div style=font-size:60px>🏗️</div>\'"></div>';
+}
+
+function openBuy(type){
+  var a=cat(type); if(!a) return;
+  var afford = state.user.coins >= a.cost;
+  openModal('🏗️ '+a.name,
+    imgTag(a)+
+    '<p class="m-sub">Generates <b>+'+fmt(a.base)+'</b> coins/h at Level 1</p>'+
+    '<div class="m-price">🪙 '+fmt(a.cost)+'</div>'+
+    '<button class="btn gold" id="mBtn"'+(afford?'':' disabled')+' onclick="executeBuy(\''+type+'\')">Buy '+a.name+'</button>'+
+    (!afford?'<p class="m-need">Need '+fmt(a.cost-state.user.coins)+' more coins</p>':'')
+  );
+}
+
+function openUpgrade(type){
+  var a=cat(type); if(!a) return;
+  var lv  = (state.user.assets||{})[type]||0;
+  var atMax = lv>=state.maxLv;
+  var cur  = totalIncome(type,lv);
+  var cost = upgCost(type,lv);
+  var next = atMax?cur:totalIncome(type,lv+1);
+  var afford = state.user.coins>=cost;
+  var body =
+    imgTag(a)+
+    '<div class="m-stat-row">'+
+      '<div class="m-stat"><div class="mk">Level</div><div class="mv">'+lv+'</div></div>'+
+      '<div class="m-stat"><div class="mk">Income/h</div><div class="mv">🪙'+fmt(cur)+'</div></div>'+
+    '</div>';
+  if(atMax){
+    body += '<button class="btn" disabled>✅ MAX LEVEL</button>';
+  } else {
+    body +=
+      '<p class="m-sub">Lv.'+lv+' → Lv.'+(lv+1)+' &nbsp;|&nbsp; +<b style="color:#3a8a2a">'+fmt(next-cur)+'/h</b></p>'+
+      '<div class="m-price">🪙 '+fmt(cost)+'</div>'+
+      '<button class="btn" id="mBtn"'+(afford?'':' disabled')+' onclick="executeUpgrade(\''+type+'\')">Upgrade</button>'+
+      (!afford?'<p class="m-need">Need '+fmt(cost-state.user.coins)+' more coins</p>':'');
+  }
+  openModal('⬆️ '+a.name, body);
+}
+
+function openLocked(type){
+  var a=cat(type); if(!a) return;
+  var per = state.island.incomePerHour;
+  var pct = a.unlock>0?Math.min(100,Math.floor(per/a.unlock*100)):0;
+  openModal('🔒 '+a.name,
+    imgTag(a,true)+
+    '<p class="m-sub">Unlock when income reaches <b>'+fmt(a.unlock)+'</b> coins/h</p>'+
+    '<div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:'+pct+'%"></div></div>'+
+    '<p class="prog-lbl">'+fmt(per)+' / '+fmt(a.unlock)+' ('+pct+'%)</p>'
+  );
+}
+
+/* ─── ACTIONS ─── */
+function executeBuy(type){
+  closeModal();
+  var a=cat(type); if(!a) return;
+  state.user.coins -= a.cost;
+  state.user.assets[type] = 1;
+  recompute();
+  refresh();
+  showToast('✅ Bought '+a.name+'!');
+}
+function executeUpgrade(type){
+  closeModal();
+  var lv=(state.user.assets||{})[type]||0;
+  var cost=upgCost(type,lv);
+  state.user.coins-=cost;
+  state.user.assets[type]=lv+1;
+  recompute();
+  refresh();
+  showToast('⬆️ Upgraded to Level '+(lv+1)+'!');
+}
+function doCollect(){
+  var p=state.island.pendingCoins;
+  state.user.coins+=p;
+  state.island.pendingCoins=0;
+  state.user.collectTs=Date.now();
+  refresh();
+  showToast('🪙 Collected '+fmt(p)+' coins!');
+}
+function recompute(){
+  var per=0,assets=state.user.assets||{};
+  for(var t in assets){ var lv=assets[t]||0; if(lv>0) per+=totalIncome(t,lv); }
+  state.island.incomePerHour=per;
+}
+
+/* ─── UI REFRESH ─── */
+function refresh(){
+  document.getElementById('uCoins').textContent  = fmt(state.user.coins);
+  document.getElementById('incomeDisp').textContent = fmt(state.island.incomePerHour);
+  document.getElementById('pendDisp').textContent   = fmt(state.island.pendingCoins);
+  var hasPend = state.island.pendingCoins>0;
+  document.getElementById('btnCollect').disabled = !hasPend;
+  document.getElementById('collectDot').style.display = hasPend?'block':'none';
+  buildIsland();
+}
+
+/* ─── PENDING TICK ─── */
+setInterval(function(){
+  var per=state.island.incomePerHour; if(!per) return;
+  var cap=state.island.offlineCapSec;
+  var elapsed=Math.min((Date.now()-(state.user.collectTs||Date.now()))/1000,cap);
+  var pend=Math.floor(per*elapsed/3600);
+  state.island.pendingCoins=pend;
+  document.getElementById('pendDisp').textContent=fmt(pend);
+  var hasPend=pend>0;
+  document.getElementById('btnCollect').disabled=!hasPend;
+  document.getElementById('collectDot').style.display=hasPend?'block':'none';
+},1000);
+
+/* ─── TOAST ─── */
+var toastTimer;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ t.classList.remove('show'); },2200);
+}
+
+/* ─── TAB ─── */
+function setTab(el,tab){
+  document.querySelectorAll('.nav-item').forEach(function(x){ x.classList.remove('active'); });
+  el.classList.add('active');
+  if(tab!=='island') showToast(tab.charAt(0).toUpperCase()+tab.slice(1)+' — coming soon');
+}
+
+/* ─── INIT ─── */
+refresh();
+</script>
 </body>
 </html>
