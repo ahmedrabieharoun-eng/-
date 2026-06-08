@@ -2,26 +2,35 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hex Island</title>
 
 <style>
+
 body{
     margin:0;
-    background:#0c3d57;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
+    background:#08354d;
+    color:white;
+    font-family:Arial;
+}
+
+.topbar{
+    padding:15px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
 }
 
 .map{
-    position:relative;
+    width:900px;
+    margin:auto;
+    margin-top:20px;
 }
 
 .row{
     display:flex;
     justify-content:center;
-    margin-top:-28px;
+    margin-top:-25px;
 }
 
 .row:first-child{
@@ -29,12 +38,13 @@ body{
 }
 
 .hex{
-    width:120px;
-    height:138px;
-    margin:0 4px;
+    width:140px;
+    height:160px;
+    margin:5px;
+    cursor:pointer;
     position:relative;
 
-    clip-path: polygon(
+    clip-path:polygon(
         25% 0%,
         75% 0%,
         100% 50%,
@@ -43,75 +53,265 @@ body{
         0% 50%
     );
 
-    background:url('https://picsum.photos/200');
-    background-size:cover;
-
-    border:2px solid #222;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    background:#cfd8dc;
+    overflow:hidden;
+    border:3px solid #222;
 }
 
-.number{
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    background:#e7d39a;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:28px;
-    font-weight:bold;
+.hex img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
 }
 
 .fog{
     position:absolute;
     inset:0;
     background:
-      radial-gradient(circle,#fff 35%,#ddd 36%,#fff 70%);
-    opacity:.85;
-    pointer-events:none;
+    radial-gradient(circle,#fff 35%,#ddd 36%,#fff 70%);
 }
+
+.number{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#e7d39a;
+    color:black;
+    font-weight:bold;
+    font-size:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.info{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    background:rgba(0,0,0,.7);
+    text-align:center;
+    padding:4px;
+    font-size:12px;
+}
+
+button{
+    margin-top:4px;
+    border:none;
+    padding:4px 8px;
+    cursor:pointer;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="map">
+<div class="topbar">
+💰 Coins: <span id="coins">999999999</span>
+</div>
 
-    <div class="row">
-        <div class="hex"><div class="fog"></div><div class="number">3</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">2</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">6</div></div>
-    </div>
+<div class="map" id="map"></div>
 
-    <div class="row">
-        <div class="hex"><div class="fog"></div><div class="number">3</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">9</div></div>
+<script>
 
-        <div class="hex" style="background:url('https://images.unsplash.com/photo-1511497584788-876760111969?w=500');background-size:cover;">
-            <div class="number">8</div>
-        </div>
+let coins = 999999999;
 
-        <div class="hex"><div class="fog"></div><div class="number">8</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">10</div></div>
-    </div>
+const assets = [
 
-    <div class="row">
-        <div class="hex"><div class="fog"></div><div class="number">6</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">4</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">11</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">4</div></div>
-    </div>
+{
+name:"Coconut Tree",
+price:100,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?1"
+},
 
-    <div class="row">
-        <div class="hex"><div class="fog"></div><div class="number">11</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">9</div></div>
-        <div class="hex"><div class="fog"></div><div class="number">12</div></div>
-    </div>
+{
+name:"Farm",
+price:200,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?2"
+},
+
+{
+name:"Mine",
+price:300,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?3"
+},
+
+{
+name:"Port",
+price:400,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?4"
+},
+
+{
+name:"Fishing Dock",
+price:500,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?5"
+},
+
+{
+name:"Market",
+price:600,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?6"
+},
+
+{
+name:"Volcano",
+price:700,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?7"
+},
+
+{
+name:"Crystal Cave",
+price:800,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?8"
+},
+
+{
+name:"Shipyard",
+price:900,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?9"
+},
+
+{
+name:"Village",
+price:1000,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?10"
+},
+
+{
+name:"Obsidian Mine",
+price:1200,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?11"
+},
+
+{
+name:"Lighthouse",
+price:1500,
+level:1,
+owned:false,
+image:"https://picsum.photos/300/300?12"
+}
+
+];
+
+const rows = [
+[0,1,2],
+[3,4,5,6,7],
+[8,9,10,11]
+];
+
+function render(){
+
+document.getElementById("coins").innerText = coins;
+
+let html = "";
+
+rows.forEach(row=>{
+
+html += `<div class="row">`;
+
+row.forEach(index=>{
+
+let item = assets[index];
+
+if(!item.owned){
+
+html += `
+<div class="hex"
+onclick="buy(${index})">
+
+<div class="fog"></div>
+
+<div class="number">
+${item.price}
+</div>
 
 </div>
+`;
+
+}else{
+
+html += `
+<div class="hex">
+
+<img src="${item.image}">
+
+<div class="info">
+
+<b>${item.name}</b><br>
+
+Level ${item.level}<br>
+
+<button onclick="upgrade(${index})">
+Upgrade
+</button>
+
+</div>
+
+</div>
+`;
+
+}
+
+});
+
+html += `</div>`;
+
+});
+
+document.getElementById("map").innerHTML = html;
+}
+
+function buy(index){
+
+let item = assets[index];
+
+if(coins < item.price) return;
+
+coins -= item.price;
+
+item.owned = true;
+
+render();
+}
+
+function upgrade(index){
+
+assets[index].level++;
+
+render();
+}
+
+render();
+
+</script>
 
 </body>
 </html>
