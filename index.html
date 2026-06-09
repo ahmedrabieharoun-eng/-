@@ -4,1121 +4,1165 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>RASEEN</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- TonConnect UI -->
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <style>
-/* ═══════════════════════════════════════
-   RESET & ROOT VARIABLES
-═══════════════════════════════════════ */
+/* ═══════════════════════════════════════ RESET */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 ::-webkit-scrollbar{width:0;height:0;display:none}
 *{scrollbar-width:none;-ms-overflow-style:none}
 :root{
-  --bg1:#020d1a;
-  --bg2:#041222;
-  --card:rgba(4,18,34,0.85);
-  --card2:rgba(0,150,234,0.06);
-  --border:rgba(0,150,234,0.18);
-  --border2:rgba(0,150,234,0.38);
-  --ton:#0098EA;
-  --ton-glow:rgba(0,152,234,0.5);
-  --ton2:#00c2ff;
-  --gold:#FFD700;
-  --gold-glow:rgba(255,215,0,0.4);
-  --green:#00E676;
-  --green-glow:rgba(0,230,118,0.4);
-  --red:#ff4d6d;
-  --text:#ffffff;
-  --text2:rgba(255,255,255,0.7);
-  --text3:rgba(255,255,255,0.4);
-  --glass:rgba(255,255,255,0.04);
-  --glass2:rgba(0,152,234,0.08);
+  --bamboo:#7cb342;--bamboo2:#9ccc40;--bamboo-glow:rgba(124,179,66,.5);
+  --coin:#FFD700;--coin-glow:rgba(255,215,0,.4);
+  --card:rgba(6,20,6,.82);--glass:rgba(8,28,8,.68);
+  --border:rgba(124,179,66,.2);--border2:rgba(124,179,66,.38);
+  --text:#e8f5e9;--muted:rgba(232,245,233,.52);
+  --red:#ef5350;--blue:#42a5f5;--cyan:#26c6da;
+  --g1:#061206;--g2:#0a1f0a;--g3:#0d2810;
+  --neon-green:#00F27A;--green-glow:rgba(0,242,122,.4);
+  --crystal-blue:#00D4FF;
 }
 body{
-  font-family:'Tajawal',sans-serif;font-weight:500;
-  background: radial-gradient(ellipse at 10% 0%, rgba(0,80,150,0.35) 0%, transparent 60%),
-              radial-gradient(ellipse at 90% 100%, rgba(0,40,100,0.4) 0%, transparent 60%),
-              linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
-  background-attachment:fixed;
-  color:var(--text);min-height:100vh;padding-bottom:80px;overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
+  font-family:'Fredoka',cursive;font-weight:800;
+  background:linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
+    url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat,#000;
+  background-attachment:scroll;
+  color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;
+  font-size:clamp(13px,1.5vw,16px);-webkit-font-smoothing:antialiased;
 }
-button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-serif!important;}
-/* ═══════════════════════════════════════
-   LOADING SCREEN
-═══════════════════════════════════════ */
-#loadingScreen{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--bg1);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
-  transition:opacity 0.6s ease;
-}
-#loadingScreen.hidden{opacity:0;pointer-events:none}
-.ld-logo-text{
-  font-size:52px;font-weight:800;letter-spacing:4px;
-  background:linear-gradient(135deg,var(--ton),var(--ton2),var(--green));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 0 30px var(--ton-glow));
-}
-.ld-subtitle{font-size:14px;color:var(--text3);letter-spacing:2px;font-weight:500}
-.ld-progress{width:200px;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
-.ld-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--ton),var(--ton2));border-radius:3px;transition:width 0.3s ease}
-.ld-loading-text{font-size:13px;color:var(--text3)}
-/* ═══════════════════════════════════════
-   TOP BAR
-═══════════════════════════════════════ */
-.topbar{
-  position:sticky;top:0;z-index:200;
-  background:rgba(2,13,26,0.92);
-  border-bottom:1px solid rgba(0,152,234,0.12);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;
-}
-.topbar-avatar{
-  width:40px;height:40px;border-radius:50%;
-  background:var(--glass2);border:2px solid var(--border2);
-  overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:20px;
-}
-.topbar-avatar img{width:100%;height:100%;object-fit:cover}
-.topbar-info{flex:1;min-width:0}
-.topbar-name{font-size:15px;font-weight:700;color:#fff;line-height:1.2;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.topbar-id{font-size:11px;color:var(--text3);font-weight:500}
-.topbar-balance{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(0,152,234,0.12);border:1px solid rgba(0,152,234,0.25);
-  border-radius:20px;padding:6px 12px;
-  flex-shrink:0;
-}
-.topbar-balance img{width:18px;height:18px;border-radius:50%;object-fit:contain}
-.topbar-bal-val{font-size:14px;font-weight:800;color:var(--ton)}
-/* ═══════════════════════════════════════
-   SECTIONS
-═══════════════════════════════════════ */
-.sec{display:none;padding:12px 14px;animation:secIn 0.28s ease}
+button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
+.sec{display:none;animation:fi .26s ease}
 .sec.active{display:block}
-@keyframes secIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-/* ═══════════════════════════════════════
-   PAGE TITLE
-═══════════════════════════════════════ */
-.pg-title{
-  font-size:22px;font-weight:800;color:#fff;
-  margin-bottom:16px;display:flex;align-items:center;gap:10px;
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════ LOADING */
+#loadingScreen{
+  position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:52px;gap:0;transition:opacity .7s ease;
 }
-.pg-title-icon{
-  width:42px;height:42px;border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex-shrink:0;
+#loadingScreen::before{
+  content:'';position:absolute;inset:0;
+  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778713958/loading_page_y7v8xq.jpg');
+  background-size:cover;background-position:center;z-index:0;
 }
-.pg-title-icon.dep{background:linear-gradient(135deg,rgba(0,230,118,0.2),rgba(0,230,118,0.05));border:1px solid rgba(0,230,118,0.3)}
-.pg-title-icon.wd{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,215,0,0.05));border:1px solid rgba(255,215,0,0.3)}
-.pg-title-icon.ref{background:linear-gradient(135deg,rgba(0,152,234,0.2),rgba(0,152,234,0.05));border:1px solid rgba(0,152,234,0.3)}
-/* ═══════════════════════════════════════
-   CARDS
-═══════════════════════════════════════ */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:16px;
-  margin-bottom:12px;
-  backdrop-filter:blur(12px);
-  position:relative;overflow:hidden;
+#loadingScreen::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 60%,rgba(0,0,0,.55) 100%);z-index:0;
 }
-.card::before{
-  content:'';position:absolute;inset:0;border-radius:20px;
-  background:linear-gradient(135deg,rgba(0,152,234,0.04) 0%,transparent 60%);
-  pointer-events:none;
+#loadingScreen>*{position:relative;z-index:1;}
+#loadingScreen.hidden{opacity:0;pointer-events:none;}
+#ldLogoMain{display:flex!important;flex:1;align-items:center;justify-content:center;width:100%;padding:0!important;margin:0!important;width:100vw!important;max-width:100vw!important;}
+#ldLogoMain img{width:100vw;max-width:100vw;min-width:100vw;height:auto;object-fit:cover;display:block;filter:drop-shadow(0 6px 24px rgba(0,0,0,.75));}
+.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:92%;max-width:430px;}
+.ld-bar-row{display:flex;align-items:center;gap:12px;width:100%;justify-content:center;}
+.ld-segs-new{display:flex;gap:4px;flex:1;align-items:center;justify-content:center;}
+.ld-segs-new .seg{flex:1;height:18px;border-radius:3px;background:rgba(255,255,255,.14);transition:background .25s ease,box-shadow .25s ease;}
+.ld-segs-new .seg.active{background:linear-gradient(180deg,#3aa0ff,#1565ff);box-shadow:0 0 8px rgba(58,160,255,.85),0 0 14px rgba(21,101,255,.55),inset 0 1px 0 rgba(255,255,255,.35);}
+.ld-pct{font-size:16px;font-weight:800;color:#fff;font-family:'Fredoka',sans-serif;min-width:46px;text-align:right;text-shadow:0 0 8px rgba(58,160,255,.7),0 1px 4px rgba(0,0,0,.9);}
+.ld-sub{font-size:18px!important;color:#fff!important;font-weight:800!important;letter-spacing:1px!important;font-family:'Fredoka',sans-serif!important;text-shadow:0 2px 10px rgba(0,0,0,.9)!important;}
+
+/* ═══════════ NOTIF TOAST */
+#notifBar{
+  position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-100px);
+  z-index:9990;background:rgba(6,20,6,.97);border-radius:14px;
+  padding:11px 18px;font-size:14px;font-weight:700;color:var(--text);
+  border:1px solid var(--border);backdrop-filter:blur(16px);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  max-width:92vw;text-align:center;
 }
-/* Balance display card */
-.bal-card{
-  background:linear-gradient(135deg,rgba(0,80,150,0.35),rgba(0,40,100,0.5));
-  border:1px solid rgba(0,152,234,0.3);
-  border-radius:20px;padding:20px;margin-bottom:14px;text-align:center;
-  position:relative;overflow:hidden;
+#notifBar.show{transform:translateX(-50%) translateY(0)}
+
+/* ═══════════ NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,10,.97);border-top:1px solid rgba(255,255,255,.08);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;transition:all .2s;position:relative;gap:3px;min-height:68px;}
+.ni-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;transition:all .2s;overflow:visible;font-size:24px;}
+.ni-icon svg{width:26px;height:26px;fill:rgba(255,255,255,.38);transition:fill .2s;}
+.ni.active .ni-icon svg{fill:#39FF14;filter:drop-shadow(0 0 6px #39FF1488);}
+.ni-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.38);transition:color .2s;line-height:1;margin-top:1px;}
+.ni.active .ni-lbl{color:#39FF14;text-shadow:0 0 8px #39FF1466;}
+
+/* ═══════════ PROFILE / FINANCE SECTION */
+#sectionFinance{padding:0!important;position:relative;min-height:100vh;background:#000;}
+.pf-hero{position:relative;width:100%;height:240px;overflow:hidden;}
+.pf-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;display:block;}
+.pf-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.45) 40%,rgba(0,0,0,0) 70%);}
+.pf-hero-bottom{position:absolute;left:0;right:0;bottom:0;height:80px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 100%);pointer-events:none;}
+.pf-actions{position:absolute;top:14px;right:14px;z-index:11;display:flex;gap:10px;}
+.pf-tb-btn{background:rgba(20,20,20,.85);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;height:38px;}
+.pf-topbar{position:absolute;top:60px;left:16px;z-index:10;display:flex;align-items:center;gap:12px;}
+.pf-tb-avatar{width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.18);background:#111;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.pf-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.pf-tb-info{display:flex;flex-direction:column;gap:2px;}
+.pf-tb-name{font-size:19px;font-weight:900;color:#fff;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.85);}
+.pf-tb-handle{font-size:12px;font-weight:600;color:rgba(255,255,255,.62);text-shadow:0 1px 4px rgba(0,0,0,.8);}
+.pf-balcard{position:absolute;left:16px;right:auto;top:138px;width:auto;max-width:62%;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:10;}
+.pf-balicon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pf-balicon img{width:24px;height:24px;}
+.pf-ballbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.65);}
+.pf-balrow{display:flex;align-items:baseline;gap:6px;margin-top:2px;}
+.pf-balval{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px;line-height:1;}
+.pf-baltkn{font-size:11px;font-weight:800;color:#fff;opacity:.85;}
+
+/* Profile Cards Grid */
+.pf-grid{padding:0 12px 16px;}
+.pf-card-wrap{cursor:pointer;border-radius:18px;overflow:hidden;position:relative;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);}
+.pf-card-img{width:100%;height:100%;object-fit:cover;display:block;}
+.pf-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px;}
+.pf-card-label{font-size:14px;font-weight:800;color:#fff;}
+
+/* ═══════════ SUB-PAGE OVERLAY (DEPOSIT / WITHDRAW / REFERRALS) */
+#profileSubPage{
+  --psp-accent:#42a5f5;--psp-accent-glow:rgba(66,165,245,.45);
 }
-.bal-card::after{
-  content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;
-  border-radius:50%;background:radial-gradient(circle,rgba(0,152,234,0.25),transparent 70%);
+#profileSubPage[data-page="deposit"]{
+  --psp-accent:#1a8fff;--psp-accent-glow:rgba(26,143,255,.6);
+  background:linear-gradient(rgba(2,10,22,.82),rgba(3,14,30,.88)),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463433/b15a663f-ec8d-4eb7-85c9-1d0e97480151_imgxsh.png') center/cover fixed!important;
 }
-.bal-label{font-size:12px;color:var(--text3);font-weight:600;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}
-.bal-value{font-size:38px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px}
-.bal-value span{font-size:18px;font-weight:600;color:var(--ton);margin-right:6px}
-.bal-usd{font-size:13px;color:var(--text3);font-weight:500}
-/* ═══════════════════════════════════════
-   FORM ELEMENTS
-═══════════════════════════════════════ */
-.form-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.form-label i{color:var(--ton);font-size:12px}
-.form-input{
-  width:100%;background:rgba(0,0,0,0.4);
-  border:1.5px solid var(--border);border-radius:14px;
-  padding:13px 16px;color:#fff;font-size:15px;font-weight:600;
-  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
-  margin-bottom:12px;
+#profileSubPage[data-page="withdraw"]{
+  --psp-accent:#9DFF3D;--psp-accent-glow:rgba(157,255,61,.55);
+  background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.84)),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463372/9222f5eb-c18b-42c0-9776-9f64d4e53942_vfyihg.png') center/cover fixed!important;
 }
-.form-input:focus{border-color:var(--ton);box-shadow:0 0 0 3px rgba(0,152,234,0.12)}
-.form-input::placeholder{color:var(--text3)}
-.amount-wrap{
-  position:relative;margin-bottom:12px;
+#profileSubPage[data-page="referrals"]{
+  --psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55);
+  background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.80)),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463296/4d98081c-dfab-4d8c-b6c2-09701c151362_yr3pym.png') center/cover fixed!important;
 }
-.amount-input{
-  width:100%;background:rgba(0,0,0,0.4);
-  border:1.5px solid var(--border);border-radius:14px;
-  padding:13px 70px 13px 16px;color:#fff;font-size:20px;font-weight:800;
-  outline:none;transition:border-color 0.2s;
-}
-.amount-input:focus{border-color:var(--ton)}
-.amount-input::placeholder{color:var(--text3);font-size:15px;font-weight:500}
-.amount-suffix{
-  position:absolute;left:16px;top:50%;transform:translateY(-50%);
-  font-size:14px;font-weight:700;color:var(--ton);pointer-events:none;
-}
-.amount-max{
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  background:rgba(0,152,234,0.15);border:1px solid rgba(0,152,234,0.35);
-  border-radius:8px;padding:5px 10px;color:var(--ton);
-  font-size:12px;font-weight:800;cursor:pointer;
-}
-.amount-max:active{background:rgba(0,152,234,0.35)}
-/* Preset amounts */
-.preset-row{display:flex;gap:8px;margin-bottom:14px}
-.preset-btn{
-  flex:1;padding:9px 4px;text-align:center;
-  background:rgba(0,152,234,0.08);border:1px solid rgba(0,152,234,0.2);
-  border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ton);
-  transition:all 0.18s;
-}
-.preset-btn:active{background:rgba(0,152,234,0.25);border-color:var(--ton)}
-/* ═══════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════ */
-.btn{
-  width:100%;padding:14px;border:none;border-radius:14px;
-  font-size:16px;font-weight:800;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:all 0.2s;letter-spacing:0.3px;
-}
-.btn:active{transform:scale(0.98)}
-.btn:disabled{opacity:0.4;cursor:default;transform:none}
-.btn-green{
-  background:linear-gradient(135deg,#00b84c,#00E676);
-  color:#001a0b;
-  box-shadow:0 4px 20px rgba(0,230,118,0.35);
-}
-.btn-green:not(:disabled){animation:btn-pulse-green 2.5s ease-in-out infinite}
-@keyframes btn-pulse-green{0%,100%{box-shadow:0 4px 20px rgba(0,230,118,0.35)}50%{box-shadow:0 4px 30px rgba(0,230,118,0.65)}}
-.btn-gold{
-  background:linear-gradient(135deg,#b8860b,var(--gold),#b8860b);
-  color:#1a0a00;
-  box-shadow:0 4px 20px rgba(255,215,0,0.3);
-}
-.btn-gold:not(:disabled){animation:btn-pulse-gold 2.5s ease-in-out infinite}
-@keyframes btn-pulse-gold{0%,100%{box-shadow:0 4px 20px rgba(255,215,0,0.3)}50%{box-shadow:0 4px 30px rgba(255,215,0,0.6)}}
-.btn-ton{
-  background:linear-gradient(135deg,#0077c2,var(--ton),#00c2ff);
-  color:#fff;
-  box-shadow:0 4px 20px rgba(0,152,234,0.4);
-}
-.btn-outline{
-  background:transparent;border:1.5px solid var(--border2);color:var(--ton);
-}
-/* ═══════════════════════════════════════
-   INFO BOX
-═══════════════════════════════════════ */
-.info-box{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:12px 14px;border-radius:12px;margin-bottom:12px;
-  font-size:13px;font-weight:600;line-height:1.5;
-}
-.info-box.yellow{background:rgba(255,215,0,0.07);border:1px solid rgba(255,215,0,0.2);color:#FFD740}
-.info-box.blue{background:rgba(0,152,234,0.07);border:1px solid rgba(0,152,234,0.2);color:var(--ton)}
-.info-box.green{background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.2);color:var(--green)}
-.info-box i{margin-top:1px;flex-shrink:0;font-size:14px}
-/* ═══════════════════════════════════════
-   DIVIDER
-═══════════════════════════════════════ */
-.divider{
-  display:flex;align-items:center;gap:12px;margin:6px 0 14px;
-}
-.divider-line{flex:1;height:1px;background:var(--border)}
-.divider-text{font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap}
-/* ═══════════════════════════════════════
-   HISTORY LIST
-═══════════════════════════════════════ */
-.hist-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:18px;overflow:hidden;
-}
-.hist-header{
-  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05);
-  font-size:14px;font-weight:800;color:#fff;
-  display:flex;align-items:center;gap:8px;
-}
-.hist-row{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);
-  transition:background 0.15s;
-}
-.hist-row:last-child{border-bottom:none}
-.hist-row:active{background:rgba(255,255,255,0.03)}
-.hist-icon{
-  width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  overflow:hidden;
-}
-.hist-icon img{width:100%;height:100%;object-fit:cover}
-.hist-icon.dep-icon{background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.25);color:var(--green)}
-.hist-icon.wd-icon{background:rgba(0,152,234,0.12);border:1px solid rgba(0,152,234,0.25)}
-.hist-info{flex:1;min-width:0}
-.hist-addr{font-size:12px;font-weight:700;color:#fff;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
-.hist-date{font-size:11px;color:var(--text3);margin-top:2px;font-weight:500}
-.hist-right{text-align:left;flex-shrink:0}
-.hist-amt{font-size:14px;font-weight:800;color:#fff}
-.hist-amt.incoming{color:var(--green)}
-.hist-amt.outgoing{color:var(--gold)}
-.hist-empty{padding:28px;text-align:center;color:var(--text3);font-size:13px}
-/* Status badges */
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;
-  margin-top:3px;
-}
-.badge.pending{background:rgba(255,170,0,0.12);color:#FFAA00;border:1px solid rgba(255,170,0,0.3)}
-.badge.approved,.badge.completed{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.3)}
-.badge.rejected,.badge.cancelled{background:rgba(255,77,109,0.12);color:var(--red);border:1px solid rgba(255,77,109,0.3)}
-/* ═══════════════════════════════════════
-   DEPOSIT SECTION SPECIFIC
-═══════════════════════════════════════ */
-.dep-steps{counter-reset:step;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-.dep-step{
-  display:flex;align-items:flex-start;gap:12px;
-  background:rgba(0,152,234,0.05);border:1px solid rgba(0,152,234,0.12);
-  border-radius:14px;padding:12px 14px;
-}
-.dep-step-num{
-  width:28px;height:28px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,var(--ton),#0077c2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:800;color:#fff;
-}
-.dep-step-text{flex:1;font-size:13px;font-weight:600;color:var(--text2);line-height:1.5}
-.dep-step-text strong{color:#fff;font-weight:800}
-.dep-addr-box{
-  background:rgba(0,0,0,0.4);border:1.5px solid rgba(0,152,234,0.25);
-  border-radius:14px;padding:14px;margin-bottom:12px;
-}
-.dep-addr-label{font-size:12px;color:var(--text3);font-weight:700;margin-bottom:6px;
-  display:flex;align-items:center;gap:6px}
-.dep-addr-label img{width:16px;height:16px;border-radius:50%}
-.dep-addr-val{font-size:13px;font-weight:700;color:var(--ton);word-break:break-all;line-height:1.5}
-.dep-addr-copy{
-  margin-top:10px;width:100%;padding:9px;
-  background:rgba(0,152,234,0.12);border:1px solid rgba(0,152,234,0.3);
-  border-radius:10px;color:var(--ton);font-size:13px;font-weight:800;cursor:pointer;
-}
-.dep-addr-copy:active{background:rgba(0,152,234,0.3)}
-/* ═══════════════════════════════════════
-   REFERRALS SECTION
-═══════════════════════════════════════ */
-.ref-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.ref-stat-card{
-  background:var(--glass2);border:1px solid var(--border);
-  border-radius:16px;padding:14px;text-align:center;
-}
-.ref-stat-icon{font-size:24px;margin-bottom:6px}
-.ref-stat-val{font-size:24px;font-weight:800;color:#fff;margin-bottom:2px}
-.ref-stat-lbl{font-size:11px;color:var(--text3);font-weight:600}
-.ref-link-card{
-  background:linear-gradient(135deg,rgba(0,80,150,0.3),rgba(0,40,100,0.4));
-  border:1px solid rgba(0,152,234,0.25);
-  border-radius:18px;padding:16px;margin-bottom:12px;
-}
-.ref-link-title{font-size:14px;font-weight:800;color:#fff;margin-bottom:10px;
-  display:flex;align-items:center;gap:8px}
-.ref-link-row{display:flex;gap:8px;margin-bottom:12px}
-.ref-link-input{
-  flex:1;background:rgba(0,0,0,0.4);border:1.5px solid var(--border);
-  border-radius:12px;padding:10px 12px;color:var(--ton);font-size:12px;font-weight:700;
-  outline:none;min-width:0;
-}
-.ref-copy-btn{
-  background:linear-gradient(135deg,var(--ton),#0077c2);
-  border:none;border-radius:12px;padding:10px 16px;
-  color:#fff;font-size:13px;font-weight:800;cursor:pointer;
-  display:flex;align-items:center;gap:6px;white-space:nowrap;
-}
-.ref-share-btn{
-  width:100%;padding:12px;
-  background:linear-gradient(135deg,rgba(0,152,234,0.15),rgba(0,152,234,0.05));
-  border:1.5px solid rgba(0,152,234,0.3);
-  border-radius:12px;color:var(--ton);font-size:14px;font-weight:800;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.ref-bonus-card{
-  display:flex;align-items:center;gap:14px;
-  background:rgba(0,152,234,0.07);border:1px solid rgba(0,152,234,0.18);
-  border-radius:14px;padding:14px;margin-bottom:12px;
-}
-.ref-bonus-pct{font-size:36px;font-weight:800;color:var(--ton);line-height:1}
-.ref-bonus-txt{font-size:13px;color:var(--text2);font-weight:600;line-height:1.5}
-.ref-bonus-txt strong{color:#fff;font-weight:800}
-.ref-list-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden}
-.ref-list-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05);
-  font-size:14px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:space-between}
-.ref-count-badge{background:rgba(0,152,234,0.12);border:1px solid rgba(0,152,234,0.25);
-  border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800;color:var(--ton)}
-.ref-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04)}
-.ref-item:last-child{border-bottom:none}
-.ref-item-av{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
-  background:var(--glass2);border:2px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;
-}
-.ref-item-av img{width:100%;height:100%;object-fit:cover}
-.ref-item-info{flex:1}
-.ref-item-name{font-size:13px;font-weight:700;color:#fff}
-.ref-item-date{font-size:11px;color:var(--text3);margin-top:2px;font-weight:500}
-.ref-item-earn{font-size:13px;font-weight:800;color:var(--ton);white-space:nowrap}
-.ref-item-dep{display:inline-flex;align-items:center;gap:4px;margin-top:3px;
-  font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
-.ref-item-dep.yes{background:rgba(0,230,118,0.12);color:var(--green);border:1px solid rgba(0,230,118,0.25)}
-.ref-item-dep.no{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid rgba(255,255,255,0.1)}
-/* ═══════════════════════════════════════
-   BOTTOM NAV
-═══════════════════════════════════════ */
-.bnav{
-  position:fixed;bottom:0;left:0;right:0;z-index:300;
-  background:rgba(2,13,26,0.96);
-  border-top:1px solid rgba(0,152,234,0.12);
-  display:flex;backdrop-filter:blur(20px);
-  padding-bottom:env(safe-area-inset-bottom,0);
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:10px 4px 12px;cursor:pointer;transition:all 0.2s;gap:4px;min-height:64px;
+.psp-hero{position:relative;height:230px;overflow:hidden;background-image:var(--psp-hero);background-size:cover;background-position:center;}
+.psp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,var(--g1) 100%);pointer-events:none}
+#profileSubPage[data-page="deposit"] .psp-hero{height:195px;background-image:linear-gradient(180deg,rgba(2,12,26,.25) 0%,rgba(2,12,26,.1) 40%,rgba(2,12,26,.97) 100%),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463339/90ea6293-3f5f-4da0-84d4-bf975c4d5ffc_ymkzpg.png');background-size:cover;background-position:center top;}
+#profileSubPage[data-page="deposit"] .psp-hero::after{display:none}
+#profileSubPage[data-page="withdraw"] .psp-hero{height:195px;background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463462/d61caadc-2aed-42c0-a9b1-84e97d8040cc_ppgjnp.png');}
+#profileSubPage[data-page="referrals"] .psp-hero{background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463494/da884438-0462-4c40-88c3-562cf9fb51ea_yvwqaj.png');}
+#profileSubPage[data-page="referrals"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(30,5,50,1) 100%)}
+.psp-hero-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:16px 16px 10px;z-index:3;}
+.psp-back{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);color:var(--psp-accent);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 0 14px var(--psp-accent-glow);}
+.psp-title{font-size:26px;font-weight:800;color:var(--psp-accent);text-shadow:0 0 22px var(--psp-accent-glow);display:flex;align-items:center;gap:10px;letter-spacing:.3px;}
+.psp-userrow{position:absolute;left:14px;right:14px;bottom:16px;display:flex;align-items:center;gap:12px;z-index:3;}
+.psp-avatar{width:62px;height:62px;border-radius:50%;border:2.5px solid var(--psp-accent);box-shadow:0 0 18px var(--psp-accent-glow);overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.psp-avatar img{width:100%;height:100%;object-fit:cover;}
+.psp-username{flex:1;min-width:0;font-size:20px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px;}
+.psp-username::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--psp-accent);box-shadow:0 0 8px var(--psp-accent-glow);flex-shrink:0;}
+.psp-balcard{background:rgba(0,0,0,.55);backdrop-filter:blur(12px);border:1.5px solid var(--psp-accent);border-radius:14px;padding:10px 14px;min-width:140px;box-shadow:0 0 16px var(--psp-accent-glow);}
+.psp-ballbl{font-size:11px;color:rgba(255,255,255,.85);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.psp-ballbl i{color:var(--psp-accent);font-size:14px;}
+.psp-balrow{display:flex;align-items:baseline;gap:5px;margin-top:3px;}
+.psp-balval{font-size:20px;font-weight:800;color:#fff;}
+.psp-baltkn{font-size:11px;color:rgba(255,255,255,.75);font-weight:700;}
+/* Deposit/withdraw smaller header */
+#profileSubPage[data-page="deposit"] .psp-back,
+#profileSubPage[data-page="withdraw"] .psp-back{width:34px;height:34px;font-size:17px;}
+#profileSubPage[data-page="deposit"] .psp-title,
+#profileSubPage[data-page="withdraw"] .psp-title{font-size:18px;}
+#profileSubPage[data-page="deposit"] .psp-hero-bar,
+#profileSubPage[data-page="withdraw"] .psp-hero-bar{padding:10px 14px 8px;}
+#profileSubPage[data-page="deposit"] .psp-userrow,
+#profileSubPage[data-page="withdraw"] .psp-userrow{bottom:10px;left:12px;right:12px;gap:9px;}
+#profileSubPage[data-page="deposit"] .psp-avatar,
+#profileSubPage[data-page="withdraw"] .psp-avatar{width:44px;height:44px;font-size:19px;}
+#profileSubPage[data-page="deposit"] .psp-username,
+#profileSubPage[data-page="withdraw"] .psp-username{font-size:14px;}
+#profileSubPage[data-page="deposit"] .psp-username::after,
+#profileSubPage[data-page="withdraw"] .psp-username::after{width:6px;height:6px;}
+#profileSubPage[data-page="deposit"] .psp-balcard,
+#profileSubPage[data-page="withdraw"] .psp-balcard{padding:6px 10px;min-width:110px;}
+#profileSubPage[data-page="deposit"] .psp-ballbl,
+#profileSubPage[data-page="withdraw"] .psp-ballbl{font-size:9px;}
+#profileSubPage[data-page="deposit"] .psp-balval,
+#profileSubPage[data-page="withdraw"] .psp-balval{font-size:15px;}
+#profileSubPage[data-page="deposit"] .psp-back{background:rgba(2,20,40,.7);border:1.5px solid rgba(26,143,255,.7);box-shadow:0 0 16px rgba(26,143,255,.5);color:#1a8fff;}
+#profileSubPage[data-page="deposit"] .psp-title{color:#fff;font-size:22px;text-shadow:0 0 20px rgba(26,143,255,.8);}
+#profileSubPage[data-page="deposit"] .psp-balcard{background:rgba(2,20,40,.75);border:1.5px solid rgba(26,143,255,.6);box-shadow:0 0 18px rgba(26,143,255,.35);backdrop-filter:blur(12px);}
+.psp-body{padding:14px 0 8px;}
+/* Inner cards follow sub-page card bg */
+#profileSubPage .wd-form,.wd-new-wallet-card,.wd-new-hist-card,.dep-card{
   position:relative;
+  background-image:linear-gradient(rgba(0,0,0,.66),rgba(0,0,0,.78)),var(--psp-cardbg);
+  background-size:cover;background-position:center;
+  border:1.5px solid var(--psp-accent)!important;
+  box-shadow:0 6px 22px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2) inset;
 }
-.nav-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all 0.25s}
-.nav-icon svg{width:24px;height:24px;fill:rgba(255,255,255,0.35);transition:fill 0.25s}
-.nav-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);transition:all 0.2s;line-height:1}
-.nav-item.active .nav-icon svg{fill:var(--ton);filter:drop-shadow(0 0 6px rgba(0,152,234,0.7))}
-.nav-item.active .nav-label{color:var(--ton)}
-.nav-item.active::before{
-  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:40px;height:2px;border-radius:0 0 2px 2px;
-  background:linear-gradient(90deg,transparent,var(--ton),transparent);
-}
-/* ═══════════════════════════════════════
-   NOTIFICATION TOAST
-═══════════════════════════════════════ */
-#toast{
-  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-100px);
-  z-index:999;background:rgba(2,13,26,0.97);border-radius:14px;
-  padding:11px 18px;font-size:14px;font-weight:700;color:#fff;
-  border:1px solid var(--border);backdrop-filter:blur(20px);
-  box-shadow:0 8px 32px rgba(0,0,0,0.5);
-  transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  max-width:90vw;text-align:center;white-space:nowrap;
-}
-#toast.show{transform:translateX(-50%) translateY(0)}
-/* ═══════════════════════════════════════
-   LOADING STATE
-═══════════════════════════════════════ */
-.spin{display:inline-block;animation:spin 0.8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* Error state */
-.error-state{
-  text-align:center;padding:40px 20px;
-  display:none;
-}
-.error-state.show{display:block}
-.error-icon{font-size:48px;margin-bottom:12px}
-.error-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:8px}
-.error-msg{font-size:14px;color:var(--text3);margin-bottom:20px;line-height:1.6}
-/* Shimmer skeleton */
-.skeleton{
-  background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%);
-  background-size:200% 100%;
-  animation:shimmer 1.5s infinite;border-radius:8px;
-}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* Responsive */
-@media(min-width:600px){
-  .sec{max-width:480px;margin:0 auto}
-  .bnav{max-width:480px;left:50%;right:auto;transform:translateX(-50%)}
-  .topbar{max-width:480px;margin:0 auto;left:50%;right:auto;transform:translateX(-50%)}
-  #toast{max-width:420px}
-}
+#profileSubPage[data-page="deposit"] .dep-card{--psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463433/b15a663f-ec8d-4eb7-85c9-1d0e97480151_imgxsh.png');}
+#profileSubPage[data-page="withdraw"] .wd-new-wallet-card,
+#profileSubPage[data-page="withdraw"] .wd-new-hist-card{--psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463372/9222f5eb-c18b-42c0-9776-9f64d4e53942_vfyihg.png');}
+#profileSubPage .flabel{color:#fff!important;}
+#profileSubPage .btn-prim,#profileSubPage .dep-btn-prim,.btn-wd-new{background:linear-gradient(135deg,var(--psp-accent),color-mix(in srgb,var(--psp-accent) 70%,#000))!important;color:#fff!important;box-shadow:0 6px 18px var(--psp-accent-glow)!important;}
+#profileSubPage .wd-new-hist-hdr{color:var(--psp-accent)!important;}
+
+/* ═══ DEPOSIT PAGE STYLES */
+.dep-card{border-radius:14px;padding:12px 12px 10px;margin-bottom:9px;backdrop-filter:blur(10px);overflow:hidden;}
+.dep-card-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.dep-step{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#1a8fff,#0a5fcc);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(26,143,255,.7);flex-shrink:0;}
+.dep-card-title{font-size:14px;font-weight:800;color:#fff;letter-spacing:.2px;}
+.dep-wal-body{display:flex;align-items:center;gap:8px;}
+.dep-wal-info{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:rgba(2,12,26,.65);border:1px solid rgba(26,143,255,.35);border-radius:11px;padding:8px 10px;}
+.dep-wal-icon{width:34px;height:34px;border-radius:50%;background:rgba(26,143,255,.12);border:1.5px solid rgba(26,143,255,.5);display:flex;align-items:center;justify-content:center;color:#1a8fff;font-size:15px;flex-shrink:0;box-shadow:0 0 10px rgba(26,143,255,.35);}
+.dep-wal-text{flex:1;min-width:0;}
+.dep-wal-lbl{font-size:10px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:2px;}
+.dep-wal-addr{font-size:12px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dep-wal-addr .conn-dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 7px #00e676;flex-shrink:0;display:none;}
+.dep-wal-addr.is-connected .conn-dot{display:inline-block;}
+.dep-wal-addr .conn-lbl{font-size:9px;color:#00e676;font-weight:800;display:none;}
+.dep-wal-addr.is-connected .conn-lbl{display:inline;}
+.dep-btn-conn{background:rgba(2,12,26,.7);border:1.5px solid rgba(26,143,255,.55);border-radius:11px;padding:9px 13px;color:#1a8fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 0 12px rgba(26,143,255,.25);display:flex;align-items:center;gap:6px;min-width:100px;justify-content:center;transition:.2s;}
+.dep-btn-conn:active{background:rgba(26,143,255,.15);}
+.dep-btn-conn.is-disconnect{background:rgba(26,143,255,.08);border-color:rgba(26,143,255,.6);color:#1a8fff;}
+.dep-amt-wrap{position:relative;margin-bottom:10px;}
+.dep-amt-wrap .finput{padding-left:42px!important;padding-right:62px!important;background:rgba(2,12,26,.65)!important;border:1.5px solid rgba(26,143,255,.4)!important;border-radius:12px!important;height:44px;font-size:14px;font-weight:700;margin-bottom:0!important;color:#fff;}
+.dep-amt-wrap .finput::placeholder{color:rgba(255,255,255,.3);}
+.dep-amt-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:#0098EA;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 0 9px rgba(0,152,234,.6);overflow:hidden;}
+.dep-amt-icon img{width:100%;height:100%;object-fit:cover;}
+.dep-amt-suffix{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:800;color:#fff;pointer-events:none;}
+.dep-preset-row{display:flex;gap:7px;margin-bottom:10px;}
+.dep-prbtn{flex:1;padding:8px 4px;text-align:center;background:rgba(2,12,26,.65);border:1.5px solid rgba(26,143,255,.28);border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;color:#fff;transition:.15s;}
+.dep-prbtn.active,.dep-prbtn:active{border-color:#1a8fff;background:rgba(26,143,255,.16);box-shadow:0 0 10px rgba(26,143,255,.3);color:#1a8fff;}
+.dep-btn-prim{width:100%;padding:13px;background:linear-gradient(135deg,#1a6fff,#0a4fc7)!important;border:none;border-radius:12px;color:#fff!important;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 5px 20px rgba(26,111,255,.5)!important;display:flex;align-items:center;justify-content:center;gap:7px;transition:.2s;}
+.dep-btn-prim:active{transform:scale(.98);}
+.dep-btn-prim:disabled{opacity:.4;cursor:default;box-shadow:none!important;}
+.dep-manual-input{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.dep-manual-input .finput{background:rgba(2,12,26,.65)!important;border:1px solid rgba(26,143,255,.28)!important;border-radius:10px!important;margin-bottom:0!important;flex:1;height:38px;color:#fff;font-weight:600;font-size:12px;}
+.dep-copy-btn{background:rgba(26,143,255,.1);border:1.5px solid rgba(26,143,255,.4);border-radius:10px;padding:0 11px;color:#1a8fff;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px;height:38px;white-space:nowrap;box-shadow:0 0 8px rgba(26,143,255,.18);transition:.15s;}
+.dep-copy-btn:active{background:rgba(26,143,255,.22);}
+.dep-manual-foot{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(26,143,255,.22);font-size:11px;color:rgba(255,255,255,.65);font-weight:600;}
+.dep-manual-foot i{color:#1a8fff;}
+.dep-manual-foot b{color:#1a8fff;font-weight:900;}
+.flabel{font-size:12px;font-weight:700;color:rgba(255,255,255,.7)!important;margin-bottom:5px;display:block;}
+.finput{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-weight:600;margin-bottom:7px;outline:none;}
+.finput:focus{outline:none;border-color:#1a8fff;}
+.tx-status{display:none;margin-top:10px;padding:11px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;text-align:center;}
+.tx-status.visible{display:block;}
+.txsi{font-size:22px;margin-bottom:4px;}
+.txsm{font-size:13px;font-weight:800;margin-bottom:3px;}
+.txsd{font-size:11px;color:var(--muted);font-weight:500;}
+
+/* ═══ WITHDRAW STYLES */
+.wd-new-wallet-card{border-radius:16px;padding:14px 13px;margin-bottom:9px;backdrop-filter:blur(12px);position:relative;overflow:hidden;}
+.wd-new-addr-input{width:100%;background:rgba(0,0,0,.42);border:1.5px solid rgba(157,255,61,.22);border-radius:10px;padding:9px 12px;color:#fff;font-size:12px;font-weight:600;font-family:'Fredoka',cursive;outline:none;margin-bottom:11px;transition:border-color .2s;}
+.wd-new-addr-input:focus{border-color:rgba(157,255,61,.55);}
+.wd-new-addr-input::placeholder{color:rgba(255,255,255,.28);}
+.wd-new-amount-wrap{position:relative;background:rgba(0,0,0,.42);border:1.5px solid rgba(157,255,61,.22);border-radius:10px;display:flex;align-items:center;overflow:hidden;margin-bottom:11px;}
+.wd-new-amount-input{flex:1;background:transparent;border:none;color:rgba(255,255,255,.45);font-size:12px;font-weight:600;font-family:'Fredoka',cursive;padding:9px 12px;outline:none;min-width:0;}
+.wd-new-amount-input::placeholder{color:rgba(255,255,255,.28);}
+.wd-new-max-btn{background:transparent;border:none;color:#9DFF3D;font-size:12px;font-weight:800;padding:9px 14px;cursor:pointer;font-family:'Fredoka',cursive;flex-shrink:0;}
+.btn-wd-new{width:100%;padding:12px;background:linear-gradient(135deg,#3a9e1e,#5cc827,#3a9e1e);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 0 20px rgba(92,200,39,.45),0 4px 16px rgba(0,0,0,.4);transition:all .18s;font-family:'Fredoka',cursive;}
+.btn-wd-new:active{transform:scale(.97);}
+.btn-wd-new:disabled{opacity:.42;cursor:default;box-shadow:none;}
+@keyframes wd-new-glow{0%,100%{box-shadow:0 0 20px rgba(92,200,39,.45)}50%{box-shadow:0 0 36px rgba(92,200,39,.8)}}
+.btn-wd-new:not(:disabled){animation:wd-new-glow 2.2s ease-in-out infinite;}
+.wd-new-hist-card{border-radius:16px;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 4px 18px rgba(0,0,0,.5);position:relative;}
+.wd-new-hist-hdr{padding:11px 14px;font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.06);}
+.wd-new-hist-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);}
+.wd-new-hist-row:last-child{border-bottom:none;}
+.wd-new-hist-icon{width:34px;height:34px;border-radius:50%;background:#0098EA;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(0,152,234,.4);overflow:hidden;}
+.wd-new-hist-icon img{width:100%;height:100%;object-fit:cover;}
+.wd-new-hist-info{flex:1;min-width:0;}
+.wd-new-hist-addr{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.wd-new-hist-date{font-size:10px;color:rgba(255,255,255,.38);margin-top:2px;font-weight:500;}
+.wd-new-hist-right{text-align:right;flex-shrink:0;}
+.wd-new-hist-amt{font-size:12px;font-weight:800;color:#fff;margin-bottom:4px;}
+.stat-badge-new{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.stat-badge-new.pending{background:rgba(255,168,0,.12);color:#FFAA00;border:1px solid rgba(255,168,0,.3);}
+.stat-badge-new.approved{background:rgba(0,200,80,.12);color:#00C850;border:1px solid rgba(0,200,80,.3);}
+.stat-badge-new.rejected{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+.wd-err-banner{display:none;padding:9px 12px;border-radius:10px;margin-top:10px;font-size:12px;gap:8px;align-items:flex-start;}
+.wd-err-banner.show{display:flex;}
+.hist-empty{padding:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:500;}
+
+/* ═══ REFERRALS PAGE */
+.ref2-commission-card{margin:0 11px 12px;background:rgba(0,0,0,.42);border:1.5px solid rgba(199,125,255,.28);border-radius:18px;padding:13px;backdrop-filter:blur(8px);background-image:linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.74)),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463296/4d98081c-dfab-4d8c-b6c2-09701c151362_yr3pym.png');background-size:cover;background-position:center;}
+.ref2-pct-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ref2-pct{font-size:36px;font-weight:800;color:#C77DFF;text-shadow:0 0 20px rgba(199,125,255,.7);line-height:1;}
+.ref2-pct-txt{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);line-height:1.5;}
+.ref2-link-row{display:flex;gap:7px;margin-bottom:8px;}
+.ref2-inp{flex:1;background:rgba(0,0,0,.38);border:1.5px solid rgba(199,125,255,.28);border-radius:10px;padding:9px 10px;color:#C77DFF;font-size:11px;font-weight:600;outline:none;font-family:'Fredoka',cursive;}
+.ref2-copy-btn{background:rgba(199,125,255,.14);border:1.5px solid rgba(199,125,255,.4);border-radius:10px;padding:9px 14px;color:#C77DFF;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px;transition:.15s;}
+.ref2-copy-btn:active{background:rgba(199,125,255,.3);}
+.ref2-share-note{font-size:11px;color:rgba(255,255,255,.5);font-weight:600;text-align:center;}
+.ref2-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:0 11px 10px;}
+.ref2-stat-card{border:1.5px solid rgba(199,125,255,.22);border-radius:12px;padding:8px 5px;backdrop-filter:blur(8px);position:relative;overflow:hidden;background-image:linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.74)),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463296/4d98081c-dfab-4d8c-b6c2-09701c151362_yr3pym.png');background-size:cover;background-position:center;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:62px;}
+.ref2-stat-lbl{font-size:7px;color:rgba(255,255,255,.6);font-weight:700;display:flex;align-items:center;gap:3px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.2px;justify-content:center;flex-wrap:wrap;line-height:1.2;}
+.ref2-stat-num{font-size:18px;font-weight:800;color:#fff;line-height:1;}
+.ref2-stat-sub{font-size:7px;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px;}
+.ref2-stat-card.active .ref2-stat-num{color:#00F27A;}
+.ref2-stat-card.active{border-color:rgba(0,242,122,.35);}
+.ref2-stat-card.inactive .ref2-stat-num{color:#ff6b6b;}
+.ref2-stat-card.inactive{border-color:rgba(255,107,107,.35);}
+.ref2-stat-card.earned .ref2-stat-num{font-size:18px;color:#C77DFF;}
+.ref2-stat-card.earned{border-color:rgba(199,125,255,.45);}
+.ref2-subtabs{display:flex;gap:7px;margin:0 11px 9px;}
+.ref2-stab{flex:1;padding:11px 8px;text-align:center;background:rgba(0,0,0,.38);border:1.5px solid rgba(199,125,255,.18);border-radius:13px;font-size:13px;font-weight:800;cursor:pointer;color:rgba(255,255,255,.6);transition:all .18s;}
+.ref2-stab.active{background:rgba(199,125,255,.18);border-color:rgba(199,125,255,.55);color:#C77DFF;}
+.ref2-filters-row{display:flex;gap:7px;margin:0 11px 9px;align-items:center;}
+.ref2-filter-btn{flex:1;display:flex;align-items:center;gap:5px;justify-content:center;background:rgba(0,0,0,.45);border:1.5px solid rgba(199,125,255,.22);border-radius:11px;padding:7px 9px;cursor:pointer;font-size:10px;font-weight:700;color:rgba(255,255,255,.75);backdrop-filter:blur(6px);transition:all .18s;}
+.ref2-filter-btn i{font-size:10px;color:#C77DFF;}
+.ref2-filter-dropdown{position:fixed;z-index:9999;background:rgba(12,5,25,.97);border:1.5px solid rgba(199,125,255,.45);border-radius:12px;overflow:hidden;backdrop-filter:blur(18px);display:none;min-width:170px;box-shadow:0 8px 32px rgba(0,0,0,.8);}
+.ref2-filter-dropdown.open{display:block;}
+.ref2-filter-opt{padding:9px 13px;font-size:10px;font-weight:700;color:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.05);transition:background .12s;}
+.ref2-filter-opt:last-child{border-bottom:none;}
+.ref2-filter-opt:hover,.ref2-filter-opt.active{background:rgba(199,125,255,.15);color:#C77DFF;}
+.ref2-filter-opt .fopt-check{margin-left:auto;color:#C77DFF;font-size:11px;opacity:0;}
+.ref2-filter-opt.active .fopt-check{opacity:1;}
+.ref2-list-card{margin:0 11px;background:rgba(0,0,0,.45);border:1.5px solid rgba(199,125,255,.2);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px);background-image:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.75)),url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463296/4d98081c-dfab-4d8c-b6c2-09701c151362_yr3pym.png');background-size:cover;background-position:center;}
+.ref2-list-item{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.05);}
+.ref2-list-item:last-child{border-bottom:none;}
+.ref2-av{width:36px;height:36px;border-radius:50%;background:rgba(199,125,255,.2);border:2px solid rgba(199,125,255,.5);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0;}
+.ref2-av img{width:100%;height:100%;object-fit:cover;}
+.ref2-li-info{flex:1;min-width:0;}
+.ref2-li-name{font-size:11px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ref2-li-date{font-size:9px;color:rgba(255,255,255,.45);font-weight:600;margin-top:1px;}
+.ref2-li-earn{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:#C77DFF;white-space:nowrap;flex-shrink:0;}
+.ref2-li-earn img{width:15px;height:15px;border-radius:50%;object-fit:cover;}
+.ref2-empty{padding:20px;text-align:center;color:rgba(255,255,255,.35);font-size:11px;font-weight:600;}
 </style>
 </head>
 <body>
-<!-- ═══════════════ LOADING SCREEN ═══════════════ -->
+
+<!-- ════ LOADING SCREEN ════ -->
 <div id="loadingScreen">
-  <div class="ld-logo-text">RASEEN</div>
-  <div class="ld-subtitle">BLOCKCHAIN · FINANCE</div>
-  <div class="ld-progress"><div class="ld-progress-bar" id="ldBar"></div></div>
-  <div class="ld-loading-text" id="ldText">جارٍ التحميل...</div>
-</div>
-<!-- ═══════════════ TOPBAR ═══════════════ -->
-<div class="topbar" id="topbar">
-  <div class="topbar-avatar" id="topAvatar">👤</div>
-  <div class="topbar-info">
-    <div class="topbar-name" id="topName">جارٍ التحميل...</div>
-    <div class="topbar-id" id="topId">ID: —</div>
+  <div id="ldLogoMain">
+    <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png" onerror="this.style.display='none'" alt="RASEEN">
   </div>
-  <div class="topbar-balance">
-    <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON">
-    <span class="topbar-bal-val" id="topBal">0.0000</span>
-  </div>
-</div>
-<!-- ═══════════════════════════════════════════
-     DEPOSIT PAGE
-═══════════════════════════════════════════ -->
-<div class="sec active" id="secDeposit">
-  <!-- Balance -->
-  <div class="bal-card" style="margin-top:10px">
-    <div class="bal-label">رصيد TON</div>
-    <div class="bal-value"><span>TON</span><span id="depBal">0.0000</span></div>
-    <div class="bal-usd" id="depUsd">≈ $0.00</div>
-  </div>
-  <div class="card">
-    <div class="pg-title" style="font-size:18px;margin-bottom:14px">
-      <div class="pg-title-icon dep"><i class="fas fa-arrow-down" style="color:var(--green)"></i></div>
-      إيداع TON
-    </div>
-    <!-- Steps -->
-    <div class="dep-steps">
-      <div class="dep-step">
-        <div class="dep-step-num">1</div>
-        <div class="dep-step-text">أرسل TON إلى عنوان المحفظة أدناه من أي محفظة TON</div>
+  <div class="ld-bar-wrap">
+    <div class="ld-sub" id="ldText">Loading...</div>
+    <div class="ld-bar-row">
+      <div class="ld-segs-new" id="ldSegs">
+        <div class="seg" id="seg0"></div><div class="seg" id="seg1"></div>
+        <div class="seg" id="seg2"></div><div class="seg" id="seg3"></div>
+        <div class="seg" id="seg4"></div><div class="seg" id="seg5"></div>
+        <div class="seg" id="seg6"></div><div class="seg" id="seg7"></div>
+        <div class="seg" id="seg8"></div><div class="seg" id="seg9"></div>
       </div>
-      <div class="dep-step">
-        <div class="dep-step-num">2</div>
-        <div class="dep-step-text">أدخل مبلغ الإيداع ورقم المعاملة (TxHash)</div>
-      </div>
-      <div class="dep-step">
-        <div class="dep-step-num">3</div>
-        <div class="dep-step-text">سيتم مراجعة الإيداع وإضافة الرصيد خلال دقائق</div>
-      </div>
+      <div class="ld-pct" id="ldPct">0%</div>
     </div>
-    <!-- Wallet Address -->
-    <div class="dep-addr-box">
-      <div class="dep-addr-label">
-        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON">
-        عنوان محفظة الإيداع
-      </div>
-      <div class="dep-addr-val" id="depWalletAddr">EQBSd4s...</div>
-      <button class="dep-addr-copy" onclick="copyDepositAddr()">
-        <i class="fas fa-copy"></i> نسخ العنوان
-      </button>
-    </div>
-    <div class="info-box yellow">
-      <i class="fas fa-exclamation-triangle"></i>
-      <span>الحد الأدنى للإيداع: <strong id="depMinText">1 TON</strong>. أرسل TON فقط إلى هذا العنوان.</span>
-    </div>
-    <div class="divider">
-      <div class="divider-line"></div>
-      <div class="divider-text">أدخل تفاصيل المعاملة</div>
-      <div class="divider-line"></div>
-    </div>
-    <label class="form-label"><i class="fas fa-hashtag"></i> رقم المعاملة (TxHash)</label>
-    <input class="form-input" id="depTxHash" placeholder="الصق رقم المعاملة هنا..." type="text">
-    <label class="form-label"><i class="fas fa-coins"></i> مبلغ الإيداع (TON)</label>
-    <div class="amount-wrap">
-      <input class="amount-input" id="depAmount" placeholder="0.00" type="number" min="0" step="0.001">
-      <div class="amount-suffix" style="right:16px;left:auto">TON</div>
-    </div>
-    <div class="preset-row">
-      <button class="preset-btn" onclick="setDepAmt(1)">1</button>
-      <button class="preset-btn" onclick="setDepAmt(5)">5</button>
-      <button class="preset-btn" onclick="setDepAmt(10)">10</button>
-      <button class="preset-btn" onclick="setDepAmt(50)">50</button>
-    </div>
-    <button class="btn btn-green" id="depBtn" onclick="submitDeposit()">
-      <i class="fas fa-arrow-down"></i>
-      تأكيد الإيداع
-    </button>
-  </div>
-  <!-- History -->
-  <div class="hist-card">
-    <div class="hist-header">
-      <i class="fas fa-history" style="color:var(--green)"></i>
-      سجل الإيداعات
-    </div>
-    <div id="depHistList"><div class="hist-empty">لا توجد إيداعات سابقة</div></div>
   </div>
 </div>
-<!-- ═══════════════════════════════════════════
-     WITHDRAW PAGE
-═══════════════════════════════════════════ -->
-<div class="sec" id="secWithdraw">
-  <!-- Balance -->
-  <div class="bal-card" style="margin-top:10px">
-    <div class="bal-label">رصيد متاح للسحب</div>
-    <div class="bal-value"><span>TON</span><span id="wdBal">0.0000</span></div>
-    <div class="bal-usd" id="wdUsd">≈ $0.00</div>
-  </div>
-  <div class="card">
-    <div class="pg-title" style="font-size:18px;margin-bottom:14px">
-      <div class="pg-title-icon wd"><i class="fas fa-arrow-up" style="color:var(--gold)"></i></div>
-      سحب TON
+
+<!-- ════ NOTIF TOAST ════ -->
+<div id="notifBar"></div>
+
+<!-- ════════════════════════════════════════════
+     MAIN SECTION — PROFILE / FINANCE
+════════════════════════════════════════════ -->
+<div class="sec active" id="sectionFinance">
+  <!-- HERO HEADER -->
+  <div class="pf-hero">
+    <img class="pf-hero-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/28c8e6bc-d206-4d74-8a19-4dbfb8fa4897_mxwtsa.png" alt="profile hero">
+    <div class="pf-hero-overlay"></div>
+    <div class="pf-actions">
+      <button class="pf-tb-btn" id="langBtn">🌐 AR</button>
     </div>
-    <div class="info-box blue">
-      <i class="fas fa-info-circle"></i>
-      <span>رسوم السحب: <strong id="wdFeeText">10%</strong> · الحد الأدنى: <strong id="wdMinText">0.0001 TON</strong></span>
-    </div>
-    <label class="form-label"><i class="fas fa-wallet"></i> عنوان محفظة TON</label>
-    <input class="form-input" id="wdAddress" placeholder="UQ... أو EQ..." type="text">
-    <label class="form-label"><i class="fas fa-coins"></i> مبلغ السحب</label>
-    <div class="amount-wrap">
-      <input class="amount-input" id="wdAmount" placeholder="0.0000" type="number" min="0" step="0.0001"
-        style="padding-right:55px">
-      <div class="amount-suffix" style="right:16px;left:auto">TON</div>
-      <button class="amount-max" style="right:auto;left:12px" onclick="setWdMax()">الكل</button>
-    </div>
-    <!-- Fee preview -->
-    <div id="wdFeePreview" style="display:none;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);border-radius:12px;padding:12px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:13px;color:var(--text3);font-weight:600">المبلغ المطلوب</span>
-        <span style="font-size:14px;font-weight:800;color:#fff" id="wdPreviewRequested">0</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:13px;color:var(--text3);font-weight:600">الرسوم (10%)</span>
-        <span style="font-size:13px;font-weight:700;color:var(--red)" id="wdPreviewFee">-0</span>
-      </div>
-      <div style="height:1px;background:rgba(255,255,255,0.08);margin:8px 0"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:14px;font-weight:800;color:#fff">ستستلم</span>
-        <span style="font-size:16px;font-weight:800;color:var(--green)" id="wdPreviewNet">0</span>
+    <div class="pf-topbar">
+      <div class="pf-tb-avatar" id="pfAvatar"><span>🏍️</span></div>
+      <div class="pf-tb-info">
+        <span class="pf-tb-name" id="pfUserName">Player</span>
+        <span class="pf-tb-handle" id="pfUserHandle">@player</span>
       </div>
     </div>
-    <button class="btn btn-gold" id="wdBtn" onclick="submitWithdraw()">
-      <i class="fas fa-arrow-up"></i>
-      طلب السحب
-    </button>
-  </div>
-  <!-- History -->
-  <div class="hist-card">
-    <div class="hist-header">
-      <i class="fas fa-history" style="color:var(--gold)"></i>
-      سجل السحوبات
-    </div>
-    <div id="wdHistList"><div class="hist-empty">لا توجد سحوبات سابقة</div></div>
-  </div>
-</div>
-<!-- ═══════════════════════════════════════════
-     REFERRALS PAGE
-═══════════════════════════════════════════ -->
-<div class="sec" id="secReferral">
-  <!-- Stats -->
-  <div class="ref-stats" style="margin-top:10px">
-    <div class="ref-stat-card">
-      <div class="ref-stat-icon">👥</div>
-      <div class="ref-stat-val" id="refCount">0</div>
-      <div class="ref-stat-lbl">إجمالي الإحالات</div>
-    </div>
-    <div class="ref-stat-card">
-      <div class="ref-stat-icon">💰</div>
-      <div class="ref-stat-val" id="refEarned" style="font-size:18px;color:var(--gold)">0.00 TON</div>
-      <div class="ref-stat-lbl">الأرباح من الإحالات</div>
-    </div>
-  </div>
-  <!-- Bonus info -->
-  <div class="ref-bonus-card">
-    <div class="ref-bonus-pct" id="refBonusPct">10%</div>
-    <div class="ref-bonus-txt">
-      <strong>عمولة على كل إيداع</strong><br>
-      احصل على عمولة من كل إيداع يقوم به أصدقاؤك
-    </div>
-  </div>
-  <!-- Link card -->
-  <div class="ref-link-card">
-    <div class="ref-link-title">
-      <i class="fas fa-link" style="color:var(--ton)"></i>
-      رابط الإحالة الخاص بك
-    </div>
-    <div class="ref-link-row">
-      <input class="ref-link-input" id="refLinkInp" readonly value="جارٍ التحميل...">
-      <button class="ref-copy-btn" onclick="copyRefLink()">
-        <i class="fas fa-copy"></i> نسخ
-      </button>
-    </div>
-    <button class="ref-share-btn" onclick="shareRefLink()">
-      <i class="fas fa-share-alt"></i>
-      مشاركة الرابط مع الأصدقاء
-    </button>
-  </div>
-  <!-- Referrals list -->
-  <div class="ref-list-card">
-    <div class="ref-list-header">
-      <span>قائمة الأصدقاء</span>
-      <span class="ref-count-badge" id="refCountBadge">0</span>
-    </div>
-    <div id="refList"><div class="hist-empty">لم تدعُ أحداً بعد</div></div>
-  </div>
-</div>
-<!-- Toast -->
-<div id="toast"></div>
-<!-- ═══════════════ BOTTOM NAV ═══════════════ -->
-<nav class="bnav">
-  <div class="nav-item active" id="navDeposit" onclick="showSec('Deposit')">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-      </svg>
-    </div>
-    <span class="nav-label">إيداع</span>
-  </div>
-  <div class="nav-item" id="navWithdraw" onclick="showSec('Withdraw')">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-      </svg>
-    </div>
-    <span class="nav-label">سحب</span>
-  </div>
-  <div class="nav-item" id="navReferral" onclick="showSec('Referral')">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-      </svg>
-    </div>
-    <span class="nav-label">إحالات</span>
-  </div>
-</nav>
-<!-- ═══════════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════════ -->
-<script>
-/* ════════════════════════════════════════════
-   CONFIG
-════════════════════════════════════════════ */
-const SERVER_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
-const DEPOSIT_WALLET = 'EQBSd4sEXhC9M6PQezpJBOxdB9q8kpqKQpxPv2Lp2jFbXJHe'; // عنوان المحفظة - عدّله
-/* ════════════════════════════════════════════
-   STATE
-════════════════════════════════════════════ */
-const S = {
-  user: null,
-  config: null,
-  referrals: [],
-  wdHistory: [],
-  depHistory: [],
-  initData: '',
-  tgUser: null,
-  loaded: false,
-};
-/* ════════════════════════════════════════════
-   LOADING
-════════════════════════════════════════════ */
-function updateProgress(pct, text) {
-  const bar = document.getElementById('ldBar');
-  const txt = document.getElementById('ldText');
-  if (bar) bar.style.width = pct + '%';
-  if (txt) txt.textContent = text;
-}
-function hideLoading() {
-  const el = document.getElementById('loadingScreen');
-  if (el) {
-    el.classList.add('hidden');
-    setTimeout(() => el.remove(), 700);
-  }
-}
-/* ════════════════════════════════════════════
-   NAVIGATION
-════════════════════════════════════════════ */
-function showSec(name) {
-  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const sec = document.getElementById('sec' + name);
-  const nav = document.getElementById('nav' + name);
-  if (sec) sec.classList.add('active');
-  if (nav) nav.classList.add('active');
-  // refresh data on tab switch
-  if (name === 'Deposit') renderDepHistory();
-  if (name === 'Withdraw') { renderWdHistory(); updateWdPreview(); }
-  if (name === 'Referral') renderReferrals();
-}
-/* ════════════════════════════════════════════
-   API CLIENT - Cloudflare Workers
-════════════════════════════════════════════ */
-async function api(action, data = {}) {
-  const auth = S.initData ? `Telegram ${S.initData}` : '';
-  const res = await fetch(`${SERVER_URL}/api`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': auth,
-      'X-Action': action,
-    },
-    body: JSON.stringify({ action, data }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error || 'Server error');
-  return json.data;
-}
-/* ════════════════════════════════════════════
-   TOAST
-════════════════════════════════════════════ */
-let _toastTimer;
-function toast(msg, type = 'info') {
-  const el = document.getElementById('toast');
-  if (!el) return;
-  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-  el.textContent = (icons[type] || '') + ' ' + msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
-}
-/* ════════════════════════════════════════════
-   INIT - Telegram WebApp
-════════════════════════════════════════════ */
-async function init() {
-  // Init Telegram WebApp
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready();
-    tg.expand();
-    tg.setHeaderColor('#020d1a');
-    tg.setBackgroundColor('#020d1a');
-    S.initData = tg.initData || '';
-    S.tgUser = tg.initDataUnsafe?.user || null;
-  }
-  updateProgress(20, 'جارٍ التحقق من الهوية...');
-  // For testing outside Telegram (dev mode)
-  if (!S.initData) {
-    console.warn('[RASEEN] No Telegram initData. Running in dev/preview mode.');
-    S.initData = 'dev_mode';
-  }
-  updateProgress(45, 'جارٍ جلب بيانات الحساب...');
-  try {
-    const stateData = await api('getState', {
-      _startParam: tg?.initDataUnsafe?.start_param || '',
-    });
-    S.user      = stateData.user;
-    S.config    = stateData.config;
-    S.referrals = stateData.referrals || [];
-    S.wdHistory = stateData.wdHistory || [];
-    S.depHistory = stateData.depHistory || [];
-    S.loaded = true;
-    updateProgress(80, 'جارٍ تهيئة الواجهة...');
-    renderAll();
-    updateProgress(100, 'تم التحميل!');
-    setTimeout(hideLoading, 600);
-  } catch (err) {
-    console.error('[RASEEN] Init error:', err);
-    updateProgress(100, 'خطأ في التحميل');
-    // Show error in UI but still hide loading
-    setTimeout(() => {
-      hideLoading();
-      toast('تعذر الاتصال بالسيرفر. تحقق من الاتصال.', 'error');
-    }, 800);
-  }
-}
-/* ════════════════════════════════════════════
-   RENDER ALL
-════════════════════════════════════════════ */
-function renderAll() {
-  renderTopbar();
-  renderDepPage();
-  renderWdPage();
-  renderRefPage();
-}
-/* ════════════════════════════════════════════
-   TOPBAR
-════════════════════════════════════════════ */
-function renderTopbar() {
-  if (!S.user) return;
-  const u = S.user;
-  const nameEl = document.getElementById('topName');
-  const idEl   = document.getElementById('topId');
-  const balEl  = document.getElementById('topBal');
-  const avEl   = document.getElementById('topAvatar');
-  const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || 'مستخدم';
-  if (nameEl) nameEl.textContent = name;
-  if (idEl) idEl.textContent = `ID: ${u.referralCode || '—'}`;
-  if (balEl) balEl.textContent = (u.tonBalance || 0).toFixed(4);
-  if (avEl && u.photoUrl) {
-    avEl.innerHTML = `<img src="${u.photoUrl}" onerror="this.parentElement.textContent='👤'">`;
-  }
-}
-/* ════════════════════════════════════════════
-   DEPOSIT PAGE
-════════════════════════════════════════════ */
-function renderDepPage() {
-  const bal = S.user?.tonBalance || 0;
-  const depBalEl = document.getElementById('depBal');
-  const depUsdEl = document.getElementById('depUsd');
-  const minEl    = document.getElementById('depMinText');
-  const addrEl   = document.getElementById('depWalletAddr');
-  if (depBalEl) depBalEl.textContent = bal.toFixed(4);
-  if (depUsdEl) depUsdEl.textContent = `≈ $${(bal * 6.5).toFixed(2)}`; // approximate
-  if (minEl) minEl.textContent = `${S.config?.minDepositTon || 1} TON`;
-  if (addrEl) addrEl.textContent = DEPOSIT_WALLET;
-  renderDepHistory();
-}
-function renderDepHistory() {
-  const list = document.getElementById('depHistList');
-  if (!list) return;
-  const hist = S.depHistory || [];
-  if (!hist.length) {
-    list.innerHTML = '<div class="hist-empty">لا توجد إيداعات سابقة</div>';
-    return;
-  }
-  list.innerHTML = hist.map(d => `
-    <div class="hist-row">
-      <div class="hist-icon dep-icon"><i class="fas fa-arrow-down"></i></div>
-      <div class="hist-info">
-        <div class="hist-addr">${d.txHash ? d.txHash.slice(0,20)+'...' : 'إيداع'}</div>
-        <div class="hist-date">${formatDate(d.ts)}</div>
-      </div>
-      <div class="hist-right">
-        <div class="hist-amt incoming">+${d.amount} TON</div>
-        <div class="${statusBadge(d.status)}">${statusLabel(d.status)}</div>
-      </div>
-    </div>
-  `).join('');
-}
-function copyDepositAddr() {
-  const addr = document.getElementById('depWalletAddr')?.textContent || DEPOSIT_WALLET;
-  navigator.clipboard.writeText(addr).then(() => toast('تم نسخ عنوان المحفظة!', 'success'))
-    .catch(() => toast('تعذر النسخ', 'error'));
-}
-function setDepAmt(n) { document.getElementById('depAmount').value = n; }
-async function submitDeposit() {
-  if (!S.loaded) { toast('جارٍ تحميل البيانات...', 'warning'); return; }
-  const txHash = document.getElementById('depTxHash').value.trim();
-  const amount = parseFloat(document.getElementById('depAmount').value) || 0;
-  if (!txHash) { toast('أدخل رقم المعاملة (TxHash)', 'error'); return; }
-  if (amount < (S.config?.minDepositTon || 1)) {
-    toast(`الحد الأدنى ${S.config?.minDepositTon || 1} TON`, 'error'); return;
-  }
-  const btn = document.getElementById('depBtn');
-  setLoading(btn, true, 'جارٍ الإرسال...');
-  try {
-    await api('deposit', { txHash, amount });
-    toast('✅ تم تسجيل الإيداع! سيتم مراجعته قريباً', 'success');
-    document.getElementById('depTxHash').value = '';
-    document.getElementById('depAmount').value = '';
-    // Refresh state
-    await refreshState();
-  } catch (err) {
-    toast(err.message || 'فشل الإيداع', 'error');
-  } finally {
-    setLoading(btn, false, '<i class="fas fa-arrow-down"></i> تأكيد الإيداع');
-  }
-}
-/* ════════════════════════════════════════════
-   WITHDRAW PAGE
-════════════════════════════════════════════ */
-function renderWdPage() {
-  const bal = S.user?.tonBalance || 0;
-  const wdBalEl = document.getElementById('wdBal');
-  const wdUsdEl = document.getElementById('wdUsd');
-  const feeEl   = document.getElementById('wdFeeText');
-  const minEl   = document.getElementById('wdMinText');
-  if (wdBalEl) wdBalEl.textContent = bal.toFixed(4);
-  if (wdUsdEl) wdUsdEl.textContent = `≈ $${(bal * 6.5).toFixed(2)}`;
-  if (feeEl)   feeEl.textContent = `${S.config?.withdrawFeePct || 10}%`;
-  if (minEl)   minEl.textContent = `${S.config?.minWithdrawTon || 0.0001} TON`;
-  // Restore saved address
-  const savedAddr = S.user?.withdrawWallet;
-  const addrEl = document.getElementById('wdAddress');
-  if (addrEl && savedAddr && !addrEl.value) addrEl.value = savedAddr;
-  // Live preview
-  document.getElementById('wdAmount').addEventListener('input', updateWdPreview);
-  renderWdHistory();
-}
-function updateWdPreview() {
-  const amt = parseFloat(document.getElementById('wdAmount')?.value) || 0;
-  const fee = S.config?.withdrawFeePct || 10;
-  const preview = document.getElementById('wdFeePreview');
-  if (!preview) return;
-  if (amt <= 0) { preview.style.display = 'none'; return; }
-  const feeAmt = amt * fee / 100;
-  const net = amt - feeAmt;
-  preview.style.display = 'block';
-  document.getElementById('wdPreviewRequested').textContent = amt.toFixed(4) + ' TON';
-  document.getElementById('wdPreviewFee').textContent = '-' + feeAmt.toFixed(4) + ' TON';
-  document.getElementById('wdPreviewNet').textContent = net.toFixed(4) + ' TON';
-}
-function setWdMax() {
-  const bal = S.user?.tonBalance || 0;
-  document.getElementById('wdAmount').value = bal.toFixed(4);
-  updateWdPreview();
-}
-function renderWdHistory() {
-  const list = document.getElementById('wdHistList');
-  if (!list) return;
-  const hist = S.wdHistory || [];
-  if (!hist.length) {
-    list.innerHTML = '<div class="hist-empty">لا توجد سحوبات سابقة</div>';
-    return;
-  }
-  list.innerHTML = hist.map(w => `
-    <div class="hist-row">
-      <div class="hist-icon wd-icon">
-        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON">
-      </div>
-      <div class="hist-info">
-        <div class="hist-addr">${w.address ? w.address.slice(0,20)+'...' : '—'}</div>
-        <div class="hist-date">${formatDate(w.ts)}</div>
-      </div>
-      <div class="hist-right">
-        <div class="hist-amt outgoing">${w.amt || w.amtRequested} TON</div>
-        <div class="${statusBadge(w.status)}">${statusLabel(w.status)}</div>
-      </div>
-    </div>
-  `).join('');
-}
-async function submitWithdraw() {
-  if (!S.loaded) { toast('جارٍ تحميل البيانات...', 'warning'); return; }
-  const address = document.getElementById('wdAddress').value.trim();
-  const amount  = parseFloat(document.getElementById('wdAmount').value) || 0;
-  if (!address || address.length < 10) { toast('أدخل عنوان محفظة TON صحيح', 'error'); return; }
-  if (amount < (S.config?.minWithdrawTon || 0.0001)) {
-    toast(`الحد الأدنى ${S.config?.minWithdrawTon || 0.0001} TON`, 'error'); return;
-  }
-  if (amount > (S.user?.tonBalance || 0)) {
-    toast('رصيد غير كافٍ', 'error'); return;
-  }
-  const btn = document.getElementById('wdBtn');
-  setLoading(btn, true, 'جارٍ الإرسال...');
-  try {
-    const result = await api('withdraw', { address, amount });
-    toast('✅ تم تقديم طلب السحب بنجاح', 'success');
-    document.getElementById('wdAmount').value = '';
-    document.getElementById('wdFeePreview').style.display = 'none';
-    await refreshState();
-  } catch (err) {
-    const msg = err.message || 'فشل طلب السحب';
-    if (msg === 'WALLET_USED') toast('هذه المحفظة مستخدمة من حساب آخر', 'error');
-    else toast(msg, 'error');
-  } finally {
-    setLoading(btn, false, '<i class="fas fa-arrow-up"></i> طلب السحب');
-  }
-}
-/* ════════════════════════════════════════════
-   REFERRALS PAGE
-════════════════════════════════════════════ */
-function renderRefPage() {
-  const refs = S.referrals || [];
-  const refCode = S.user?.referralCode || '';
-  const botName = 'RaseenBot'; // غير هذا إلى اسم البوت الحقيقي
-  const refLink = `https://t.me/${botName}?start=${refCode}`;
-  // Stats
-  const countEl  = document.getElementById('refCount');
-  const earnedEl = document.getElementById('refEarned');
-  const pctEl    = document.getElementById('refBonusPct');
-  const linkInp  = document.getElementById('refLinkInp');
-  const countBadge = document.getElementById('refCountBadge');
-  if (countEl) countEl.textContent = refs.length;
-  if (countBadge) countBadge.textContent = refs.length;
-  if (pctEl) pctEl.textContent = `${S.config?.refBonusPct || 10}%`;
-  const totalEarned = refs.reduce((sum, r) => sum + (r.earned || 0), 0);
-  if (earnedEl) earnedEl.textContent = totalEarned.toFixed(4) + ' TON';
-  if (linkInp) linkInp.value = refLink;
-  renderReferrals();
-}
-function renderReferrals() {
-  const list = document.getElementById('refList');
-  if (!list) return;
-  const refs = S.referrals || [];
-  if (!refs.length) {
-    list.innerHTML = '<div class="hist-empty">لم تدعُ أحداً بعد. شارك رابطك!</div>';
-    return;
-  }
-  list.innerHTML = refs.map(r => {
-    const name = r.name || 'صديق';
-    const hasDeposited = r.hasDeposited;
-    return `
-      <div class="ref-item">
-        <div class="ref-item-av">
-          ${r.photo ? `<img src="${r.photo}" onerror="this.parentElement.textContent='👤'">` : '👤'}
+    <div class="pf-balcard">
+      <div class="pf-balicon"><img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON"></div>
+      <div style="flex:1;min-width:0">
+        <div class="pf-ballbl">Total Balance</div>
+        <div class="pf-balrow">
+          <span class="pf-balval" id="finTonBal">0.00</span>
+          <span class="pf-baltkn">TON</span>
         </div>
-        <div class="ref-item-info">
-          <div class="ref-item-name">${escHtml(name)}</div>
-          <div class="ref-item-date">${r.date || ''}</div>
-          <div class="ref-item-dep ${hasDeposited ? 'yes' : 'no'}">
-            ${hasDeposited ? '✅ أودع' : '⏳ لم يودع بعد'}
+      </div>
+    </div>
+    <div class="pf-hero-bottom"></div>
+  </div>
+
+  <!-- PROFILE CARDS GRID -->
+  <div class="pf-grid">
+    <!-- Row 1: Deposit + Withdraw -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="pf-card-wrap" style="aspect-ratio:1" onclick="openProfilePage('deposit')">
+        <img class="pf-card-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463329/7f694191-2573-44e8-bdea-58902d795f89_jytvr2.png">
+        <div class="pf-card-overlay"><span class="pf-card-label">💰 إيداع</span></div>
+      </div>
+      <div class="pf-card-wrap" style="aspect-ratio:1" onclick="openProfilePage('withdraw')">
+        <img class="pf-card-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463433/39783016-fb77-417e-905e-ddd718a53934_lmsyqn.png">
+        <div class="pf-card-overlay"><span class="pf-card-label">📤 سحب</span></div>
+      </div>
+    </div>
+    <!-- Row 2: Referrals (full width) -->
+    <div class="pf-card-wrap" style="height:120px" onclick="openProfilePage('referrals')">
+      <img class="pf-card-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463434/aef1eeee-0d4c-41da-bc9d-d5af83bbfe45_efkzgl.png">
+      <div class="pf-card-overlay"><span class="pf-card-label" style="font-size:16px">👥 إحالات الأصدقاء</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SUB-PAGE OVERLAY
+════════════════════════════════════════════ -->
+<div id="profileSubPage" style="display:none;position:fixed;inset:0;z-index:150;overflow-y:auto;padding-bottom:108px">
+  <div class="psp-hero">
+    <div class="psp-hero-bar">
+      <button class="psp-back" onclick="closeProfilePage()">←</button>
+      <span class="psp-title" id="pspTitle">Page</span>
+    </div>
+    <div class="psp-userrow">
+      <div class="psp-avatar" id="pspAvatar"><span>🏍️</span></div>
+      <div class="psp-username" id="pspUserName">Player</div>
+      <div class="psp-balcard">
+        <div class="psp-ballbl"><span>Balance</span> <i class="fas fa-wallet"></i></div>
+        <div class="psp-balrow">
+          <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:18px;height:18px;border-radius:50%;object-fit:cover;flex-shrink:0">
+          <span class="psp-balval" id="pspBalVal">0.00</span>
+          <span class="psp-baltkn">TON</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="psp-body" id="pspBody"></div>
+</div>
+
+<!-- ═══ DEPOSIT CONTENT TEMPLATE ═══ -->
+<div id="page-deposit-content" style="display:none">
+  <div style="margin:0 12px">
+    <!-- ① Connect Wallet -->
+    <div class="dep-card" style="margin-bottom:9px">
+      <div class="dep-card-hdr">
+        <div class="dep-step">1</div>
+        <div class="dep-card-title">Connect Wallet</div>
+      </div>
+      <div class="dep-wal-body">
+        <div class="dep-wal-info">
+          <div class="dep-wal-icon"><i class="fas fa-wallet"></i></div>
+          <div class="dep-wal-text">
+            <div class="dep-wal-lbl">Wallet</div>
+            <div class="dep-wal-addr" id="walletAddressDisplay">Not connected<span class="conn-dot"></span><span class="conn-lbl">Connected</span></div>
           </div>
         </div>
-        <div style="text-align:left">
-          <div class="ref-item-earn">${(r.earned || 0).toFixed(4)} TON</div>
-        </div>
+        <button class="dep-btn-conn" id="connectWalletBtn" onclick="connectWallet()">
+          <i class="fas fa-plug"></i> <span id="connBtnLabel">Connect</span>
+        </button>
       </div>
-    `;
+    </div>
+
+    <!-- ② Amount + Deposit Button -->
+    <div class="dep-card" style="margin-bottom:9px">
+      <div class="dep-card-hdr">
+        <div class="dep-step">2</div>
+        <div class="dep-card-title">Amount (TON)</div>
+      </div>
+      <div class="dep-amt-wrap">
+        <div class="dep-amt-icon">
+          <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON">
+        </div>
+        <input type="number" id="depositAmountInput" class="finput" placeholder="Enter amount" step="0.1" min="1">
+        <div class="dep-amt-suffix">TON</div>
+      </div>
+      <div class="dep-preset-row">
+        <span class="dep-prbtn" onclick="setDepAmt(1)">1 TON</span>
+        <span class="dep-prbtn" onclick="setDepAmt(2)">2 TON</span>
+        <span class="dep-prbtn" onclick="setDepAmt(5)">5 TON</span>
+        <span class="dep-prbtn" onclick="setDepAmt(10)">10 TON</span>
+      </div>
+      <button class="dep-btn-prim" id="submitDepositBtn" disabled onclick="initiateDeposit()">
+        <i class="fas fa-arrow-down"></i> Deposit TON
+      </button>
+      <div class="tx-status" id="depositStatus">
+        <div class="txsi">⏳</div><div class="txsm">Processing deposit...</div>
+        <div class="txsd" id="depositStatusDetail"></div>
+      </div>
+    </div>
+
+    <!-- ③ Manual Deposit (wallet address + user ID) -->
+    <div class="dep-card">
+      <div class="dep-card-hdr">
+        <div class="dep-step">3</div>
+        <div class="dep-card-title">Manual Deposit</div>
+      </div>
+      <label class="flabel">Wallet Address (send TON here)</label>
+      <div class="dep-manual-input">
+        <input type="text" class="finput" id="manualWalletAddr" readonly value="UQDrVUxBI9tGFmJq0FtR4GpR13BD2_m7X83Vho7EDxDW1EYu">
+        <button class="dep-copy-btn" onclick="copyText('manualWalletAddr')"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+      <label class="flabel">Comment / Memo (Your User ID)</label>
+      <div class="dep-manual-input">
+        <input type="text" class="finput" id="manualCommentId" readonly>
+        <button class="dep-copy-btn" onclick="copyText('manualCommentId')"><i class="fas fa-copy"></i> Copy</button>
+      </div>
+      <div class="dep-manual-foot"><i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address. Include your User ID in the memo/comment.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WITHDRAW CONTENT TEMPLATE ═══ -->
+<div id="page-withdraw-content" style="display:none">
+  <div style="margin:0 12px">
+    <span id="wdTonBal" style="display:none">0.000</span>
+    <div class="wd-new-wallet-card">
+      <label class="flabel">TON Wallet Address</label>
+      <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ... or EQ...">
+      <label class="flabel">Amount (TON)</label>
+      <div class="wd-new-amount-wrap">
+        <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.1 TON" step="0.1" min="0.1" oninput="updateWdFeePreview()">
+        <button class="wd-new-max-btn" onclick="document.getElementById('wdAmtInput').value=document.getElementById('wdTonBal').textContent||'0';updateWdFeePreview()">Max</button>
+      </div>
+      <!-- Fee preview -->
+      <div id="wdFeePreview" style="display:none;margin:8px 0;padding:10px 12px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.25);border-radius:10px;font-size:12px;font-weight:600;color:#FFD740;line-height:1.8">
+        <div>💸 رسوم السحب (10%): <span id="wdFeeAmt" style="font-weight:800;color:#ff8a80">-0.00 TON</span></div>
+        <div>✅ المبلغ الصافي بعد الخصم: <span id="wdNetAmt" style="font-weight:800;color:#00F27A">0.00 TON</span></div>
+      </div>
+      <button class="btn-wd-new" id="wdBtn" onclick="doWithdraw()">
+        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0">
+        <span>Request Withdrawal</span>
+      </button>
+      <div class="wd-err-banner" id="wdErrBanner"></div>
+    </div>
+    <!-- Withdrawal History -->
+    <div class="wd-new-hist-card" style="margin-top:10px">
+      <div class="wd-new-hist-hdr">📋 Withdrawal History</div>
+      <div id="wdHistList"><div class="hist-empty">No withdrawals yet</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REFERRALS CONTENT TEMPLATE ═══ -->
+<div id="page-referrals-content" style="display:none">
+  <!-- Commission card + link -->
+  <div class="ref2-commission-card">
+    <div class="ref2-pct-row">
+      <span class="ref2-pct" id="refBonusPctDisp">10%</span>
+      <span class="ref2-pct-txt">عمولة على كل إيداع يقوم به أصدقاؤك!</span>
+    </div>
+    <div class="ref2-link-row">
+      <input class="ref2-inp" id="refLinkInp" readonly placeholder="Your referral link...">
+      <button class="ref2-copy-btn" onclick="copyRefLink()"><i class="fas fa-copy"></i> Copy</button>
+    </div>
+    <div class="ref2-share-note">🎁 Share this link with friends to earn</div>
+  </div>
+
+  <!-- Sub tabs -->
+  <div class="ref2-subtabs">
+    <div class="ref2-stab active" onclick="switchRef2Tab(this,'friends')">👥 Friends</div>
+    <div class="ref2-stab" onclick="switchRef2Tab(this,'missions')">📊 Stats</div>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="ref2-stats-grid">
+    <div class="ref2-stat-card">
+      <div class="ref2-stat-lbl"><i class="fas fa-users" style="color:#C77DFF"></i> Total</div>
+      <div class="ref2-stat-num" id="ref2TotalCount">0</div>
+      <div class="ref2-stat-sub">Friends</div>
+    </div>
+    <div class="ref2-stat-card active">
+      <div class="ref2-stat-lbl"><i class="fas fa-user-check" style="color:#00F27A"></i> Active</div>
+      <div class="ref2-stat-num" id="ref2ActiveCount">0</div>
+      <div class="ref2-stat-sub">Friends</div>
+    </div>
+    <div class="ref2-stat-card inactive">
+      <div class="ref2-stat-lbl"><i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive</div>
+      <div class="ref2-stat-num" id="ref2InactiveCount">0</div>
+      <div class="ref2-stat-sub">Friends</div>
+    </div>
+    <div class="ref2-stat-card earned">
+      <div class="ref2-stat-lbl"><i class="fas fa-wallet" style="color:#C77DFF"></i> Earned</div>
+      <div class="ref2-stat-num" id="ref2TotalEarned">0</div>
+      <div class="ref2-stat-sub" style="display:flex;align-items:center;gap:2px;justify-content:center">
+        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:9px;height:9px;border-radius:50%"> TON
+      </div>
+    </div>
+  </div>
+
+  <!-- Dropdowns -->
+  <div class="ref2-filter-dropdown" id="ref2TypeDropdown">
+    <div class="ref2-filter-opt active" data-val="all" onclick="setRef2TypeFilter(this,'all')">
+      <i class="fas fa-users" style="color:#C77DFF"></i> All Referrals <span class="fopt-check"><i class="fas fa-check"></i></span>
+    </div>
+    <div class="ref2-filter-opt" data-val="active" onclick="setRef2TypeFilter(this,'active')">
+      <i class="fas fa-user-check" style="color:#00F27A"></i> Active Only <span class="fopt-check"><i class="fas fa-check"></i></span>
+    </div>
+    <div class="ref2-filter-opt" data-val="top" onclick="setRef2TypeFilter(this,'top')">
+      <i class="fas fa-star" style="color:#FFD700"></i> Top Earners <span class="fopt-check"><i class="fas fa-check"></i></span>
+    </div>
+    <div class="ref2-filter-opt" data-val="inactive" onclick="setRef2TypeFilter(this,'inactive')">
+      <i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive Only <span class="fopt-check"><i class="fas fa-check"></i></span>
+    </div>
+  </div>
+
+  <!-- Friends list -->
+  <div id="ref2-cont-friends">
+    <div class="ref2-filters-row">
+      <div class="ref2-filter-btn" id="ref2TypeFilterBtn" onclick="toggleRef2Dropdown('type')">
+        <i class="fas fa-filter"></i>
+        <span id="ref2TypeLabel">All Referrals</span>
+        <i class="fas fa-chevron-down" style="margin-left:auto;font-size:8px;color:rgba(255,255,255,.4)"></i>
+      </div>
+    </div>
+    <div class="ref2-list-card">
+      <div id="ref2FriendsList"><div class="ref2-empty">No referrals yet</div></div>
+    </div>
+  </div>
+
+  <!-- Missions sub -->
+  <div id="ref2-cont-missions" style="display:none;margin:0 11px">
+    <div style="background:rgba(199,125,255,.07);border:1px solid rgba(199,125,255,.2);border-radius:12px;padding:14px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">🎯</div>
+      <div style="font-size:15px;font-weight:800;color:#C77DFF;margin-bottom:6px">إحصائيات الإحالات</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.6">
+        ادعُ أصدقاءك واحصل على <strong style="color:#C77DFF">10%</strong> من كل إيداع يقومون به.<br>
+        الصديق النشط = من قام بالإيداع.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BOTTOM NAV ════ -->
+<nav class="bnav">
+  <div class="ni active" data-s="sectionFinance" onclick="goNav(this)">
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+    </div>
+    <div class="ni-lbl">Finance</div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────
+const SERVER_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
+const BOT_APP_LINK= 'https://t.me/RaseenRacingBot/app'; // غير هذا لرابط البوت الحقيقي
+const DEPOSIT_ADDR= 'UQDrVUxBI9tGFmJq0FtR4GpR13BD2_m7X83Vho7EDxDW1EYu'; // محفظة الإيداع
+
+// ─── STATE ─────────────────────────────────────────────────────
+const S = {
+  tg: null, initData:'', userId:'', user: null,
+  refs: [], wdHist: [], depHist: [], config: null,
+  _dataLoaded: false, _initialized: false,
+};
+
+// ─── UTILS ─────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+let _notifTimer;
+function showNotif(msg, type='i'){
+  const el = document.getElementById('notifBar');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'show';
+  clearTimeout(_notifTimer);
+  _notifTimer = setTimeout(()=>el.classList.remove('show'), 3500);
+}
+
+const _debMap = {};
+function debounce(k, ms=1200){
+  const now = Date.now();
+  if (_debMap[k] && now - _debMap[k] < ms) return false;
+  _debMap[k] = now; return true;
+}
+
+// ─── LOADING ───────────────────────────────────────────────────
+let _ldPct = 0;
+function setLdPct(pct, text){
+  _ldPct = pct;
+  document.getElementById('ldPct').textContent = Math.round(pct)+'%';
+  if (text) document.getElementById('ldText').textContent = text;
+  const segs = document.querySelectorAll('#ldSegs .seg');
+  const filled = Math.round(pct / 10);
+  segs.forEach((s,i) => s.classList.toggle('active', i < filled));
+}
+function hideLoading(){
+  const el = document.getElementById('loadingScreen');
+  if (el){ el.classList.add('hidden'); setTimeout(()=>el.remove(),700); }
+}
+
+// ─── API ───────────────────────────────────────────────────────
+async function api(action, data={}){
+  const auth = S.initData ? `Telegram ${S.initData}` : '';
+  const resp = await fetch(`${SERVER_URL}/api`, {
+    method: 'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':auth, 'X-Action':action },
+    body: JSON.stringify({ action, data }),
+  });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const json = await resp.json();
+  if (!json.success){
+    const err = new Error(json.error || 'API error');
+    err.errorCode = json.errorCode || '';
+    throw err;
+  }
+  return json.data;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────────
+function goNav(el){
+  const psp = document.getElementById('profileSubPage');
+  if (psp && psp.style.display !== 'none') psp.style.display = 'none';
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(el.dataset.s).classList.add('active');
+  if(el.dataset.s==='sectionFinance') syncFinanceHeader();
+}
+
+// ─── PROFILE SUB-PAGES ─────────────────────────────────────────
+const PAGE_CONFIG = {
+  deposit:  { title:'💰 Deposit',         icon:'💰', pspHero:'', titleText:'Deposit TON' },
+  withdraw: { title:'📤 Withdraw',        icon:'📤', titleText:'Withdraw TON' },
+  referrals:{ title:'👥 Referrals',       icon:'👥', titleText:'Referrals' },
+};
+
+function openProfilePage(page){
+  const psp = document.getElementById('profileSubPage');
+  psp.setAttribute('data-page', page);
+  psp.style.display = 'block';
+  psp.scrollTop = 0;
+
+  // Set title
+  const titleEl = document.getElementById('pspTitle');
+  const cfg = PAGE_CONFIG[page] || {};
+  if (titleEl) titleEl.textContent = cfg.titleText || page;
+
+  // Sync user info in hero
+  const u = S.user || {};
+  const pspAv = document.getElementById('pspAvatar');
+  const pspUn = document.getElementById('pspUserName');
+  const pspBv = document.getElementById('pspBalVal');
+  if (pspAv && u.photoUrl) pspAv.innerHTML = `<img src="${esc(u.photoUrl)}" onerror="this.parentElement.innerHTML='🏍️'">`;
+  if (pspUn) pspUn.textContent = u.firstName || 'Player';
+  if (pspBv) pspBv.textContent = (u.tonBalance||0).toFixed(4);
+  // Sync wdTonBal for withdraw max button
+  const wdBal = document.getElementById('wdTonBal');
+  if (wdBal) wdBal.textContent = (u.tonBalance||0).toFixed(4);
+
+  // Load page content
+  const body = document.getElementById('pspBody');
+  const tpl  = document.getElementById(`page-${page}-content`);
+  if (body && tpl) body.innerHTML = tpl.innerHTML;
+
+  // Re-attach events after innerHTML copy
+  if (page === 'deposit'){
+    const depBtn = body.querySelector('#submitDepositBtn');
+    if (depBtn) depBtn.onclick = initiateDeposit;
+    const connBtn = body.querySelector('#connectWalletBtn');
+    if (connBtn) connBtn.onclick = connectWallet;
+    // Fill manual comment ID
+    const cId = body.querySelector('#manualCommentId');
+    if (cId) cId.value = S.userId || '';
+    // Fill manual wallet addr
+    const mw = body.querySelector('#manualWalletAddr');
+    if (mw) mw.value = DEPOSIT_ADDR;
+    // Update wallet status
+    updateWalletDisplayInBody(body);
+  }
+  if (page === 'withdraw'){
+    const wdAmtInp = body.querySelector('#wdAmtInput');
+    if (wdAmtInp) wdAmtInp.oninput = updateWdFeePreview;
+    const wdBtn = body.querySelector('#wdBtn');
+    if (wdBtn) wdBtn.onclick = doWithdraw;
+    const wdTb = body.querySelector('#wdTonBal');
+    if (wdTb) wdTb.textContent = (u.tonBalance||0).toFixed(4);
+    renderWdHistNew(body);
+  }
+  if (page === 'referrals'){
+    updateRef2Stats();
+    renderRef2List();
+    const linkInp = body.querySelector('#refLinkInp');
+    if (linkInp) linkInp.value = `${BOT_APP_LINK}?startapp=${encodeURIComponent(S.userId||'000')}`;
+  }
+}
+
+function closeProfilePage(){
+  const psp = document.getElementById('profileSubPage');
+  if (psp) psp.style.display = 'none';
+}
+
+// ─── SYNC FINANCE HEADER ────────────────────────────────────────
+function syncFinanceHeader(){
+  const u = S.user || {};
+  const el = document.getElementById('finTonBal');
+  if (el) el.textContent = (u.tonBalance||0).toFixed(4);
+  const avEl = document.getElementById('pfAvatar');
+  if (avEl && u.photoUrl) avEl.innerHTML = `<img src="${u.photoUrl}" onerror="this.parentElement.innerHTML='🏍️'">`;
+  const nameEl = document.getElementById('pfUserName');
+  if (nameEl) nameEl.textContent = u.firstName || 'Player';
+  const handleEl = document.getElementById('pfUserHandle');
+  if (handleEl) handleEl.textContent = u.username ? `@${u.username}` : '';
+  // Also sync sub-page balance
+  const pspBv = document.getElementById('pspBalVal');
+  if (pspBv) pspBv.textContent = (u.tonBalance||0).toFixed(4);
+}
+
+// ─── DEPOSIT ────────────────────────────────────────────────────
+let _walletConnected = false;
+let _walletAddr = '';
+let _tonConnect = null;
+
+async function initTonConnect(){
+  try {
+    _tonConnect = new TonConnectUI({
+      manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
+    });
+    _tonConnect.onStatusChange(wallet => {
+      if (wallet) {
+        _walletConnected = true;
+        _walletAddr = wallet.account.address;
+        updateWalletDisplayInBody(document.getElementById('pspBody'));
+        const depBtn = document.querySelector('#pspBody #submitDepositBtn');
+        if (depBtn) depBtn.disabled = false;
+      } else {
+        _walletConnected = false;
+        _walletAddr = '';
+        updateWalletDisplayInBody(document.getElementById('pspBody'));
+        const depBtn = document.querySelector('#pspBody #submitDepositBtn');
+        if (depBtn) depBtn.disabled = true;
+      }
+    });
+  } catch(e){ console.warn('TonConnect init failed:', e.message); }
+}
+
+function updateWalletDisplayInBody(container){
+  const disp = container?.querySelector?.('#walletAddressDisplay') || document.getElementById('walletAddressDisplay');
+  const btn  = container?.querySelector?.('#connectWalletBtn')     || document.getElementById('connectWalletBtn');
+  const lbl  = container?.querySelector?.('#connBtnLabel')         || document.getElementById('connBtnLabel');
+  if (!disp) return;
+  if (_walletConnected && _walletAddr){
+    const short = _walletAddr.slice(0,6)+'...'+_walletAddr.slice(-4);
+    disp.innerHTML = `<span class="conn-dot"></span><span class="conn-lbl">Connected</span> ${short}`;
+    disp.classList.add('is-connected');
+    if (btn){ btn.classList.add('is-disconnect'); }
+    if (lbl) lbl.textContent = 'Disconnect';
+  } else {
+    disp.innerHTML = `Not connected<span class="conn-dot"></span><span class="conn-lbl">Connected</span>`;
+    disp.classList.remove('is-connected');
+    if (btn){ btn.classList.remove('is-disconnect'); }
+    if (lbl) lbl.textContent = 'Connect';
+  }
+}
+
+async function connectWallet(){
+  if (_walletConnected && _tonConnect){
+    try{ await _tonConnect.disconnect(); } catch(e){}
+    _walletConnected = false; _walletAddr = '';
+    updateWalletDisplayInBody(document.getElementById('pspBody'));
+    return;
+  }
+  if (_tonConnect){
+    try{ await _tonConnect.openModal(); }
+    catch(e){ showNotif('❌ '+e.message,'e'); }
+  } else {
+    showNotif('⚠️ TonConnect not available','w');
+  }
+}
+
+function setDepAmt(n){
+  const el = document.getElementById('depositAmountInput') || document.querySelector('#pspBody #depositAmountInput');
+  if (el) el.value = n;
+}
+
+async function initiateDeposit(){
+  const body = document.getElementById('pspBody');
+  const amtEl   = body?.querySelector('#depositAmountInput') || document.getElementById('depositAmountInput');
+  const statEl  = body?.querySelector('#depositStatus')      || document.getElementById('depositStatus');
+  const detEl   = body?.querySelector('#depositStatusDetail')|| document.getElementById('depositStatusDetail');
+  const btn     = body?.querySelector('#submitDepositBtn')   || document.getElementById('submitDepositBtn');
+
+  const amt = parseFloat(amtEl?.value) || 0;
+  if (amt < 1){ showNotif('❌ Minimum 1 TON','e'); return; }
+  if (!_walletConnected){ showNotif('❌ Connect your wallet first','e'); return; }
+  if (!debounce('dep')) return;
+
+  if (statEl) statEl.classList.add('visible');
+  if (detEl) detEl.textContent = 'Please confirm in your wallet...';
+  if (btn){ btn.disabled = true; btn.textContent = '⏳ Processing...'; }
+
+  try {
+    // Send TON via TonConnect
+    const tx = {
+      validUntil: Math.floor(Date.now()/1000) + 300,
+      messages:[{
+        address: DEPOSIT_ADDR,
+        amount: String(Math.round(amt * 1e9)),
+        payload: '', // optional comment
+      }],
+    };
+    const result = await _tonConnect.sendTransaction(tx);
+    const txHash = result?.boc || `manual_${Date.now()}`;
+
+    if (detEl) detEl.textContent = 'Registering transaction...';
+
+    // Register with server
+    await api('deposit', { txHash, amount: amt });
+    showNotif('✅ Deposit registered! Will be confirmed shortly.','s');
+    if (statEl){ statEl.classList.remove('visible'); }
+    if (amtEl) amtEl.value = '';
+    setTimeout(loadState, 3000);
+  } catch(e){
+    if (statEl) statEl.classList.remove('visible');
+    showNotif('❌ '+(e.message||'Deposit failed'),'e');
+  } finally {
+    if (btn){ btn.disabled = false; btn.innerHTML = '<i class="fas fa-arrow-down"></i> Deposit TON'; }
+  }
+}
+
+function copyText(id){
+  const el = document.getElementById(id) || document.querySelector('#pspBody #'+id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.value).then(()=>showNotif('✅ Copied!','s')).catch(()=>showNotif('❌ Copy failed','e'));
+}
+
+// ─── WITHDRAW ───────────────────────────────────────────────────
+function updateWdFeePreview(){
+  const amtEl    = document.querySelector('#pspBody #wdAmtInput') || document.getElementById('wdAmtInput');
+  const preview  = document.querySelector('#pspBody #wdFeePreview') || document.getElementById('wdFeePreview');
+  const feeEl    = document.querySelector('#pspBody #wdFeeAmt')    || document.getElementById('wdFeeAmt');
+  const netEl    = document.querySelector('#pspBody #wdNetAmt')    || document.getElementById('wdNetAmt');
+  if (!preview||!feeEl||!netEl) return;
+  const amt = parseFloat(amtEl?.value)||0;
+  if (amt >= 0.1){
+    const fee = +(amt*0.1).toFixed(8);
+    const net = +(amt-fee).toFixed(8);
+    feeEl.textContent = `-${fee.toFixed(4)} TON`;
+    netEl.textContent = `${net.toFixed(4)} TON`;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+async function doWithdraw(){
+  const body    = document.getElementById('pspBody');
+  const addrEl  = body?.querySelector('#wdAddrInput') || document.getElementById('wdAddrInput');
+  const amtEl   = body?.querySelector('#wdAmtInput')  || document.getElementById('wdAmtInput');
+  const errEl   = body?.querySelector('#wdErrBanner') || document.getElementById('wdErrBanner');
+  const btn     = body?.querySelector('#wdBtn')       || document.getElementById('wdBtn');
+
+  const addr = (addrEl?.value||'').trim();
+  const amt  = parseFloat(amtEl?.value)||0;
+  const tonBal = S.user?.tonBalance||0;
+
+  if (!addr || addr.length < 10){ showNotif('❌ Enter a valid TON address','e'); return; }
+  if (amt < 0.1){ showNotif('❌ Minimum 0.1 TON','e'); return; }
+  if (amt > tonBal){ showNotif('❌ Not enough TON balance','e'); return; }
+  if (!debounce('withdraw')) return;
+
+  if (btn){ btn.disabled = true; btn.querySelector('span').textContent = '⏳ Processing...'; }
+  if (errEl){ errEl.classList.remove('show'); errEl.textContent = ''; }
+
+  try {
+    const res = await api('withdraw', { address:addr, amount:amt });
+    S.user.tonBalance = res.tonBalance;
+    const feeAmt = +(amt*0.1).toFixed(8);
+    const netAmt = +(amt-feeAmt).toFixed(8);
+    syncFinanceHeader();
+    if (addrEl) addrEl.value = '';
+    if (amtEl) amtEl.value = '';
+    const fp = document.querySelector('#pspBody #wdFeePreview') || document.getElementById('wdFeePreview');
+    if (fp) fp.style.display = 'none';
+    renderWdHistNew(body);
+    showNotif(`✅ طلب سحب ${amt} TON — ستستلم: ${netAmt} TON`,'s');
+    setTimeout(loadState, 2000);
+  } catch(e){
+    const msg = e.message || '';
+    const errCode = e.errorCode || '';
+    if (errCode==='WALLET_USED'||msg.includes('WALLET_USED')){
+      showNotif('⚠️ This wallet is already linked to another account.','e');
+    } else {
+      showNotif('❌ '+msg,'e');
+    }
+    if (errEl && msg){ errEl.textContent = '❌ '+msg; errEl.classList.add('show'); }
+  } finally {
+    if (btn){ btn.disabled = false; btn.querySelector('span').textContent = 'Request Withdrawal'; }
+  }
+}
+
+function renderWdHistNew(container){
+  container = container || document.getElementById('pspBody');
+  const listEl = container?.querySelector('#wdHistList') || document.getElementById('wdHistList');
+  if (!listEl) return;
+  const hist = S.wdHist || [];
+  if (!hist.length){ listEl.innerHTML = '<div class="hist-empty">No withdrawals yet</div>'; return; }
+  const TON_ICON = `<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">`;
+  listEl.innerHTML = hist.map(w=>{
+    const statusMap = { pending:'pending', approved:'approved', rejected:'rejected' };
+    const st = statusMap[w.status] || 'pending';
+    const stLabel = { pending:'⏳ Pending', approved:'✅ Approved', rejected:'❌ Rejected' }[w.status] || w.status;
+    return `
+      <div class="wd-new-hist-row">
+        <div class="wd-new-hist-icon">${TON_ICON}</div>
+        <div class="wd-new-hist-info">
+          <div class="wd-new-hist-addr">${esc((w.address||'').slice(0,20)+'...')}</div>
+          <div class="wd-new-hist-date">${w.ts?new Date(w.ts).toLocaleDateString():'—'}</div>
+        </div>
+        <div class="wd-new-hist-right">
+          <div class="wd-new-hist-amt">${w.amt||w.amtRequested} TON</div>
+          <div class="stat-badge-new ${st}">${stLabel}</div>
+        </div>
+      </div>`;
   }).join('');
 }
-function copyRefLink() {
-  const val = document.getElementById('refLinkInp')?.value;
-  if (!val) return;
-  navigator.clipboard.writeText(val)
-    .then(() => toast('تم نسخ رابط الإحالة!', 'success'))
-    .catch(() => toast('تعذر النسخ', 'error'));
+
+// ─── REFERRALS ─────────────────────────────────────────────────
+window._ref2TypeFilter = 'all';
+
+function switchRef2Tab(el, tab){
+  document.querySelectorAll('.ref2-stab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  const fc = document.getElementById('ref2-cont-friends')  || document.querySelector('#pspBody #ref2-cont-friends');
+  const mc = document.getElementById('ref2-cont-missions') || document.querySelector('#pspBody #ref2-cont-missions');
+  if (fc) fc.style.display = tab==='friends'  ? 'block' : 'none';
+  if (mc) mc.style.display = tab==='missions' ? 'block' : 'none';
 }
-function shareRefLink() {
-  const val = document.getElementById('refLinkInp')?.value;
-  if (!val) return;
-  const text = `🎮 انضم إلى RASEEN!\n\nاستثمر واكسب TON مباشرة!\n${val}`;
-  const tg = window.Telegram?.WebApp;
-  if (tg?.openTelegramLink) {
-    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(val)}&text=${encodeURIComponent(text)}`);
-  } else if (navigator.share) {
-    navigator.share({ title: 'RASEEN', text, url: val });
-  } else {
-    copyRefLink();
+
+function toggleRef2Dropdown(which){
+  event.stopPropagation();
+  const typeD = document.getElementById('ref2TypeDropdown') || document.querySelector('#pspBody #ref2TypeDropdown');
+  const typeBtn = document.getElementById('ref2TypeFilterBtn') || document.querySelector('#pspBody #ref2TypeFilterBtn');
+  if (which==='type' && typeD && typeBtn){
+    const open = typeD.classList.contains('open');
+    if (!open){
+      const rect = typeBtn.getBoundingClientRect();
+      typeD.style.top  = (rect.bottom+5)+'px';
+      typeD.style.left = rect.left+'px';
+      typeD.style.width= rect.width+'px';
+      typeD.style.display='block'; typeD.classList.add('open');
+    } else { typeD.style.display='none'; typeD.classList.remove('open'); }
   }
 }
-/* ════════════════════════════════════════════
-   REFRESH STATE
-════════════════════════════════════════════ */
-async function refreshState() {
+
+document.addEventListener('click', ()=>{
+  const d = document.getElementById('ref2TypeDropdown');
+  if (d){ d.classList.remove('open'); d.style.display='none'; }
+});
+
+function setRef2TypeFilter(el, val){
+  event.stopPropagation();
+  window._ref2TypeFilter = val;
+  document.querySelectorAll('#ref2TypeDropdown .ref2-filter-opt').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  const lbl = document.getElementById('ref2TypeLabel') || document.querySelector('#pspBody #ref2TypeLabel');
+  if (lbl) lbl.textContent = el.innerText.replace('✓','').trim().split('\n')[0].trim();
+  const d = document.getElementById('ref2TypeDropdown');
+  if (d){ d.classList.remove('open'); d.style.display='none'; }
+  renderRef2List();
+}
+
+function renderRef2List(){
+  const listEl = document.getElementById('ref2FriendsList') || document.querySelector('#pspBody #ref2FriendsList');
+  if (!listEl) return;
+  const TON_ICON = `<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:15px;height:15px;border-radius:50%;object-fit:cover">`;
+  let refs = S.refs || [];
+  if (window._ref2TypeFilter==='active')   refs = refs.filter(r=>r.hasDeposited);
+  else if (window._ref2TypeFilter==='inactive') refs = refs.filter(r=>!r.hasDeposited);
+  else if (window._ref2TypeFilter==='top')  refs = [...refs].sort((a,b)=>(b.earned||0)-(a.earned||0));
+  if (!refs.length){ listEl.innerHTML = '<div class="ref2-empty">No referrals found</div>'; return; }
+  listEl.innerHTML = refs.slice(0,50).map(r=>`
+    <div class="ref2-list-item">
+      <div class="ref2-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='👤'">` :'👤'}</div>
+      <div class="ref2-li-info">
+        <div class="ref2-li-name">${esc(r.name||'Friend')}</div>
+        <div class="ref2-li-date">${esc(r.date||'Joined recently')}</div>
+      </div>
+      <div class="ref2-li-earn">+${(parseFloat(r.earned||0)).toFixed(4)} ${TON_ICON}</div>
+    </div>`).join('');
+}
+
+function updateRef2Stats(){
+  const refs = S.refs || [];
+  const total    = refs.length;
+  const active   = refs.filter(r=>r.hasDeposited).length;
+  const inactive = total - active;
+  const totalEarned = refs.reduce((s,r)=>s+(r.earned||0), 0);
+  ['ref2TotalCount','ref2ActiveCount','ref2InactiveCount','ref2TotalEarned'].forEach(id=>{
+    const el = document.getElementById(id) || document.querySelector('#pspBody #'+id);
+    if (!el) return;
+    if (id==='ref2TotalCount')   el.textContent = total;
+    if (id==='ref2ActiveCount')  el.textContent = active;
+    if (id==='ref2InactiveCount')el.textContent = inactive;
+    if (id==='ref2TotalEarned')  el.textContent = totalEarned.toFixed(4);
+  });
+  // Link
+  const linkInp = document.getElementById('refLinkInp') || document.querySelector('#pspBody #refLinkInp');
+  if (linkInp) linkInp.value = `${BOT_APP_LINK}?startapp=${encodeURIComponent(S.userId||'000')}`;
+  // Bonus pct
+  const pctEl = document.getElementById('refBonusPctDisp') || document.querySelector('#pspBody #refBonusPctDisp');
+  if (pctEl) pctEl.textContent = (S.config?.refBonusPct||10)+'%';
+}
+
+function copyRefLink(){
+  const el = document.getElementById('refLinkInp') || document.querySelector('#pspBody #refLinkInp');
+  const val = el?.value || '';
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(()=>showNotif('✅ Referral link copied!','s')).catch(()=>showNotif('❌ Copy failed','e'));
+}
+
+// ─── LOAD STATE ─────────────────────────────────────────────────
+async function loadState(){
   try {
-    const stateData = await api('getState', {});
-    S.user       = stateData.user;
-    S.config     = stateData.config;
-    S.referrals  = stateData.referrals || [];
-    S.wdHistory  = stateData.wdHistory || [];
-    S.depHistory = stateData.depHistory || [];
-    renderAll();
-  } catch (err) {
-    console.error('[RASEEN] Refresh error:', err);
+    const d = await api('getState', { _startParam: S.startParam||'' });
+    S.user    = d.user    || S.user;
+    S.refs    = d.referrals || [];
+    S.wdHist  = d.wdHistory  || [];
+    S.depHist = d.depHistory || [];
+    S.config  = d.config || null;
+    S._dataLoaded = true;
+    syncFinanceHeader();
+    // If sub-page is open, refresh it
+    const psp = document.getElementById('profileSubPage');
+    if (psp && psp.style.display !== 'none'){
+      const page = psp.getAttribute('data-page');
+      if (page === 'withdraw'){ const wdTb = document.querySelector('#pspBody #wdTonBal'); if (wdTb) wdTb.textContent=(S.user?.tonBalance||0).toFixed(4); renderWdHistNew(); }
+      if (page === 'referrals'){ updateRef2Stats(); renderRef2List(); }
+    }
+  } catch(e){ console.warn('loadState:', e.message); }
+}
+
+// ─── INIT ───────────────────────────────────────────────────────
+async function init(){
+  // Telegram WebApp
+  const tg = window.Telegram?.WebApp;
+  S.tg = tg;
+  if (tg){
+    tg.ready(); tg.expand();
+    tg.setHeaderColor('#000000');
+    tg.setBackgroundColor('#000000');
+    S.initData  = tg.initData || '';
+    S.startParam= tg.initDataUnsafe?.start_param || '';
+    const u = tg.initDataUnsafe?.user;
+    if (u){ S.userId = String(u.id); }
   }
+  if (!S.initData){ S.initData = 'dev_mode'; S.userId = '999999999'; }
+
+  setLdPct(20, 'Connecting...');
+
+  // Init TonConnect in background
+  initTonConnect().catch(()=>{});
+
+  setLdPct(45, 'Loading account...');
+  try {
+    const d = await api('getState', { _startParam: S.startParam||'' });
+    S.user    = d.user || {};
+    S.refs    = d.referrals || [];
+    S.wdHist  = d.wdHistory  || [];
+    S.depHist = d.depHistory || [];
+    S.config  = d.config || null;
+    if (!S.userId && S.user.referralCode) S.userId = String(S.user.referralCode);
+    S._dataLoaded = true;
+    setLdPct(90, 'Ready!');
+    syncFinanceHeader();
+    setTimeout(hideLoading, 500);
+  } catch(e){
+    console.error('Init error:', e);
+    setLdPct(100, 'Error connecting...');
+    setTimeout(()=>{
+      hideLoading();
+      showNotif('⚠️ Connection error. Check your network.','e');
+    }, 800);
+  }
+
+  S._initialized = true;
+  // Auto-refresh every 60s
+  setInterval(loadState, 60000);
 }
-/* ════════════════════════════════════════════
-   HELPERS
-════════════════════════════════════════════ */
-function statusBadge(status) {
-  const map = { pending:'badge pending', approved:'badge approved', completed:'badge approved', rejected:'badge rejected', cancelled:'badge rejected' };
-  return map[status] || 'badge pending';
-}
-function statusLabel(status) {
-  const map = { pending:'قيد المراجعة', approved:'موافق عليه', completed:'مكتمل', rejected:'مرفوض', cancelled:'ملغي' };
-  return map[status] || status || '—';
-}
-function formatDate(ts) {
-  if (!ts) return '—';
-  return new Date(ts).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-}
-function escHtml(str) {
-  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function setLoading(btn, loading, normalHtml) {
-  if (!btn) return;
-  btn.disabled = loading;
-  if (loading) btn.innerHTML = '<span class="spin">⟳</span> جارٍ المعالجة...';
-  else btn.innerHTML = normalHtml;
-}
-/* ════════════════════════════════════════════
-   BOOT
-════════════════════════════════════════════ */
+
 window.addEventListener('load', init);
 </script>
 </body>
