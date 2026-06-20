@@ -3,10 +3,210 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RASEEN</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SHIB App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0a0a0a;--bg2:#111;--glass:rgba(255,255,255,.04);--glass-border:rgba(255,255,255,.08);--orange:#ff7a18;--orange2:#ff9d3f;--orange-dim:rgba(255,122,24,.15);--orange-glow:rgba(255,122,24,.35);--text:#fff;--muted:#8a8a8a;--green:#22c55e;--green-dim:rgba(34,197,94,.15);--red:#ef4444;--blue:#3b82f6;--radius:20px;--radius-sm:14px;--radius-xs:10px;--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;height:100%;overflow:hidden;font-size:14px;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(ellipse at 50% 0%,#1a0f08 0%,#0a0a0a 50%)fixed}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px calc(100px + var(--safe-bottom));scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.glass{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius)}
+.btn{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border:none;border-radius:var(--radius-sm);padding:16px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;box-shadow:0 8px 24px var(--orange-glow);transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn-ghost{background:var(--glass);border:1px solid var(--glass-border);box-shadow:none}
+.btn-sm{padding:10px 16px;font-size:13px;width:auto;border-radius:var(--radius-xs);box-shadow:none}
+.btn-outline{background:0 0;border:1.5px solid var(--orange);color:var(--orange);box-shadow:none}
+.topbar{display:flex;align-items:center;gap:12px;padding:16px 16px 0;flex-shrink:0;z-index:10}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 12px var(--orange-glow)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.topbar .greet{font-size:11px;color:var(--muted);letter-spacing:.5px}
+.topbar .name{font-size:16px;font-weight:700;color:var(--orange)}
+.balance-card{padding:28px 24px;text-align:center;margin-top:16px;position:relative;overflow:hidden}
+.balance-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,var(--orange-glow),transparent 60%);pointer-events:none}
+.balance-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.balance-amount{font-size:42px;font-weight:800;letter-spacing:-1px;display:flex;justify-content:center;align-items:baseline;gap:8px;line-height:1.1}
+.balance-amount .coin-icon{font-size:32px}
+.balance-amount .currency{font-size:14px;color:var(--orange);font-weight:600;letter-spacing:1px}
+.balance-change{font-size:12px;color:var(--green);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.stat{padding:16px 10px;text-align:center;border-radius:var(--radius-sm)}
+.stat .stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:500}
+.stat .stat-value{font-size:18px;font-weight:700;color:var(--orange)}
+.invite-banner{display:flex;align-items:center;gap:14px;padding:16px;margin-top:14px;background:linear-gradient(135deg,var(--orange),#e06b10);border-radius:var(--radius);color:#fff;cursor:pointer;box-shadow:0 10px 30px var(--orange-glow);transition:transform .2s;position:relative;overflow:hidden}
+.invite-banner:active{transform:scale(.98)}
+.invite-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.1));pointer-events:none}
+.invite-banner .invite-icon{width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.invite-banner .invite-title{font-size:16px;font-weight:700}
+.invite-banner .invite-sub{font-size:12px;opacity:.9;margin-top:2px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin:22px 4px 12px}
+.section-header .section-title{font-size:15px;font-weight:700}
+.reward-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--radius-sm)}
+.reward-row .reward-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.reward-dot.green{background:var(--green-dim);color:var(--green)}
+.reward-dot.orange{background:var(--orange-dim);color:var(--orange)}
+.reward-dot.blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.reward-row .reward-info{flex:1}
+.reward-row .reward-title{font-size:13px;font-weight:600}
+.reward-row .reward-time{font-size:11px;color:var(--muted);margin-top:2px}
+.reward-row .reward-amount{color:var(--green);font-weight:700;font-size:13px;white-space:nowrap}
+.promo-banner{display:flex;align-items:center;gap:14px;padding:18px;margin-top:14px;background:linear-gradient(135deg,#1a0f08,#0a0a0a);border:1px solid var(--glass-border);border-radius:var(--radius)}
+.promo-banner .promo-icon{font-size:40px}
+.promo-banner .promo-content{flex:1}
+.promo-banner .promo-title{font-size:15px;font-weight:700;color:var(--orange);margin-bottom:4px}
+.promo-banner .promo-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.promo-banner .btn{margin-top:10px}
+.tabs{display:flex;gap:6px;padding:6px;margin:14px 0;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm)}
+.tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);border-radius:var(--radius-xs);cursor:pointer;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;box-shadow:0 4px 14px var(--orange-glow)}
+.task-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--radius-sm)}
+.task-row .task-icon{width:42px;height:42px;border-radius:var(--radius-xs);background:var(--orange-dim);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.task-row .task-info{flex:1;min-width:0}
+.task-row .task-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-row .task-reward{font-size:12px;color:var(--orange);margin-top:2px}
+.task-row .task-action{margin-left:auto;flex-shrink:0}
+.task-done-icon{color:var(--green);font-size:20px;font-weight:700}
+.combo-card{padding:20px;margin-bottom:14px;border-radius:var(--radius)}
+.combo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.combo-header .combo-title{font-size:16px;font-weight:700}
+.combo-header .combo-timer{background:linear-gradient(135deg,var(--orange),var(--orange2));padding:6px 12px;border-radius:var(--radius-xs);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.combo-desc{text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.4}
+.combo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.combo-slot{aspect-ratio:1;background:var(--glass);border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted2,#555);cursor:pointer;transition:all .2s;user-select:none}
+.combo-slot.selected{border-color:var(--orange);background:var(--orange-dim);color:var(--orange);box-shadow:0 0 20px var(--orange-glow)}
+.ref-banner{padding:28px 20px;text-align:center;margin-bottom:14px;border-radius:var(--radius);position:relative;overflow:hidden}
+.ref-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--orange-glow),transparent 60%);pointer-events:none}
+.ref-banner .ref-icon{font-size:54px;margin-bottom:8px;position:relative}
+.ref-banner .ref-text{font-size:15px;font-weight:600;position:relative;line-height:1.5}
+.ref-banner .ref-text b{color:var(--orange)}
+.ref-link-box{padding:14px;margin-top:16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);position:relative}
+.ref-link-box .ref-link-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:8px;font-weight:500}
+.ref-link-box .ref-link-row{display:flex;gap:8px;align-items:center}
+.ref-link-box input{flex:1;background:0 0;border:none;color:#fff;font-size:12px;font-family:inherit;outline:none;padding:4px}
+.ref-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:var(--radius-sm)}
+.ref-row .ref-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#555,#333);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;overflow:hidden;flex-shrink:0}
+.ref-row .ref-avatar img{width:100%;height:100%;object-fit:cover}
+.ref-row .ref-name{font-size:13px;font-weight:600}
+.ref-row .ref-date{font-size:11px;color:var(--muted);margin-top:1px}
+.ref-row .ref-earned{margin-left:auto;color:var(--orange);font-weight:700;font-size:13px;text-align:right;white-space:nowrap}
+.ref-row .ref-earned small{font-size:10px;color:var(--muted);font-weight:500}
+.nav{display:flex;background:rgba(10,10,10,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--glass-border);position:absolute;bottom:0;left:0;right:0;padding:8px 0 calc(8px + var(--safe-bottom));z-index:50}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:600;transition:color .2s;user-select:none}
+.nav-item.active{color:var(--orange)}
+.nav-icon{width:24px;height:24px}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 8px var(--orange-glow))}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:100;animation:fadeIn .2s}
+.modal-sheet{width:100%;max-width:480px;background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px calc(24px + var(--safe-bottom));border-top:1px solid var(--glass-border);animation:slideUp .25s ease;max-height:85vh;overflow-y:auto}
+.modal-sheet h3{font-size:18px;margin-bottom:16px;font-weight:700}
+.modal-sheet label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
+.modal-sheet input,.modal-sheet select,.modal-sheet textarea{width:100%;background:var(--glass);border:1px solid var(--glass-border);color:#fff;padding:14px;border-radius:var(--radius-xs);font-size:14px;font-family:inherit;margin-bottom:12px;outline:none;transition:border-color .2s}
+.modal-sheet input:focus,.modal-sheet select:focus,.modal-sheet textarea:focus{border-color:var(--orange)}
+.modal-sheet .btn+.btn{margin-top:8px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--glass-border);color:var(--text);padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;z-index:200;animation:toastIn .25s;max-width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.success{border-color:var(--green)}
+.toast.error{border-color:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.empty-state{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+.empty-state .empty-icon{font-size:40px;margin-bottom:12px;display:block}
+.spinner{width:28px;height:28px;border:3px solid var(--glass);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-full{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000}
+.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;color:var(--red);font-size:14px;background:var(--bg);gap:16px}
+.error-screen .error-icon{font-size:48px}
+.error-screen .error-text{color:var(--muted);font-size:13px}
+.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wallet-action{padding:16px;text-align:center;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s}
+.wallet-action:active{transform:scale(.97)}
+.wallet-action .wa-icon{font-size:24px;margin-bottom:6px}
+.wallet-action .wa-label{font-size:12px;font-weight:600;color:var(--muted)}
+.promo-input-row{display:flex;gap:8px;margin-top:14px}
+.promo-input-row input{flex:1;background:var(--glass);border:1px solid var(--glass-border);color:#fff;padding:14px;border-radius:var(--radius-xs);font-size:14px;font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:2px}
+.promo-input-row input:focus{border-color:var(--orange)}
+.promo-input-row .btn{width:auto;padding:14px 20px}
+.load-more{text-align:center;padding:16px;color:var(--muted);font-size:12px;cursor:pointer}
+.load-more:hover{color:var(--orange)}
+.tx-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--radius-sm)}
+.tx-row .tx-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tx-row .tx-icon.out{background:rgba(239,68,68,.15);color:var(--red)}
+.tx-row .tx-icon.in{background:var(--green-dim);color:var(--green)}
+.tx-row .tx-info{flex:1}
+.tx-row .tx-title{font-size:13px;font-weight:600}
+.tx-row .tx-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.tx-row .tx-amount{font-weight:700;font-size:13px}
+.tx-row .tx-amount.out{color:var(--red)}
+.tx-row .tx-amount.in{color:var(--green)}
+</style>
 </head>
 <body>
-<div id="app"></div>
-<script src="app.min.js"></script>
+<div id="app">
+<div id="loader" class="loader-full"><div class="spinner"></div></div>
+<div id="root" style="display:none">
+<div class="topbar">
+<div class="avatar" id="hdrAvatar"></div>
+<div><div class="greet">Welcome back,</div><div class="name" id="hdrName">User</div></div>
+</div>
+<div class="scroll" id="scroll"></div>
+<div class="nav" id="bottomNav">
+<div class="nav-item active" data-view="home"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg><span>Home</span></div>
+<div class="nav-item" data-view="tasks"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><span>Tasks</span></div>
+<div class="nav-item" data-view="referrals"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Referrals</span></div>
+</div>
+</div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+</div>
+<script>
+(function(){
+var TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){try{TG.ready();TG.expand();TG.setHeaderColor('#0a0a0a');TG.setBackgroundColor('#0a0a0a')}catch(e){}}
+var BTN='YOUR_BOT_USERNAME',CN='SHIB',CI='🐕',tk=null,st={user:null,recent:[],tasks:[],config:{},refs:[],refsTotal:0,withdraws:[],combo:null,comboClaimed:false},vw='home',tab='channel',rp=0,cs=[null,null,null,null],cst=0;
+var CO=['🍎','🍊','🍋','🍇','🍓','🍒','🍑','🍌','🥝','🍍','🥥','🍈','🌽','🥕','🍄'];
+function di(){var c=localStorage.getItem('dev_fp');if(c)return c;var a=document.createElement('canvas'),x=a.getContext('2d');x.textBaseline='top';x.font='14px Arial';x.fillText('fp',2,2);var fp=[navigator.userAgent,navigator.language,screen.width+'x'+screen.height,new Date().getTimezoneOffset(),a.toDataURL().slice(-64)].join('|');localStorage.setItem('dev_fp',fp);return fp}
+async function api(a,d,m){var h={'Content-Type':'application/json'};if(tk)h['Authorization']='Bearer '+tk;var o={method:m||(d?'POST':'GET'),headers:h};if(d)o.body=JSON.stringify(d);var r=await fetch('/api/'+a,o),b=await r.json();if(!r.ok)throw{status:r.status,...b};return b}
+function $(s,p){return(p||document).querySelector(s)}
+function f(n){return(n||0).toLocaleString('en-US')}
+function ago(t){var s=Math.floor((Date.now()-t)/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+function dts(t){return new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function toast(msg,k){var e=document.createElement('div');e.className='toast '+(k||'');e.textContent=msg;$('#toastRoot').appendChild(e);setTimeout(function(){e.remove()},2500)}
+function cm(){$('#modalRoot').innerHTML=''}
+function modal(h){$('#modalRoot').innerHTML='<div class="modal-bg" id="mb"><div class="modal-sheet">'+h+'</div></div>';$('#mb').addEventListener('click',function(e){if(e.target.id==='mb')cm()})}
+function rl(){return'https://t.me/'+BTN+'?start='+(st.user?st.user.id:'')}
+function rh(){var u=st.user;if(!u)return;$('#hdrName').textContent=u.first_name||u.username||'User';var av=$('#hdrAvatar');if(u.photo_url){av.innerHTML='<img src="'+u.photo_url+'" alt="">'}else{av.textContent=(u.first_name||u.username||'U').charAt(0).toUpperCase()}}
+var RLB={daily_login:'Daily Login',referral:'Referral Reward',task:'Task Reward',daily_combo:'Daily Combo',promo:'Promo Code',admin_adjustment:'Admin Adjustment'};
+function frw(r){var l=RLB[r.reason]||'Reward',dc=r.reason==='referral'?'blue':r.reason==='task'?'orange':'green',ic=r.reason==='daily_login'?'📅':r.reason==='referral'?'👥':r.reason==='task'?'✅':r.reason==='daily_combo'?'🎯':r.reason==='promo'?'🎁':'💰';return'<div class="glass reward-row"><div class="reward-dot '+dc+'">'+ic+'</div><div class="reward-info"><div class="reward-title">'+l+'</div><div class="reward-time">'+ago(r.created_at)+'</div></div><div class="reward-amount">+'+f(r.amount)+'</div></div>'}
+function vh(){var u=st.user||{},cfg=st.config||{},rw=st.recent&&st.recent.length?st.recent.map(frw).join(''):'<div class="empty-state"><span class="empty-icon">🎯</span>Complete tasks to earn rewards!</div>';return'<div class="glass balance-card"><div class="balance-label">Your Balance</div><div class="balance-amount"><span class="coin-icon">'+CI+'</span>'+f(u.balance)+' <span class="currency">'+CN+'</span></div><div class="balance-change">&#9650; '+f(u.total_earned||0)+' total earned</div></div><div class="stats"><div class="glass stat"><div class="stat-label">Referrals</div><div class="stat-value">'+f(u.referrals_count)+'</div></div><div class="glass stat"><div class="stat-label">Active</div><div class="stat-value">'+f(u.active_referrals)+'</div></div><div class="glass stat"><div class="stat-label">Earned</div><div class="stat-value">'+f(u.total_earned)+'</div></div></div><div class="invite-banner" id="inviteBtn"><div class="invite-icon">✈️</div><div><div class="invite-title">Invite Friends</div><div class="invite-sub">Earn '+(cfg.referral_pct||25)+'% of their earnings</div></div></div><div class="section-header"><div class="section-title">Recent Rewards</div></div>'+rw+'<div class="promo-banner"><div class="promo-icon">🚀</div><div class="promo-content"><div class="promo-title">Big Rewards Await!</div><div class="promo-desc">Invite friends, complete tasks and earn huge rewards in '+CN+'!</div><button class="btn btn-sm" id="goTasks">Go</button></div></div><div class="section-header" style="margin-top:20px"><div class="section-title">Wallet</div></div><div class="wallet-actions"><div class="glass wallet-action" id="openDeposit"><div class="wa-icon">📥</div><div class="wa-label">Deposit</div></div><div class="glass wallet-action" id="openWithdraw"><div class="wa-icon">📤</div><div class="wa-label">Withdraw</div></div></div><div style="margin-top:14px"><div class="promo-input-row"><input id="promoInput" placeholder="Enter promo code" maxlength="20"><button class="btn btn-sm" id="redeemPromo">Redeem</button></div></div>'}
+function vt(){var fl=(st.tasks||[]).filter(function(t){if(tab==='channel')return t.type==='channel';if(tab==='bot')return t.type==='bot';if(tab==='invite')return t.type==='invite';return true});var te=st.combo&&!st.comboClaimed?'<div class="combo-header"><div class="combo-title">Daily Combo</div><span class="combo-timer" id="comboTimer">⏱ 23:59:59</span></div>':'';var cs_=st.combo&&!st.comboClaimed?st.combo.slots.map(function(s,i){return'<div class="combo-slot'+(cs[i]!==null?' selected':'')+'" data-idx="'+i+'">'+(cs[i]!==null?cs[i]:'?')+'</div>'}).join(''):'<div class="combo-slot">?</div><div class="combo-slot">?</div><div class="combo-slot">?</div><div class="combo-slot">?</div>';var cb=!st.comboClaimed?'<div class="glass combo-card">'+te+'<div class="combo-desc">Find the correct combination and claim '+f(st.config.daily_combo_reward||5000)+' '+CN+'</div><div class="combo-slots">'+cs_+'</div><button class="btn btn-sm" id="claimCombo" style="margin-top:14px">Claim Combo</button></div>':'';var rw=fl.length?fl.map(function(t){var btn=t.status==='done'?'<span class="task-done-icon">&#10003;</span>':t.status==='started'?'<button class="btn btn-sm btn-outline" data-verify="'+t.id+'">Verify</button>':'<button class="btn btn-sm" data-start="'+t.id+'" data-link="'+esc(t.link)+'">Join</button>';var ic={'channel':'📢','bot':'🤖','invite':'👥'};return'<div class="glass task-row"><div class="task-icon">'+(t.icon||ic[t.type]||'📢')+'</div><div class="task-info"><div class="task-name">'+esc(t.title)+'</div><div class="task-reward">+'+f(t.reward)+' '+CN+'</div></div><div class="task-action">'+btn+'</div></div>'}).join(''):'<div class="empty-state"><span class="empty-icon">📋</span>No tasks available</div>';return cb+'<div class="tabs"><div class="tab'+(tab==='channel'?' active':'')+'" data-tab="channel">Channels</div><div class="tab'+(tab==='bot'?' active':'')+'" data-tab="bot">Bots</div><div class="tab'+(tab==='invite'?' active':'')+'" data-tab="invite">Invites</div></div>'+rw+'<button class="btn btn-ghost" id="addTaskBtn" style="margin-top:14px">+ Submit Task</button><div class="section-header" style="margin-top:20px"><div class="section-title">Daily Login</div></div><button class="btn" id="claimDailyBtn">Claim Daily +'+f(st.config.daily_login_reward||500)+' '+CN+'</button>'}
+function vr(){var u=st.user||{},rw=st.refs&&st.refs.length?st.refs.map(function(r){var in_=(r.name||'U').charAt(0).toUpperCase(),av=r.photo?'<img src="'+r.photo+'" alt="">':in_;return'<div class="glass ref-row"><div class="ref-avatar">'+av+'</div><div><div class="ref-name">'+esc(r.name||'User')+'</div><div class="ref-date">'+dts(r.created_at)+'</div></div><div class="ref-earned">+'+f(r.earned||0)+' <small>'+CN+'</small></div></div>'}).join(''):'<div class="empty-state"><span class="empty-icon">👥</span>No referrals yet — share your link!</div>',hm=st.refs&&st.refs.length<st.refsTotal;return'<div class="glass ref-banner"><div class="ref-icon">🎉</div><div class="ref-text">Invite friends and earn <b>'+(st.config.referral_pct||25)+'% of their earnings!</b></div><div class="ref-link-box"><div class="ref-link-label">Your Referral Link</div><div class="ref-link-row"><input id="refLinkInp" readonly value="'+rl()+'"><button class="btn btn-sm" id="copyRefBtn">Copy</button></div></div></div><div class="stats"><div class="glass stat"><div class="stat-label">Total</div><div class="stat-value">'+f(u.referrals_count)+'</div></div><div class="glass stat"><div class="stat-label">Active</div><div class="stat-value">'+f(u.active_referrals)+'</div></div><div class="glass stat"><div class="stat-label">Earned</div><div class="stat-value">'+f(u.referral_earned||0)+'</div></div></div><div class="section-header"><div class="section-title">Referral List</div></div>'+rw+(hm?'<div class="load-more" id="loadMoreRefs">Load more...</div>':'')}
+function vw_(){var u=st.user||{},tx=st.withdraws&&st.withdraws.length?st.withdraws.map(function(w){var sc=w.status==='approved'?'green':w.status==='rejected'?'red':'orange',sl=w.status==='approved'?'Completed':w.status==='rejected'?'Rejected':'Pending';return'<div class="glass tx-row"><div class="tx-icon out">📤</div><div class="tx-info"><div class="tx-title">Withdraw '+w.currency+'</div><div class="tx-sub">'+sl+' · '+dts(w.created_at)+'</div></div><div class="tx-amount out">-'+f(w.amount)+'</div></div>'}).join(''):'<div class="empty-state"><span class="empty-icon">💼</span>No transactions yet</div>';return'<div class="glass balance-card" style="margin-top:0"><div class="balance-label">Wallet Balance</div><div class="balance-amount"><span class="coin-icon">'+CI+'</span>'+f(u.balance)+' <span class="currency">'+CN+'</span></div></div><div class="wallet-actions"><div class="glass wallet-action" id="openDeposit2"><div class="wa-icon">📥</div><div class="wa-label">Deposit</div></div><div class="glass wallet-action" id="openWithdraw2"><div class="wa-icon">📤</div><div class="wa-label">Withdraw</div></div></div><div class="section-header"><div class="section-title">Transaction History</div></div>'+tx}
+function r(){rh();var h;if(vw==='home')h=vh();else if(vw==='tasks')h=vt();else if(vw==='referrals')h=vr();else if(vw==='wallet')h=vw_();$('#scroll').innerHTML=h;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.view===vw)});be()}
+function be(){document.querySelectorAll('.nav-item').forEach(function(n){n.onclick=function(){vw=n.dataset.view;if(vw==='tasks')lt();if(vw==='referrals'){rp=0;lr()}if(vw==='wallet')lw();r()}});var ib=$('#inviteBtn');if(ib)ib.onclick=function(){vw='referrals';rp=0;lr();r()};var gt=$('#goTasks');if(gt)gt.onclick=function(){vw='tasks';lt();r()};var od=$('#openDeposit');if(od)od.onclick=function(){vw='wallet';lw();r()};var od2=$('#openDeposit2');if(od2)od2.onclick=od_;var ow=$('#openWithdraw');if(ow)ow.onclick=ow_;var ow2=$('#openWithdraw2');if(ow2)ow2.onclick=ow_;document.querySelectorAll('[data-tab]').forEach(function(t){t.onclick=function(){tab=t.dataset.tab;r()}});document.querySelectorAll('[data-start]').forEach(function(b){b.onclick=function(){st_(b.dataset.start,b.dataset.link)}});document.querySelectorAll('[data-verify]').forEach(function(b){b.onclick=function(){vt_(b.dataset.verify)}});document.querySelectorAll('[data-idx]').forEach(function(s){s.onclick=function(){sls(parseInt(s.dataset.idx))}});var cc=$('#claimCombo');if(cc)cc.onclick=cc_;var cd=$('#claimDailyBtn');if(cd)cd.onclick=cd_;var at=$('#addTaskBtn');if(at)at.onclick=oat;var cr=$('#copyRefBtn');if(cr)cr.onclick=cp;var lm=$('#loadMoreRefs');if(lm)lm.onclick=lmr;var rp_=$('#redeemPromo');if(rp_)rp_.onclick=rp__;var ct=$('#comboTimer');if(ct)sct(ct)}
+function sct(el){function t(){var n=new Date,e=new Date(n);e.setHours(23,59,59,999);var d=e-n;if(d<=0){el.textContent='⏱ 00:00:00';return}var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);el.textContent='⏱ '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}t();setInterval(t,1000)}
+function sls(idx){if(st.comboClaimed)return;cs[idx]=CO[cst%CO.length];cst++;r()}
+async function cc_(){if(st.comboClaimed)return toast('Already claimed today','error');if(cs.includes(null))return toast('Select all 4 slots first','error');try{var res=await api('combo/claim',{slots:cs});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;st.comboClaimed=true;ls()}catch(e){toast(e.error==='WRONG_COMBO'?'Wrong combination!':e.error||'Error','error');if(e.error!=='WRONG_COMBO'){cs=[null,null,null,null];r()}}}
+async function rp__(){var inp=$('#promoInput'),code=inp.value.trim();if(!code)return toast('Enter a promo code','error');try{var res=await api('promo/redeem',{code:code});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;inp.value='';ls()}catch(e){toast(e.error||'Invalid code','error')}}
+function cp(){var inp=$('#refLinkInp');if(inp){inp.select();navigator.clipboard.writeText(inp.value).then(function(){toast('Copied!','success')})}}
+async function st_(id,link){try{await api('tasks/start',{taskId:id});if(link&&TG&&TG.openTelegramLink&&/t\.me/.test(link))TG.openTelegramLink(link);else if(link)window.open(link,'_blank');toast('Joined! Verify in a few seconds.','success');setTimeout(lt,3000)}catch(e){toast(e.error||'Error','error')}}
+async function vt_(id){try{var res=await api('tasks/verify',{taskId:id});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;lt();ls()}catch(e){toast(e.error||'Error','error')}}
+async function cd_(){try{var res=await api('claim-daily',{});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;ls()}catch(e){toast(e.error==='ALREADY_CLAIMED'?'Come back tomorrow!':e.error||'Error','error')}}
+function oat(){modal('<h3>Submit a Task</h3><label>Title</label><input id="t_title" maxlength="100"><label>Link</label><input id="t_link" placeholder="https://t.me/..." maxlength="200"><label>Type</label><select id="t_type"><option value="channel">Channel</option><option value="bot">Bot</option></select><button class="btn" id="t_submit">Submit for Review</button><button class="btn btn-ghost" onclick="document.getElementById(\'mb\').click()">Cancel</button>');$('#t_submit').onclick=async function(){var title=$('#t_title').value.trim(),link=$('#t_link').value.trim(),type=$('#t_type').value;if(!title||!link)return toast('Fill all fields','error');if(!link.includes('t.me/'))return toast('Must be a Telegram link','error');try{await api('tasks/submit',{title:title,link:link,type:type});toast('Submitted for review!','success');cm()}catch(e){toast(e.error||'Error','error')}}}
+function od_(){modal('<h3>Deposit</h3><div style="font-size:13px;color:var(--muted);margin-bottom:16px">Deposit '+CN+' to your wallet. Contact support for instructions.</div><div class="glass" style="padding:16px;text-align:center;margin-bottom:16px"><div style="font-size:11px;color:var(--muted);margin-bottom:8px">Send '+CN+' to:</div><div style="font-size:12px;color:var(--orange);font-family:monospace">Coming soon...</div></div><button class="btn btn-ghost" onclick="document.getElementById(\'mb\').click()">Close</button>')}
+function ow_(){var u=st.user||{},min=st.config.min_withdraw_ton||50000;modal('<h3>Withdraw</h3><div style="font-size:12px;color:var(--muted);margin-bottom:12px">Balance: '+f(u.balance)+' '+CN+'</div><label>Currency</label><select id="w_currency"><option value="TON">TON (min '+f(min)+')</option><option value="USDT">USDT (min '+f(st.config.min_withdraw_usdt||50000)+')</option></select><label>Address</label><input id="w_address" placeholder="Wallet address" maxlength="200"><label>Amount</label><input id="w_amount" type="number" placeholder="Amount in '+CN+'"><button class="btn" id="w_submit">Request Withdraw</button><button class="btn btn-ghost" onclick="document.getElementById(\'mb\').click()">Cancel</button>');$('#w_submit').onclick=async function(){var currency=$('#w_currency').value,address=$('#w_address').value.trim(),amount=Number($('#w_amount').value);if(!address||address.length<10)return toast('Invalid address','error');if(!amount||amount<=0)return toast('Invalid amount','error');try{var res=await api('withdraw',{currency:currency,address:address,amount:amount});toast('Withdraw requested!','success');st.user.balance=res.balance;cm();ls()}catch(e){toast(e.error||'Error','error')}}}
+async function ls(){try{var res=await api('state',{});st.user=res.user;st.recent=res.recent_rewards||[];st.config=res.config||{};r()}catch(e){}}
+async function lt(){try{var tasksRes=await api('tasks',null,'GET'),comboRes=await api('combo',null,'GET');st.tasks=tasksRes.tasks||[];st.combo=comboRes.combo||null;st.comboClaimed=comboRes.claimed||false;cs=[null,null,null,null];r()}catch(e){}}
+async function lr(){try{var res=await api('referrals?offset='+(rp*20)+'&limit=20',null,'GET');if(rp===0)st.refs=res.items||[];else st.refs=(st.refs||[]).concat(res.items||[]);st.refsTotal=res.total||0;r()}catch(e){}}
+function lmr(){rp++;lr()}
+async function lw(){try{var res=await api('wallet',null,'GET');st.withdraws=res.withdraws||[];r()}catch(e){}}
+async function boot(){var id=(TG&&TG.initData)||'';if(!id){document.body.innerHTML='<div class="error-screen"><div class="error-icon">⚠️</div><div>Open this app inside Telegram.</div></div>';return}try{var res=await api('auth',{initData:id,device:di()});tk=res.token;st.user=res.user;$('#loader').style.display='none';$('#root').style.display='flex';r();ls();lt()}catch(e){if(e.error==='DEVICE_TAKEN'){document.body.innerHTML='<div class="error-screen"><div class="error-icon">🔒</div><div class="error-text">Another account is registered on this device.</div></div>'}else{document.body.innerHTML='<div class="error-screen"><div class="error-icon">⚠️</div><div class="error-text">Connection failed: '+(e.error||e.message||'Unknown error')+'</div></div>'}}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot()})();
+</script>
 </body>
 </html>
