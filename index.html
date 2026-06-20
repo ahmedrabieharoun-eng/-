@@ -1,212 +1,1014 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>SHIB App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SHIB Rewards</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#0a0a0a;--bg2:#111;--glass:rgba(255,255,255,.04);--glass-border:rgba(255,255,255,.08);--orange:#ff7a18;--orange2:#ff9d3f;--orange-dim:rgba(255,122,24,.15);--orange-glow:rgba(255,122,24,.35);--text:#fff;--muted:#8a8a8a;--green:#22c55e;--green-dim:rgba(34,197,94,.15);--red:#ef4444;--blue:#3b82f6;--radius:20px;--radius-sm:14px;--radius-xs:10px;--safe-bottom:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;height:100%;overflow:hidden;font-size:14px;-webkit-font-smoothing:antialiased}
-body{background:radial-gradient(ellipse at 50% 0%,#1a0f08 0%,#0a0a0a 50%)fixed}
-#app{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative}
-.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px calc(100px + var(--safe-bottom));scrollbar-width:none}
-.scroll::-webkit-scrollbar{display:none}
-.glass{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius)}
-.btn{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;border:none;border-radius:var(--radius-sm);padding:16px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;box-shadow:0 8px 24px var(--orange-glow);transition:transform .15s}
-.btn:active{transform:scale(.97)}
-.btn-ghost{background:var(--glass);border:1px solid var(--glass-border);box-shadow:none}
-.btn-sm{padding:10px 16px;font-size:13px;width:auto;border-radius:var(--radius-xs);box-shadow:none}
-.btn-outline{background:0 0;border:1.5px solid var(--orange);color:var(--orange);box-shadow:none}
-.topbar{display:flex;align-items:center;gap:12px;padding:16px 16px 0;flex-shrink:0;z-index:10}
-.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;overflow:hidden;flex-shrink:0;box-shadow:0 4px 12px var(--orange-glow)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;
+  --orange:#f7931a;--orange2:#ff6b00;
+  --orange-dim:rgba(247,147,26,0.15);--orange-dim2:rgba(247,147,26,0.08);
+  --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+  --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
+  --green:#22c55e;--red:#ef4444;
+  --radius:16px;--radius-sm:10px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
+
+/* Loading */
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
+.loading-screen.hidden{display:none}
+.loading-logo{font-size:64px;animation:pulse 1.5s infinite}
+.loading-text{font-size:16px;color:var(--text2)}
+.loading-bar{width:200px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.loading-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:2px;animation:load 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+/* Pages */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:80px;-webkit-overflow-scrolling:touch}
+.page.active{transform:translateX(0)}
+.page.prev{transform:translateX(-30%)}
+.page::-webkit-scrollbar{width:0}
+
+/* Nav */
+.nav{position:absolute;bottom:0;left:0;right:0;height:72px;background:rgba(10,10,10,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--glass-border);display:flex;align-items:center;z-index:100;padding:0 8px;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;cursor:pointer;border-radius:12px;transition:background 0.2s;position:relative}
+.nav-item:active{background:var(--glass)}
+.nav-icon{font-size:22px;transition:all 0.2s;color:var(--text3)}
+.nav-label{font-size:10px;font-weight:500;letter-spacing:0.3px;color:var(--text3);transition:color 0.2s}
+.nav-item.active .nav-icon{color:var(--orange);transform:translateY(-1px)}
+.nav-item.active .nav-label{color:var(--orange)}
+
+/* Glass */
+.glass-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(10px)}
+
+/* ===== HOME PAGE ===== */
+.home-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.user-info{display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff4500);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;border:2px solid rgba(247,147,26,0.4);flex-shrink:0;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.topbar .greet{font-size:11px;color:var(--muted);letter-spacing:.5px}
-.topbar .name{font-size:16px;font-weight:700;color:var(--orange)}
-.balance-card{padding:28px 24px;text-align:center;margin-top:16px;position:relative;overflow:hidden}
-.balance-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,var(--orange-glow),transparent 60%);pointer-events:none}
-.balance-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:500}
-.balance-amount{font-size:42px;font-weight:800;letter-spacing:-1px;display:flex;justify-content:center;align-items:baseline;gap:8px;line-height:1.1}
-.balance-amount .coin-icon{font-size:32px}
-.balance-amount .currency{font-size:14px;color:var(--orange);font-weight:600;letter-spacing:1px}
-.balance-change{font-size:12px;color:var(--green);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:4px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.stat{padding:16px 10px;text-align:center;border-radius:var(--radius-sm)}
-.stat .stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:500}
-.stat .stat-value{font-size:18px;font-weight:700;color:var(--orange)}
-.invite-banner{display:flex;align-items:center;gap:14px;padding:16px;margin-top:14px;background:linear-gradient(135deg,var(--orange),#e06b10);border-radius:var(--radius);color:#fff;cursor:pointer;box-shadow:0 10px 30px var(--orange-glow);transition:transform .2s;position:relative;overflow:hidden}
-.invite-banner:active{transform:scale(.98)}
-.invite-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.1));pointer-events:none}
-.invite-banner .invite-icon{width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.invite-banner .invite-title{font-size:16px;font-weight:700}
-.invite-banner .invite-sub{font-size:12px;opacity:.9;margin-top:2px}
-.section-header{display:flex;justify-content:space-between;align-items:center;margin:22px 4px 12px}
-.section-header .section-title{font-size:15px;font-weight:700}
-.reward-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--radius-sm)}
-.reward-row .reward-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.reward-dot.green{background:var(--green-dim);color:var(--green)}
-.reward-dot.orange{background:var(--orange-dim);color:var(--orange)}
-.reward-dot.blue{background:rgba(59,130,246,.15);color:var(--blue)}
-.reward-row .reward-info{flex:1}
-.reward-row .reward-title{font-size:13px;font-weight:600}
-.reward-row .reward-time{font-size:11px;color:var(--muted);margin-top:2px}
-.reward-row .reward-amount{color:var(--green);font-weight:700;font-size:13px;white-space:nowrap}
-.promo-banner{display:flex;align-items:center;gap:14px;padding:18px;margin-top:14px;background:linear-gradient(135deg,#1a0f08,#0a0a0a);border:1px solid var(--glass-border);border-radius:var(--radius)}
-.promo-banner .promo-icon{font-size:40px}
-.promo-banner .promo-content{flex:1}
-.promo-banner .promo-title{font-size:15px;font-weight:700;color:var(--orange);margin-bottom:4px}
-.promo-banner .promo-desc{font-size:12px;color:var(--muted);line-height:1.4}
-.promo-banner .btn{margin-top:10px}
-.tabs{display:flex;gap:6px;padding:6px;margin:14px 0;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm)}
-.tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);border-radius:var(--radius-xs);cursor:pointer;transition:all .2s}
-.tab.active{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff;box-shadow:0 4px 14px var(--orange-glow)}
-.task-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--radius-sm)}
-.task-row .task-icon{width:42px;height:42px;border-radius:var(--radius-xs);background:var(--orange-dim);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.task-row .task-info{flex:1;min-width:0}
-.task-row .task-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.task-row .task-reward{font-size:12px;color:var(--orange);margin-top:2px}
-.task-row .task-action{margin-left:auto;flex-shrink:0}
-.task-done-icon{color:var(--green);font-size:20px;font-weight:700}
-.combo-card{padding:20px;margin-bottom:14px;border-radius:var(--radius)}
-.combo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.combo-header .combo-title{font-size:16px;font-weight:700}
-.combo-header .combo-timer{background:linear-gradient(135deg,var(--orange),var(--orange2));padding:6px 12px;border-radius:var(--radius-xs);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
-.combo-desc{text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.4}
-.combo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.combo-slot{aspect-ratio:1;background:var(--glass);border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted2,#555);cursor:pointer;transition:all .2s;user-select:none}
-.combo-slot.selected{border-color:var(--orange);background:var(--orange-dim);color:var(--orange);box-shadow:0 0 20px var(--orange-glow)}
-.ref-banner{padding:28px 20px;text-align:center;margin-bottom:14px;border-radius:var(--radius);position:relative;overflow:hidden}
-.ref-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--orange-glow),transparent 60%);pointer-events:none}
-.ref-banner .ref-icon{font-size:54px;margin-bottom:8px;position:relative}
-.ref-banner .ref-text{font-size:15px;font-weight:600;position:relative;line-height:1.5}
-.ref-banner .ref-text b{color:var(--orange)}
-.ref-link-box{padding:14px;margin-top:16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);position:relative}
-.ref-link-box .ref-link-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:8px;font-weight:500}
-.ref-link-box .ref-link-row{display:flex;gap:8px;align-items:center}
-.ref-link-box input{flex:1;background:0 0;border:none;color:#fff;font-size:12px;font-family:inherit;outline:none;padding:4px}
-.ref-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:var(--radius-sm)}
-.ref-row .ref-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#555,#333);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;overflow:hidden;flex-shrink:0}
-.ref-row .ref-avatar img{width:100%;height:100%;object-fit:cover}
-.ref-row .ref-name{font-size:13px;font-weight:600}
-.ref-row .ref-date{font-size:11px;color:var(--muted);margin-top:1px}
-.ref-row .ref-earned{margin-left:auto;color:var(--orange);font-weight:700;font-size:13px;text-align:right;white-space:nowrap}
-.ref-row .ref-earned small{font-size:10px;color:var(--muted);font-weight:500}
-.nav{display:flex;background:rgba(10,10,10,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--glass-border);position:absolute;bottom:0;left:0;right:0;padding:8px 0 calc(8px + var(--safe-bottom));z-index:50}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:600;transition:color .2s;user-select:none}
-.nav-item.active{color:var(--orange)}
-.nav-icon{width:24px;height:24px}
-.nav-item.active .nav-icon{filter:drop-shadow(0 0 8px var(--orange-glow))}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:100;animation:fadeIn .2s}
-.modal-sheet{width:100%;max-width:480px;background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px calc(24px + var(--safe-bottom));border-top:1px solid var(--glass-border);animation:slideUp .25s ease;max-height:85vh;overflow-y:auto}
-.modal-sheet h3{font-size:18px;margin-bottom:16px;font-weight:700}
-.modal-sheet label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
-.modal-sheet input,.modal-sheet select,.modal-sheet textarea{width:100%;background:var(--glass);border:1px solid var(--glass-border);color:#fff;padding:14px;border-radius:var(--radius-xs);font-size:14px;font-family:inherit;margin-bottom:12px;outline:none;transition:border-color .2s}
-.modal-sheet input:focus,.modal-sheet select:focus,.modal-sheet textarea:focus{border-color:var(--orange)}
-.modal-sheet .btn+.btn{margin-top:8px}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--glass-border);color:var(--text);padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;z-index:200;animation:toastIn .25s;max-width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.toast.success{border-color:var(--green)}
-.toast.error{border-color:var(--red)}
-@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.empty-state{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
-.empty-state .empty-icon{font-size:40px;margin-bottom:12px;display:block}
-.spinner{width:28px;height:28px;border:3px solid var(--glass);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;margin:40px auto}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader-full{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000}
-.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;color:var(--red);font-size:14px;background:var(--bg);gap:16px}
-.error-screen .error-icon{font-size:48px}
-.error-screen .error-text{color:var(--muted);font-size:13px}
-.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.wallet-action{padding:16px;text-align:center;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s}
-.wallet-action:active{transform:scale(.97)}
-.wallet-action .wa-icon{font-size:24px;margin-bottom:6px}
-.wallet-action .wa-label{font-size:12px;font-weight:600;color:var(--muted)}
-.promo-input-row{display:flex;gap:8px;margin-top:14px}
-.promo-input-row input{flex:1;background:var(--glass);border:1px solid var(--glass-border);color:#fff;padding:14px;border-radius:var(--radius-xs);font-size:14px;font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:2px}
-.promo-input-row input:focus{border-color:var(--orange)}
-.promo-input-row .btn{width:auto;padding:14px 20px}
-.load-more{text-align:center;padding:16px;color:var(--muted);font-size:12px;cursor:pointer}
-.load-more:hover{color:var(--orange)}
-.tx-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;border-radius:var(--radius-sm)}
-.tx-row .tx-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.tx-row .tx-icon.out{background:rgba(239,68,68,.15);color:var(--red)}
-.tx-row .tx-icon.in{background:var(--green-dim);color:var(--green)}
-.tx-row .tx-info{flex:1}
-.tx-row .tx-title{font-size:13px;font-weight:600}
-.tx-row .tx-sub{font-size:11px;color:var(--muted);margin-top:1px}
-.tx-row .tx-amount{font-weight:700;font-size:13px}
-.tx-row .tx-amount.out{color:var(--red)}
-.tx-row .tx-amount.in{color:var(--green)}
+.user-name-wrap{display:flex;flex-direction:column}
+.user-greeting{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase}
+.user-name{font-size:16px;font-weight:700;color:var(--text)}
+
+.balance-section{padding:0 16px 16px}
+.balance-card{padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
+.balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.12) 0%,transparent 70%);pointer-events:none}
+.balance-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.balance-amount{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.balance-num{font-size:38px;font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1}
+.balance-currency{font-size:18px;font-weight:700;color:var(--orange)}
+.balance-sub{font-size:13px;color:var(--text3)}
+.balance-logo{position:absolute;right:20px;bottom:18px;font-size:44px;opacity:0.55}
+
+.stats-section{padding:0 16px 16px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
+.stat-val{font-size:17px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+.stat-val.orange{color:var(--orange)}
+.stat-lbl{font-size:10px;color:var(--text3);letter-spacing:0.2px}
+
+.invite-section{padding:0 16px 16px}
+.invite-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s,opacity 0.15s;position:relative;overflow:hidden}
+.invite-btn:active{transform:scale(0.97)}
+.invite-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
+.invite-icon{font-size:28px;flex-shrink:0}
+.invite-text{text-align:left}
+.invite-title{font-size:17px;font-weight:800;color:#fff;display:block}
+.invite-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px}
+.section-title{font-size:16px;font-weight:700;color:var(--text)}
+.view-all{font-size:12px;color:var(--orange);cursor:pointer;font-weight:600}
+
+.rewards-section{padding:0 16px 16px}
+.reward-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.reward-icon{width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.reward-info{flex:1}
+.reward-name{font-size:14px;font-weight:600;color:var(--text)}
+.reward-amount{font-size:13px;color:var(--green);font-weight:700}
+.reward-time{font-size:11px;color:var(--text3)}
+
+.promo-section{padding:0 16px 16px}
+.promo-card{padding:20px;border-radius:18px;background:linear-gradient(135deg,#1a0e00,#0f0700);border:1px solid rgba(247,147,26,0.2);display:flex;gap:16px;align-items:center;position:relative;overflow:hidden}
+.promo-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(247,147,26,0.15),transparent 70%)}
+.promo-emoji{font-size:52px;flex-shrink:0}
+.promo-content{flex:1}
+.promo-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
+.promo-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.promo-btn{display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;border:none;transition:transform 0.15s}
+.promo-btn:active{transform:scale(0.95)}
+
+/* ===== TASKS PAGE ===== */
+.tasks-header{padding:20px 20px 16px;text-align:center}
+.page-title{font-size:22px;font-weight:800;color:var(--text)}
+
+.combo-section{padding:0 16px 16px}
+.combo-card{padding:20px;border-radius:18px;background:linear-gradient(145deg,#0f0800,#111111);border:1px solid rgba(247,147,26,0.3)}
+.combo-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.combo-title{font-size:18px;font-weight:800;color:var(--text)}
+.combo-timer{display:flex;align-items:center;gap:6px;background:rgba(247,147,26,0.12);padding:6px 12px;border-radius:20px;border:1px solid rgba(247,147,26,0.25)}
+.timer-val{font-size:13px;font-weight:700;color:var(--orange);font-variant-numeric:tabular-nums}
+.combo-desc{font-size:13px;color:var(--text2);margin-bottom:16px}
+.combo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.combo-slot{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all 0.2s}
+.combo-slot.filled{background:rgba(247,147,26,0.1);border-color:var(--orange);border-style:solid}
+.combo-slot-num{font-size:11px;color:var(--text3);font-weight:600}
+.combo-slot-icon{font-size:28px}
+.combo-items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.combo-item{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all 0.2s}
+.combo-item:active{transform:scale(0.93)}
+.combo-item.selected{border-color:var(--orange);background:rgba(247,147,26,0.15)}
+.combo-check-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s}
+.combo-check-btn:active{transform:scale(0.97)}
+
+.tabs-section{padding:0 16px 12px}
+.tabs{display:flex;gap:6px;background:var(--glass);border-radius:12px;padding:4px;border:1px solid var(--glass-border)}
+.tab{flex:1;padding:8px 6px;border-radius:10px;text-align:center;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab.active{background:var(--orange);color:#fff}
+
+.tasks-list{padding:0 16px 8px}
+.tasks-group-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px}
+.task-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.task-logo{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:rgba(0,136,204,0.15);border:1px solid rgba(0,136,204,0.25)}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-reward{font-size:12px;color:var(--orange);font-weight:700;margin-top:2px}
+.task-btn{padding:8px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
+.task-btn.verify{background:rgba(247,147,26,0.15);color:var(--orange);border:1px solid rgba(247,147,26,0.3)}
+.task-btn.done{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+
+.add-task-section{padding:0 16px 16px}
+.add-task-btn{width:100%;padding:16px;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:14px;font-weight:600}
+.add-task-btn:active{background:var(--orange-dim)}
+.add-task-sub{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
+
+/* ===== REFERRALS PAGE ===== */
+.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(247,147,26,0.25);text-align:center;position:relative;overflow:hidden}
+.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(247,147,26,0.18) 0%,transparent 70%)}
+.ref-emoji{font-size:56px;margin-bottom:10px;display:block;position:relative}
+.ref-banner-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;position:relative}
+.ref-banner-pct{font-size:28px;font-weight:900;color:var(--orange);display:block;margin-bottom:8px;position:relative}
+.ref-banner-desc{font-size:13px;color:var(--text2);position:relative}
+
+.ref-link-section{padding:0 16px 16px}
+.ref-link-card{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)}
+.ref-link-label{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
+.ref-link-row{display:flex;align-items:center;gap:10px}
+.ref-link-url{flex:1;font-size:12px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,0.06)}
+.copy-btn{padding:10px 18px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:13px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
+.copy-btn:active{transform:scale(0.94)}
+
+.ref-stats{padding:0 16px 16px}
+.ref-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ref-stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
+.ref-stat-val{font-size:18px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+.ref-stat-val.orange{color:var(--orange)}
+.ref-stat-lbl{font-size:10px;color:var(--text3)}
+.active-dot{width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;margin-right:4px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.ref-list-section{padding:0 16px 16px}
+.ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
+.ref-user-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(247,147,26,0.25)}
+.ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ref-user-info{flex:1;min-width:0}
+.ref-user-name{font-size:14px;font-weight:600;color:var(--text)}
+.ref-user-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.ref-user-earn{text-align:right}
+.ref-user-earn-val{font-size:14px;font-weight:800;color:var(--orange);display:block}
+.ref-user-earn-lbl{font-size:10px;color:var(--text3)}
+.ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
+.ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
+.ref-user-badge.new{background:rgba(247,147,26,0.12);color:var(--orange)}
+.load-more{width:100%;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;margin-top:4px}
+.load-more:active{background:rgba(255,255,255,0.08)}
+
+/* ===== WALLET PAGE ===== */
+.wallet-header{padding:20px 20px 16px;text-align:center}
+.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
+.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.1) 0%,transparent 70%);pointer-events:none}
+.wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
+.wbal-sub{font-size:13px;color:var(--text3)}
+
+.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.wallet-action-btn{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s}
+.wallet-action-btn:active{background:rgba(255,255,255,0.08);transform:scale(0.97)}
+.wallet-action-btn.primary{background:linear-gradient(135deg,var(--orange),var(--orange2));border:none}
+.wallet-action-icon{font-size:24px}
+.wallet-action-label{font-size:13px;font-weight:700;color:var(--text)}
+.wallet-action-btn.primary .wallet-action-label{color:#fff}
+
+.wallet-form-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
+.wallet-form-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
+.wallet-input:focus{border-color:rgba(247,147,26,0.5)}
+.wallet-input::placeholder{color:var(--text3)}
+.wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
+.wallet-submit:disabled{opacity:0.5;cursor:default}
+
+.tx-section{padding:0 16px 16px}
+.tx-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+.tx-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.tx-label{font-size:13px;color:var(--text)}
+.tx-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px}
+.tx-badge.ok{background:rgba(34,197,94,0.15);color:var(--green)}
+.tx-badge.pend{background:rgba(247,147,26,0.12);color:var(--orange)}
+.tx-badge.err{background:rgba(239,68,68,0.15);color:var(--red)}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(247,147,26,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(247,147,26,0.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{background:rgba(239,68,68,0.95);box-shadow:0 4px 20px rgba(239,68,68,0.4)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(4px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#141414;border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);border-top:1px solid var(--glass-border)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:16px}
+.modal-input{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:12px;font-family:inherit;transition:border-color 0.2s}
+.modal-input:focus{border-color:rgba(247,147,26,0.5)}
+.modal-input::placeholder{color:var(--text3)}
+.modal-submit{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
+.modal-submit:active{transform:scale(0.97)}
+.modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
+.modal-close:active{background:var(--glass)}
+
+.empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
 </style>
 </head>
 <body>
-<div id="app">
-<div id="loader" class="loader-full"><div class="spinner"></div></div>
-<div id="root" style="display:none">
-<div class="topbar">
-<div class="avatar" id="hdrAvatar"></div>
-<div><div class="greet">Welcome back,</div><div class="name" id="hdrName">User</div></div>
+
+<!-- Loading -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">🐕</div>
+  <div class="loading-text">Loading SHIB Rewards...</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
 </div>
-<div class="scroll" id="scroll"></div>
-<div class="nav" id="bottomNav">
-<div class="nav-item active" data-view="home"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg><span>Home</span></div>
-<div class="nav-item" data-view="tasks"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><span>Tasks</span></div>
-<div class="nav-item" data-view="referrals"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Referrals</span></div>
+
+<div class="app" id="mainApp" style="display:none">
+  <div class="pages">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="home-header">
+        <div class="user-info">
+          <div class="avatar" id="homeAvatar">👤</div>
+          <div class="user-name-wrap">
+            <span class="user-greeting">Welcome back</span>
+            <span class="user-name" id="homeName">Player</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="balance-section">
+        <div class="balance-card">
+          <div class="balance-label">Your Balance</div>
+          <div class="balance-amount">
+            <span class="balance-num" id="homeTon">0</span>
+            <span class="balance-currency">TON</span>
+          </div>
+          <div class="balance-sub" id="homeTonUsd">≈ $0.00</div>
+          <div class="balance-logo">🐕</div>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" id="statTotalRefs">0</div>
+            <div class="stat-lbl">Total Referrals</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val orange" id="statActiveRefs">0</div>
+            <div class="stat-lbl">Active Refs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val orange" id="statEarned">0</div>
+            <div class="stat-lbl">TON Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="invite-section">
+        <button class="invite-btn" id="homeInviteBtn">
+          <div class="invite-icon">✈️</div>
+          <div class="invite-text">
+            <span class="invite-title">Invite Friends</span>
+            <span class="invite-sub" id="homeInviteSub">Earn 10% of friends' deposits!</span>
+          </div>
+        </button>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div class="section-title">Recent Activity</div>
+        </div>
+        <div class="rewards-section" id="homeActivity">
+          <div class="empty-state">No activity yet</div>
+        </div>
+      </div>
+
+      <div class="promo-section">
+        <div class="promo-card">
+          <div class="promo-emoji">🚀</div>
+          <div class="promo-content">
+            <div class="promo-title">Big Rewards Await!</div>
+            <div class="promo-desc">Invite friends, complete tasks and earn real TON rewards!</div>
+            <button class="promo-btn" onclick="switchPage('tasks')">Let's Go!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="page" id="page-tasks">
+      <div class="tasks-header"><div class="page-title">Tasks</div></div>
+
+      <div class="combo-section">
+        <div class="combo-card">
+          <div class="combo-top">
+            <div class="combo-title">Daily Combo</div>
+            <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
+          </div>
+          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your TON reward</div>
+          <div class="combo-slots">
+            <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
+            <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
+            <div class="combo-slot" id="slot-2"><span class="combo-slot-num">3</span><span class="combo-slot-icon" id="si-2">?</span></div>
+            <div class="combo-slot" id="slot-3"><span class="combo-slot-num">4</span><span class="combo-slot-icon" id="si-3">?</span></div>
+          </div>
+          <div class="combo-items">
+            <div class="combo-item" onclick="selectCombo(this,'🦴')">🦴</div>
+            <div class="combo-item" onclick="selectCombo(this,'🏠')">🏠</div>
+            <div class="combo-item" onclick="selectCombo(this,'🎾')">🎾</div>
+            <div class="combo-item" onclick="selectCombo(this,'🍖')">🍖</div>
+          </div>
+          <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">Check Combo</button>
+        </div>
+      </div>
+
+      <div class="tabs-section">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'channels')">Channels</div>
+          <div class="tab" onclick="switchTab(this,'bots')">Bots</div>
+          <div class="tab" onclick="switchTab(this,'invite')">Invite</div>
+        </div>
+      </div>
+      <div class="tasks-list">
+        <div class="tasks-group-label" id="tasksGroupLabel">Join Channels</div>
+        <div id="tasksContent"></div>
+      </div>
+      <div class="add-task-section">
+        <button class="add-task-btn" onclick="openAddTaskModal()"><span style="font-size:20px">+</span><span>Add Task</span></button>
+        <div class="add-task-sub">Submit your channel / bot to get reward</div>
+      </div>
+    </div>
+
+    <!-- REFERRALS -->
+    <div class="page" id="page-refs">
+      <div class="ref-banner">
+        <span class="ref-emoji">🐶</span>
+        <div class="ref-banner-title">Invite friends and earn</div>
+        <span class="ref-banner-pct" id="refPct">10%</span>
+        <div class="ref-banner-desc">of every deposit your referrals make — forever!</div>
+      </div>
+
+      <div class="ref-link-section">
+        <div class="ref-link-card">
+          <div class="ref-link-label">Your Referral Link</div>
+          <div class="ref-link-row">
+            <div class="ref-link-url" id="refLinkUrl">Loading...</div>
+            <button class="copy-btn" onclick="copyRefLink()">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-stats">
+        <div class="ref-stats-grid">
+          <div class="ref-stat-card">
+            <div class="ref-stat-val" id="refTotal">0</div>
+            <div class="ref-stat-lbl">Total Refs</div>
+          </div>
+          <div class="ref-stat-card">
+            <div class="ref-stat-val orange"><span class="active-dot"></span><span id="refActive">0</span></div>
+            <div class="ref-stat-lbl">Active Refs</div>
+          </div>
+          <div class="ref-stat-card">
+            <div class="ref-stat-val orange" id="refTotalEarned">0</div>
+            <div class="ref-stat-lbl">TON Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-list-section">
+        <div class="ref-list-title">Referral List</div>
+        <div id="refList"><div class="empty-state">No referrals yet</div></div>
+        <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMoreRefs()">Load More</button>
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div class="page" id="page-wallet">
+      <div class="wallet-header"><div class="page-title">Wallet</div></div>
+
+      <div class="wallet-bal-card">
+        <div class="wbal-label">TON Balance</div>
+        <div class="wbal-amount" id="walletTon">0 TON</div>
+        <div class="wbal-sub" id="walletCoinsInfo">Earn TON from tasks &amp; referrals</div>
+      </div>
+
+      <div class="wallet-actions">
+        <div class="wallet-action-btn" onclick="openDepositModal()">
+          <div class="wallet-action-icon">⬇️</div>
+          <div class="wallet-action-label">Deposit TON</div>
+        </div>
+        <div class="wallet-action-btn primary" onclick="openWithdrawModal()">
+          <div class="wallet-action-icon">⬆️</div>
+          <div class="wallet-action-label">Withdraw</div>
+        </div>
+      </div>
+
+      <div class="tx-section">
+        <div class="tx-title">Transaction History</div>
+        <div id="walletHistory"><div class="empty-state">No transactions yet</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="nav">
+    <div class="nav-item active" onclick="switchPage('home')" id="nav-home">
+      <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('tasks')" id="nav-tasks">
+      <div class="nav-icon">📋</div><div class="nav-label">Tasks</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('refs')" id="nav-refs">
+      <div class="nav-icon">👥</div><div class="nav-label">Referrals</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('wallet')" id="nav-wallet">
+      <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
+    </div>
+  </div>
 </div>
+
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="addTaskModal" onclick="closeModalOutside(event,'addTaskModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Task</div>
+    <input class="modal-input" id="addTaskLink" placeholder="Channel / Bot link (t.me/...)">
+    <input class="modal-input" id="addTaskDesc" placeholder="Description (optional)">
+    <button class="modal-submit" onclick="submitAddTask()">Submit for Review</button>
+    <button class="modal-close" onclick="closeModal('addTaskModal')">Cancel</button>
+  </div>
 </div>
-<div id="modalRoot"></div>
-<div id="toastRoot"></div>
+
+<!-- Deposit Modal -->
+<div class="modal-overlay" id="depositModal" onclick="closeModalOutside(event,'depositModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⬇️ Deposit TON</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-radius:10px;line-height:1.6">
+      Send TON to: <span style="color:var(--orange);font-weight:700" id="depositAddr">—</span><br>
+      Min: <span id="depositMin">1</span> TON
+    </div>
+    <input class="modal-input" id="depAmount" type="number" step="0.0001" placeholder="Amount in TON">
+    <input class="modal-input" id="depHash" placeholder="Transaction hash">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="depMsg"></div>
+    <button class="modal-submit" id="depBtn" onclick="submitDeposit()">Submit Deposit</button>
+    <button class="modal-close" onclick="closeModal('depositModal')">Cancel</button>
+  </div>
 </div>
+
+<!-- Withdraw Modal -->
+<div class="modal-overlay" id="withdrawModal" onclick="closeModalOutside(event,'withdrawModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⬆️ Withdraw TON</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-radius:10px;line-height:1.6">
+      Min: <span id="wdMin">0.0001</span> TON &nbsp;|&nbsp; Fee: <span id="wdFee">10</span>%<br>
+      Balance: <span style="color:var(--orange);font-weight:700" id="wdBal">0</span> TON
+    </div>
+    <input class="modal-input" id="wdAddr" placeholder="Your TON wallet address">
+    <input class="modal-input" id="wdAmount" type="number" step="0.0001" placeholder="Amount in TON">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="wdMsg"></div>
+    <button class="modal-submit" id="wdBtn" onclick="submitWithdraw()">Request Withdrawal</button>
+    <button class="modal-close" onclick="closeModal('withdrawModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-(function(){
-var TG=window.Telegram&&window.Telegram.WebApp;
-if(TG){try{TG.ready();TG.expand();TG.setHeaderColor('#0a0a0a');TG.setBackgroundColor('#0a0a0a')}catch(e){}}
-var BTN='YOUR_BOT_USERNAME',CN='SHIB',CI='🐕',tk=null,st={user:null,recent:[],tasks:[],config:{},refs:[],refsTotal:0,withdraws:[],combo:null,comboClaimed:false},vw='home',tab='channel',rp=0,cs=[null,null,null,null],cst=0;
-var CO=['🍎','🍊','🍋','🍇','🍓','🍒','🍑','🍌','🥝','🍍','🥥','🍈','🌽','🥕','🍄'];
-function di(){var c=localStorage.getItem('dev_fp');if(c)return c;var a=document.createElement('canvas'),x=a.getContext('2d');x.textBaseline='top';x.font='14px Arial';x.fillText('fp',2,2);var fp=[navigator.userAgent,navigator.language,screen.width+'x'+screen.height,new Date().getTimezoneOffset(),a.toDataURL().slice(-64)].join('|');localStorage.setItem('dev_fp',fp);return fp}
-async function api(a,d,m){var h={'Content-Type':'application/json'};if(tk)h['Authorization']='Bearer '+tk;var o={method:m||(d?'POST':'GET'),headers:h};if(d)o.body=JSON.stringify(d);var r=await fetch('/api/'+a,o);var t=await r.text();try{var b=JSON.parse(t)}catch(e){throw{status:r.status,error:'BAD_RESPONSE',detail:t.slice(0,200)}}if(!r.ok)throw{status:r.status,...b};return b}
-function $(s,p){return(p||document).querySelector(s)}
-function f(n){return(n||0).toLocaleString('en-US')}
-function ago(t){var s=Math.floor((Date.now()-t)/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
-function dts(t){return new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
-function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function toast(msg,k){var e=document.createElement('div');e.className='toast '+(k||'');e.textContent=msg;$('#toastRoot').appendChild(e);setTimeout(function(){e.remove()},2500)}
-function cm(){$('#modalRoot').innerHTML=''}
-function modal(h){$('#modalRoot').innerHTML='<div class="modal-bg" id="mb"><div class="modal-sheet">'+h+'</div></div>';$('#mb').addEventListener('click',function(e){if(e.target.id==='mb')cm()})}
-function rl(){return'https://t.me/'+BTN+'?start='+(st.user?st.user.id:'')}
-function rh(){var u=st.user;if(!u)return;$('#hdrName').textContent=u.first_name||u.username||'User';var av=$('#hdrAvatar');if(u.photo_url){av.innerHTML='<img src="'+u.photo_url+'" alt="">'}else{av.textContent=(u.first_name||u.username||'U').charAt(0).toUpperCase()}}
-var RLB={daily_login:'Daily Login',referral:'Referral Reward',task:'Task Reward',daily_combo:'Daily Combo',promo:'Promo Code',admin_adjustment:'Admin Adjustment'};
-function frw(r){var l=RLB[r.reason]||'Reward',dc=r.reason==='referral'?'blue':r.reason==='task'?'orange':'green',ic=r.reason==='daily_login'?'📅':r.reason==='referral'?'👥':r.reason==='task'?'✅':r.reason==='daily_combo'?'🎯':r.reason==='promo'?'🎁':'💰';return'<div class="glass reward-row"><div class="reward-dot '+dc+'">'+ic+'</div><div class="reward-info"><div class="reward-title">'+l+'</div><div class="reward-time">'+ago(r.created_at)+'</div></div><div class="reward-amount">+'+f(r.amount)+'</div></div>'}
-function vh(){var u=st.user||{},cfg=st.config||{},rw=st.recent&&st.recent.length?st.recent.map(frw).join(''):'<div class="empty-state"><span class="empty-icon">🎯</span>Complete tasks to earn rewards!</div>';return'<div class="glass balance-card"><div class="balance-label">Your Balance</div><div class="balance-amount"><span class="coin-icon">'+CI+'</span>'+f(u.balance)+' <span class="currency">'+CN+'</span></div><div class="balance-change">&#9650; '+f(u.total_earned||0)+' total earned</div></div><div class="stats"><div class="glass stat"><div class="stat-label">Referrals</div><div class="stat-value">'+f(u.referrals_count)+'</div></div><div class="glass stat"><div class="stat-label">Active</div><div class="stat-value">'+f(u.active_referrals)+'</div></div><div class="glass stat"><div class="stat-label">Earned</div><div class="stat-value">'+f(u.total_earned)+'</div></div></div><div class="invite-banner" id="inviteBtn"><div class="invite-icon">✈️</div><div><div class="invite-title">Invite Friends</div><div class="invite-sub">Earn '+(cfg.referral_pct||25)+'% of their earnings</div></div></div><div class="section-header"><div class="section-title">Recent Rewards</div></div>'+rw+'<div class="promo-banner"><div class="promo-icon">🚀</div><div class="promo-content"><div class="promo-title">Big Rewards Await!</div><div class="promo-desc">Invite friends, complete tasks and earn huge rewards in '+CN+'!</div><button class="btn btn-sm" id="goTasks">Go</button></div></div><div class="section-header" style="margin-top:20px"><div class="section-title">Wallet</div></div><div class="wallet-actions"><div class="glass wallet-action" id="openDeposit"><div class="wa-icon">📥</div><div class="wa-label">Deposit</div></div><div class="glass wallet-action" id="openWithdraw"><div class="wa-icon">📤</div><div class="wa-label">Withdraw</div></div></div><div style="margin-top:14px"><div class="promo-input-row"><input id="promoInput" placeholder="Enter promo code" maxlength="20"><button class="btn btn-sm" id="redeemPromo">Redeem</button></div></div>'}
-function vt(){var fl=(st.tasks||[]).filter(function(t){if(tab==='channel')return t.type==='channel';if(tab==='bot')return t.type==='bot';if(tab==='invite')return t.type==='invite';return true});var te=st.combo&&!st.comboClaimed?'<div class="combo-header"><div class="combo-title">Daily Combo</div><span class="combo-timer" id="comboTimer">⏱ 23:59:59</span></div>':'';var cs_=st.combo&&!st.comboClaimed?st.combo.slots.map(function(s,i){return'<div class="combo-slot'+(cs[i]!==null?' selected':'')+'" data-idx="'+i+'">'+(cs[i]!==null?cs[i]:'?')+'</div>'}).join(''):'<div class="combo-slot">?</div><div class="combo-slot">?</div><div class="combo-slot">?</div><div class="combo-slot">?</div>';var cb=!st.comboClaimed?'<div class="glass combo-card">'+te+'<div class="combo-desc">Find the correct combination and claim '+f(st.config.daily_combo_reward||5000)+' '+CN+'</div><div class="combo-slots">'+cs_+'</div><button class="btn btn-sm" id="claimCombo" style="margin-top:14px">Claim Combo</button></div>':'';var rw=fl.length?fl.map(function(t){var btn=t.status==='done'?'<span class="task-done-icon">&#10003;</span>':t.status==='started'?'<button class="btn btn-sm btn-outline" data-verify="'+t.id+'">Verify</button>':'<button class="btn btn-sm" data-start="'+t.id+'" data-link="'+esc(t.link)+'">Join</button>';var ic={'channel':'📢','bot':'🤖','invite':'👥'};return'<div class="glass task-row"><div class="task-icon">'+(t.icon||ic[t.type]||'📢')+'</div><div class="task-info"><div class="task-name">'+esc(t.title)+'</div><div class="task-reward">+'+f(t.reward)+' '+CN+'</div></div><div class="task-action">'+btn+'</div></div>'}).join(''):'<div class="empty-state"><span class="empty-icon">📋</span>No tasks available</div>';return cb+'<div class="tabs"><div class="tab'+(tab==='channel'?' active':'')+'" data-tab="channel">Channels</div><div class="tab'+(tab==='bot'?' active':'')+'" data-tab="bot">Bots</div><div class="tab'+(tab==='invite'?' active':'')+'" data-tab="invite">Invites</div></div>'+rw+'<button class="btn btn-ghost" id="addTaskBtn" style="margin-top:14px">+ Submit Task</button><div class="section-header" style="margin-top:20px"><div class="section-title">Daily Login</div></div><button class="btn" id="claimDailyBtn">Claim Daily +'+f(st.config.daily_login_reward||500)+' '+CN+'</button>'}
-function vr(){var u=st.user||{},rw=st.refs&&st.refs.length?st.refs.map(function(r){var in_=(r.name||'U').charAt(0).toUpperCase(),av=r.photo?'<img src="'+r.photo+'" alt="">':in_;return'<div class="glass ref-row"><div class="ref-avatar">'+av+'</div><div><div class="ref-name">'+esc(r.name||'User')+'</div><div class="ref-date">'+dts(r.created_at)+'</div></div><div class="ref-earned">+'+f(r.earned||0)+' <small>'+CN+'</small></div></div>'}).join(''):'<div class="empty-state"><span class="empty-icon">👥</span>No referrals yet — share your link!</div>',hm=st.refs&&st.refs.length<st.refsTotal;return'<div class="glass ref-banner"><div class="ref-icon">🎉</div><div class="ref-text">Invite friends and earn <b>'+(st.config.referral_pct||25)+'% of their earnings!</b></div><div class="ref-link-box"><div class="ref-link-label">Your Referral Link</div><div class="ref-link-row"><input id="refLinkInp" readonly value="'+rl()+'"><button class="btn btn-sm" id="copyRefBtn">Copy</button></div></div></div><div class="stats"><div class="glass stat"><div class="stat-label">Total</div><div class="stat-value">'+f(u.referrals_count)+'</div></div><div class="glass stat"><div class="stat-label">Active</div><div class="stat-value">'+f(u.active_referrals)+'</div></div><div class="glass stat"><div class="stat-label">Earned</div><div class="stat-value">'+f(u.referral_earned||0)+'</div></div></div><div class="section-header"><div class="section-title">Referral List</div></div>'+rw+(hm?'<div class="load-more" id="loadMoreRefs">Load more...</div>':'')}
-function vw_(){var u=st.user||{},tx=st.withdraws&&st.withdraws.length?st.withdraws.map(function(w){var sc=w.status==='approved'?'green':w.status==='rejected'?'red':'orange',sl=w.status==='approved'?'Completed':w.status==='rejected'?'Rejected':'Pending';return'<div class="glass tx-row"><div class="tx-icon out">📤</div><div class="tx-info"><div class="tx-title">Withdraw '+w.currency+'</div><div class="tx-sub">'+sl+' · '+dts(w.created_at)+'</div></div><div class="tx-amount out">-'+f(w.amount)+'</div></div>'}).join(''):'<div class="empty-state"><span class="empty-icon">💼</span>No transactions yet</div>';return'<div class="glass balance-card" style="margin-top:0"><div class="balance-label">Wallet Balance</div><div class="balance-amount"><span class="coin-icon">'+CI+'</span>'+f(u.balance)+' <span class="currency">'+CN+'</span></div></div><div class="wallet-actions"><div class="glass wallet-action" id="openDeposit2"><div class="wa-icon">📥</div><div class="wa-label">Deposit</div></div><div class="glass wallet-action" id="openWithdraw2"><div class="wa-icon">📤</div><div class="wa-label">Withdraw</div></div></div><div class="section-header"><div class="section-title">Transaction History</div></div>'+tx}
-function r(){rh();var h;if(vw==='home')h=vh();else if(vw==='tasks')h=vt();else if(vw==='referrals')h=vr();else if(vw==='wallet')h=vw_();$('#scroll').innerHTML=h;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.view===vw)});be()}
-function be(){document.querySelectorAll('.nav-item').forEach(function(n){n.onclick=function(){vw=n.dataset.view;if(vw==='tasks')lt();if(vw==='referrals'){rp=0;lr()}if(vw==='wallet')lw();r()}});var ib=$('#inviteBtn');if(ib)ib.onclick=function(){vw='referrals';rp=0;lr();r()};var gt=$('#goTasks');if(gt)gt.onclick=function(){vw='tasks';lt();r()};var od=$('#openDeposit');if(od)od.onclick=function(){vw='wallet';lw();r()};var od2=$('#openDeposit2');if(od2)od2.onclick=od_;var ow=$('#openWithdraw');if(ow)ow.onclick=ow_;var ow2=$('#openWithdraw2');if(ow2)ow2.onclick=ow_;document.querySelectorAll('[data-tab]').forEach(function(t){t.onclick=function(){tab=t.dataset.tab;r()}});document.querySelectorAll('[data-start]').forEach(function(b){b.onclick=function(){st_(b.dataset.start,b.dataset.link)}});document.querySelectorAll('[data-verify]').forEach(function(b){b.onclick=function(){vt_(b.dataset.verify)}});document.querySelectorAll('[data-idx]').forEach(function(s){s.onclick=function(){sls(parseInt(s.dataset.idx))}});var cc=$('#claimCombo');if(cc)cc.onclick=cc_;var cd=$('#claimDailyBtn');if(cd)cd.onclick=cd_;var at=$('#addTaskBtn');if(at)at.onclick=oat;var cr=$('#copyRefBtn');if(cr)cr.onclick=cp;var lm=$('#loadMoreRefs');if(lm)lm.onclick=lmr;var rp_=$('#redeemPromo');if(rp_)rp_.onclick=rp__;var ct=$('#comboTimer');if(ct)sct(ct)}
-function sct(el){function t(){var n=new Date,e=new Date(n);e.setHours(23,59,59,999);var d=e-n;if(d<=0){el.textContent='⏱ 00:00:00';return}var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);el.textContent='⏱ '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}t();setInterval(t,1000)}
-function sls(idx){if(st.comboClaimed)return;cs[idx]=CO[cst%CO.length];cst++;r()}
-async function cc_(){if(st.comboClaimed)return toast('Already claimed today','error');if(cs.includes(null))return toast('Select all 4 slots first','error');try{var res=await api('combo/claim',{slots:cs});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;st.comboClaimed=true;ls()}catch(e){toast(e.error==='WRONG_COMBO'?'Wrong combination!':e.error||'Error','error');if(e.error!=='WRONG_COMBO'){cs=[null,null,null,null];r()}}}
-async function rp__(){var inp=$('#promoInput'),code=inp.value.trim();if(!code)return toast('Enter a promo code','error');try{var res=await api('promo/redeem',{code:code});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;inp.value='';ls()}catch(e){toast(e.error||'Invalid code','error')}}
-function cp(){var inp=$('#refLinkInp');if(inp){inp.select();navigator.clipboard.writeText(inp.value).then(function(){toast('Copied!','success')})}}
-async function st_(id,link){try{await api('tasks/start',{taskId:id});if(link&&TG&&TG.openTelegramLink&&/t\.me/.test(link))TG.openTelegramLink(link);else if(link)window.open(link,'_blank');toast('Joined! Verify in a few seconds.','success');setTimeout(lt,3000)}catch(e){toast(e.error||'Error','error')}}
-async function vt_(id){try{var res=await api('tasks/verify',{taskId:id});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;lt();ls()}catch(e){toast(e.error||'Error','error')}}
-async function cd_(){try{var res=await api('claim-daily',{});toast('+'+f(res.reward)+' '+CN,'success');st.user.balance=res.balance;ls()}catch(e){toast(e.error==='ALREADY_CLAIMED'?'Come back tomorrow!':e.error||'Error','error')}}
-function oat(){modal('<h3>Submit a Task</h3><label>Title</label><input id="t_title" maxlength="100"><label>Link</label><input id="t_link" placeholder="https://t.me/..." maxlength="200"><label>Type</label><select id="t_type"><option value="channel">Channel</option><option value="bot">Bot</option></select><button class="btn" id="t_submit">Submit for Review</button><button class="btn btn-ghost" onclick="document.getElementById(\'mb\').click()">Cancel</button>');$('#t_submit').onclick=async function(){var title=$('#t_title').value.trim(),link=$('#t_link').value.trim(),type=$('#t_type').value;if(!title||!link)return toast('Fill all fields','error');if(!link.includes('t.me/'))return toast('Must be a Telegram link','error');try{await api('tasks/submit',{title:title,link:link,type:type});toast('Submitted for review!','success');cm()}catch(e){toast(e.error||'Error','error')}}}
-function od_(){modal('<h3>Deposit</h3><div style="font-size:13px;color:var(--muted);margin-bottom:16px">Deposit '+CN+' to your wallet. Contact support for instructions.</div><div class="glass" style="padding:16px;text-align:center;margin-bottom:16px"><div style="font-size:11px;color:var(--muted);margin-bottom:8px">Send '+CN+' to:</div><div style="font-size:12px;color:var(--orange);font-family:monospace">Coming soon...</div></div><button class="btn btn-ghost" onclick="document.getElementById(\'mb\').click()">Close</button>')}
-function ow_(){var u=st.user||{},min=st.config.min_withdraw_ton||50000;modal('<h3>Withdraw</h3><div style="font-size:12px;color:var(--muted);margin-bottom:12px">Balance: '+f(u.balance)+' '+CN+'</div><label>Currency</label><select id="w_currency"><option value="TON">TON (min '+f(min)+')</option><option value="USDT">USDT (min '+f(st.config.min_withdraw_usdt||50000)+')</option></select><label>Address</label><input id="w_address" placeholder="Wallet address" maxlength="200"><label>Amount</label><input id="w_amount" type="number" placeholder="Amount in '+CN+'"><button class="btn" id="w_submit">Request Withdraw</button><button class="btn btn-ghost" onclick="document.getElementById(\'mb\').click()">Cancel</button>');$('#w_submit').onclick=async function(){var currency=$('#w_currency').value,address=$('#w_address').value.trim(),amount=Number($('#w_amount').value);if(!address||address.length<10)return toast('Invalid address','error');if(!amount||amount<=0)return toast('Invalid amount','error');try{var res=await api('withdraw',{currency:currency,address:address,amount:amount});toast('Withdraw requested!','success');st.user.balance=res.balance;cm();ls()}catch(e){toast(e.error||'Error','error')}}}
-async function ls(){try{var res=await api('state',{});st.user=res.user;st.recent=res.recent_rewards||[];st.config=res.config||{};r()}catch(e){}}
-async function lt(){try{var tasksRes=await api('tasks',null,'GET'),comboRes=await api('combo',null,'GET');st.tasks=tasksRes.tasks||[];st.combo=comboRes.combo||null;st.comboClaimed=comboRes.claimed||false;cs=[null,null,null,null];r()}catch(e){}}
-async function lr(){try{var res=await api('referrals?offset='+(rp*20)+'&limit=20',null,'GET');if(rp===0)st.refs=res.items||[];else st.refs=(st.refs||[]).concat(res.items||[]);st.refsTotal=res.total||0;r()}catch(e){}}
-function lmr(){rp++;lr()}
-async function lw(){try{var res=await api('wallet',null,'GET');st.withdraws=res.withdraws||[];r()}catch(e){}}
-async function boot(){var id=(TG&&TG.initData)||'';      if(!id){document.body.innerHTML='<div class="error-screen"><div class="error-icon">⚠️</div><div>Open this app inside Telegram.</div></div>';return}try{var res=await api('auth',{initData:id,device:di()});tk=res.token;st.user=res.user;$('#loader').style.display='none';$('#root').style.display='flex';r();ls();lt()}catch(e){if(e.error==='DEVICE_TAKEN'){document.body.innerHTML='<div class="error-screen"><div class="error-icon">🔒</div><div class="error-text">Another account is registered on this device.</div></div>'}else{document.body.innerHTML='<div class="error-screen"><div class="error-icon">⚠️</div><div class="error-text">Connection failed'+(e.detail?' (response was not JSON)':'')+': '+(e.error||e.message||'Unknown error')+'</div></div>'}}}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot()})();
+// ── Config ──────────────────────────────────────────────────────────
+// ↓↓↓ غيّر القيمتين دول بعد ما تنشر الـ Worker على Cloudflare ↓↓↓
+var API_URL  = 'https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/api'; // ← رابط الـ Worker بتاعك + /api
+var BOT_USER = 'YourBotUsername'; // ← يوزر بوت التليجرام بتاعك من غير @
+
+// ── State ───────────────────────────────────────────────────────────
+var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
+
+var currentTab = 'channels';
+
+// ── Boot ─────────────────────────────────────────────────────────────
+(function boot(){
+  var tries = 0;
+  var iv = setInterval(function(){
+    tries++;
+    if (window.Telegram && window.Telegram.WebApp){
+      clearInterval(iv);
+      try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(_){}
+      S.initData = Telegram.WebApp.initData || '';
+      loadState();
+    } else if (tries > 40){
+      clearInterval(iv);
+      loadState(); // dev mode fallback (not inside Telegram)
+    }
+  }, 100);
+})();
+
+// ── API ──────────────────────────────────────────────────────────────
+function api(action, data){
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Telegram '+S.initData, 'X-Action':action },
+    body: JSON.stringify({ action:action, data:data||{} })
+  }).then(function(r){ return r.json(); });
+}
+
+// ── Load state ───────────────────────────────────────────────────────
+function loadState(){
+  api('getState', { _initData: S.initData }).then(function(res){
+    if (!res || !res.success){
+      showMockData();
+      return;
+    }
+    S.data = res.data;
+    S.user = res.data.user;
+    S.refs = res.data.referrals || [];
+    showApp();
+    render();
+  }).catch(function(){
+    showMockData();
+  });
+}
+
+// Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
+function showMockData(){
+  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', tonBalance:0.5, referralCode:'123456', withdrawWallet:'' };
+  S.data = {
+    referrals:[], depHistory:[], wdHistory:[], balanceLog:[],
+    tasks:[
+      {id:'c1',category:'channels',icon:'✈️',name:'Join Main Channel',link:'https://t.me/yourchannel',reward:0.002,status:'active'},
+      {id:'b1',category:'bots',icon:'🎮',name:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:0.002,status:'active'},
+    ],
+    combo:{ solvedToday:false, reward:0.01 },
+    config:{ refBonusPct:10, minWithdrawTon:0.0001, minDepositTon:1, withdrawFeePct:10, depositAddress:'YOUR_TON_WALLET_ADDRESS', botUsername:BOT_USER, inviteTasks:{
+      invite_1:{kind:'invite',n:1,ton:0.002}, invite_5:{kind:'invite',n:5,ton:0.012}, invite_10:{kind:'invite',n:10,ton:0.03}
+    }}
+  };
+  S.refs = [];
+  showApp();
+  render();
+}
+
+function showApp(){
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('mainApp').style.display = 'flex';
+}
+
+// ── Render ────────────────────────────────────────────────────────────
+function render(){
+  var u = S.user; var d = S.data; var cfg = d.config || {};
+  // Header
+  var av = document.getElementById('homeAvatar');
+  if (u.photoUrl) av.innerHTML = '<img src="'+u.photoUrl+'" alt="">';
+  else av.textContent = (u.firstName||'P')[0].toUpperCase();
+  document.getElementById('homeName').textContent = u.firstName || 'Player';
+  // Balance
+  document.getElementById('homeTon').textContent = fmtTon(u.tonBalance);
+  // Stats
+  var totalRefs = S.refs.length;
+  var activeRefs = S.refs.filter(function(r){ return r.hasDeposited; }).length;
+  var totalRefEarned = S.refs.reduce(function(sum,r){ return sum + (parseFloat(r.earned)||0); },0);
+  document.getElementById('statTotalRefs').textContent = totalRefs;
+  document.getElementById('statActiveRefs').textContent = activeRefs;
+  document.getElementById('statEarned').textContent = fmtTon(totalRefEarned);
+  // Invite btn
+  var pct = cfg.refBonusPct || 10;
+  document.getElementById('homeInviteSub').textContent = 'Earn '+pct+'% of friends\' deposits!';
+  document.getElementById('homeInviteBtn').onclick = function(){ shareInvite(); };
+  // Activity log
+  renderActivity(d.balanceLog || []);
+  // Refs page
+  document.getElementById('refPct').textContent = pct + '%';
+  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?start='+u.referralCode;
+  document.getElementById('refTotal').textContent = totalRefs;
+  document.getElementById('refActive').textContent = activeRefs;
+  document.getElementById('refTotalEarned').textContent = fmtTon(totalRefEarned);
+  renderRefs(0);
+  // Wallet
+  document.getElementById('walletTon').textContent = fmtTon(u.tonBalance) + ' TON';
+  document.getElementById('depositAddr').textContent = cfg.depositAddress || 'YOUR_TON_WALLET_ADDRESS';
+  document.getElementById('depositMin').textContent = cfg.minDepositTon || 1;
+  document.getElementById('wdMin').textContent = cfg.minWithdrawTon || 0.0001;
+  document.getElementById('wdFee').textContent = cfg.withdrawFeePct || 10;
+  document.getElementById('wdBal').textContent = fmtTon(u.tonBalance);
+  if (u.withdrawWallet) document.getElementById('wdAddr').value = u.withdrawWallet;
+  renderWalletHistory(d.depHistory||[], d.wdHistory||[]);
+  // Combo
+  renderComboState();
+  // Tasks
+  renderTasks(currentTab);
+}
+
+function renderActivity(log){
+  var el = document.getElementById('homeActivity');
+  if (!log.length){ el.innerHTML = '<div class="empty-state">No activity yet</div>'; return; }
+  var icons = { verify_task:'✅', claim_task:'🎯', combo_claim:'🎉', withdraw_request:'💸', admin_confirm_deposit:'💰', referral_commission:'👥', admin_set_balance:'🔧' };
+  el.innerHTML = log.slice(0,5).map(function(e){
+    var icon = icons[e.type] || '✅';
+    var amount = e.ton_reward!=null ? e.ton_reward : (e.amount_net!=null ? e.amount_net : (e.amount_ton!=null ? e.amount_ton : e.comm));
+    var label = (e.type||'').replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
+    var ts = e.ts ? timeAgo(e.ts) : '';
+    return '<div class="reward-item">'+
+      '<div class="reward-icon">'+icon+'</div>'+
+      '<div class="reward-info">'+
+        '<div class="reward-name">'+label+'</div>'+
+        (amount ? '<div class="reward-amount">+'+fmtTon(Math.abs(amount))+' TON</div>' : '')+
+      '</div>'+
+      '<div class="reward-time">'+ts+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderRefs(page){
+  var el = document.getElementById('refList');
+  var refs = S.refs;
+  if (!refs.length){ el.innerHTML = '<div class="empty-state">No referrals yet</div>'; return; }
+  var visible = refs.slice(0, 5 + page*5);
+  el.innerHTML = visible.map(function(r){
+    var name = r.firstName || r.name || 'Unknown';
+    var handle = r.username ? '@'+r.username : '';
+    var earned = fmtTon(r.earned || 0);
+    var badge = r.hasDeposited ? '<span class="ref-user-badge active">Active</span>' : '<span class="ref-user-badge new">New</span>';
+    var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
+    var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    return '<div class="ref-user-item">'+
+      '<div class="ref-user-avatar">'+av+'</div>'+
+      '<div class="ref-user-info">'+
+        '<div class="ref-user-name">'+esc(name)+'</div>'+
+        '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
+        badge+
+      '</div>'+
+      '<div class="ref-user-earn">'+
+        '<span class="ref-user-earn-val">+'+earned+'</span>'+
+        '<span class="ref-user-earn-lbl">TON</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  var loadBtn = document.getElementById('loadMoreBtn');
+  if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
+}
+
+function loadMoreRefs(){
+  S.refPage++;
+  renderRefs(S.refPage);
+}
+
+function renderWalletHistory(deps, wds){
+  var rows = [];
+  deps.forEach(function(d){ rows.push({ ts:d.ts, label:'Deposit '+fmtTon(d.amount)+' TON', cls:d.status==='completed'?'ok':'pend', txt:d.status==='completed'?'Done':'Pending' }); });
+  wds.forEach(function(w){ rows.push({ ts:w.ts, label:'Withdraw '+fmtTon(w.amtRequested||w.amt)+' TON', cls:w.status==='approved'?'ok':w.status==='rejected'?'err':'pend', txt:w.status==='approved'?'Approved':w.status==='rejected'?'Rejected':'Pending' }); });
+  rows.sort(function(a,b){ return b.ts - a.ts; });
+  var el = document.getElementById('walletHistory');
+  if (!rows.length){ el.innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+  el.innerHTML = rows.map(function(r){ return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>'; }).join('');
+}
+
+// ── Tasks ─────────────────────────────────────────────────────────────
+function renderTasks(tab){
+  var labels = { channels:'Join Channels', bots:'Join Bots', invite:'Invite Tasks' };
+  document.getElementById('tasksGroupLabel').textContent = labels[tab];
+  var completed = (S.data && S.data.completedTasks) || [];
+
+  if (tab === 'invite'){
+    var inviteDefs = (S.data.config && S.data.config.inviteTasks) || {};
+    var refCount = S.refs.length;
+    var labelMap = { invite_1:'Invite 1 Friend', invite_5:'Invite 5 Friends', invite_10:'Invite 10 Friends' };
+    var ids = ['invite_1','invite_5','invite_10'];
+    document.getElementById('tasksContent').innerHTML = ids.filter(function(id){ return inviteDefs[id]; }).map(function(id){
+      var t = inviteDefs[id];
+      var done = completed.indexOf(id) > -1;
+      var eligible = refCount >= t.n;
+      var btnClass = done ? 'done' : (eligible ? 'join' : 'verify');
+      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+t.n);
+      var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+id+'\')' : '');
+      return '<div class="task-item">'+
+        '<div class="task-logo">👥</div>'+
+        '<div class="task-info">'+
+          '<div class="task-name">'+esc(labelMap[id]||id)+'</div>'+
+          '<div class="task-reward">+'+fmtTon(t.ton)+' TON</div>'+
+        '</div>'+
+        '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
+      '</div>';
+    }).join('');
+    return;
+  }
+
+  var list = ((S.data && S.data.tasks) || []).filter(function(t){ return t.category===tab; });
+  if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
+  document.getElementById('tasksContent').innerHTML = list.map(function(t){
+    var done = completed.indexOf(t.id) > -1;
+    var st = done ? 'done' : (S.taskJoined && S.taskJoined[t.id] ? 'verify' : 'join');
+    var btnClass = st==='join'?'join':st==='verify'?'verify':'done';
+    var btnText  = st==='join'?'Join':st==='verify'?'Verify':'✓ Done';
+    var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
+    return '<div class="task-item">'+
+      '<div class="task-logo">'+(t.icon||'📋')+'</div>'+
+      '<div class="task-info">'+
+        '<div class="task-name">'+esc(t.name)+'</div>'+
+        '<div class="task-reward">+'+fmtTon(t.reward)+' TON</div>'+
+      '</div>'+
+      '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
+    '</div>';
+  }).join('');
+}
+
+function switchTab(el, tab){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  currentTab = tab;
+  renderTasks(tab);
+}
+
+S.taskJoined = {};
+function doJoinTask(id){
+  var list = (S.data && S.data.tasks) || [];
+  var task = list.find(function(t){ return t.id===id; });
+  S.taskJoined[id] = true;
+  renderTasks(currentTab);
+  showToast('Joined! Click Verify to claim your reward ✓');
+  if (task && task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
+  } else if (task && task.link){
+    window.open(task.link, '_blank');
+  }
+}
+
+function doVerifyTask(id){
+  api('verifyTask', { taskId:id }).then(function(res){
+    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
+    S.data.completedTasks = S.data.completedTasks || [];
+    S.data.completedTasks.push(id);
+    S.user.tonBalance = res.data.tonBalance;
+    delete S.taskJoined[id];
+    document.getElementById('homeTon').textContent = fmtTon(S.user.tonBalance);
+    document.getElementById('walletTon').textContent = fmtTon(S.user.tonBalance) + ' TON';
+    renderTasks(currentTab);
+    showToast('+'+fmtTon(res.data.tonAdded)+' TON added! 🎉');
+  }).catch(function(){ showToast('Network error','error'); });
+}
+
+function doClaimInvite(id){
+  api('claimTask', { taskId:id }).then(function(res){
+    if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
+    S.data.completedTasks = S.data.completedTasks || [];
+    S.data.completedTasks.push(id);
+    S.user.tonBalance = res.data.tonBalance;
+    document.getElementById('homeTon').textContent = fmtTon(S.user.tonBalance);
+    document.getElementById('walletTon').textContent = fmtTon(S.user.tonBalance) + ' TON';
+    renderTasks(currentTab);
+    showToast('+'+fmtTon(res.data.tonAdded)+' TON added! 🎉');
+  }).catch(function(){ showToast('Network error','error'); });
+}
+
+// ── Daily Combo (server-validated) ──────────────────────────────────
+function renderComboState(){
+  var combo = (S.data && S.data.combo) || {};
+  var btn = document.getElementById('comboCheckBtn');
+  var desc = document.getElementById('comboDesc');
+  var reward = combo.reward || 0.01;
+  if (combo.solvedToday){
+    btn.disabled = true;
+    btn.textContent = '✓ Claimed Today';
+    desc.textContent = 'Come back tomorrow for a new combo!';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Check Combo — '+fmtTon(reward)+' TON';
+    desc.textContent = 'Find the correct combination and claim your TON reward';
+  }
+}
+
+function selectCombo(el, emoji){
+  if (S.data && S.data.combo && S.data.combo.solvedToday) return;
+  if (S.comboFilled >= 4) return;
+  if (el.classList.contains('selected')) return;
+  el.classList.add('selected');
+  el.onclick = null;
+  document.getElementById('si-'+S.comboFilled).textContent = emoji;
+  document.getElementById('slot-'+S.comboFilled).classList.add('filled');
+  S.comboFilled++;
+  S.comboSel.push(emoji);
+}
+
+function checkCombo(){
+  if (S.data && S.data.combo && S.data.combo.solvedToday){ showToast('Already claimed today\u2019s combo!'); return; }
+  if (S.comboFilled < 4){ showToast('Select all 4 items first!'); return; }
+  var btn = document.getElementById('comboCheckBtn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+  api('checkCombo', { selection:S.comboSel }).then(function(res){
+    if (!res.success){
+      showToast(res.error||'Failed.','error');
+      renderComboState();
+      resetCombo();
+      return;
+    }
+    if (!res.data.correct){
+      showToast('❌ Wrong combination. Try again!','error');
+      renderComboState();
+      resetCombo();
+      return;
+    }
+    S.user.tonBalance = res.data.tonBalance;
+    S.data.combo.solvedToday = true;
+    document.getElementById('homeTon').textContent = fmtTon(S.user.tonBalance);
+    document.getElementById('walletTon').textContent = fmtTon(S.user.tonBalance) + ' TON';
+    showToast('🎉 Correct! +'+fmtTon(res.data.tonAdded)+' TON!');
+    renderComboState();
+    resetCombo();
+  }).catch(function(){
+    showToast('Network error','error');
+    renderComboState();
+    resetCombo();
+  });
+}
+
+function resetCombo(){
+  S.comboFilled = 0; S.comboSel = [];
+  for (var i=0;i<4;i++){
+    document.getElementById('si-'+i).textContent='?';
+    document.getElementById('slot-'+i).classList.remove('filled');
+  }
+  document.querySelectorAll('.combo-item').forEach(function(item){
+    item.classList.remove('selected');
+    var emoji = item.textContent;
+    item.onclick = (function(e){ return function(){ selectCombo(item,e); }; })(emoji);
+  });
+}
+
+// ── Wallet actions ─────────────────────────────────────────────────────
+function submitDeposit(){
+  var amount = parseFloat(document.getElementById('depAmount').value);
+  var hash   = document.getElementById('depHash').value.trim();
+  var btn    = document.getElementById('depBtn');
+  var msg    = document.getElementById('depMsg');
+  msg.textContent = '';
+  if (!amount || amount <= 0){ msg.textContent = 'Enter a valid amount.'; msg.style.color='var(--red)'; return; }
+  if (!hash || hash.length < 5){ msg.textContent = 'Enter the transaction hash.'; msg.style.color='var(--red)'; return; }
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('deposit', { amount:amount, txHash:hash }).then(function(res){
+    btn.disabled = false; btn.textContent = 'Submit Deposit';
+    if (!res.success){ msg.textContent=res.error||'Failed.'; msg.style.color='var(--red)'; return; }
+    closeModal('depositModal');
+    showToast('Deposit submitted! Awaiting confirmation 💰');
+    document.getElementById('depAmount').value=''; document.getElementById('depHash').value='';
+    loadState();
+  }).catch(function(e){ btn.disabled=false; btn.textContent='Submit Deposit'; msg.textContent=e.message; msg.style.color='var(--red)'; });
+}
+
+function submitWithdraw(){
+  var addr   = document.getElementById('wdAddr').value.trim();
+  var amount = parseFloat(document.getElementById('wdAmount').value);
+  var btn    = document.getElementById('wdBtn');
+  var msg    = document.getElementById('wdMsg');
+  msg.textContent = '';
+  if (!addr || addr.length < 10){ msg.textContent='Invalid TON address.'; msg.style.color='var(--red)'; return; }
+  if (!amount || amount <= 0)    { msg.textContent='Enter a valid amount.'; msg.style.color='var(--red)'; return; }
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('withdraw', { address:addr, amount:amount }).then(function(res){
+    btn.disabled = false; btn.textContent = 'Request Withdrawal';
+    if (!res.success){ msg.textContent=res.error||'Failed.'; msg.style.color='var(--red)'; return; }
+    closeModal('withdrawModal');
+    var cfg = S.data.config||{};
+    var fee = cfg.withdrawFeePct||10;
+    var net = +(amount*(1-fee/100)).toFixed(4);
+    showToast('Withdrawal requested! Net: '+net+' TON 📤');
+    S.user.tonBalance = res.data.tonBalance;
+    document.getElementById('walletTon').textContent = fmtTon(res.data.tonBalance)+' TON';
+    document.getElementById('wdBal').textContent = fmtTon(res.data.tonBalance);
+    document.getElementById('homeTon').textContent = fmtTon(res.data.tonBalance);
+    loadState();
+  }).catch(function(e){ btn.disabled=false; btn.textContent='Request Withdrawal'; msg.textContent=e.message; msg.style.color='var(--red)'; });
+}
+
+// ── Invite / copy ─────────────────────────────────────────────────────
+function shareInvite(){
+  if (!S.user) return;
+  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var link = 'https://t.me/'+botUser+'?start='+S.user.referralCode;
+  var text  = 'Join me on SHIB Rewards and earn real TON!';
+  var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
+  }
+  navigator.clipboard && navigator.clipboard.writeText(link);
+  showToast('Invite link copied! 🎉');
+}
+
+function copyRefLink(){
+  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var link = 'https://t.me/'+botUser+'?start='+(S.user ? S.user.referralCode : '0');
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try{ var url='https://t.me/share/url?url='+encodeURIComponent(link); Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
+  }
+  navigator.clipboard && navigator.clipboard.writeText(link);
+  showToast('Referral link copied! 📋');
+}
+
+// ── Page switching ────────────────────────────────────────────────────
+var currentPage = 'home';
+function switchPage(name){
+  if (currentPage===name) return;
+  var prev = document.getElementById('page-'+currentPage);
+  var next = document.getElementById('page-'+name);
+  prev.classList.remove('active'); prev.classList.add('prev');
+  setTimeout(function(){ prev.classList.remove('prev'); }, 350);
+  next.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('nav-'+name).classList.add('active');
+  currentPage = name;
+}
+
+// ── Modals ─────────────────────────────────────────────────────────────
+function openAddTaskModal(){ document.getElementById('addTaskModal').classList.add('open'); }
+function openDepositModal(){ document.getElementById('depositModal').classList.add('open'); }
+function openWithdrawModal(){
+  if (S.user){ document.getElementById('wdBal').textContent = fmtTon(S.user.tonBalance); }
+  document.getElementById('withdrawModal').classList.add('open');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
+
+function submitAddTask(){
+  var link = document.getElementById('addTaskLink').value.trim();
+  var desc = document.getElementById('addTaskDesc').value.trim();
+  if (!link){ showToast('Please enter a link!','error'); return; }
+  api('submitTaskSuggestion', { link:link, desc:desc }).then(function(res){
+    if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
+    closeModal('addTaskModal');
+    document.getElementById('addTaskLink').value=''; document.getElementById('addTaskDesc').value='';
+    showToast('Task submitted for review ✅');
+  }).catch(function(){ showToast('Network error','error'); });
+}
+
+// ── Daily combo countdown (resets at UTC midnight) ─────────────────────
+(function timerTick(){
+  setInterval(function(){
+    var el = document.getElementById('comboTimer'); if(!el) return;
+    var now = new Date();
+    var nextUtcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1);
+    var s = Math.max(0, Math.floor((nextUtcMidnight - now.getTime())/1000));
+    el.textContent=[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(function(n){ return String(n).padStart(2,'0'); }).join(':');
+  },1000);
+})();
+
+// ── Toast ──────────────────────────────────────────────────────────────
+var _toastTimer;
+function showToast(msg, type){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (type==='error'?' error':'');
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────
+function fmtNum(n){ return (parseInt(n)||0).toLocaleString('en-US'); }
+function fmtTon(n){ var s=(parseFloat(n)||0).toFixed(4).replace(/\.?0+$/,''); return s||'0'; }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){ return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function timeAgo(ts){
+  var d=(Date.now()-ts)/1000;
+  if(d<60) return 'just now';
+  if(d<3600) return Math.floor(d/60)+'m ago';
+  if(d<86400) return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
 </script>
 </body>
 </html>
