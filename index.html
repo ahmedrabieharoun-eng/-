@@ -277,7 +277,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-            <span class="balance-currency">TON</span>
+            <span class="balance-currency">SHIBA</span>
           </div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
           <div class="balance-logo">🐕</div>
@@ -296,7 +296,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
           <div class="stat-card">
             <div class="stat-val orange" id="statEarned">0</div>
-            <div class="stat-lbl">TON Earned</div>
+            <div class="stat-lbl">SHIBA Earned</div>
           </div>
         </div>
       </div>
@@ -325,7 +325,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="promo-emoji">🚀</div>
           <div class="promo-content">
             <div class="promo-title">Big Rewards Await!</div>
-            <div class="promo-desc">Invite friends, complete tasks and earn real TON rewards!</div>
+            <div class="promo-desc">Invite friends, complete tasks and earn real SHIBA rewards!</div>
             <button class="promo-btn" onclick="switchPage('tasks')">Let's Go!</button>
           </div>
         </div>
@@ -342,7 +342,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
             <div class="combo-title">Daily Combo</div>
             <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
           </div>
-          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your TON reward</div>
+          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your SHIBA reward</div>
           <div class="combo-slots">
             <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
             <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
@@ -381,7 +381,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="ref-banner">
         <span class="ref-emoji">🐶</span>
         <div class="ref-banner-title">Invite friends and earn</div>
-        <span class="ref-banner-pct" id="refPct">0.002 TON</span>
+        <span class="ref-banner-pct" id="refPct">4,000 SHIBA</span>
         <div class="ref-banner-desc">for every friend who joins using your link!</div>
       </div>
 
@@ -407,7 +407,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
           <div class="ref-stat-card">
             <div class="ref-stat-val orange" id="refTotalEarned">0</div>
-            <div class="ref-stat-lbl">TON Earned</div>
+            <div class="ref-stat-lbl">SHIBA Earned</div>
           </div>
         </div>
       </div>
@@ -424,9 +424,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
       <div class="wallet-bal-card">
-        <div class="wbal-label">TON Balance</div>
-        <div class="wbal-amount" id="walletTon">0 TON</div>
-        <div class="wbal-sub" id="walletCoinsInfo">Earn TON from tasks &amp; referrals</div>
+        <div class="wbal-label">SHIBA Balance</div>
+        <div class="wbal-amount" id="walletTon">0 SHIBA</div>
+        <div class="wbal-sub" id="walletCoinsInfo">Earn SHIBA from tasks &amp; referrals</div>
       </div>
 
       <div class="wallet-actions">
@@ -479,7 +479,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 <script>
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
-var BOT_USER = 'YourBotUsername'; // ← غيّرها ليوزر بوت التليجرام بتاعك من غير @
+var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
 
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
@@ -532,19 +532,21 @@ function loadState(){
 
 // Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
 function showMockData(){
-  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:0.5, referralCode:'123456' };
+  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'123456' };
   S.data = {
     referrals:[], balanceLogs:[],
     tasks:[
-      {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:0.002,status:'active'},
-      {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:0.002,status:'active'},
-      {id:'inv1',category:'invite',title:'Invite 1 Friend',reward:0.002,requiredReferrals:1,status:'active'},
-      {id:'inv5',category:'invite',title:'Invite 5 Friends',reward:0.012,requiredReferrals:5,status:'active'},
-      {id:'inv10',category:'invite',title:'Invite 10 Friends',reward:0.03,requiredReferrals:10,status:'active'}
+      {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:500,status:'active'},
+      {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'},
+      {id:'invite_1',category:'invite',title:'دعوة 1 مستخدم',reward:1000,requiredReferrals:1,status:'active'},
+      {id:'invite_10',category:'invite',title:'دعوة 10 مستخدمين',reward:10000,requiredReferrals:10,status:'active'},
+      {id:'invite_25',category:'invite',title:'دعوة 25 مستخدم',reward:25000,requiredReferrals:25,status:'active'},
+      {id:'invite_50',category:'invite',title:'دعوة 50 مستخدم',reward:50000,requiredReferrals:50,status:'active'},
+      {id:'invite_100',category:'invite',title:'دعوة 100 مستخدم',reward:100000,requiredReferrals:100,status:'active'}
     ],
     completedTasks:[],
-    combo:{ solvedToday:false, reward:0.01 },
-    config:{ referralReward:0.002, botUsername:BOT_USER }
+    combo:{ solvedToday:false, reward:5000 },
+    config:{ referralReward:4000, botUsername:BOT_USER }
   };
   S.refs = [];
   showApp();
@@ -565,29 +567,29 @@ function render(){
   else av.textContent = (u.firstName||'P')[0].toUpperCase();
   document.getElementById('homeName').textContent = u.firstName || 'Player';
   // Balance
-  document.getElementById('homeTon').textContent = fmtTon(u.balance);
+  document.getElementById('homeTon').textContent = fmtShiba(u.balance);
   // Stats
   var totalRefs = S.refs.length;
   var activeRefs = S.refs.length; // كل إحالة مفعّلة بمجرد دخولها (لا يوجد نظام إيداع)
   var totalRefEarned = S.refs.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
   document.getElementById('statTotalRefs').textContent = totalRefs;
   document.getElementById('statActiveRefs').textContent = activeRefs;
-  document.getElementById('statEarned').textContent = fmtTon(totalRefEarned);
+  document.getElementById('statEarned').textContent = fmtShiba(totalRefEarned);
   // Invite btn
-  var refReward = cfg.referralReward || 0.002;
-  document.getElementById('homeInviteSub').textContent = 'Earn '+fmtTon(refReward)+' TON per friend!';
+  var refReward = cfg.referralReward || 4000;
+  document.getElementById('homeInviteSub').textContent = 'Earn '+fmtShiba(refReward)+' SHIBA per friend!';
   document.getElementById('homeInviteBtn').onclick = function(){ shareInvite(); };
   // Activity log
   renderActivity(d.balanceLogs || []);
   // Refs page
-  document.getElementById('refPct').textContent = fmtTon(refReward)+' TON';
+  document.getElementById('refPct').textContent = fmtShiba(refReward)+' SHIBA';
   document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?start='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
-  document.getElementById('refTotalEarned').textContent = fmtTon(totalRefEarned);
+  document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
   // Wallet (Balance & History)
-  document.getElementById('walletTon').textContent = fmtTon(u.balance) + ' TON';
+  document.getElementById('walletTon').textContent = fmtShiba(u.balance) + ' SHIBA';
   renderWalletHistory(d.balanceLogs||[]);
   // Combo
   renderComboState();
@@ -609,7 +611,7 @@ function renderActivity(log){
       '<div class="reward-icon">'+icon+'</div>'+
       '<div class="reward-info">'+
         '<div class="reward-name">'+label+'</div>'+
-        (amount ? '<div class="reward-amount">+'+fmtTon(Math.abs(amount))+' TON</div>' : '')+
+        (amount ? '<div class="reward-amount">+'+fmtShiba(Math.abs(amount))+' SHIBA</div>' : '')+
       '</div>'+
       '<div class="reward-time">'+ts+'</div>'+
     '</div>';
@@ -624,7 +626,7 @@ function renderRefs(page){
   el.innerHTML = visible.map(function(r){
     var name = r.firstName || r.name || 'Unknown';
     var handle = r.username ? '@'+r.username : '';
-    var earned = fmtTon(r.reward || 0);
+    var earned = fmtShiba(r.reward || 0);
     var badge = '<span class="ref-user-badge active">Active</span>';
     var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
     var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
@@ -637,7 +639,7 @@ function renderRefs(page){
       '</div>'+
       '<div class="ref-user-earn">'+
         '<span class="ref-user-earn-val">+'+earned+'</span>'+
-        '<span class="ref-user-earn-lbl">TON</span>'+
+        '<span class="ref-user-earn-lbl">SHIBA</span>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -655,7 +657,7 @@ function renderWalletHistory(logs){
   var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
   var rows = logs.slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).map(function(l){
     var label = labels[l.type] || (l.type||'Reward');
-    return { label: label+' +'+fmtTon(l.amount)+' TON', cls:'ok', txt:'Done' };
+    return { label: label+' +'+fmtShiba(l.amount)+' SHIBA', cls:'ok', txt:'Done' };
   });
   document.getElementById('walletHistory').innerHTML = rows.map(function(r){
     return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>';
@@ -684,7 +686,7 @@ function renderTasks(tab){
         '<div class="task-logo">👥</div>'+
         '<div class="task-info">'+
           '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
-          '<div class="task-reward">+'+fmtTon(t.reward)+' TON</div>'+
+          '<div class="task-reward">+'+fmtShiba(t.reward)+' SHIBA</div>'+
         '</div>'+
         '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
       '</div>';
@@ -704,7 +706,7 @@ function renderTasks(tab){
       '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
       '<div class="task-info">'+
         '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
-        '<div class="task-reward">+'+fmtTon(t.reward)+' TON</div>'+
+        '<div class="task-reward">+'+fmtShiba(t.reward)+' SHIBA</div>'+
       '</div>'+
       '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
     '</div>';
@@ -737,12 +739,12 @@ function doVerifyTask(id){
     if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
-    S.user.balance = res.data.tonBalance;
+    S.user.balance = res.data.shibaBalance;
     delete S.taskJoined[id];
-    document.getElementById('homeTon').textContent = fmtTon(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtTon(S.user.balance) + ' TON';
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
     renderTasks(currentTab);
-    showToast('+'+fmtTon(res.data.tonAdded)+' TON added! 🎉');
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' SHIBA added! 🎉');
   }).catch(function(){ showToast('Network error','error'); });
 }
 
@@ -751,11 +753,11 @@ function doClaimInvite(id){
     if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
-    S.user.balance = res.data.tonBalance;
-    document.getElementById('homeTon').textContent = fmtTon(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtTon(S.user.balance) + ' TON';
+    S.user.balance = res.data.shibaBalance;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
     renderTasks(currentTab);
-    showToast('+'+fmtTon(res.data.tonAdded)+' TON added! 🎉');
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' SHIBA added! 🎉');
   }).catch(function(){ showToast('Network error','error'); });
 }
 
@@ -764,15 +766,15 @@ function renderComboState(){
   var combo = (S.data && S.data.combo) || {};
   var btn = document.getElementById('comboCheckBtn');
   var desc = document.getElementById('comboDesc');
-  var reward = combo.reward || 0.01;
+  var reward = combo.reward || 5000;
   if (combo.solvedToday){
     btn.disabled = true;
     btn.textContent = '✓ Claimed Today';
     desc.textContent = 'Come back tomorrow for a new combo!';
   } else {
     btn.disabled = false;
-    btn.textContent = 'Check Combo — '+fmtTon(reward)+' TON';
-    desc.textContent = 'Find the correct combination and claim your TON reward';
+    btn.textContent = 'Check Combo — '+fmtShiba(reward)+' SHIBA';
+    desc.textContent = 'Find the correct combination and claim your SHIBA reward';
   }
 }
 
@@ -806,11 +808,11 @@ function checkCombo(){
       resetCombo();
       return;
     }
-    S.user.balance = res.data.tonBalance;
+    S.user.balance = res.data.shibaBalance;
     S.data.combo.solvedToday = true;
-    document.getElementById('homeTon').textContent = fmtTon(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtTon(S.user.balance) + ' TON';
-    showToast('🎉 Correct! +'+fmtTon(res.data.tonAdded)+' TON!');
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+    showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' SHIBA!');
     renderComboState();
     resetCombo();
   }).catch(function(){
@@ -841,7 +843,7 @@ function shareInvite(){
   if (!S.user) return;
   var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
   var link = 'https://t.me/'+botUser+'?start='+S.user.referralCode;
-  var text  = 'Join me on SHIB Rewards and earn real TON!';
+  var text  = 'Join me on SHIB Rewards and earn real SHIBA!';
   var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
     try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
@@ -915,7 +917,7 @@ function showToast(msg, type){
 
 // ── Utils ──────────────────────────────────────────────────────────────
 function fmtNum(n){ return (parseInt(n)||0).toLocaleString('en-US'); }
-function fmtTon(n){ var s=(parseFloat(n)||0).toFixed(4).replace(/\.?0+$/,''); return s||'0'; }
+function fmtShiba(n){ return Math.round(parseFloat(n)||0).toLocaleString('en-US'); }
 function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){ return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
 function timeAgo(ts){
   var d=(Date.now()-ts)/1000;
