@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -280,7 +279,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
             <span class="balance-num" id="homeTon">0</span>
             <span class="balance-currency">TON</span>
           </div>
-          <div class="balance-sub" id="homeTonUsd">≈ $0.00</div>
+          <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
           <div class="balance-logo">🐕</div>
         </div>
       </div>
@@ -307,7 +306,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="invite-icon">✈️</div>
           <div class="invite-text">
             <span class="invite-title">Invite Friends</span>
-            <span class="invite-sub" id="homeInviteSub">Earn 10% of friends' deposits!</span>
+            <span class="invite-sub" id="homeInviteSub">Earn rewards for every friend!</span>
           </div>
         </button>
       </div>
@@ -382,8 +381,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="ref-banner">
         <span class="ref-emoji">🐶</span>
         <div class="ref-banner-title">Invite friends and earn</div>
-        <span class="ref-banner-pct" id="refPct">10%</span>
-        <div class="ref-banner-desc">of every deposit your referrals make — forever!</div>
+        <span class="ref-banner-pct" id="refPct">0.002 TON</span>
+        <div class="ref-banner-desc">for every friend who joins using your link!</div>
       </div>
 
       <div class="ref-link-section">
@@ -431,13 +430,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       </div>
 
       <div class="wallet-actions">
-        <div class="wallet-action-btn" onclick="openDepositModal()">
-          <div class="wallet-action-icon">⬇️</div>
-          <div class="wallet-action-label">Deposit TON</div>
-        </div>
-        <div class="wallet-action-btn primary" onclick="openWithdrawModal()">
-          <div class="wallet-action-icon">⬆️</div>
-          <div class="wallet-action-label">Withdraw</div>
+        <div class="wallet-action-btn primary" style="grid-column:1 / span 2" onclick="switchPage('tasks')">
+          <div class="wallet-action-icon">📋</div>
+          <div class="wallet-action-label">Earn More via Tasks</div>
         </div>
       </div>
 
@@ -478,47 +473,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   </div>
 </div>
 
-<!-- Deposit Modal -->
-<div class="modal-overlay" id="depositModal" onclick="closeModalOutside(event,'depositModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">⬇️ Deposit TON</div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-radius:10px;line-height:1.6">
-      Send TON to: <span style="color:var(--orange);font-weight:700" id="depositAddr">—</span><br>
-      Min: <span id="depositMin">1</span> TON
-    </div>
-    <input class="modal-input" id="depAmount" type="number" step="0.0001" placeholder="Amount in TON">
-    <input class="modal-input" id="depHash" placeholder="Transaction hash">
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="depMsg"></div>
-    <button class="modal-submit" id="depBtn" onclick="submitDeposit()">Submit Deposit</button>
-    <button class="modal-close" onclick="closeModal('depositModal')">Cancel</button>
-  </div>
-</div>
-
-<!-- Withdraw Modal -->
-<div class="modal-overlay" id="withdrawModal" onclick="closeModalOutside(event,'withdrawModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">⬆️ Withdraw TON</div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-radius:10px;line-height:1.6">
-      Min: <span id="wdMin">0.0001</span> TON &nbsp;|&nbsp; Fee: <span id="wdFee">10</span>%<br>
-      Balance: <span style="color:var(--orange);font-weight:700" id="wdBal">0</span> TON
-    </div>
-    <input class="modal-input" id="wdAddr" placeholder="Your TON wallet address">
-    <input class="modal-input" id="wdAmount" type="number" step="0.0001" placeholder="Amount in TON">
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="wdMsg"></div>
-    <button class="modal-submit" id="wdBtn" onclick="submitWithdraw()">Request Withdrawal</button>
-    <button class="modal-close" onclick="closeModal('withdrawModal')">Cancel</button>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────
-// ↓↓↓ غيّر القيمتين دول بعد ما تنشر الـ Worker على Cloudflare ↓↓↓
-var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev/'; // ← رابط الـ Worker بتاعك
-var BOT_USER = 'YourBotUsername'; // ← يوزر بوت التليجرام بتاعك من غير @
+var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
+var BOT_USER = 'YourBotUsername'; // ← غيّرها ليوزر بوت التليجرام بتاعك من غير @
 
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
@@ -543,11 +504,12 @@ var currentTab = 'channels';
 })();
 
 // ── API ──────────────────────────────────────────────────────────────
+// worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
 function api(action, data){
-  return fetch(API_URL, {
+  return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
     method: 'POST',
-    headers: { 'Content-Type':'application/json', 'Authorization':'Telegram '+S.initData, 'X-Action':action },
-    body: JSON.stringify({ action:action, data:data||{} })
+    headers: { 'Content-Type':'application/json', 'Authorization':'tma '+S.initData },
+    body: JSON.stringify(data||{})
   }).then(function(r){ return r.json(); });
 }
 
@@ -570,17 +532,19 @@ function loadState(){
 
 // Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
 function showMockData(){
-  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', tonBalance:0.5, referralCode:'123456', withdrawWallet:'' };
+  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:0.5, referralCode:'123456' };
   S.data = {
-    referrals:[], depHistory:[], wdHistory:[], balanceLog:[],
+    referrals:[], balanceLogs:[],
     tasks:[
-      {id:'c1',category:'channels',icon:'✈️',name:'Join Main Channel',link:'https://t.me/yourchannel',reward:0.002,status:'active'},
-      {id:'b1',category:'bots',icon:'🎮',name:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:0.002,status:'active'},
+      {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:0.002,status:'active'},
+      {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:0.002,status:'active'},
+      {id:'inv1',category:'invite',title:'Invite 1 Friend',reward:0.002,requiredReferrals:1,status:'active'},
+      {id:'inv5',category:'invite',title:'Invite 5 Friends',reward:0.012,requiredReferrals:5,status:'active'},
+      {id:'inv10',category:'invite',title:'Invite 10 Friends',reward:0.03,requiredReferrals:10,status:'active'}
     ],
+    completedTasks:[],
     combo:{ solvedToday:false, reward:0.01 },
-    config:{ refBonusPct:10, minWithdrawTon:0.0001, minDepositTon:1, withdrawFeePct:10, depositAddress:'YOUR_TON_WALLET_ADDRESS', botUsername:BOT_USER, inviteTasks:{
-      invite_1:{kind:'invite',n:1,ton:0.002}, invite_5:{kind:'invite',n:5,ton:0.012}, invite_10:{kind:'invite',n:10,ton:0.03}
-    }}
+    config:{ referralReward:0.002, botUsername:BOT_USER }
   };
   S.refs = [];
   showApp();
@@ -601,36 +565,30 @@ function render(){
   else av.textContent = (u.firstName||'P')[0].toUpperCase();
   document.getElementById('homeName').textContent = u.firstName || 'Player';
   // Balance
-  document.getElementById('homeTon').textContent = fmtTon(u.tonBalance);
+  document.getElementById('homeTon').textContent = fmtTon(u.balance);
   // Stats
   var totalRefs = S.refs.length;
-  var activeRefs = S.refs.filter(function(r){ return r.hasDeposited; }).length;
-  var totalRefEarned = S.refs.reduce(function(sum,r){ return sum + (parseFloat(r.earned)||0); },0);
+  var activeRefs = S.refs.length; // كل إحالة مفعّلة بمجرد دخولها (لا يوجد نظام إيداع)
+  var totalRefEarned = S.refs.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
   document.getElementById('statTotalRefs').textContent = totalRefs;
   document.getElementById('statActiveRefs').textContent = activeRefs;
   document.getElementById('statEarned').textContent = fmtTon(totalRefEarned);
   // Invite btn
-  var pct = cfg.refBonusPct || 10;
-  document.getElementById('homeInviteSub').textContent = 'Earn '+pct+'% of friends\' deposits!';
+  var refReward = cfg.referralReward || 0.002;
+  document.getElementById('homeInviteSub').textContent = 'Earn '+fmtTon(refReward)+' TON per friend!';
   document.getElementById('homeInviteBtn').onclick = function(){ shareInvite(); };
   // Activity log
-  renderActivity(d.balanceLog || []);
+  renderActivity(d.balanceLogs || []);
   // Refs page
-  document.getElementById('refPct').textContent = pct + '%';
+  document.getElementById('refPct').textContent = fmtTon(refReward)+' TON';
   document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?start='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
   document.getElementById('refTotalEarned').textContent = fmtTon(totalRefEarned);
   renderRefs(0);
-  // Wallet
-  document.getElementById('walletTon').textContent = fmtTon(u.tonBalance) + ' TON';
-  document.getElementById('depositAddr').textContent = cfg.depositAddress || 'YOUR_TON_WALLET_ADDRESS';
-  document.getElementById('depositMin').textContent = cfg.minDepositTon || 1;
-  document.getElementById('wdMin').textContent = cfg.minWithdrawTon || 0.0001;
-  document.getElementById('wdFee').textContent = cfg.withdrawFeePct || 10;
-  document.getElementById('wdBal').textContent = fmtTon(u.tonBalance);
-  if (u.withdrawWallet) document.getElementById('wdAddr').value = u.withdrawWallet;
-  renderWalletHistory(d.depHistory||[], d.wdHistory||[]);
+  // Wallet (Balance & History)
+  document.getElementById('walletTon').textContent = fmtTon(u.balance) + ' TON';
+  renderWalletHistory(d.balanceLogs||[]);
   // Combo
   renderComboState();
   // Tasks
@@ -640,11 +598,12 @@ function render(){
 function renderActivity(log){
   var el = document.getElementById('homeActivity');
   if (!log.length){ el.innerHTML = '<div class="empty-state">No activity yet</div>'; return; }
-  var icons = { verify_task:'✅', claim_task:'🎯', combo_claim:'🎉', withdraw_request:'💸', admin_confirm_deposit:'💰', referral_commission:'👥', admin_set_balance:'🔧' };
+  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥' };
+  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
   el.innerHTML = log.slice(0,5).map(function(e){
     var icon = icons[e.type] || '✅';
-    var amount = e.ton_reward!=null ? e.ton_reward : (e.amount_net!=null ? e.amount_net : (e.amount_ton!=null ? e.amount_ton : e.comm));
-    var label = (e.type||'').replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
+    var amount = e.amount;
+    var label = labels[e.type] || (e.type||'').replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
     var ts = e.ts ? timeAgo(e.ts) : '';
     return '<div class="reward-item">'+
       '<div class="reward-icon">'+icon+'</div>'+
@@ -665,8 +624,8 @@ function renderRefs(page){
   el.innerHTML = visible.map(function(r){
     var name = r.firstName || r.name || 'Unknown';
     var handle = r.username ? '@'+r.username : '';
-    var earned = fmtTon(r.earned || 0);
-    var badge = r.hasDeposited ? '<span class="ref-user-badge active">Active</span>' : '<span class="ref-user-badge new">New</span>';
+    var earned = fmtTon(r.reward || 0);
+    var badge = '<span class="ref-user-badge active">Active</span>';
     var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
     var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
     return '<div class="ref-user-item">'+
@@ -691,14 +650,16 @@ function loadMoreRefs(){
   renderRefs(S.refPage);
 }
 
-function renderWalletHistory(deps, wds){
-  var rows = [];
-  deps.forEach(function(d){ rows.push({ ts:d.ts, label:'Deposit '+fmtTon(d.amount)+' TON', cls:d.status==='completed'?'ok':'pend', txt:d.status==='completed'?'Done':'Pending' }); });
-  wds.forEach(function(w){ rows.push({ ts:w.ts, label:'Withdraw '+fmtTon(w.amtRequested||w.amt)+' TON', cls:w.status==='approved'?'ok':w.status==='rejected'?'err':'pend', txt:w.status==='approved'?'Approved':w.status==='rejected'?'Rejected':'Pending' }); });
-  rows.sort(function(a,b){ return b.ts - a.ts; });
-  var el = document.getElementById('walletHistory');
-  if (!rows.length){ el.innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
-  el.innerHTML = rows.map(function(r){ return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>'; }).join('');
+function renderWalletHistory(logs){
+  if (!logs || !logs.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
+  var rows = logs.slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).map(function(l){
+    var label = labels[l.type] || (l.type||'Reward');
+    return { label: label+' +'+fmtTon(l.amount)+' TON', cls:'ok', txt:'Done' };
+  });
+  document.getElementById('walletHistory').innerHTML = rows.map(function(r){
+    return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>';
+  }).join('');
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────
@@ -706,24 +667,24 @@ function renderTasks(tab){
   var labels = { channels:'Join Channels', bots:'Join Bots', invite:'Invite Tasks' };
   document.getElementById('tasksGroupLabel').textContent = labels[tab];
   var completed = (S.data && S.data.completedTasks) || [];
+  var allTasks = (S.data && S.data.tasks) || [];
 
   if (tab === 'invite'){
-    var inviteDefs = (S.data.config && S.data.config.inviteTasks) || {};
     var refCount = S.refs.length;
-    var labelMap = { invite_1:'Invite 1 Friend', invite_5:'Invite 5 Friends', invite_10:'Invite 10 Friends' };
-    var ids = ['invite_1','invite_5','invite_10'];
-    document.getElementById('tasksContent').innerHTML = ids.filter(function(id){ return inviteDefs[id]; }).map(function(id){
-      var t = inviteDefs[id];
-      var done = completed.indexOf(id) > -1;
-      var eligible = refCount >= t.n;
+    var list = allTasks.filter(function(t){ return t.category==='invite'; });
+    if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No invite tasks right now</div>'; return; }
+    document.getElementById('tasksContent').innerHTML = list.map(function(t){
+      var required = t.requiredReferrals || t.requiredCount || 0;
+      var done = completed.indexOf(t.id) > -1;
+      var eligible = refCount >= required;
       var btnClass = done ? 'done' : (eligible ? 'join' : 'verify');
-      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+t.n);
-      var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+id+'\')' : '');
+      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+required);
+      var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+t.id+'\')' : '');
       return '<div class="task-item">'+
         '<div class="task-logo">👥</div>'+
         '<div class="task-info">'+
-          '<div class="task-name">'+esc(labelMap[id]||id)+'</div>'+
-          '<div class="task-reward">+'+fmtTon(t.ton)+' TON</div>'+
+          '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
+          '<div class="task-reward">+'+fmtTon(t.reward)+' TON</div>'+
         '</div>'+
         '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
       '</div>';
@@ -731,7 +692,7 @@ function renderTasks(tab){
     return;
   }
 
-  var list = ((S.data && S.data.tasks) || []).filter(function(t){ return t.category===tab; });
+  var list = allTasks.filter(function(t){ return t.category===tab; });
   if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
   document.getElementById('tasksContent').innerHTML = list.map(function(t){
     var done = completed.indexOf(t.id) > -1;
@@ -740,9 +701,9 @@ function renderTasks(tab){
     var btnText  = st==='join'?'Join':st==='verify'?'Verify':'✓ Done';
     var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
     return '<div class="task-item">'+
-      '<div class="task-logo">'+(t.icon||'📋')+'</div>'+
+      '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
       '<div class="task-info">'+
-        '<div class="task-name">'+esc(t.name)+'</div>'+
+        '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
         '<div class="task-reward">+'+fmtTon(t.reward)+' TON</div>'+
       '</div>'+
       '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
@@ -776,10 +737,10 @@ function doVerifyTask(id){
     if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
-    S.user.tonBalance = res.data.tonBalance;
+    S.user.balance = res.data.tonBalance;
     delete S.taskJoined[id];
-    document.getElementById('homeTon').textContent = fmtTon(S.user.tonBalance);
-    document.getElementById('walletTon').textContent = fmtTon(S.user.tonBalance) + ' TON';
+    document.getElementById('homeTon').textContent = fmtTon(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtTon(S.user.balance) + ' TON';
     renderTasks(currentTab);
     showToast('+'+fmtTon(res.data.tonAdded)+' TON added! 🎉');
   }).catch(function(){ showToast('Network error','error'); });
@@ -790,9 +751,9 @@ function doClaimInvite(id){
     if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
-    S.user.tonBalance = res.data.tonBalance;
-    document.getElementById('homeTon').textContent = fmtTon(S.user.tonBalance);
-    document.getElementById('walletTon').textContent = fmtTon(S.user.tonBalance) + ' TON';
+    S.user.balance = res.data.tonBalance;
+    document.getElementById('homeTon').textContent = fmtTon(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtTon(S.user.balance) + ' TON';
     renderTasks(currentTab);
     showToast('+'+fmtTon(res.data.tonAdded)+' TON added! 🎉');
   }).catch(function(){ showToast('Network error','error'); });
@@ -845,10 +806,10 @@ function checkCombo(){
       resetCombo();
       return;
     }
-    S.user.tonBalance = res.data.tonBalance;
+    S.user.balance = res.data.tonBalance;
     S.data.combo.solvedToday = true;
-    document.getElementById('homeTon').textContent = fmtTon(S.user.tonBalance);
-    document.getElementById('walletTon').textContent = fmtTon(S.user.tonBalance) + ' TON';
+    document.getElementById('homeTon').textContent = fmtTon(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtTon(S.user.balance) + ' TON';
     showToast('🎉 Correct! +'+fmtTon(res.data.tonAdded)+' TON!');
     renderComboState();
     resetCombo();
@@ -873,49 +834,7 @@ function resetCombo(){
 }
 
 // ── Wallet actions ─────────────────────────────────────────────────────
-function submitDeposit(){
-  var amount = parseFloat(document.getElementById('depAmount').value);
-  var hash   = document.getElementById('depHash').value.trim();
-  var btn    = document.getElementById('depBtn');
-  var msg    = document.getElementById('depMsg');
-  msg.textContent = '';
-  if (!amount || amount <= 0){ msg.textContent = 'Enter a valid amount.'; msg.style.color='var(--red)'; return; }
-  if (!hash || hash.length < 5){ msg.textContent = 'Enter the transaction hash.'; msg.style.color='var(--red)'; return; }
-  btn.disabled = true; btn.textContent = 'Submitting...';
-  api('deposit', { amount:amount, txHash:hash }).then(function(res){
-    btn.disabled = false; btn.textContent = 'Submit Deposit';
-    if (!res.success){ msg.textContent=res.error||'Failed.'; msg.style.color='var(--red)'; return; }
-    closeModal('depositModal');
-    showToast('Deposit submitted! Awaiting confirmation 💰');
-    document.getElementById('depAmount').value=''; document.getElementById('depHash').value='';
-    loadState();
-  }).catch(function(e){ btn.disabled=false; btn.textContent='Submit Deposit'; msg.textContent=e.message; msg.style.color='var(--red)'; });
-}
-
-function submitWithdraw(){
-  var addr   = document.getElementById('wdAddr').value.trim();
-  var amount = parseFloat(document.getElementById('wdAmount').value);
-  var btn    = document.getElementById('wdBtn');
-  var msg    = document.getElementById('wdMsg');
-  msg.textContent = '';
-  if (!addr || addr.length < 10){ msg.textContent='Invalid TON address.'; msg.style.color='var(--red)'; return; }
-  if (!amount || amount <= 0)    { msg.textContent='Enter a valid amount.'; msg.style.color='var(--red)'; return; }
-  btn.disabled = true; btn.textContent = 'Submitting...';
-  api('withdraw', { address:addr, amount:amount }).then(function(res){
-    btn.disabled = false; btn.textContent = 'Request Withdrawal';
-    if (!res.success){ msg.textContent=res.error||'Failed.'; msg.style.color='var(--red)'; return; }
-    closeModal('withdrawModal');
-    var cfg = S.data.config||{};
-    var fee = cfg.withdrawFeePct||10;
-    var net = +(amount*(1-fee/100)).toFixed(4);
-    showToast('Withdrawal requested! Net: '+net+' TON 📤');
-    S.user.tonBalance = res.data.tonBalance;
-    document.getElementById('walletTon').textContent = fmtTon(res.data.tonBalance)+' TON';
-    document.getElementById('wdBal').textContent = fmtTon(res.data.tonBalance);
-    document.getElementById('homeTon').textContent = fmtTon(res.data.tonBalance);
-    loadState();
-  }).catch(function(e){ btn.disabled=false; btn.textContent='Request Withdrawal'; msg.textContent=e.message; msg.style.color='var(--red)'; });
-}
+// (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
 
 // ── Invite / copy ─────────────────────────────────────────────────────
 function shareInvite(){
@@ -957,11 +876,6 @@ function switchPage(name){
 
 // ── Modals ─────────────────────────────────────────────────────────────
 function openAddTaskModal(){ document.getElementById('addTaskModal').classList.add('open'); }
-function openDepositModal(){ document.getElementById('depositModal').classList.add('open'); }
-function openWithdrawModal(){
-  if (S.user){ document.getElementById('wdBal').textContent = fmtTon(S.user.tonBalance); }
-  document.getElementById('withdrawModal').classList.add('open');
-}
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
 
