@@ -19,7 +19,7 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
 
-/* ── Loading ── */
+/* Loading */
 .loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
 .loading-screen.hidden{display:none}
 .loading-logo{font-size:64px;animation:pulse 1.5s infinite}
@@ -29,37 +29,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
 
-/* ── Force Join Screen ── */
-.forcejoin-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;z-index:998;overflow-y:auto;padding-bottom:40px}
-.forcejoin-screen.hidden{display:none}
-.fj-header{width:100%;padding:32px 20px 20px;text-align:center}
-.fj-logo{font-size:60px;margin-bottom:12px}
-.fj-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px}
-.fj-desc{font-size:14px;color:var(--text2);line-height:1.5}
-.fj-channels{width:100%;padding:0 20px;margin-top:8px}
-.fj-channel-item{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:10px}
-.fj-channel-icon{width:48px;height:48px;border-radius:50%;background:rgba(0,136,204,0.15);border:1px solid rgba(0,136,204,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.fj-channel-info{flex:1;min-width:0}
-.fj-channel-name{font-size:14px;font-weight:700;color:var(--text)}
-.fj-channel-handle{font-size:12px;color:var(--text3);margin-top:2px}
-.fj-channel-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.fj-channel-status.pending{background:rgba(247,147,26,0.12);border:1px solid rgba(247,147,26,0.3);color:var(--text3)}
-.fj-channel-status.joined{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:var(--green)}
-.fj-join-btn{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(0,136,204,0.3),rgba(0,136,204,0.15));border:1px solid rgba(0,136,204,0.4);font-size:13px;font-weight:700;color:#4fc3f7;cursor:pointer;transition:all 0.2s;text-decoration:none}
-.fj-join-btn:active{transform:scale(0.95)}
-.fj-verify-btn{width:calc(100% - 40px);margin:16px 20px 0;padding:18px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:16px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
-.fj-verify-btn:active{transform:scale(0.97)}
-.fj-verify-btn:disabled{opacity:0.5;cursor:default}
-.fj-note{font-size:12px;color:var(--text3);text-align:center;padding:12px 20px;line-height:1.5}
-
-/* ── Pages ── */
+/* Pages */
 .pages{flex:1;overflow:hidden;position:relative}
 .page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:80px;-webkit-overflow-scrolling:touch}
 .page.active{transform:translateX(0)}
 .page.prev{transform:translateX(-30%)}
 .page::-webkit-scrollbar{width:0}
 
-/* ── Nav ── */
+/* Nav */
 .nav{position:absolute;bottom:0;left:0;right:0;height:72px;background:rgba(10,10,10,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--glass-border);display:flex;align-items:center;z-index:100;padding:0 8px;padding-bottom:env(safe-area-inset-bottom)}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;cursor:pointer;border-radius:12px;transition:background 0.2s;position:relative}
 .nav-item:active{background:var(--glass)}
@@ -68,10 +45,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .nav-item.active .nav-icon{color:var(--orange);transform:translateY(-1px)}
 .nav-item.active .nav-label{color:var(--orange)}
 
-/* ── Glass ── */
+/* Glass */
 .glass-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(10px)}
 
-/* ── HOME ── */
+/* ===== HOME PAGE ===== */
 .home-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between}
 .user-info{display:flex;align-items:center;gap:12px}
 .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff4500);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;border:2px solid rgba(247,147,26,0.4);flex-shrink:0;overflow:hidden}
@@ -79,6 +56,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .user-name-wrap{display:flex;flex-direction:column}
 .user-greeting{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase}
 .user-name{font-size:16px;font-weight:700;color:var(--text)}
+
 .balance-section{padding:0 16px 16px}
 .balance-card{padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
 .balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.12) 0%,transparent 70%);pointer-events:none}
@@ -88,21 +66,27 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .balance-currency{font-size:18px;font-weight:700;color:var(--orange)}
 .balance-sub{font-size:13px;color:var(--text3)}
 .balance-logo{position:absolute;right:20px;bottom:18px;font-size:44px;opacity:0.55}
+
 .stats-section{padding:0 16px 16px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
 .stat-val{font-size:17px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
 .stat-val.orange{color:var(--orange)}
 .stat-lbl{font-size:10px;color:var(--text3);letter-spacing:0.2px}
+
 .invite-section{padding:0 16px 16px}
 .invite-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s,opacity 0.15s;position:relative;overflow:hidden}
 .invite-btn:active{transform:scale(0.97)}
+.invite-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
 .invite-icon{font-size:28px;flex-shrink:0}
 .invite-text{text-align:left}
 .invite-title{font-size:17px;font-weight:800;color:#fff;display:block}
 .invite-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
+
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px}
 .section-title{font-size:16px;font-weight:700;color:var(--text)}
+.view-all{font-size:12px;color:var(--orange);cursor:pointer;font-weight:600}
+
 .rewards-section{padding:0 16px 16px}
 .reward-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
 .reward-icon{width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -110,6 +94,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .reward-name{font-size:14px;font-weight:600;color:var(--text)}
 .reward-amount{font-size:13px;color:var(--green);font-weight:700}
 .reward-time{font-size:11px;color:var(--text3)}
+
 .promo-section{padding:0 16px 16px}
 .promo-card{padding:20px;border-radius:18px;background:linear-gradient(135deg,#1a0e00,#0f0700);border:1px solid rgba(247,147,26,0.2);display:flex;gap:16px;align-items:center;position:relative;overflow:hidden}
 .promo-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(247,147,26,0.15),transparent 70%)}
@@ -120,9 +105,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .promo-btn{display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;border:none;transition:transform 0.15s}
 .promo-btn:active{transform:scale(0.95)}
 
-/* ── TASKS ── */
+/* ===== TASKS PAGE ===== */
 .tasks-header{padding:20px 20px 16px;text-align:center}
 .page-title{font-size:22px;font-weight:800;color:var(--text)}
+
 .combo-section{padding:0 16px 16px}
 .combo-card{padding:20px;border-radius:18px;background:linear-gradient(145deg,#0f0800,#111111);border:1px solid rgba(247,147,26,0.3)}
 .combo-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -141,10 +127,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .combo-item.selected{border-color:var(--orange);background:rgba(247,147,26,0.15)}
 .combo-check-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s}
 .combo-check-btn:active{transform:scale(0.97)}
+
 .tabs-section{padding:0 16px 12px}
 .tabs{display:flex;gap:6px;background:var(--glass);border-radius:12px;padding:4px;border:1px solid var(--glass-border)}
 .tab{flex:1;padding:8px 6px;border-radius:10px;text-align:center;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
 .tab.active{background:var(--orange);color:#fff}
+
 .tasks-list{padding:0 16px 8px}
 .tasks-group-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px}
 .task-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
@@ -156,18 +144,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
 .task-btn.verify{background:rgba(247,147,26,0.15);color:var(--orange);border:1px solid rgba(247,147,26,0.3)}
 .task-btn.done{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+
 .add-task-section{padding:0 16px 16px}
 .add-task-btn{width:100%;padding:16px;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:14px;font-weight:600}
 .add-task-btn:active{background:var(--orange-dim)}
 .add-task-sub{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
 
-/* ── REFERRALS ── */
+/* ===== REFERRALS PAGE ===== */
 .ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(247,147,26,0.25);text-align:center;position:relative;overflow:hidden}
 .ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(247,147,26,0.18) 0%,transparent 70%)}
 .ref-emoji{font-size:56px;margin-bottom:10px;display:block;position:relative}
 .ref-banner-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;position:relative}
 .ref-banner-pct{font-size:28px;font-weight:900;color:var(--orange);display:block;margin-bottom:8px;position:relative}
 .ref-banner-desc{font-size:13px;color:var(--text2);position:relative}
+
 .ref-link-section{padding:0 16px 16px}
 .ref-link-card{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)}
 .ref-link-label{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
@@ -175,6 +165,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .ref-link-url{flex:1;font-size:12px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,0.06)}
 .copy-btn{padding:10px 18px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:13px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
 .copy-btn:active{transform:scale(0.94)}
+
 .ref-stats{padding:0 16px 16px}
 .ref-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .ref-stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
@@ -183,6 +174,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .ref-stat-lbl{font-size:10px;color:var(--text3)}
 .active-dot{width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;margin-right:4px;animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+
 .ref-list-section{padding:0 16px 16px}
 .ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
 .ref-user-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
@@ -196,16 +188,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .ref-user-earn-lbl{font-size:10px;color:var(--text3)}
 .ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
 .ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
-.ref-user-badge.pending{background:rgba(247,147,26,0.12);color:var(--orange)}
+.ref-user-badge.new{background:rgba(247,147,26,0.12);color:var(--orange)}
 .load-more{width:100%;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;margin-top:4px}
+.load-more:active{background:rgba(255,255,255,0.08)}
 
-/* ── WALLET ── */
+/* ===== WALLET PAGE ===== */
 .wallet-header{padding:20px 20px 16px;text-align:center}
 .wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
 .wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.1) 0%,transparent 70%);pointer-events:none}
 .wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
 .wbal-sub{font-size:13px;color:var(--text3)}
+
 .wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
 .wallet-action-btn{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s}
 .wallet-action-btn:active{background:rgba(255,255,255,0.08);transform:scale(0.97)}
@@ -213,16 +207,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .wallet-action-icon{font-size:24px}
 .wallet-action-label{font-size:13px;font-weight:700;color:var(--text)}
 .wallet-action-btn.primary .wallet-action-label{color:#fff}
-/* Withdraw Form */
-.withdraw-form{margin:0 16px 16px;padding:20px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
-.withdraw-form-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.withdraw-label{font-size:12px;color:var(--text3);margin-bottom:6px;font-weight:600;letter-spacing:0.3px}
-.withdraw-input{width:100%;padding:13px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:14px;font-family:inherit;transition:border-color 0.2s}
-.withdraw-input:focus{border-color:rgba(247,147,26,0.5)}
-.withdraw-input::placeholder{color:var(--text3)}
-.withdraw-min-info{font-size:12px;color:var(--text3);margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-radius:10px}
-.withdraw-submit{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
-.withdraw-submit:disabled{opacity:0.5;cursor:default}
+
+.wallet-form-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
+.wallet-form-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
+.wallet-input:focus{border-color:rgba(247,147,26,0.5)}
+.wallet-input::placeholder{color:var(--text3)}
+.wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
+.wallet-submit:disabled{opacity:0.5;cursor:default}
+
 .tx-section{padding:0 16px 16px}
 .tx-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
 .tx-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
@@ -232,12 +225,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .tx-badge.pend{background:rgba(247,147,26,0.12);color:var(--orange)}
 .tx-badge.err{background:rgba(239,68,68,0.15);color:var(--red)}
 
-/* ── Toast ── */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(247,147,26,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:9999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(247,147,26,0.4)}
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(247,147,26,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(247,147,26,0.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.error{background:rgba(239,68,68,0.95);box-shadow:0 4px 20px rgba(239,68,68,0.4)}
 
-/* ── Modal ── */
+/* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(4px)}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{background:#141414;border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);border-top:1px solid var(--glass-border)}
@@ -250,7 +243,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .modal-submit{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
 .modal-submit:active{transform:scale(0.97)}
 .modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
+.modal-close:active{background:var(--glass)}
+
 .empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
+
+/* ===== FORCE-SUB (Mandatory Subscription) GATE ===== */
+.forcesub-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998;padding:24px;overflow-y:auto}
+.forcesub-screen.show{display:flex}
+.forcesub-card{width:100%;max-width:380px;text-align:center}
+.forcesub-emoji{font-size:56px;margin-bottom:12px}
+.forcesub-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px}
+.forcesub-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.forcesub-list{margin-bottom:20px;text-align:left}
+.forcesub-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:10px}
+.forcesub-item-icon{font-size:22px;flex-shrink:0}
+.forcesub-item-title{flex:1;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.forcesub-item-btn{padding:8px 16px;border-radius:18px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:12px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
+.forcesub-item-btn:active{transform:scale(0.94)}
+.forcesub-verify-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
+.forcesub-verify-btn:active{transform:scale(0.97)}
+.forcesub-verify-btn:disabled{opacity:0.6}
 </style>
 </head>
 <body>
@@ -262,19 +274,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   <div class="loading-bar"><div class="loading-fill"></div></div>
 </div>
 
-<!-- Force Join Screen -->
-<div class="forcejoin-screen hidden" id="forceJoinScreen">
-  <div class="fj-header">
-    <div class="fj-logo">🐕</div>
-    <div class="fj-title">Join Our Channels</div>
-    <div class="fj-desc">Please subscribe to all channels below to access SHIB Rewards</div>
+<!-- Mandatory Subscription Gate -->
+<div class="forcesub-screen" id="forceSubScreen">
+  <div class="forcesub-card">
+    <div class="forcesub-emoji">🔒</div>
+    <div class="forcesub-title">Join to Continue</div>
+    <div class="forcesub-desc">You must join the channels below to use the bot and unlock your referral reward.</div>
+    <div class="forcesub-list" id="forceSubList"></div>
+    <button class="forcesub-verify-btn" id="forceSubVerifyBtn" onclick="verifyForceSub()">✅ Verify Membership</button>
   </div>
-  <div class="fj-channels" id="fjChannelsList"></div>
-  <button class="fj-verify-btn" id="fjVerifyBtn" onclick="verifyForceJoin()">✅ Verify Subscription</button>
-  <div class="fj-note">After subscribing to all channels, tap "Verify Subscription"</div>
 </div>
 
-<!-- Main App -->
 <div class="app" id="mainApp" style="display:none">
   <div class="pages">
 
@@ -289,17 +299,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
         </div>
       </div>
+
       <div class="balance-section">
         <div class="balance-card">
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-            <span class="balance-currency" id="homeCurrencyLabel">SHIBA</span>
+            <span class="balance-currency">SHIBA</span>
           </div>
-          <div class="balance-sub">Keep earning every day!</div>
+          <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
           <div class="balance-logo">🐕</div>
         </div>
       </div>
+
       <div class="stats-section">
         <div class="stats-grid">
           <div class="stat-card">
@@ -312,10 +324,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
           <div class="stat-card">
             <div class="stat-val orange" id="statEarned">0</div>
-            <div class="stat-lbl"><span id="statCurrencyLbl">SHIBA</span> Earned</div>
+            <div class="stat-lbl">SHIBA Earned</div>
           </div>
         </div>
       </div>
+
       <div class="invite-section">
         <button class="invite-btn" id="homeInviteBtn">
           <div class="invite-icon">✈️</div>
@@ -325,10 +338,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
         </button>
       </div>
+
       <div>
-        <div class="section-header"><div class="section-title">Recent Activity</div></div>
-        <div class="rewards-section" id="homeActivity"><div class="empty-state">No activity yet</div></div>
+        <div class="section-header">
+          <div class="section-title">Recent Activity</div>
+        </div>
+        <div class="rewards-section" id="homeActivity">
+          <div class="empty-state">No activity yet</div>
+        </div>
       </div>
+
       <div class="promo-section">
         <div class="promo-card">
           <div class="promo-emoji">🚀</div>
@@ -344,6 +363,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <!-- TASKS -->
     <div class="page" id="page-tasks">
       <div class="tasks-header"><div class="page-title">Tasks</div></div>
+
       <div class="combo-section">
         <div class="combo-card">
           <div class="combo-top">
@@ -366,6 +386,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">Check Combo</button>
         </div>
       </div>
+
       <div class="tabs-section">
         <div class="tabs">
           <div class="tab active" onclick="switchTab(this,'channels')">Channels</div>
@@ -389,8 +410,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
         <span class="ref-emoji">🐶</span>
         <div class="ref-banner-title">Invite friends and earn</div>
         <span class="ref-banner-pct" id="refPct">4,000 SHIBA</span>
-        <div class="ref-banner-desc">for every friend who joins &amp; completes verification!</div>
+        <div class="ref-banner-desc">for every friend who joins &amp; verifies using your link!</div>
       </div>
+
       <div class="ref-link-section">
         <div class="ref-link-card">
           <div class="ref-link-label">Your Referral Link</div>
@@ -400,6 +422,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
         </div>
       </div>
+
       <div class="ref-stats">
         <div class="ref-stats-grid">
           <div class="ref-stat-card">
@@ -416,6 +439,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
         </div>
       </div>
+
       <div class="ref-list-section">
         <div class="ref-list-title">Referral List</div>
         <div id="refList"><div class="empty-state">No referrals yet</div></div>
@@ -426,31 +450,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <!-- WALLET -->
     <div class="page" id="page-wallet">
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
+
       <div class="wallet-bal-card">
         <div class="wbal-label">SHIBA Balance</div>
         <div class="wbal-amount" id="walletTon">0 SHIBA</div>
         <div class="wbal-sub" id="walletCoinsInfo">Earn SHIBA from tasks &amp; referrals</div>
       </div>
+
       <div class="wallet-actions">
+        <div class="wallet-action-btn primary" onclick="openWithdrawForm()">
+          <div class="wallet-action-icon">💸</div>
+          <div class="wallet-action-label">Withdraw SHIBA</div>
+        </div>
         <div class="wallet-action-btn" onclick="switchPage('tasks')">
           <div class="wallet-action-icon">📋</div>
-          <div class="wallet-action-label">Earn via Tasks</div>
-        </div>
-        <div class="wallet-action-btn" onclick="switchPage('refs')">
-          <div class="wallet-action-icon">👥</div>
-          <div class="wallet-action-label">Invite Friends</div>
+          <div class="wallet-action-label">Earn More</div>
         </div>
       </div>
 
-      <!-- Withdraw Form -->
-      <div class="withdraw-form">
-        <div class="withdraw-form-title">💸 Withdraw SHIBA</div>
-        <div class="withdraw-label">Wallet Address (<span id="withdrawNetwork">BEP20</span>)</div>
-        <input class="withdraw-input" id="withdrawAddress" placeholder="Enter your SHIBA wallet address..." type="text" autocomplete="off" spellcheck="false">
-        <div class="withdraw-label">Amount (SHIBA)</div>
-        <input class="withdraw-input" id="withdrawAmount" placeholder="Enter amount..." type="number" min="1">
-        <div class="withdraw-min-info" id="withdrawMinInfo">Minimum withdrawal: loading...</div>
-        <button class="withdraw-submit" id="withdrawSubmitBtn" onclick="submitWithdraw()">Submit Withdrawal</button>
+      <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
+        <div class="wallet-form-title"><span>💸</span><span>Withdraw SHIBA</span></div>
+        <input class="wallet-input" id="withdrawWallet" placeholder="TON wallet address (EQ... / UQ...)">
+        <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in SHIBA">
+        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 SHIBA</div>
+        <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal</button>
+        <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
       </div>
 
       <div class="tx-section">
@@ -490,20 +514,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   </div>
 </div>
 
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
-var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @) — يُستبدل تلقائيًا من config
+var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
 
 // ── State ───────────────────────────────────────────────────────────
-var S = {
-  initData: '', user: null, data: null, refs: [], activeRefs: [],
-  refPage: 0, comboFilled: 0, comboSel: [], taskJoined: {}
-};
+var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
+
 var currentTab = 'channels';
-var currentPage = 'home';
 
 // ── Boot ─────────────────────────────────────────────────────────────
 (function boot(){
@@ -517,12 +539,13 @@ var currentPage = 'home';
       loadState();
     } else if (tries > 40){
       clearInterval(iv);
-      loadState();
+      loadState(); // dev mode fallback (not inside Telegram)
     }
   }, 100);
 })();
 
 // ── API ──────────────────────────────────────────────────────────────
+// worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
 function api(action, data){
   return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
     method: 'POST',
@@ -533,110 +556,26 @@ function api(action, data){
 
 // ── Load state ───────────────────────────────────────────────────────
 function loadState(){
-  api('getState', {}).then(function(res){
-    if (!res || !res.success){ showMockData(); return; }
+  api('getState', { _initData: S.initData }).then(function(res){
+    if (!res || !res.success){
+      showMockData();
+      return;
+    }
     S.data = res.data;
     S.user = res.data.user;
     S.refs = res.data.referrals || [];
-    S.activeRefs = res.data.activeRefs || res.data.activeReferrals || [];
-
-    // تحقق من الاشتراك الإجباري
-    if (!res.data.forceJoinCompleted) {
-      showForceJoinScreen(res.data.forceJoinChannels || []);
-    } else {
-      showApp();
-      render();
-    }
-  }).catch(function(){ showMockData(); });
-}
-
-// ── Force Join ────────────────────────────────────────────────────────
-function showForceJoinScreen(channels){
-  document.getElementById('loadingScreen').classList.add('hidden');
-  document.getElementById('forceJoinScreen').classList.remove('hidden');
-  renderForceJoinChannels(channels, []);
-}
-
-function renderForceJoinChannels(channels, statusArr){
-  var list = document.getElementById('fjChannelsList');
-  if (!channels || !channels.length){
-    // لا توجد قنوات — ادخل مباشرة
-    completeForceJoin();
-    return;
-  }
-  list.innerHTML = channels.map(function(ch, i){
-    var joined = statusArr[i] ? statusArr[i].joined : false;
-    var url = ch.url || ('https://t.me/' + ch.username);
-    var title = ch.title || ('@' + ch.username);
-    var handle = '@' + (ch.username || '');
-    return '<div class="fj-channel-item">'+
-      '<div class="fj-channel-icon">📢</div>'+
-      '<div class="fj-channel-info">'+
-        '<div class="fj-channel-name">'+esc(title)+'</div>'+
-        '<div class="fj-channel-handle">'+esc(handle)+'</div>'+
-      '</div>'+
-      (joined
-        ? '<div class="fj-channel-status joined">✓</div>'
-        : '<a class="fj-join-btn" href="'+esc(url)+'" target="_blank" onclick="openTgLink(\''+esc(url)+'\')">Join ↗</a>'
-      )+
-    '</div>';
-  }).join('');
-}
-
-function openTgLink(url){
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try { Telegram.WebApp.openTelegramLink(url); return false; } catch(_){}
-  }
-  window.open(url, '_blank');
-}
-
-function verifyForceJoin(){
-  var btn = document.getElementById('fjVerifyBtn');
-  btn.disabled = true;
-  btn.textContent = 'Verifying...';
-
-  api('checkForceJoin', {}).then(function(res){
-    if (!res || !res.success){
-      showToast('Error verifying. Try again.', 'error');
-      btn.disabled = false;
-      btn.textContent = '✅ Verify Subscription';
-      return;
-    }
-    if (!res.data.allJoined){
-      // عرض حالة كل قناة
-      renderForceJoinChannels(res.data.channels, res.data.channels);
-      showToast('Please join all channels first!', 'error');
-      btn.disabled = false;
-      btn.textContent = '✅ Verify Subscription';
-      return;
-    }
-    // تم التحقق بنجاح
-    completeForceJoin();
+    showApp();
+    render();
   }).catch(function(){
-    showToast('Network error. Try again.', 'error');
-    btn.disabled = false;
-    btn.textContent = '✅ Verify Subscription';
+    showMockData();
   });
 }
 
-function completeForceJoin(){
-  document.getElementById('forceJoinScreen').classList.add('hidden');
-  if (S.data && S.user) {
-    S.user.forceJoinCompleted = true;
-    showApp();
-    render();
-  } else {
-    // إعادة تحميل البيانات بعد إتمام التحقق
-    document.getElementById('loadingScreen').classList.remove('hidden');
-    loadState();
-  }
-}
-
-// Graceful fallback (dev mode)
+// Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
 function showMockData(){
-  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'DEMO01', forceJoinCompleted:true };
+  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'123456', wallet:'' };
   S.data = {
-    referrals:[], activeRefs:[], balanceLogs:[],
+    referrals:[], balanceLogs:[], withdrawals:[],
     tasks:[
       {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:500,status:'active'},
       {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'},
@@ -648,69 +587,112 @@ function showMockData(){
     ],
     completedTasks:[],
     combo:{ solvedToday:false, reward:5000 },
-    config:{ referralReward:4000, botUsername:BOT_USER, currencyName:'SHIBA', withdrawMin:10000, walletNetwork:'BEP20' },
-    forceJoinCompleted: true,
-    forceJoinChannels: []
+    config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
+    forceSub:{ required:false, passed:true, channels:[] }
   };
-  S.refs = []; S.activeRefs = [];
-  showApp(); render();
+  S.refs = [];
+  showApp();
+  render();
 }
 
 function showApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
-  document.getElementById('forceJoinScreen').classList.add('hidden');
-  document.getElementById('mainApp').style.display = 'flex';
+  var fs = (S.data && S.data.forceSub) || { required:false, passed:true, channels:[] };
+  if (fs.required && !fs.passed){
+    renderForceSub(fs);
+    document.getElementById('forceSubScreen').classList.add('show');
+    document.getElementById('mainApp').style.display = 'none';
+  } else {
+    document.getElementById('forceSubScreen').classList.remove('show');
+    document.getElementById('mainApp').style.display = 'flex';
+  }
+}
+
+// ── Mandatory Subscription (Force-Sub) ──────────────────────────────────
+function renderForceSub(fs){
+  var list = document.getElementById('forceSubList');
+  var channels = (fs && fs.channels) || [];
+  if (!channels.length){
+    list.innerHTML = '<div class="empty-state">No channels configured</div>';
+    return;
+  }
+  list.innerHTML = channels.map(function(c,i){
+    return '<div class="forcesub-item">'+
+      '<div class="forcesub-item-icon">📢</div>'+
+      '<div class="forcesub-item-title">'+esc(c.title)+'</div>'+
+      '<button class="forcesub-item-btn" onclick="openForceSubChannel('+i+')">Join</button>'+
+    '</div>';
+  }).join('');
+}
+
+function openForceSubChannel(i){
+  var fs = S.data && S.data.forceSub;
+  if (!fs || !fs.channels || !fs.channels[i]) return;
+  var link = fs.channels[i].link;
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(link); return; } catch(_){}
+  }
+  window.open(link, '_blank');
+}
+
+function verifyForceSub(){
+  var btn = document.getElementById('forceSubVerifyBtn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+  api('checkForceSub', {}).then(function(res){
+    btn.disabled = false; btn.textContent = '✅ Verify Membership';
+    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
+    if (res.data.passed){
+      showToast('Verified! Welcome aboard 🎉');
+      document.getElementById('forceSubScreen').classList.remove('show');
+      document.getElementById('mainApp').style.display = 'flex';
+      // إعادة تحميل الحالة بالكامل لضمان ظهور أي تحديثات (تفعيل مكافأة الداعي إن وُجد)
+      loadState();
+    } else {
+      S.data.forceSub = S.data.forceSub || {};
+      S.data.forceSub.channels = res.data.channels;
+      renderForceSub(S.data.forceSub);
+      showToast('You haven\u2019t joined all channels yet. Join them, then verify again.','error');
+    }
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = '✅ Verify Membership';
+    showToast('Network error','error');
+  });
 }
 
 // ── Render ────────────────────────────────────────────────────────────
 function render(){
   var u = S.user; var d = S.data; var cfg = d.config || {};
-  var currency = cfg.currencyName || 'SHIBA';
-
   // Header
   var av = document.getElementById('homeAvatar');
-  if (u.photoUrl) av.innerHTML = '<img src="'+esc(u.photoUrl)+'" alt="">';
+  if (u.photoUrl) av.innerHTML = '<img src="'+u.photoUrl+'" alt="">';
   else av.textContent = (u.firstName||'P')[0].toUpperCase();
   document.getElementById('homeName').textContent = u.firstName || 'Player';
-
   // Balance
   document.getElementById('homeTon').textContent = fmtShiba(u.balance);
-  document.getElementById('homeCurrencyLabel').textContent = currency;
-
-  // Stats
+  // Stats — "Active" = passed mandatory subscription (real, verified referral)
   var totalRefs = S.refs.length;
-  var activeRefs = S.activeRefs ? S.activeRefs.length : S.refs.filter(function(r){ return r.active; }).length;
-  var totalRefEarned = S.refs.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
+  var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
+  var activeRefs = activeRefsList.length;
+  var totalRefEarned = activeRefsList.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
   document.getElementById('statTotalRefs').textContent = totalRefs;
   document.getElementById('statActiveRefs').textContent = activeRefs;
   document.getElementById('statEarned').textContent = fmtShiba(totalRefEarned);
-  document.getElementById('statCurrencyLbl').textContent = currency;
-
   // Invite btn
-  var refReward = (cfg.referralReward||0) + (cfg.activeReferralReward||0);
-  document.getElementById('homeInviteSub').textContent = 'Earn '+fmtShiba(refReward)+' '+currency+' per friend!';
+  var refReward = cfg.referralReward || 4000;
+  document.getElementById('homeInviteSub').textContent = 'Earn '+fmtShiba(refReward)+' SHIBA when a friend joins & verifies!';
   document.getElementById('homeInviteBtn').onclick = function(){ shareInvite(); };
-
-  // Activity
+  // Activity log
   renderActivity(d.balanceLogs || []);
-
   // Refs page
-  document.getElementById('refPct').textContent = fmtShiba(refReward)+' '+currency;
-  var botUser = cfg.botUsername || BOT_USER;
-  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+botUser+'?startapp='+u.referralCode;
+  document.getElementById('refPct').textContent = fmtShiba(refReward)+' SHIBA';
+  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
-
-  // Wallet
-  document.getElementById('walletTon').textContent = fmtShiba(u.balance) + ' ' + currency;
-  var withdrawMin = cfg.withdrawMin || 10000;
-  var network = cfg.walletNetwork || 'BEP20';
-  document.getElementById('withdrawNetwork').textContent = network;
-  document.getElementById('withdrawMinInfo').textContent = 'Minimum withdrawal: '+fmtShiba(withdrawMin)+' '+currency+' | Network: '+network;
+  // Wallet (Balance & History)
+  document.getElementById('walletTon').textContent = fmtShiba(u.balance) + ' SHIBA';
   renderWalletHistory(d.balanceLogs||[]);
-
   // Combo
   renderComboState();
   // Tasks
@@ -720,20 +702,23 @@ function render(){
 function renderActivity(log){
   var el = document.getElementById('homeActivity');
   if (!log.length){ el.innerHTML = '<div class="empty-state">No activity yet</div>'; return; }
-  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥', withdraw_request:'💸' };
-  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdraw_request:'Withdrawal' };
+  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥', withdrawal:'💸' };
+  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdrawal:'Withdrawal' };
   el.innerHTML = log.slice(0,5).map(function(e){
     var icon = icons[e.type] || '✅';
     var amount = e.amount;
+    var isNeg = (parseFloat(amount)||0) < 0;
     var label = labels[e.type] || (e.type||'').replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
     var ts = e.ts ? timeAgo(e.ts) : '';
-    var amountStr = amount < 0 ? '-'+fmtShiba(Math.abs(amount)) : '+'+fmtShiba(amount);
-    var color = amount < 0 ? 'color:var(--red)' : 'color:var(--green)';
+    var amountHtml = '';
+    if (amount){
+      amountHtml = '<div class="reward-amount"'+(isNeg?' style="color:var(--red)"':'')+'>'+(isNeg?'-':'+')+fmtShiba(Math.abs(amount))+' SHIBA</div>';
+    }
     return '<div class="reward-item">'+
       '<div class="reward-icon">'+icon+'</div>'+
       '<div class="reward-info">'+
         '<div class="reward-name">'+label+'</div>'+
-        (amount ? '<div class="reward-amount" style="'+color+'">'+amountStr+' SHIBA</div>' : '')+
+        amountHtml+
       '</div>'+
       '<div class="reward-time">'+ts+'</div>'+
     '</div>';
@@ -748,12 +733,12 @@ function renderRefs(page){
   el.innerHTML = visible.map(function(r){
     var name = r.firstName || r.name || 'Unknown';
     var handle = r.username ? '@'+r.username : '';
-    var earned = fmtShiba(r.reward || 0);
-    var isActive = r.active === true;
+    var isActive = r.status === 'active';
+    var earned = fmtShiba(isActive ? (r.reward || 0) : 0);
     var badge = isActive
-      ? '<span class="ref-user-badge active">✓ Active</span>'
-      : '<span class="ref-user-badge pending">⏳ Pending</span>';
-    var av = r.photoUrl ? '<img src="'+esc(r.photoUrl)+'" alt="">' : esc((name[0]||'?').toUpperCase());
+      ? '<span class="ref-user-badge active">Active</span>'
+      : '<span class="ref-user-badge new">Pending Sub</span>';
+    var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
     var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
     return '<div class="ref-user-item">'+
       '<div class="ref-user-avatar">'+av+'</div>'+
@@ -772,21 +757,71 @@ function renderRefs(page){
   if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
 }
 
-function loadMoreRefs(){ S.refPage++; renderRefs(S.refPage); }
+function loadMoreRefs(){
+  S.refPage++;
+  renderRefs(S.refPage);
+}
 
 function renderWalletHistory(logs){
-  if (!logs || !logs.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
-  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdraw_request:'Withdrawal Request' };
-  var rows = logs.slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).map(function(l){
+  var withdrawals = (S.data && S.data.withdrawals) || [];
+  var entries = [];
+  (logs||[]).forEach(function(l){
+    if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
+    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
     var label = labels[l.type] || (l.type||'Reward');
-    var isWithdraw = l.type === 'withdraw_request';
-    var amount = l.amount || 0;
-    var amtStr = amount < 0 ? '-'+fmtShiba(Math.abs(amount)) : '+'+fmtShiba(amount);
-    return { label: label+' '+amtStr+' SHIBA', cls: isWithdraw ? 'pend' : 'ok', txt: isWithdraw ? 'Pending' : 'Done' };
+    entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' SHIBA', cls:'ok', txt:'Done' });
   });
-  document.getElementById('walletHistory').innerHTML = rows.map(function(r){
+  withdrawals.forEach(function(w){
+    var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
+    var txt = w.status==='completed' ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
+    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtShiba(w.amount)+' SHIBA', cls:cls, txt:txt });
+  });
+  entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+  if (!entries.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+  document.getElementById('walletHistory').innerHTML = entries.map(function(r){
     return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>';
   }).join('');
+}
+
+// ── Withdraw SHIBA ──────────────────────────────────────────────────────
+function openWithdrawForm(){
+  var cfg = (S.data && S.data.config) || {};
+  if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
+  var minW = cfg.minWithdrawal || 50000;
+  document.getElementById('withdrawMinNote').textContent = 'Minimum withdrawal: '+fmtShiba(minW)+' SHIBA';
+  document.getElementById('withdrawWallet').value = (S.user && S.user.wallet) || '';
+  document.getElementById('withdrawAmount').value = '';
+  document.getElementById('withdrawFormCard').style.display = 'block';
+}
+
+function closeWithdrawForm(){
+  document.getElementById('withdrawFormCard').style.display = 'none';
+}
+
+function submitWithdrawal(){
+  var wallet = document.getElementById('withdrawWallet').value.trim();
+  var amount = parseFloat(document.getElementById('withdrawAmount').value);
+  if (!wallet){ showToast('Enter your TON wallet address','error'); return; }
+  if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
+  if (S.user && amount > (S.user.balance||0)){ showToast('Insufficient balance','error'); return; }
+  var btn = document.getElementById('withdrawSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('requestWithdrawal', { walletAddress:wallet, amount:amount }).then(function(res){
+    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
+    if (!res.success){ showToast(res.error||'Withdrawal failed','error'); return; }
+    S.user.balance = res.data.shibaBalance;
+    S.user.wallet = wallet;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+    S.data.withdrawals = S.data.withdrawals || [];
+    S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, status:'pending', ts:Date.now() });
+    renderWalletHistory(S.data.balanceLogs||[]);
+    closeWithdrawForm();
+    showToast('Withdrawal request submitted ✅');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
+    showToast('Network error','error');
+  });
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────
@@ -797,15 +832,15 @@ function renderTasks(tab){
   var allTasks = (S.data && S.data.tasks) || [];
 
   if (tab === 'invite'){
-    var activeRefCount = S.activeRefs ? S.activeRefs.length : S.refs.filter(function(r){ return r.active; }).length;
+    var refCount = S.refs.length;
     var list = allTasks.filter(function(t){ return t.category==='invite'; });
     if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No invite tasks right now</div>'; return; }
     document.getElementById('tasksContent').innerHTML = list.map(function(t){
       var required = t.requiredReferrals || t.requiredCount || 0;
       var done = completed.indexOf(t.id) > -1;
-      var eligible = activeRefCount >= required;
+      var eligible = refCount >= required;
       var btnClass = done ? 'done' : (eligible ? 'join' : 'verify');
-      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : activeRefCount+'/'+required);
+      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+required);
       var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+t.id+'\')' : '');
       return '<div class="task-item">'+
         '<div class="task-logo">👥</div>'+
@@ -813,7 +848,7 @@ function renderTasks(tab){
           '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
           '<div class="task-reward">+'+fmtShiba(t.reward)+' SHIBA</div>'+
         '</div>'+
-        '<button class="task-btn '+btnClass+'" '+(onclick?'onclick="'+onclick+'"':'')+' '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
+        '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
       '</div>';
     }).join('');
     return;
@@ -833,7 +868,7 @@ function renderTasks(tab){
         '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
         '<div class="task-reward">+'+fmtShiba(t.reward)+' SHIBA</div>'+
       '</div>'+
-      '<button class="task-btn '+btnClass+'" '+(onclick?'onclick="'+onclick+'"':'')+'>'+btnText+'</button>'+
+      '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
     '</div>';
   }).join('');
 }
@@ -845,16 +880,16 @@ function switchTab(el, tab){
   renderTasks(tab);
 }
 
+S.taskJoined = {};
 function doJoinTask(id){
   var list = (S.data && S.data.tasks) || [];
   var task = list.find(function(t){ return t.id===id; });
   S.taskJoined[id] = true;
   renderTasks(currentTab);
   showToast('Joined! Click Verify to claim your reward ✓');
-  if (task && task.link){
-    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-      try { Telegram.WebApp.openTelegramLink(task.link); return; } catch(_){}
-    }
+  if (task && task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
+  } else if (task && task.link){
     window.open(task.link, '_blank');
   }
 }
@@ -886,7 +921,7 @@ function doClaimInvite(id){
   }).catch(function(){ showToast('Network error','error'); });
 }
 
-// ── Daily Combo ────────────────────────────────────────────────────────
+// ── Daily Combo (server-validated) ──────────────────────────────────
 function renderComboState(){
   var combo = (S.data && S.data.combo) || {};
   var btn = document.getElementById('comboCheckBtn');
@@ -916,20 +951,35 @@ function selectCombo(el, emoji){
 }
 
 function checkCombo(){
-  if (S.data && S.data.combo && S.data.combo.solvedToday){ showToast('Already claimed today\'s combo!'); return; }
+  if (S.data && S.data.combo && S.data.combo.solvedToday){ showToast('Already claimed today\u2019s combo!'); return; }
   if (S.comboFilled < 4){ showToast('Select all 4 items first!'); return; }
   var btn = document.getElementById('comboCheckBtn');
   btn.disabled = true; btn.textContent = 'Checking...';
   api('checkCombo', { selection:S.comboSel }).then(function(res){
-    if (!res.success){ showToast(res.error||'Failed.','error'); renderComboState(); resetCombo(); return; }
-    if (!res.data.correct){ showToast('❌ Wrong combination. Try again!','error'); renderComboState(); resetCombo(); return; }
+    if (!res.success){
+      showToast(res.error||'Failed.','error');
+      renderComboState();
+      resetCombo();
+      return;
+    }
+    if (!res.data.correct){
+      showToast('❌ Wrong combination. Try again!','error');
+      renderComboState();
+      resetCombo();
+      return;
+    }
     S.user.balance = res.data.shibaBalance;
     S.data.combo.solvedToday = true;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
     showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' SHIBA!');
-    renderComboState(); resetCombo();
-  }).catch(function(){ showToast('Network error','error'); renderComboState(); resetCombo(); });
+    renderComboState();
+    resetCombo();
+  }).catch(function(){
+    showToast('Network error','error');
+    renderComboState();
+    resetCombo();
+  });
 }
 
 function resetCombo(){
@@ -945,66 +995,41 @@ function resetCombo(){
   });
 }
 
-// ── Withdraw ──────────────────────────────────────────────────────────
-function submitWithdraw(){
-  var address = (document.getElementById('withdrawAddress').value||'').trim();
-  var amount = parseInt(document.getElementById('withdrawAmount').value, 10);
-  var cfg = (S.data && S.data.config) || {};
-  var currency = cfg.currencyName || 'SHIBA';
-  var withdrawMin = cfg.withdrawMin || 10000;
-
-  if (!address){ showToast('Please enter wallet address', 'error'); return; }
-  if (!amount || isNaN(amount) || amount <= 0){ showToast('Please enter a valid amount', 'error'); return; }
-  if (amount < withdrawMin){ showToast('Minimum withdrawal is '+fmtShiba(withdrawMin)+' '+currency, 'error'); return; }
-  if (!S.user || amount > S.user.balance){ showToast('Insufficient balance', 'error'); return; }
-
-  var btn = document.getElementById('withdrawSubmitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
-
-  api('submitWithdraw', { walletAddress: address, amount: amount }).then(function(res){
-    if (!res.success){ showToast(res.error||'Withdrawal failed', 'error'); btn.disabled=false; btn.textContent='Submit Withdrawal'; return; }
-    showToast('✅ Withdrawal request submitted!');
-    document.getElementById('withdrawAddress').value = '';
-    document.getElementById('withdrawAmount').value = '';
-    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
-    // Reload to update history
-    loadState();
-  }).catch(function(){
-    showToast('Network error', 'error');
-    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
-  });
-}
+// ── Wallet actions ─────────────────────────────────────────────────────
+// (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
 
 // ── Invite / copy ─────────────────────────────────────────────────────
+// مهم جدًا: نستخدم ?startapp= وليس ?start= لأن هذا تطبيق Mini App (ويب)
+// وليس بوت أوامر تقليدي. رابط ?start= يفتح شات البوت فقط ويرسل أمر /start
+// كرسالة عادية، وهذا لا يضع الكود داخل initData بالمرة فلا يتم تتبع
+// الإحالة أبدًا. رابط ?startapp= هو الصيغة الرسمية لفتح الـ Mini App
+// مباشرة مع تمرير الكود في initData.start_param (راجع توثيق تيليجرام:
+// Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
 function shareInvite(){
   if (!S.user) return;
-  var cfg = (S.data && S.data.config) || {};
-  var botUser = cfg.botUsername || BOT_USER;
-  // استخدام startapp لـ Mini Apps (أو start للبوتات العادية)
-  var link = 'https://t.me/'+botUser+'/app?startapp='+S.user.referralCode;
-  var fallbackLink = 'https://t.me/'+botUser+'?start='+S.user.referralCode;
-  var text = 'Join me on SHIB Rewards and earn real SHIBA! 🐕';
-  var shareUrl = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
+  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var link = 'https://t.me/'+botUser+'?startapp='+S.user.referralCode;
+  var text  = 'Join me on SHIB Rewards and earn real SHIBA!';
+  var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try { Telegram.WebApp.openTelegramLink(shareUrl); return; } catch(_){}
+    try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
   }
   navigator.clipboard && navigator.clipboard.writeText(link);
   showToast('Invite link copied! 🎉');
 }
 
 function copyRefLink(){
-  var cfg = (S.data && S.data.config) || {};
-  var botUser = cfg.botUsername || BOT_USER;
-  var link = 'https://t.me/'+botUser+'/app?startapp='+(S.user ? S.user.referralCode : '0');
+  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
     try{ var url='https://t.me/share/url?url='+encodeURIComponent(link); Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
   }
-  if (navigator.clipboard){ navigator.clipboard.writeText(link); }
+  navigator.clipboard && navigator.clipboard.writeText(link);
   showToast('Referral link copied! 📋');
 }
 
 // ── Page switching ────────────────────────────────────────────────────
+var currentPage = 'home';
 function switchPage(name){
   if (currentPage===name) return;
   var prev = document.getElementById('page-'+currentPage);
@@ -1034,7 +1059,7 @@ function submitAddTask(){
   }).catch(function(){ showToast('Network error','error'); });
 }
 
-// ── Daily combo countdown ─────────────────────────────────────────────
+// ── Daily combo countdown (resets at UTC midnight) ─────────────────────
 (function timerTick(){
   setInterval(function(){
     var el = document.getElementById('comboTimer'); if(!el) return;
