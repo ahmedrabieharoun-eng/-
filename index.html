@@ -245,6 +245,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
 .modal-close:active{background:var(--glass)}
 
+.modal-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px}
+.modal-req-list{list-style:none;padding:0;margin:8px 0 18px;display:flex;flex-direction:column;gap:6px}
+.modal-req-list li{font-size:12.5px;color:var(--text2);line-height:1.5}
+.modal-field-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.modal-textarea{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:14px;font-family:inherit;resize:vertical;min-height:64px;transition:border-color 0.2s}
+.modal-textarea:focus{border-color:rgba(247,147,26,0.5)}
+.modal-textarea::placeholder{color:var(--text3)}
+.modal-disclaimer{font-size:11px;color:var(--text3);line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px solid var(--glass-border)}
+.modal-disclaimer ul{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:4px}
+.modal-success{text-align:center}
+.modal-success-icon{font-size:48px;margin-bottom:10px}
+.modal-success-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:10px}
+.modal-success-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.modal-success-list{list-style:none;padding:0;margin:0 0 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.modal-success-list li{font-size:12.5px;color:var(--text2)}
+
 .empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
 
 /* ===== FORCE-SUB (Mandatory Subscription) GATE ===== */
@@ -506,11 +522,55 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 <div class="modal-overlay" id="addTaskModal" onclick="closeModalOutside(event,'addTaskModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Add Task</div>
-    <input class="modal-input" id="addTaskLink" placeholder="Channel / Bot link (t.me/...)">
-    <input class="modal-input" id="addTaskDesc" placeholder="Description (optional)">
-    <button class="modal-submit" onclick="submitAddTask()">Submit for Review</button>
-    <button class="modal-close" onclick="closeModal('addTaskModal')">Cancel</button>
+
+    <div id="addTaskFormView">
+      <div class="modal-title">📢 Add Your Channel</div>
+      <div class="modal-desc">Promote your channel by adding it to our Tasks section.</div>
+      <div class="modal-desc" style="margin-top:10px;font-weight:700;color:var(--text)">Requirements:</div>
+      <ul class="modal-req-list">
+        <li>✅ Your channel must have at least 1,000 real members.</li>
+        <li>✅ Publish a post about SHIB Rewards Bot before submitting.</li>
+        <li>✅ The post must include the bot link and today's Combo (if available).</li>
+        <li>✅ Keep the post published until our review is complete.</li>
+        <li>⚠️ Channels with fake members or deleted posts will be rejected.</li>
+      </ul>
+
+      <div class="modal-field-label">Channel Link</div>
+      <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
+
+      <div class="modal-field-label">Post Link</div>
+      <input class="modal-input" id="addTaskPostLink" placeholder="https://t.me/yourchannel/123">
+
+      <div class="modal-field-label">Additional Notes (Optional)</div>
+      <textarea class="modal-textarea" id="addTaskDesc" placeholder="Anything you'd like us to know..."></textarea>
+
+      <button class="modal-submit" id="addTaskSubmitBtn" onclick="submitAddTask()">📤 Submit for Review</button>
+      <button class="modal-close" onclick="closeModal('addTaskModal')">Cancel</button>
+
+      <div class="modal-disclaimer">
+        By submitting this request, you confirm that:
+        <ul>
+          <li>• Your channel has 1,000+ real members.</li>
+          <li>• You have already published a promotional post about SHIB Rewards.</li>
+          <li>• The post includes the bot and Combo information.</li>
+          <li>• Our team will review your request within 24 hours.</li>
+          <li>• Approved channels will be added to the Tasks page for all users.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="addTaskSuccessView" class="modal-success" style="display:none">
+      <div class="modal-success-icon">✅</div>
+      <div class="modal-success-title">Request Submitted</div>
+      <div class="modal-success-desc">Your request has been received successfully. Our team will verify:</div>
+      <ul class="modal-success-list">
+        <li>☑️ Channel members (1000+)</li>
+        <li>☑️ Promotional post</li>
+        <li>☑️ Post availability</li>
+      </ul>
+      <div class="modal-success-desc">If everything meets the requirements, your channel will be approved and added to the Tasks section within 24 hours.</div>
+      <button class="modal-close" onclick="closeModal('addTaskModal')">Close</button>
+    </div>
   </div>
 </div>
 
@@ -1014,17 +1074,37 @@ function shareInvite(){
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
     try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
   }
-  navigator.clipboard && navigator.clipboard.writeText(link);
+  copyToClipboard(link);
   showToast('Invite link copied! 🎉');
+}
+
+// نسخ نص إلى الكليبورد فعليًا (مع Fallback للمتصفحات/الإصدارات القديمة
+// التي لا تدعم navigator.clipboard داخل WebView تيليجرام)
+function copyToClipboard(text){
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch(_){}
 }
 
 function copyRefLink(){
   var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
   var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try{ var url='https://t.me/share/url?url='+encodeURIComponent(link); Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
-  }
-  navigator.clipboard && navigator.clipboard.writeText(link);
+  copyToClipboard(link);
   showToast('Referral link copied! 📋');
 }
 
@@ -1043,20 +1123,34 @@ function switchPage(name){
 }
 
 // ── Modals ─────────────────────────────────────────────────────────────
-function openAddTaskModal(){ document.getElementById('addTaskModal').classList.add('open'); }
+function openAddTaskModal(){
+  document.getElementById('addTaskFormView').style.display = 'block';
+  document.getElementById('addTaskSuccessView').style.display = 'none';
+  document.getElementById('addTaskModal').classList.add('open');
+}
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
 
 function submitAddTask(){
   var link = document.getElementById('addTaskLink').value.trim();
+  var postLink = document.getElementById('addTaskPostLink').value.trim();
   var desc = document.getElementById('addTaskDesc').value.trim();
-  if (!link){ showToast('Please enter a link!','error'); return; }
-  api('submitTaskSuggestion', { link:link, desc:desc }).then(function(res){
+  if (!link){ showToast('Please enter your channel link!','error'); return; }
+  if (!postLink){ showToast('Please enter the promotional post link!','error'); return; }
+  var btn = document.getElementById('addTaskSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('submitTaskSuggestion', { link:link, postLink:postLink, desc:desc }).then(function(res){
+    btn.disabled = false; btn.textContent = '📤 Submit for Review';
     if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
-    closeModal('addTaskModal');
-    document.getElementById('addTaskLink').value=''; document.getElementById('addTaskDesc').value='';
-    showToast('Task submitted for review ✅');
-  }).catch(function(){ showToast('Network error','error'); });
+    document.getElementById('addTaskLink').value = '';
+    document.getElementById('addTaskPostLink').value = '';
+    document.getElementById('addTaskDesc').value = '';
+    document.getElementById('addTaskFormView').style.display = 'none';
+    document.getElementById('addTaskSuccessView').style.display = 'block';
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = '📤 Submit for Review';
+    showToast('Network error','error');
+  });
 }
 
 // ── Daily combo countdown (resets at UTC midnight) ─────────────────────
