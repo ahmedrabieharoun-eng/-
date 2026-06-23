@@ -225,6 +225,50 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .tx-badge.pend{background:rgba(247,147,26,0.12);color:var(--orange)}
 .tx-badge.err{background:rgba(239,68,68,0.15);color:var(--red)}
 
+/* ===== Lucky Wheel Card (Home) ===== */
+.wheel-card-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s;position:relative;overflow:hidden}
+.wheel-card-btn:active{transform:scale(0.97)}
+.wheel-card-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
+.wheel-card-icon{font-size:30px;flex-shrink:0;animation:wheelSpinIdle 6s linear infinite}
+@keyframes wheelSpinIdle{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.wheel-card-text{flex:1;text-align:left}
+.wheel-card-title{font-size:17px;font-weight:800;color:#fff;display:block}
+.wheel-card-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
+.wheel-card-badge{min-width:26px;height:26px;padding:0 8px;border-radius:14px;background:#fff;color:var(--orange2);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 3px rgba(255,255,255,0.2);position:relative;z-index:1}
+
+/* ===== LUCKY WHEEL PAGE ===== */
+.wheel-page-header{display:flex;align-items:center;gap:12px;padding:16px 20px 8px}
+.back-btn{width:36px;height:36px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.back-btn:active{background:rgba(255,255,255,0.1)}
+
+.wheel-info-banner{margin:8px 16px 16px;padding:14px 16px;border-radius:14px;background:rgba(247,147,26,0.1);border:1px solid rgba(247,147,26,0.25);display:flex;align-items:center;gap:12px}
+.wheel-info-emoji{font-size:26px;flex-shrink:0}
+.wheel-info-text{font-size:13px;color:var(--text2);line-height:1.5}
+.wheel-info-text b{color:var(--orange)}
+
+.wheel-stage{display:flex;flex-direction:column;align-items:center;padding:8px 20px 4px;position:relative}
+.wheel-pointer{font-size:24px;line-height:1;color:var(--orange);margin-bottom:-6px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
+.wheel-outer-wrap{position:relative;width:270px;height:270px}
+.wheel-outer{width:100%;height:100%;border-radius:50%;background:linear-gradient(145deg,#2a1d00,#161616);padding:9px;box-shadow:0 0 0 4px rgba(247,147,26,0.3),0 10px 30px rgba(0,0,0,0.55)}
+.wheel-circle{width:100%;height:100%;border-radius:50%;position:relative;transition:transform 4.5s cubic-bezier(0.17,0.89,0.32,1.05);border:2px solid rgba(255,255,255,0.08);overflow:hidden}
+.wheel-seg{position:absolute;left:50%;top:0;width:0;height:50%;transform-origin:50% 100%;display:flex;justify-content:center;align-items:flex-start;pointer-events:none}
+.wheel-seg-text{display:inline-block;margin-top:16px;font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.7);white-space:nowrap}
+.wheel-hub{position:absolute;top:50%;left:50%;width:62px;height:62px;margin:-31px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 0 0 6px var(--bg),0 4px 14px rgba(247,147,26,0.5);z-index:6;border:none;text-align:center;line-height:1.1;letter-spacing:0.5px}
+.wheel-hub:active{transform:translate(-1px,-1px) scale(0.96)}
+.wheel-hub:disabled{opacity:0.5;cursor:default}
+.wheel-spins-left{text-align:center;font-size:13px;color:var(--text2);margin:16px 0 4px}
+.wheel-spins-left b{color:var(--orange);font-size:16px}
+.wheel-cta-section{padding:18px 16px 8px}
+
+/* ===== Add-Task: quantity chips & price box ===== */
+.qty-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.qty-chip{padding:8px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;transition:all 0.15s}
+.qty-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.price-box{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;background:rgba(247,147,26,0.08);border:1px solid rgba(247,147,26,0.25);margin-bottom:10px}
+.price-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
+.price-usd{font-size:12px;color:var(--text3);margin-top:2px}
+.price-val{font-size:17px;font-weight:800;color:var(--orange)}
+
 /* Toast */
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(247,147,26,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(247,147,26,0.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -346,12 +390,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       </div>
 
       <div class="invite-section">
-        <button class="invite-btn" id="homeInviteBtn">
-          <div class="invite-icon">✈️</div>
-          <div class="invite-text">
-            <span class="invite-title">Invite Friends</span>
-            <span class="invite-sub" id="homeInviteSub">Earn rewards for every friend!</span>
+        <button class="wheel-card-btn" id="homeWheelBtn" onclick="switchPage('wheel')">
+          <div class="wheel-card-icon">🎡</div>
+          <div class="wheel-card-text">
+            <span class="wheel-card-title">Lucky Wheel</span>
+            <span class="wheel-card-sub" id="homeWheelSub">Spin &amp; win up to 10,000 SHIBA!</span>
           </div>
+          <div class="wheel-card-badge" id="homeWheelBadge" style="display:none">0</div>
         </button>
       </div>
 
@@ -486,7 +531,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
       <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
         <div class="wallet-form-title"><span>💸</span><span>Withdraw SHIBA</span></div>
-        <input class="wallet-input" id="withdrawWallet" placeholder="TON wallet address (EQ... / UQ...)">
+        <input class="wallet-input" id="withdrawWallet" placeholder="SHIBA BEP-20 wallet address (0x...)">
         <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in SHIBA">
         <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 SHIBA</div>
         <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal</button>
@@ -496,6 +541,41 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="tx-section">
         <div class="tx-title">Transaction History</div>
         <div id="walletHistory"><div class="empty-state">No transactions yet</div></div>
+      </div>
+    </div>
+
+    <!-- LUCKY WHEEL -->
+    <div class="page" id="page-wheel">
+      <div class="wheel-page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <div class="page-title">🎡 Lucky Wheel</div>
+      </div>
+
+      <div class="wheel-info-banner">
+        <div class="wheel-info-emoji">🎯</div>
+        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 SHIBA</b>!</div>
+      </div>
+
+      <div class="wheel-stage">
+        <div class="wheel-pointer">▼</div>
+        <div class="wheel-outer-wrap">
+          <div class="wheel-outer">
+            <div class="wheel-circle" id="wheelCircle"></div>
+          </div>
+          <button class="wheel-hub" id="wheelSpinBtn" onclick="spinWheel()" disabled>SPIN</button>
+        </div>
+      </div>
+
+      <div class="wheel-spins-left">Spins available: <b id="wheelSpinsLeft">0</b></div>
+
+      <div class="wheel-cta-section">
+        <button class="invite-btn" onclick="shareInvite()">
+          <div class="invite-icon">✈️</div>
+          <div class="invite-text">
+            <span class="invite-title">Invite Friends</span>
+            <span class="invite-sub">Every 2 active referrals = 1 free spin!</span>
+          </div>
+        </button>
       </div>
     </div>
 
@@ -524,37 +604,45 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <div class="modal-handle"></div>
 
     <div id="addTaskFormView">
-      <div class="modal-title">📢 Add Your Channel</div>
-      <div class="modal-desc">Promote your channel by adding it to our Tasks section.</div>
-      <div class="modal-desc" style="margin-top:10px;font-weight:700;color:var(--text)">Requirements:</div>
-      <ul class="modal-req-list">
-        <li>✅ Your channel must have at least 1,000 real members.</li>
-        <li>✅ Publish a post about SHIB Rewards Bot before submitting.</li>
-        <li>✅ The post must include the bot link and today's Combo (if available).</li>
-        <li>✅ Keep the post published until our review is complete.</li>
-        <li>⚠️ Channels with fake members or deleted posts will be rejected.</li>
-      </ul>
+      <div class="modal-title">📢 Promote Your Channel</div>
+      <div class="modal-desc">Add your channel as a task — our users will join it and earn SHIBA, helping you get real, active members fast.</div>
 
       <div class="modal-field-label">Channel Link</div>
       <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
 
-      <div class="modal-field-label">Post Link</div>
-      <input class="modal-input" id="addTaskPostLink" placeholder="https://t.me/yourchannel/123">
+      <div class="modal-field-label">Members You Need</div>
+      <div class="qty-chips" id="qtyChips">
+        <div class="qty-chip" onclick="selectQty(100,this)">100</div>
+        <div class="qty-chip" onclick="selectQty(500,this)">500</div>
+        <div class="qty-chip" onclick="selectQty(1000,this)">1,000</div>
+        <div class="qty-chip" onclick="selectQty(2000,this)">2,000</div>
+        <div class="qty-chip" onclick="selectQty(5000,this)">5,000</div>
+        <div class="qty-chip" onclick="selectQty(10000,this)">10,000</div>
+      </div>
+      <input class="modal-input" id="addTaskMembers" type="number" inputmode="numeric" min="100" step="100" placeholder="Or enter a custom amount (multiples of 100)" oninput="updateTaskPrice()">
+
+      <div class="price-box">
+        <div>
+          <div class="price-lbl">Total Cost</div>
+          <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
+        </div>
+        <div class="price-val" id="addTaskPriceShiba">0 SHIBA</div>
+      </div>
+      <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing: every 100 members = 200,000 SHIBA (≈ $1). Our team will contact you with payment details before your task goes live.</div>
 
       <div class="modal-field-label">Additional Notes (Optional)</div>
       <textarea class="modal-textarea" id="addTaskDesc" placeholder="Anything you'd like us to know..."></textarea>
 
-      <button class="modal-submit" id="addTaskSubmitBtn" onclick="submitAddTask()">📤 Submit for Review</button>
+      <button class="modal-submit" id="addTaskSubmitBtn" onclick="submitAddTask()">📤 Submit Request</button>
       <button class="modal-close" onclick="closeModal('addTaskModal')">Cancel</button>
 
       <div class="modal-disclaimer">
         By submitting this request, you confirm that:
         <ul>
-          <li>• Your channel has 1,000+ real members.</li>
-          <li>• You have already published a promotional post about SHIB Rewards.</li>
-          <li>• The post includes the bot and Combo information.</li>
-          <li>• Our team will review your request within 24 hours.</li>
-          <li>• Approved channels will be added to the Tasks page for all users.</li>
+          <li>• You own or manage this channel.</li>
+          <li>• You agree to the price calculated for the members requested.</li>
+          <li>• Our team will contact you with payment details to activate the task.</li>
+          <li>• The task goes live on the Tasks page once payment is confirmed.</li>
         </ul>
       </div>
     </div>
@@ -562,13 +650,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <div id="addTaskSuccessView" class="modal-success" style="display:none">
       <div class="modal-success-icon">✅</div>
       <div class="modal-success-title">Request Submitted</div>
-      <div class="modal-success-desc">Your request has been received successfully. Our team will verify:</div>
+      <div class="modal-success-desc">Your request has been received. Our team will review it and contact you with payment details to activate:</div>
       <ul class="modal-success-list">
-        <li>☑️ Channel members (1000+)</li>
-        <li>☑️ Promotional post</li>
-        <li>☑️ Post availability</li>
+        <li>☑️ Channel: <span id="successChannelLink"></span></li>
+        <li>☑️ Members requested: <span id="successMembers"></span></li>
+        <li>☑️ Total cost: <span id="successPrice"></span></li>
       </ul>
-      <div class="modal-success-desc">If everything meets the requirements, your channel will be approved and added to the Tasks section within 24 hours.</div>
       <button class="modal-close" onclick="closeModal('addTaskModal')">Close</button>
     </div>
   </div>
@@ -581,6 +668,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
 var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
+
+// مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
+var PRICE_PER_100_SHIBA = 200000;
+var PRICE_PER_100_USD   = 1;
+
+// إعدادات افتراضية لعجلة الحظ (تُستخدم فقط لو السيرفر لم يرسلها بعد)
+var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
+var wheelRotation = 0;
+var wheelSpinning = false;
 
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
@@ -647,6 +743,7 @@ function showMockData(){
     ],
     completedTasks:[],
     combo:{ solvedToday:false, reward:5000 },
+    wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
     config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
     forceSub:{ required:false, passed:true, channels:[] }
   };
@@ -737,10 +834,8 @@ function render(){
   document.getElementById('statTotalRefs').textContent = totalRefs;
   document.getElementById('statActiveRefs').textContent = activeRefs;
   document.getElementById('statEarned').textContent = fmtShiba(totalRefEarned);
-  // Invite btn
+  // Referral reward (used on Referrals page)
   var refReward = cfg.referralReward || 4000;
-  document.getElementById('homeInviteSub').textContent = 'Earn '+fmtShiba(refReward)+' SHIBA when a friend joins & verifies!';
-  document.getElementById('homeInviteBtn').onclick = function(){ shareInvite(); };
   // Activity log
   renderActivity(d.balanceLogs || []);
   // Refs page
@@ -757,13 +852,15 @@ function render(){
   renderComboState();
   // Tasks
   renderTasks(currentTab);
+  // Lucky Wheel
+  renderWheelInfo();
 }
 
 function renderActivity(log){
   var el = document.getElementById('homeActivity');
   if (!log.length){ el.innerHTML = '<div class="empty-state">No activity yet</div>'; return; }
-  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥', withdrawal:'💸' };
-  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdrawal:'Withdrawal' };
+  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥', withdrawal:'💸', wheel_spin:'🎡' };
+  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdrawal:'Withdrawal', wheel_spin:'Lucky Wheel' };
   el.innerHTML = log.slice(0,5).map(function(e){
     var icon = icons[e.type] || '✅';
     var amount = e.amount;
@@ -827,7 +924,7 @@ function renderWalletHistory(logs){
   var entries = [];
   (logs||[]).forEach(function(l){
     if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
-    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
+    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel' };
     var label = labels[l.type] || (l.type||'Reward');
     entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' SHIBA', cls:'ok', txt:'Done' });
   });
@@ -861,7 +958,8 @@ function closeWithdrawForm(){
 function submitWithdrawal(){
   var wallet = document.getElementById('withdrawWallet').value.trim();
   var amount = parseFloat(document.getElementById('withdrawAmount').value);
-  if (!wallet){ showToast('Enter your TON wallet address','error'); return; }
+  if (!wallet){ showToast('Enter your SHIBA BEP-20 wallet address','error'); return; }
+  if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)){ showToast('Invalid BEP-20 address. It must start with 0x and be 42 characters long','error'); return; }
   if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
   if (S.user && amount > (S.user.balance||0)){ showToast('Insufficient balance','error'); return; }
   var btn = document.getElementById('withdrawSubmitBtn');
@@ -1055,6 +1153,97 @@ function resetCombo(){
   });
 }
 
+// ── Lucky Wheel (server-validated spins) ───────────────────────────────
+function renderWheelInfo(){
+  var w = (S.data && S.data.wheel) || { spinsAvailable:0, spinsUsed:0, segments:WHEEL_DEFAULT_SEGMENTS, referralsPerSpin:2 };
+  var segments = w.segments || WHEEL_DEFAULT_SEGMENTS;
+  var spins = w.spinsAvailable || 0;
+
+  document.getElementById('wheelSpinsLeft').textContent = spins;
+  document.getElementById('wheelRefsPerSpin').textContent = w.referralsPerSpin || 2;
+
+  var badge = document.getElementById('homeWheelBadge');
+  if (spins > 0){ badge.style.display = 'flex'; badge.textContent = spins; }
+  else { badge.style.display = 'none'; }
+  document.getElementById('homeWheelSub').textContent = spins > 0
+    ? spins+' free spin'+(spins>1?'s':'')+' available — tap to spin!'
+    : 'Invite friends to earn free spins!';
+
+  var btn = document.getElementById('wheelSpinBtn');
+  if (btn && !wheelSpinning){ btn.disabled = spins <= 0; btn.textContent = 'SPIN'; }
+
+  renderWheelCircle(segments);
+}
+
+function renderWheelCircle(segments){
+  var n = segments.length;
+  var slice = 360 / n;
+  var colorA = '#241a02', colorB = '#f7931a';
+  var gradParts = [];
+  var labelsHtml = '';
+  for (var i=0;i<n;i++){
+    var start = i*slice, end = start+slice;
+    gradParts.push((i%2===0?colorA:colorB)+' '+start+'deg '+end+'deg');
+    var center = start + slice/2;
+    labelsHtml += '<div class="wheel-seg" style="transform:rotate('+center+'deg)">'+
+      '<span class="wheel-seg-text" style="transform:rotate(-'+center+'deg)">'+fmtNum(segments[i])+'</span>'+
+    '</div>';
+  }
+  var circle = document.getElementById('wheelCircle');
+  if (!circle) return;
+  circle.style.background = 'conic-gradient(from 0deg, '+gradParts.join(', ')+')';
+  circle.innerHTML = labelsHtml;
+}
+
+function spinWheel(){
+  if (wheelSpinning) return;
+  var spins = (S.data && S.data.wheel && S.data.wheel.spinsAvailable) || 0;
+  if (spins <= 0){ showToast('No spins available. Invite more friends! 🎯','error'); return; }
+
+  wheelSpinning = true;
+  var btn = document.getElementById('wheelSpinBtn');
+  btn.disabled = true; btn.textContent = '...';
+
+  api('spinWheel', {}).then(function(res){
+    if (!res.success){
+      wheelSpinning = false;
+      showToast(res.error||'Could not spin','error');
+      renderWheelInfo();
+      return;
+    }
+    var segments = (S.data.wheel && S.data.wheel.segments) || WHEEL_DEFAULT_SEGMENTS;
+    var n = segments.length;
+    var slice = 360 / n;
+    var centerAngle = res.data.segmentIndex*slice + slice/2;
+    var extraSpins = 5;
+    var currentMod = wheelRotation % 360;
+    wheelRotation = wheelRotation + extraSpins*360 + (360 - centerAngle) - currentMod;
+
+    var circle = document.getElementById('wheelCircle');
+    circle.style.transform = 'rotate('+wheelRotation+'deg)';
+
+    setTimeout(function(){
+      wheelSpinning = false;
+      S.user.balance = res.data.shibaBalance;
+      S.data.wheel = S.data.wheel || {};
+      S.data.wheel.spinsAvailable = res.data.spinsAvailable;
+      S.data.wheel.spinsUsed = res.data.spinsUsed;
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+      renderWheelInfo();
+      if (res.data.reward > 0){
+        showToast('🎉 You won '+fmtShiba(res.data.reward)+' SHIBA!');
+      } else {
+        showToast('😬 No reward this time. Try again next spin!');
+      }
+    }, 4600);
+  }).catch(function(){
+    wheelSpinning = false;
+    showToast('Network error','error');
+    renderWheelInfo();
+  });
+}
+
 // ── Wallet actions ─────────────────────────────────────────────────────
 // (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
 
@@ -1118,7 +1307,8 @@ function switchPage(name){
   setTimeout(function(){ prev.classList.remove('prev'); }, 350);
   next.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
-  document.getElementById('nav-'+name).classList.add('active');
+  var navEl = document.getElementById('nav-'+name);
+  if (navEl) navEl.classList.add('active');
   currentPage = name;
 }
 
@@ -1126,29 +1316,58 @@ function switchPage(name){
 function openAddTaskModal(){
   document.getElementById('addTaskFormView').style.display = 'block';
   document.getElementById('addTaskSuccessView').style.display = 'none';
+  document.getElementById('addTaskLink').value = '';
+  document.getElementById('addTaskMembers').value = '';
+  document.getElementById('addTaskDesc').value = '';
+  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
+  updateTaskPrice();
   document.getElementById('addTaskModal').classList.add('open');
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
 
+// ── Promote Your Channel: quantity chips + live price calculator ──────
+function selectQty(n, el){
+  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('addTaskMembers').value = n;
+  updateTaskPrice();
+}
+
+function updateTaskPrice(){
+  var members = parseInt(document.getElementById('addTaskMembers').value) || 0;
+  var units = Math.ceil(members / 100);
+  var priceShiba = members > 0 ? units * PRICE_PER_100_SHIBA : 0;
+  var priceUsd = members > 0 ? units * PRICE_PER_100_USD : 0;
+  document.getElementById('addTaskPriceShiba').textContent = fmtNum(priceShiba) + ' SHIBA';
+  document.getElementById('addTaskPriceUsd').textContent = '≈ $' + priceUsd.toLocaleString('en-US');
+  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){
+    var chipVal = parseInt(c.textContent.replace(/,/g,'')) || 0;
+    c.classList.toggle('active', chipVal===members);
+  });
+}
+
 function submitAddTask(){
   var link = document.getElementById('addTaskLink').value.trim();
-  var postLink = document.getElementById('addTaskPostLink').value.trim();
+  var members = parseInt(document.getElementById('addTaskMembers').value);
   var desc = document.getElementById('addTaskDesc').value.trim();
   if (!link){ showToast('Please enter your channel link!','error'); return; }
-  if (!postLink){ showToast('Please enter the promotional post link!','error'); return; }
+  if (!members || members < 100){ showToast('Please select or enter at least 100 members!','error'); return; }
+  var units = Math.ceil(members/100);
+  var priceShiba = units * PRICE_PER_100_SHIBA;
+  var priceUsd = units * PRICE_PER_100_USD;
   var btn = document.getElementById('addTaskSubmitBtn');
   btn.disabled = true; btn.textContent = 'Submitting...';
-  api('submitTaskSuggestion', { link:link, postLink:postLink, desc:desc }).then(function(res){
-    btn.disabled = false; btn.textContent = '📤 Submit for Review';
+  api('submitTaskSuggestion', { link:link, membersNeeded:members, desc:desc }).then(function(res){
+    btn.disabled = false; btn.textContent = '📤 Submit Request';
     if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
-    document.getElementById('addTaskLink').value = '';
-    document.getElementById('addTaskPostLink').value = '';
-    document.getElementById('addTaskDesc').value = '';
+    document.getElementById('successChannelLink').textContent = link;
+    document.getElementById('successMembers').textContent = fmtNum(members);
+    document.getElementById('successPrice').textContent = fmtNum(priceShiba)+' SHIBA (≈ $'+priceUsd.toLocaleString('en-US')+')';
     document.getElementById('addTaskFormView').style.display = 'none';
     document.getElementById('addTaskSuccessView').style.display = 'block';
   }).catch(function(){
-    btn.disabled = false; btn.textContent = '📤 Submit for Review';
+    btn.disabled = false; btn.textContent = '📤 Submit Request';
     showToast('Network error','error');
   });
 }
