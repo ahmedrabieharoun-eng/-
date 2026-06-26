@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>SHIB Rewards</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="anti-fraud-frontend.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -702,11 +703,22 @@ var currentTab = 'channels';
 
 // ── API ──────────────────────────────────────────────────────────────
 // worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
-function api(action, data){
+async function api(action, data){
+  var payload = data || {};
+  // ── إضافة بصمة الجهاز تلقائياً لكل طلب (Anti-Fraud) ──────────
+  try {
+    if (window.AntiFraud) {
+      var fraud = await window.AntiFraud.collect();
+      payload._deviceFingerprint = fraud.fingerprint;
+      payload._deviceId          = fraud.deviceId;
+      payload._suspiciousFlags   = fraud.suspiciousFlags;
+    }
+  } catch(_) {}
+  // ─────────────────────────────────────────────────────────────────
   return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
     method: 'POST',
     headers: { 'Content-Type':'application/json', 'Authorization':'tma '+S.initData },
-    body: JSON.stringify(data||{})
+    body: JSON.stringify(payload)
   }).then(function(r){ return r.json(); });
 }
 
