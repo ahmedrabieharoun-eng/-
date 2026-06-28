@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,19 +17,60 @@
   --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
   --green:#22c55e;--red:#ef4444;
   --radius:16px;--radius-sm:10px;
+  --img-coin:url('https://cryptologos.cc/logos/shiba-inu-shib-logo.svg');
+  --img-avatar:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png');
+  --img-bg:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686989/c43e799a-6f1d-41d3-8df1-55d86d19c99e_p6mzt0.png');
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)),var(--img-bg) center top/cover no-repeat,var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
 
+/* SHIBA coin icon — used inline anywhere the word "SHIBA" appears in copy */
+.shiba-icon-inline{height:0.95em;width:0.95em;vertical-align:-0.15em;object-fit:contain;display:inline-block;margin:0 1px}
+
 /* Loading */
-.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999}
+.loading-screen{position:fixed;inset:0;background:linear-gradient(rgba(8,6,4,.18),rgba(8,6,4,.34)),var(--img-bg) center top/cover no-repeat;background-color:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:999;padding:34px 24px;overflow-y:auto;text-align:center}
 .loading-screen.hidden{display:none}
-.loading-logo{font-size:64px;animation:pulse 1.5s infinite}
-.loading-text{font-size:16px;color:var(--text2)}
-.loading-bar{width:200px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
-.loading-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:2px;animation:load 1.8s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+.ld-coin{position:absolute;border-radius:50%;overflow:hidden;box-shadow:0 0 18px rgba(247,147,26,0.55),0 4px 10px rgba(0,0,0,0.5);animation:ld-float 3.6s ease-in-out infinite}
+.ld-coin img{width:100%;height:100%;display:block;object-fit:cover}
+.ld-coin-1{width:54px;height:54px;top:9%;left:8%;animation-delay:0s}
+.ld-coin-2{width:62px;height:62px;top:19%;right:7%;animation-delay:0.6s}
+.ld-coin-3{width:62px;height:62px;top:50%;left:4%;animation-delay:1.2s}
+.ld-coin-4{width:64px;height:64px;top:58%;right:4%;animation-delay:1.8s}
+@keyframes ld-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.ld-avatar-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.ld-orbit{position:absolute;width:118%;height:40%;border:2px solid rgba(247,147,26,0.65);border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 16px rgba(247,147,26,0.35)}
+.ld-ring{position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid var(--orange);box-shadow:0 0 24px rgba(247,147,26,0.6),0 0 60px rgba(247,147,26,0.35),inset 0 0 30px rgba(247,147,26,0.15);animation:ld-spin 14s linear infinite}
+@keyframes ld-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.ld-avatar{position:relative;width:72%;height:72%;border-radius:50%;object-fit:cover;z-index:2;box-shadow:0 0 0 4px rgba(10,10,10,0.6)}
+
+.ld-kicker{font-size:13px;font-weight:700;letter-spacing:6px;color:var(--orange)}
+.ld-title{font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px}
+.ld-title-accent{color:var(--orange)}
+.ld-subtitle{font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;direction:rtl}
+.ld-subtitle .shiba-icon-inline{height:1.05em;width:1.05em}
+
+.loading-bar{width:min(86%,320px);height:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(247,147,26,0.3);border-radius:20px;overflow:hidden;margin-top:4px}
+.loading-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:20px;animation:load 1.8s ease-in-out infinite;box-shadow:0 0 14px rgba(247,147,26,0.6)}
 @keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+.ld-status{margin-top:0}
+.ld-status-main{font-size:14px;color:var(--orange2);font-weight:600;direction:rtl}
+.ld-status-sub{font-size:12.5px;color:var(--text2);margin-top:4px;direction:rtl}
+.ld-heart{color:#ff4d4d}
+
+.ld-features{width:100%;max-width:380px;margin-top:12px;border:1px solid rgba(247,147,26,0.25);border-radius:16px;background:rgba(10,8,4,0.55);display:flex;padding:16px 6px}
+.ld-feature{flex:1;text-align:center;padding:0 6px;position:relative;direction:rtl}
+.ld-feature+.ld-feature::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,0.12)}
+.ld-feature-icon{font-size:24px;margin-bottom:8px;color:var(--orange)}
+.ld-feature-icon-coin{width:30px;height:30px;border-radius:50%;overflow:hidden;margin:0 auto 8px;box-shadow:0 0 10px rgba(247,147,26,0.5)}
+.ld-feature-icon-coin img{width:100%;height:100%;object-fit:cover}
+.ld-feature-title{font-size:12.5px;font-weight:700;color:#fff}
+.ld-feature-title .ld-accent{color:var(--orange)}
+.ld-feature-sub{font-size:10.5px;color:var(--text3);margin-top:3px;display:flex;align-items:center;justify-content:center;gap:3px}
+
+.ld-powered{margin-top:14px;padding:8px 18px;border:1px solid rgba(247,147,26,0.3);border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--orange);display:flex;align-items:center;gap:8px;background:rgba(247,147,26,0.06)}
 
 /* Pages */
 .pages{flex:1;overflow:hidden;position:relative}
@@ -330,9 +372,47 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
 <!-- Loading -->
 <div class="loading-screen" id="loadingScreen">
-  <div class="loading-logo">🐕</div>
-  <div class="loading-text">Loading SHIB Rewards...</div>
+  <div class="ld-coin ld-coin-1"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+  <div class="ld-coin ld-coin-2"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+  <div class="ld-coin ld-coin-3"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+  <div class="ld-coin ld-coin-4"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+
+  <div class="ld-avatar-wrap">
+    <div class="ld-orbit"></div>
+    <div class="ld-ring"></div>
+    <img class="ld-avatar" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png" alt="SHIBA">
+  </div>
+
+  <div class="ld-kicker">LOADING</div>
+  <div class="ld-title"><span class="ld-title-accent">SHIB</span> REWARDS</div>
+  <div class="ld-subtitle">أكمل المهام واربح عملات <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+
   <div class="loading-bar"><div class="loading-fill"></div></div>
+
+  <div class="ld-status">
+    <div class="ld-status-main">جارٍ التحميل...</div>
+    <div class="ld-status-sub">يرجى الانتظار <span class="ld-heart">❤</span></div>
+  </div>
+
+  <div class="ld-features">
+    <div class="ld-feature">
+      <div class="ld-feature-icon">📋</div>
+      <div class="ld-feature-title">مهام سهلة</div>
+      <div class="ld-feature-sub">نفذ المهام واربح</div>
+    </div>
+    <div class="ld-feature">
+      <div class="ld-feature-icon ld-feature-icon-coin"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+      <div class="ld-feature-title">اربح <span class="ld-accent">SHIB</span></div>
+      <div class="ld-feature-sub">اجمع عملات <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+    </div>
+    <div class="ld-feature">
+      <div class="ld-feature-icon">⚡</div>
+      <div class="ld-feature-title">سحب فوري</div>
+      <div class="ld-feature-sub">حول أرباحك بسهولة</div>
+    </div>
+  </div>
+
+  <div class="ld-powered"><span>🐾</span> POWERED BY <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> <span>🐾</span></div>
 </div>
 
 <!-- Mandatory Subscription Gate -->
@@ -366,7 +446,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-            <span class="balance-currency">SHIBA</span>
+            <span class="balance-currency"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span>
           </div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
           <div class="balance-logo">🐕</div>
@@ -385,7 +465,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
           <div class="stat-card">
             <div class="stat-val orange" id="statEarned">0</div>
-            <div class="stat-lbl">SHIBA Earned</div>
+            <div class="stat-lbl"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Earned</div>
           </div>
         </div>
       </div>
@@ -395,7 +475,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="wheel-card-icon">🎡</div>
           <div class="wheel-card-text">
             <span class="wheel-card-title">Lucky Wheel</span>
-            <span class="wheel-card-sub" id="homeWheelSub">Spin &amp; win up to 10,000 SHIBA!</span>
+            <span class="wheel-card-sub" id="homeWheelSub">Spin &amp; win up to 10,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA">!</span>
           </div>
           <div class="wheel-card-badge" id="homeWheelBadge" style="display:none">0</div>
         </button>
@@ -415,7 +495,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="promo-emoji">🚀</div>
           <div class="promo-content">
             <div class="promo-title">Big Rewards Await!</div>
-            <div class="promo-desc">Invite friends, complete tasks and earn real SHIBA rewards!</div>
+            <div class="promo-desc">Invite friends, complete tasks and earn real <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> rewards!</div>
             <button class="promo-btn" onclick="switchPage('tasks')">Let's Go!</button>
           </div>
         </div>
@@ -432,7 +512,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
             <div class="combo-title">Daily Combo</div>
             <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
           </div>
-          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your SHIBA reward</div>
+          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> reward</div>
           <div class="combo-slots">
             <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
             <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
@@ -471,7 +551,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="ref-banner">
         <span class="ref-emoji">🐶</span>
         <div class="ref-banner-title">Invite friends and earn</div>
-        <span class="ref-banner-pct" id="refPct">4,000 SHIBA</span>
+        <span class="ref-banner-pct" id="refPct">4,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span>
         <div class="ref-banner-desc">for every friend who joins &amp; verifies using your link!</div>
       </div>
 
@@ -497,7 +577,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </div>
           <div class="ref-stat-card">
             <div class="ref-stat-val orange" id="refTotalEarned">0</div>
-            <div class="ref-stat-lbl">SHIBA Earned</div>
+            <div class="ref-stat-lbl"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Earned</div>
           </div>
         </div>
       </div>
@@ -514,15 +594,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
       <div class="wallet-bal-card">
-        <div class="wbal-label">SHIBA Balance</div>
-        <div class="wbal-amount" id="walletTon">0 SHIBA</div>
-        <div class="wbal-sub" id="walletCoinsInfo">Earn SHIBA from tasks &amp; referrals</div>
+        <div class="wbal-label"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Balance</div>
+        <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+        <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> from tasks &amp; referrals</div>
       </div>
 
       <div class="wallet-actions">
         <div class="wallet-action-btn primary" onclick="openWithdrawForm()">
           <div class="wallet-action-icon">💸</div>
-          <div class="wallet-action-label">Withdraw SHIBA</div>
+          <div class="wallet-action-label">Withdraw <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
         </div>
         <div class="wallet-action-btn" onclick="switchPage('tasks')">
           <div class="wallet-action-icon">📋</div>
@@ -531,10 +611,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       </div>
 
       <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
-        <div class="wallet-form-title"><span>💸</span><span>Withdraw SHIBA</span></div>
+        <div class="wallet-form-title"><span>💸</span><span>Withdraw <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span></div>
         <input class="wallet-input" id="withdrawWallet" placeholder="SHIBA BEP-20 wallet address (0x...)">
         <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in SHIBA">
-        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 SHIBA</div>
+        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
         <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal</button>
         <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
       </div>
@@ -554,7 +634,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
       <div class="wheel-info-banner">
         <div class="wheel-info-emoji">🎯</div>
-        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 SHIBA</b>!</div>
+        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></b>!</div>
       </div>
 
       <div class="wheel-stage">
@@ -606,7 +686,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
     <div id="addTaskFormView">
       <div class="modal-title">📢 Promote Your Channel</div>
-      <div class="modal-desc">Add your channel as a task — our users will join it and earn SHIBA, helping you get real, active members fast.</div>
+      <div class="modal-desc">Add your channel as a task — our users will join it and earn <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA">, helping you get real, active members fast.</div>
 
       <div class="modal-field-label">Channel Link</div>
       <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
@@ -627,9 +707,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           <div class="price-lbl">Total Cost</div>
           <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
         </div>
-        <div class="price-val" id="addTaskPriceShiba">0 SHIBA</div>
+        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
       </div>
-      <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing: every 100 members = 200,000 SHIBA (≈ $1). Our team will contact you with payment details before your task goes live.</div>
+      <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing: every 100 members = 200,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> (≈ $1). Our team will contact you with payment details before your task goes live.</div>
 
       <div class="modal-field-label">Additional Notes (Optional)</div>
       <textarea class="modal-textarea" id="addTaskDesc" placeholder="Anything you'd like us to know..."></textarea>
@@ -669,6 +749,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
 var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
+
+// أيقونة عملة SHIBA — تُستخدم بدل كتابة كلمة "SHIBA" في أي نص يُولَّد من الجافاسكريبت
+var SHIBA_ICON = '<img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" class="shiba-icon-inline" alt="SHIBA">';
 
 // مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
 var PRICE_PER_100_SHIBA = 200000;
@@ -851,14 +934,14 @@ function render(){
   // Activity log
   renderActivity(d.balanceLogs || []);
   // Refs page
-  document.getElementById('refPct').textContent = fmtShiba(refReward)+' SHIBA';
+  document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
   document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
   // Wallet (Balance & History)
-  document.getElementById('walletTon').textContent = fmtShiba(u.balance) + ' SHIBA';
+  document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
   renderWalletHistory(d.balanceLogs||[]);
   // Combo
   renderComboState();
@@ -881,7 +964,7 @@ function renderActivity(log){
     var ts = e.ts ? timeAgo(e.ts) : '';
     var amountHtml = '';
     if (amount){
-      amountHtml = '<div class="reward-amount"'+(isNeg?' style="color:var(--red)"':'')+'>'+(isNeg?'-':'+')+fmtShiba(Math.abs(amount))+' SHIBA</div>';
+      amountHtml = '<div class="reward-amount"'+(isNeg?' style="color:var(--red)"':'')+'>'+(isNeg?'-':'+')+fmtShiba(Math.abs(amount))+' '+SHIBA_ICON+'</div>';
     }
     return '<div class="reward-item">'+
       '<div class="reward-icon">'+icon+'</div>'+
@@ -918,7 +1001,7 @@ function renderRefs(page){
       '</div>'+
       '<div class="ref-user-earn">'+
         '<span class="ref-user-earn-val">+'+earned+'</span>'+
-        '<span class="ref-user-earn-lbl">SHIBA</span>'+
+        '<span class="ref-user-earn-lbl">'+SHIBA_ICON+'</span>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -938,12 +1021,12 @@ function renderWalletHistory(logs){
     if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
     var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel' };
     var label = labels[l.type] || (l.type||'Reward');
-    entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' SHIBA', cls:'ok', txt:'Done' });
+    entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' '+SHIBA_ICON, cls:'ok', txt:'Done' });
   });
   withdrawals.forEach(function(w){
     var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
     var txt = w.status==='completed' ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
-    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtShiba(w.amount)+' SHIBA', cls:cls, txt:txt });
+    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtShiba(w.amount)+' '+SHIBA_ICON, cls:cls, txt:txt });
   });
   entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
   if (!entries.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
@@ -957,7 +1040,7 @@ function openWithdrawForm(){
   var cfg = (S.data && S.data.config) || {};
   if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
   var minW = cfg.minWithdrawal || 50000;
-  document.getElementById('withdrawMinNote').textContent = 'Minimum withdrawal: '+fmtShiba(minW)+' SHIBA';
+  document.getElementById('withdrawMinNote').innerHTML = 'Minimum withdrawal: '+fmtShiba(minW)+' '+SHIBA_ICON;
   document.getElementById('withdrawWallet').value = (S.user && S.user.wallet) || '';
   document.getElementById('withdrawAmount').value = '';
   document.getElementById('withdrawFormCard').style.display = 'block';
@@ -970,7 +1053,7 @@ function closeWithdrawForm(){
 function submitWithdrawal(){
   var wallet = document.getElementById('withdrawWallet').value.trim();
   var amount = parseFloat(document.getElementById('withdrawAmount').value);
-  if (!wallet){ showToast('Enter your SHIBA BEP-20 wallet address','error'); return; }
+  if (!wallet){ showToast('Enter your '+SHIBA_ICON+' BEP-20 wallet address','error',true); return; }
   if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)){ showToast('Invalid BEP-20 address. It must start with 0x and be 42 characters long','error'); return; }
   if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
   if (S.user && amount > (S.user.balance||0)){ showToast('Insufficient balance','error'); return; }
@@ -982,7 +1065,7 @@ function submitWithdrawal(){
     S.user.balance = res.data.shibaBalance;
     S.user.wallet = wallet;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     S.data.withdrawals = S.data.withdrawals || [];
     S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, status:'pending', ts:Date.now() });
     renderWalletHistory(S.data.balanceLogs||[]);
@@ -1016,7 +1099,7 @@ function renderTasks(tab){
         '<div class="task-logo">👥</div>'+
         '<div class="task-info">'+
           '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
-          '<div class="task-reward">+'+fmtShiba(t.reward)+' SHIBA</div>'+
+          '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
         '</div>'+
         '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
       '</div>';
@@ -1036,7 +1119,7 @@ function renderTasks(tab){
       '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
       '<div class="task-info">'+
         '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
-        '<div class="task-reward">+'+fmtShiba(t.reward)+' SHIBA</div>'+
+        '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
       '</div>'+
       '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
     '</div>';
@@ -1072,9 +1155,9 @@ function doVerifyTask(id){
     S.user.balance = res.data.shibaBalance;
     delete S.taskJoined[id];
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     renderTasks(currentTab);
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' SHIBA added! 🎉');
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
   }).catch(function(){ showToast('Network error','error'); });
 }
 
@@ -1085,9 +1168,9 @@ function doClaimInvite(id){
     S.data.completedTasks.push(id);
     S.user.balance = res.data.shibaBalance;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     renderTasks(currentTab);
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' SHIBA added! 🎉');
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
   }).catch(function(){ showToast('Network error','error'); });
 }
 
@@ -1103,8 +1186,8 @@ function renderComboState(){
     desc.textContent = 'Come back tomorrow for a new combo!';
   } else {
     btn.disabled = false;
-    btn.textContent = 'Check Combo — '+fmtShiba(reward)+' SHIBA';
-    desc.textContent = 'Find the correct combination and claim your SHIBA reward';
+    btn.innerHTML = 'Check Combo — '+fmtShiba(reward)+' '+SHIBA_ICON;
+    desc.innerHTML = 'Find the correct combination and claim your '+SHIBA_ICON+' reward';
   }
 }
 
@@ -1141,8 +1224,8 @@ function checkCombo(){
     S.user.balance = res.data.shibaBalance;
     S.data.combo.solvedToday = true;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
-    showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' SHIBA!');
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+    showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+'!',null,true);
     renderComboState();
     resetCombo();
   }).catch(function(){
@@ -1241,10 +1324,10 @@ function spinWheel(){
       S.data.wheel.spinsAvailable = res.data.spinsAvailable;
       S.data.wheel.spinsUsed = res.data.spinsUsed;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      document.getElementById('walletTon').textContent = fmtShiba(S.user.balance) + ' SHIBA';
+      document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
       renderWheelInfo();
       if (res.data.reward > 0){
-        showToast('🎉 You won '+fmtShiba(res.data.reward)+' SHIBA!');
+        showToast('🎉 You won '+fmtShiba(res.data.reward)+' '+SHIBA_ICON+'!',null,true);
       } else {
         showToast('😬 No reward this time. Try again next spin!');
       }
@@ -1351,7 +1434,7 @@ function updateTaskPrice(){
   var units = Math.ceil(members / 100);
   var priceShiba = members > 0 ? units * PRICE_PER_100_SHIBA : 0;
   var priceUsd = members > 0 ? units * PRICE_PER_100_USD : 0;
-  document.getElementById('addTaskPriceShiba').textContent = fmtNum(priceShiba) + ' SHIBA';
+  document.getElementById('addTaskPriceShiba').innerHTML = fmtNum(priceShiba) + ' ' + SHIBA_ICON;
   document.getElementById('addTaskPriceUsd').textContent = '≈ $' + priceUsd.toLocaleString('en-US');
   document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){
     var chipVal = parseInt(c.textContent.replace(/,/g,'')) || 0;
@@ -1375,7 +1458,7 @@ function submitAddTask(){
     if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
     document.getElementById('successChannelLink').textContent = link;
     document.getElementById('successMembers').textContent = fmtNum(members);
-    document.getElementById('successPrice').textContent = fmtNum(priceShiba)+' SHIBA (≈ $'+priceUsd.toLocaleString('en-US')+')';
+    document.getElementById('successPrice').innerHTML = fmtNum(priceShiba)+' '+SHIBA_ICON+' (≈ $'+priceUsd.toLocaleString('en-US')+')';
     document.getElementById('addTaskFormView').style.display = 'none';
     document.getElementById('addTaskSuccessView').style.display = 'block';
   }).catch(function(){
@@ -1397,9 +1480,9 @@ function submitAddTask(){
 
 // ── Toast ──────────────────────────────────────────────────────────────
 var _toastTimer;
-function showToast(msg, type){
+function showToast(msg, type, isHtml){
   var el = document.getElementById('toast');
-  el.textContent = msg;
+  if (isHtml) el.innerHTML = msg; else el.textContent = msg;
   el.className = 'toast' + (type==='error'?' error':'');
   el.classList.add('show');
   clearTimeout(_toastTimer);
