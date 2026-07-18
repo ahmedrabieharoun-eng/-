@@ -68,6 +68,13 @@ const DEFAULT_MANDATORY_CHANNELS = [
 // مجموعة الإيموجيز المستخدمة في الكومبو اليومي
 const COMBO_EMOJI_POOL = ['🦴', '🏠', '🎾', '🍖'];
 
+// ───────── مهام "الانضمام لبوت" (category: bots) لا يمكن التحقق منها
+// بشكل حقيقي عبر Telegram Bot API (مفيش getChatMember على بوت تاني)،
+// فبدلاً من التحقق الحقيقي، نفرض فترة انتظار حقيقية بعد فتح رابط
+// البوت (مُسجَّلة من السيرفر، وليست مجرد مؤقّت في الواجهة يمكن تجاوزه)
+// قبل السماح للمستخدم بالضغط على Verify واستلام المكافأة ─────
+const BOT_TASK_WAIT_SECONDS = 52;
+
 // ───────── عجلة الحظ (Lucky Wheel) — 8 قطاعات بالترتيب المعروض في الواجهة،
 // كل قطاع له "وزن" (weight) يحدد احتمالية الفوز به (الأوزان الأكبر = احتمال
 // أعلى). المجموع = 1000 لتسهيل حساب النسبة المئوية ─────
@@ -840,20 +847,31 @@ function isValidBep20Address(addr) {
 
 // ───────────────────────── POST /getState ─────────────────────────
 async function handleGetState(env, ctx) {
-  const { user, config } = ctx;
+  const { user, config, botToken } = ctx;
   const telegramId = user.telegramId;
 
   await ensureFixedInviteTasks(env);
 
-  const [tasksRaw, completedRaw, referralsRaw, logsRaw, withdrawalsRaw, combo, mandatoryChannels] = await Promise.all([
+  const [tasksRaw, completedRaw, referralsRaw, logsRaw, withdrawalsRaw, combo] = await Promise.all([
     dbGet(env, 'tasks'),
     dbGet(env, `users/${telegramId}/completedTasks`),
     dbGet(env, `referrals/${telegramId}`),
     dbGet(env, `balanceLogs/${telegramId}`),
     dbGet(env, `withdrawals/${telegramId}`),
     getOrCreateTodayCombo(env, config),
-    config.mandatorySubEnabled !== false ? getMandatoryChannels(env) : Promise.resolve([]),
   ]);
+
+  // ───── إعادة التحقق الفعلي (Live) من الاشتراك الإجباري في كل مرة يفتح
+  // فيها المستخدم الويب أب — وليس فقط أول مرة. لو ترك القنوات بعد أن كان
+  // قد اشترك سابقًا، يُعاد قفل الواجهة حتى يرجع ويشترك من جديد ─────
+  const fsStatus = await checkUserForceSub(env, telegramId, botToken, config);
+  if (fsStatus.passed !== !!user.forceSubPassed) {
+    await dbUpdate(env, `users/${telegramId}`, { forceSubPassed: fsStatus.passed });
+    user.forceSubPassed = fsStatus.passed;
+  }
+  if (fsStatus.passed) {
+    await activateReferralIfNeeded(env, telegramId, config);
+  }
 
   const tasks = tasksRaw
     ? Object.entries(tasksRaw).map(([id, t]) => ({ id, ...t })).filter((t) => t.status === 'active')
@@ -903,11 +921,11 @@ async function handleGetState(env, ctx) {
       referralsPerSpin: WHEEL_REFERRALS_PER_SPIN,
     },
     forceSub: {
-      required: config.mandatorySubEnabled !== false && mandatoryChannels.length > 0,
-      passed: !!user.forceSubPassed,
-      channels: mandatoryChannels.map((c) => ({
+      required: fsStatus.required,
+      passed: fsStatus.passed,
+      channels: fsStatus.channels.map((c) => ({
         id: c.id,
-        title: c.title || c.username || c.link,
+        title: c.title,
         link: c.link,
       })),
     },
@@ -927,6 +945,40 @@ async function handleCheckForceSub(env, ctx) {
   }
 
   return ok(status);
+}
+
+// ───────────────────────── POST /startTask ─────────────────────────
+// يُستدعى من الواجهة لحظة ضغط المستخدم على "Join" وفتح رابط المهمة.
+// بيسجّل وقت البدء في السيرفر (وليس في المتصفح) عشان نقدر نفرض فترة
+// الانتظار الحقيقية (52 ثانية) على مهام "الانضمام لبوت" بدون إمكانية
+// التحايل عليها من الواجهة الأمامية ─────
+async function handleStartTask(env, ctx) {
+  const { user, body } = ctx;
+  const telegramId = user.telegramId;
+  const taskId = body.taskId;
+
+  if (!isNonEmptyString(taskId, 100)) {
+    return fail('taskId غير صالح');
+  }
+
+  const task = await dbGet(env, `tasks/${taskId}`);
+  if (!task || task.status !== 'active' || task.category === 'invite') {
+    return fail('المهمة غير موجودة أو غير مفعّلة');
+  }
+
+  const alreadyDone = await dbGet(env, `completedTasks/${telegramId}/${taskId}`);
+  if (alreadyDone) {
+    return fail('تم استلام مكافأة هذه المهمة من قبل');
+  }
+
+  // لا نستبدل وقت بدء سابق لو موجود (عشان حد ما يقدر يعيد تعيين العداد
+  // بالضغط على "Join" تاني وتاني)
+  const existing = await dbGet(env, `taskStarts/${telegramId}/${taskId}`);
+  if (!existing) {
+    await dbSet(env, `taskStarts/${telegramId}/${taskId}`, Date.now());
+  }
+
+  return ok({ taskId, waitSeconds: task.category === 'bots' ? BOT_TASK_WAIT_SECONDS : 0 });
 }
 
 // ───────────────────────── POST /verifyTask ─────────────────────────
@@ -953,9 +1005,27 @@ async function handleVerifyTask(env, ctx) {
     return fail('تم استلام مكافأة هذه المهمة من قبل');
   }
 
-  const isMember = await checkTelegramMembership(env, task.link, telegramId, botToken);
-  if (!isMember) {
-    return fail('لم يتم العثور على انضمامك للقناة/البوت، تأكد من الانضمام أولاً');
+  if (task.category === 'bots') {
+    // ───── مهام البوتات: لا يوجد تحقق حقيقي ممكن عبر Telegram Bot API
+    // (botX مش بيقدر يعرف هل المستخدم بدأ botY ولا لأ)، فبدل ادعاء
+    // تحقق غير حقيقي، نفرض فترة انتظار حقيقية مسجّلة من السيرفر ─────
+    const startedAt = await dbGet(env, `taskStarts/${telegramId}/${taskId}`);
+    if (!startedAt) {
+      return fail('افتح رابط البوت أولاً بالضغط على Join');
+    }
+    const elapsedMs = Date.now() - startedAt;
+    const requiredMs = BOT_TASK_WAIT_SECONDS * 1000;
+    if (elapsedMs < requiredMs) {
+      const remaining = Math.ceil((requiredMs - elapsedMs) / 1000);
+      return fail(`انتظر ${remaining} ثانية بعد فتح البوت ثم اضغط Verify`);
+    }
+  } else {
+    // ───── مهام القنوات: تحقق حقيقي (Live) من الانضمام عبر Telegram Bot
+    // API (getChatMember)، بنفس طريقة التحقق من الاشتراك الإجباري ─────
+    const isMember = await checkTelegramMembership(env, task.link, telegramId, botToken);
+    if (!isMember) {
+      return fail('لم يتم العثور على انضمامك للقناة، تأكد من الانضمام أولاً');
+    }
   }
 
   const reward = task.reward ?? config.taskDefaultReward ?? DEFAULT_CONFIG.taskDefaultReward;
@@ -963,6 +1033,7 @@ async function handleVerifyTask(env, ctx) {
 
   await dbSet(env, `completedTasks/${telegramId}/${taskId}`, { completedAt: Date.now(), reward });
   await dbUpdate(env, `users/${telegramId}/completedTasks`, { [taskId]: true });
+  await dbDelete(env, `taskStarts/${telegramId}/${taskId}`).catch(() => {});
   await addBalanceLog(env, telegramId, {
     type: 'task_reward',
     taskId,
@@ -1227,6 +1298,7 @@ async function handleRequestWithdrawal(env, ctx) {
 // ════════════════════════════════════════════════════════════════════
 const ROUTES = {
   '/getState': handleGetState,
+  '/startTask': handleStartTask,
   '/verifyTask': handleVerifyTask,
   '/claimTask': handleClaimTask,
   '/submitTaskSuggestion': handleSubmitTaskSuggestion,
