@@ -1,1535 +1,902 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>SHIB Rewards</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="anti-fraud-frontend.js"></script>
+<title>Pipeworks Idle — Factory Chain</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;
-  --orange:#f7931a;--orange2:#ff6b00;
-  --orange-dim:rgba(247,147,26,0.15);--orange-dim2:rgba(247,147,26,0.08);
-  --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
-  --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
-  --green:#22c55e;--red:#ef4444;
-  --radius:16px;--radius-sm:10px;
-  --img-coin:url('https://cryptologos.cc/logos/shiba-inu-shib-logo.svg');
-  --img-avatar:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png');
-  --img-bg:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686989/c43e799a-6f1d-41d3-8df1-55d86d19c99e_p6mzt0.png');
-}
-html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)),var(--img-bg) center top/cover no-repeat,var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
-.app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
+  :root{
+    --panel-bg: rgba(18,22,30,0.82);
+    --panel-border: rgba(140,170,255,0.18);
+    --text-main: #eaf0ff;
+    --text-dim: #9fb0d0;
+    --accent-green: #59e39d;
+    --accent-amber: #ffb84d;
+    --accent-blue: #5fb6ff;
+  }
+  html,body{height:100%;}
+  body{
+    margin:0; display:flex; align-items:center; justify-content:center;
+    min-height:100vh;
+    background: radial-gradient(ellipse at 50% -10%, #24303f 0%, #0d1420 55%, #070b12 100%);
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    color: var(--text-main);
+    overflow:hidden;
+  }
+  #stage{
+    position:relative;
+    width:960px; height:780px;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(140,170,255,0.08);
+  }
+  canvas{ position:absolute; top:0; left:0; display:block; }
+  #loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:10px; background:#0b1018; z-index:50;
+    font-size:14px; color:var(--text-dim); letter-spacing:.5px;
+  }
+  #loading .bar{ width:220px; height:6px; border-radius:4px; background:#1c2534; overflow:hidden; }
+  #loading .fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--accent-green),var(--accent-blue)); transition:width .15s ease-out; }
 
-/* SHIBA coin icon — used inline anywhere the word "SHIBA" appears in copy */
-.shiba-icon-inline{height:0.95em;width:0.95em;vertical-align:-0.15em;object-fit:contain;display:inline-block;margin:0 1px}
+  /* ---- HUD ---- */
+  .hud-pill{
+    position:absolute; display:flex; align-items:center; gap:8px;
+    background:var(--panel-bg); border:1px solid var(--panel-border);
+    border-radius:10px; padding:6px 12px; font-size:13px; font-weight:600;
+    backdrop-filter: blur(6px); box-shadow:0 4px 14px rgba(0,0,0,.35);
+    pointer-events:none;
+  }
+  .hud-pill .lbl{ color:var(--text-dim); font-weight:500; font-size:11px; }
+  #rateFurnace{ top:26px; left:24px; }
+  #rateTanks{ top:26px; right:24px; }
+  #coinsPill{
+    top:26px; left:50%; transform:translateX(-50%);
+    font-size:16px; padding:8px 18px; gap:10px;
+  }
+  #coinsPill .coin-icon{
+    width:16px;height:16px;border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #ffe9a8, var(--accent-amber) 60%, #b0781f 100%);
+    box-shadow:0 0 8px rgba(255,184,77,.7);
+  }
+  #upgradeBtn{
+    position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(180deg,#2a3a52,#182234);
+    border:1px solid rgba(140,170,255,0.35);
+    color:var(--text-main); border-radius:12px; padding:12px 22px;
+    font-size:14px; font-weight:700; cursor:pointer; letter-spacing:.3px;
+    box-shadow:0 6px 18px rgba(0,0,0,.4);
+    transition:transform .12s ease;
+  }
+  #upgradeBtn small{ display:block; font-weight:500; font-size:11px; color:var(--accent-amber); margin-top:2px;}
+  #upgradeBtn:active{ transform:translateX(-50%) scale(.96); }
+  #upgradeBtn.pulse{ animation: btnpulse 1.6s ease-in-out infinite; }
+  @keyframes btnpulse{
+    0%,100%{ box-shadow:0 6px 18px rgba(0,0,0,.4), 0 0 0 0 rgba(89,227,157,.45); }
+    50%{ box-shadow:0 6px 18px rgba(0,0,0,.4), 0 0 0 8px rgba(89,227,157,0); }
+  }
+  #upgradeBtn:disabled{ opacity:.45; cursor:not-allowed; animation:none; }
 
-/* Loading */
-.loading-screen{position:fixed;inset:0;background:linear-gradient(rgba(8,6,4,.18),rgba(8,6,4,.34)),var(--img-bg) center top/cover no-repeat;background-color:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:999;padding:34px 24px;overflow-y:auto;text-align:center}
-.loading-screen.hidden{display:none}
-
-.ld-coin{position:absolute;border-radius:50%;overflow:hidden;box-shadow:0 0 18px rgba(247,147,26,0.55),0 4px 10px rgba(0,0,0,0.5);animation:ld-float 3.6s ease-in-out infinite}
-.ld-coin img{width:100%;height:100%;display:block;object-fit:cover}
-.ld-coin-1{width:54px;height:54px;top:9%;left:8%;animation-delay:0s}
-.ld-coin-2{width:62px;height:62px;top:19%;right:7%;animation-delay:0.6s}
-.ld-coin-3{width:62px;height:62px;top:50%;left:4%;animation-delay:1.2s}
-.ld-coin-4{width:64px;height:64px;top:58%;right:4%;animation-delay:1.8s}
-@keyframes ld-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-
-.ld-avatar-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
-.ld-orbit{position:absolute;width:118%;height:40%;border:2px solid rgba(247,147,26,0.65);border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 16px rgba(247,147,26,0.35)}
-.ld-ring{position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid var(--orange);box-shadow:0 0 24px rgba(247,147,26,0.6),0 0 60px rgba(247,147,26,0.35),inset 0 0 30px rgba(247,147,26,0.15);animation:ld-spin 14s linear infinite}
-@keyframes ld-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-.ld-avatar{position:relative;width:72%;height:72%;border-radius:50%;object-fit:cover;z-index:2;box-shadow:0 0 0 4px rgba(10,10,10,0.6)}
-
-.ld-kicker{font-size:13px;font-weight:700;letter-spacing:6px;color:var(--orange)}
-.ld-title{font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px}
-.ld-title-accent{color:var(--orange)}
-.ld-subtitle{font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;direction:rtl}
-.ld-subtitle .shiba-icon-inline{height:1.05em;width:1.05em}
-
-.loading-bar{width:min(86%,320px);height:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(247,147,26,0.3);border-radius:20px;overflow:hidden;margin-top:4px}
-.loading-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:20px;animation:load 1.8s ease-in-out infinite;box-shadow:0 0 14px rgba(247,147,26,0.6)}
-@keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
-
-.ld-status{margin-top:0}
-.ld-status-main{font-size:14px;color:var(--orange2);font-weight:600;direction:rtl}
-.ld-status-sub{font-size:12.5px;color:var(--text2);margin-top:4px;direction:rtl}
-.ld-heart{color:#ff4d4d}
-
-.ld-features{width:100%;max-width:380px;margin-top:12px;border:1px solid rgba(247,147,26,0.25);border-radius:16px;background:rgba(10,8,4,0.55);display:flex;padding:16px 6px}
-.ld-feature{flex:1;text-align:center;padding:0 6px;position:relative;direction:rtl}
-.ld-feature+.ld-feature::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,0.12)}
-.ld-feature-icon{font-size:24px;margin-bottom:8px;color:var(--orange)}
-.ld-feature-icon-coin{width:30px;height:30px;border-radius:50%;overflow:hidden;margin:0 auto 8px;box-shadow:0 0 10px rgba(247,147,26,0.5)}
-.ld-feature-icon-coin img{width:100%;height:100%;object-fit:cover}
-.ld-feature-title{font-size:12.5px;font-weight:700;color:#fff}
-.ld-feature-title .ld-accent{color:var(--orange)}
-.ld-feature-sub{font-size:10.5px;color:var(--text3);margin-top:3px;display:flex;align-items:center;justify-content:center;gap:3px}
-
-.ld-powered{margin-top:14px;padding:8px 18px;border:1px solid rgba(247,147,26,0.3);border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--orange);display:flex;align-items:center;gap:8px;background:rgba(247,147,26,0.06)}
-
-/* Pages */
-.pages{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:80px;-webkit-overflow-scrolling:touch}
-.page.active{transform:translateX(0)}
-.page.prev{transform:translateX(-30%)}
-.page::-webkit-scrollbar{width:0}
-
-/* Nav */
-.nav{position:absolute;bottom:0;left:0;right:0;height:72px;background:rgba(10,10,10,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--glass-border);display:flex;align-items:center;z-index:100;padding:0 8px;padding-bottom:env(safe-area-inset-bottom)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;cursor:pointer;border-radius:12px;transition:background 0.2s;position:relative}
-.nav-item:active{background:var(--glass)}
-.nav-icon{font-size:22px;transition:all 0.2s;color:var(--text3)}
-.nav-label{font-size:10px;font-weight:500;letter-spacing:0.3px;color:var(--text3);transition:color 0.2s}
-.nav-item.active .nav-icon{color:var(--orange);transform:translateY(-1px)}
-.nav-item.active .nav-label{color:var(--orange)}
-
-/* Glass */
-.glass-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(10px)}
-
-/* ===== HOME PAGE ===== */
-.home-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between}
-.user-info{display:flex;align-items:center;gap:12px}
-.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff4500);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;border:2px solid rgba(247,147,26,0.4);flex-shrink:0;overflow:hidden}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.user-name-wrap{display:flex;flex-direction:column}
-.user-greeting{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase}
-.user-name{font-size:16px;font-weight:700;color:var(--text)}
-
-.balance-section{padding:0 16px 16px}
-.balance-card{padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
-.balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.12) 0%,transparent 70%);pointer-events:none}
-.balance-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
-.balance-amount{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
-.balance-num{font-size:38px;font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1}
-.balance-currency{font-size:18px;font-weight:700;color:var(--orange)}
-.balance-sub{font-size:13px;color:var(--text3)}
-.balance-logo{position:absolute;right:20px;bottom:18px;font-size:44px;opacity:0.55}
-
-.stats-section{padding:0 16px 16px}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
-.stat-val{font-size:17px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
-.stat-val.orange{color:var(--orange)}
-.stat-lbl{font-size:10px;color:var(--text3);letter-spacing:0.2px}
-
-.invite-section{padding:0 16px 16px}
-.invite-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s,opacity 0.15s;position:relative;overflow:hidden}
-.invite-btn:active{transform:scale(0.97)}
-.invite-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
-.invite-icon{font-size:28px;flex-shrink:0}
-.invite-text{text-align:left}
-.invite-title{font-size:17px;font-weight:800;color:#fff;display:block}
-.invite-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
-
-.section-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px}
-.section-title{font-size:16px;font-weight:700;color:var(--text)}
-.view-all{font-size:12px;color:var(--orange);cursor:pointer;font-weight:600}
-
-.rewards-section{padding:0 16px 16px}
-.reward-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
-.reward-icon{width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.reward-info{flex:1}
-.reward-name{font-size:14px;font-weight:600;color:var(--text)}
-.reward-amount{font-size:13px;color:var(--green);font-weight:700}
-.reward-time{font-size:11px;color:var(--text3)}
-
-.promo-section{padding:0 16px 16px}
-.promo-card{padding:20px;border-radius:18px;background:linear-gradient(135deg,#1a0e00,#0f0700);border:1px solid rgba(247,147,26,0.2);display:flex;gap:16px;align-items:center;position:relative;overflow:hidden}
-.promo-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(247,147,26,0.15),transparent 70%)}
-.promo-emoji{font-size:52px;flex-shrink:0}
-.promo-content{flex:1}
-.promo-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
-.promo-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px}
-.promo-btn{display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;border:none;transition:transform 0.15s}
-.promo-btn:active{transform:scale(0.95)}
-
-/* ===== TASKS PAGE ===== */
-.tasks-header{padding:20px 20px 16px;text-align:center}
-.page-title{font-size:22px;font-weight:800;color:var(--text)}
-
-.combo-section{padding:0 16px 16px}
-.combo-card{padding:20px;border-radius:18px;background:linear-gradient(145deg,#0f0800,#111111);border:1px solid rgba(247,147,26,0.3)}
-.combo-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.combo-title{font-size:18px;font-weight:800;color:var(--text)}
-.combo-timer{display:flex;align-items:center;gap:6px;background:rgba(247,147,26,0.12);padding:6px 12px;border-radius:20px;border:1px solid rgba(247,147,26,0.25)}
-.timer-val{font-size:13px;font-weight:700;color:var(--orange);font-variant-numeric:tabular-nums}
-.combo-desc{font-size:13px;color:var(--text2);margin-bottom:16px}
-.combo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.combo-slot{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all 0.2s}
-.combo-slot.filled{background:rgba(247,147,26,0.1);border-color:var(--orange);border-style:solid}
-.combo-slot-num{font-size:11px;color:var(--text3);font-weight:600}
-.combo-slot-icon{font-size:28px}
-.combo-items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.combo-item{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all 0.2s}
-.combo-item:active{transform:scale(0.93)}
-.combo-item.selected{border-color:var(--orange);background:rgba(247,147,26,0.15)}
-.combo-check-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s}
-.combo-check-btn:active{transform:scale(0.97)}
-
-.tabs-section{padding:0 16px 12px}
-.tabs{display:flex;gap:6px;background:var(--glass);border-radius:12px;padding:4px;border:1px solid var(--glass-border)}
-.tab{flex:1;padding:8px 6px;border-radius:10px;text-align:center;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.tab.active{background:var(--orange);color:#fff}
-
-.tasks-list{padding:0 16px 8px}
-.tasks-group-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px}
-.task-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
-.task-logo{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:rgba(0,136,204,0.15);border:1px solid rgba(0,136,204,0.25)}
-.task-info{flex:1;min-width:0}
-.task-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.task-reward{font-size:12px;color:var(--orange);font-weight:700;margin-top:2px}
-.task-btn{padding:8px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;flex-shrink:0}
-.task-btn:disabled{opacity:0.55;cursor:default}
-.task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
-.task-btn.verify{background:rgba(247,147,26,0.15);color:var(--orange);border:1px solid rgba(247,147,26,0.3)}
-.task-btn.done{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
-
-.add-task-section{padding:0 16px 16px}
-.add-task-btn{width:100%;padding:16px;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:14px;font-weight:600}
-.add-task-btn:active{background:var(--orange-dim)}
-.add-task-sub{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
-
-/* ===== REFERRALS PAGE ===== */
-.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(247,147,26,0.25);text-align:center;position:relative;overflow:hidden}
-.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(247,147,26,0.18) 0%,transparent 70%)}
-.ref-emoji{font-size:56px;margin-bottom:10px;display:block;position:relative}
-.ref-banner-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;position:relative}
-.ref-banner-pct{font-size:28px;font-weight:900;color:var(--orange);display:block;margin-bottom:8px;position:relative}
-.ref-banner-desc{font-size:13px;color:var(--text2);position:relative}
-
-.ref-link-section{padding:0 16px 16px}
-.ref-link-card{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)}
-.ref-link-label{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
-.ref-link-row{display:flex;align-items:center;gap:10px}
-.ref-link-url{flex:1;font-size:12px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,0.06)}
-.copy-btn{padding:10px 18px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:13px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
-.copy-btn:active{transform:scale(0.94)}
-
-.ref-stats{padding:0 16px 16px}
-.ref-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.ref-stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
-.ref-stat-val{font-size:18px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
-.ref-stat-val.orange{color:var(--orange)}
-.ref-stat-lbl{font-size:10px;color:var(--text3)}
-.active-dot{width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;margin-right:4px;animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
-
-.ref-list-section{padding:0 16px 16px}
-.ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
-.ref-user-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
-.ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(247,147,26,0.25)}
-.ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.ref-user-info{flex:1;min-width:0}
-.ref-user-name{font-size:14px;font-weight:600;color:var(--text)}
-.ref-user-meta{font-size:11px;color:var(--text3);margin-top:2px}
-.ref-user-earn{text-align:right}
-.ref-user-earn-val{font-size:14px;font-weight:800;color:var(--orange);display:block}
-.ref-user-earn-lbl{font-size:10px;color:var(--text3)}
-.ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
-.ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
-.ref-user-badge.new{background:rgba(247,147,26,0.12);color:var(--orange)}
-.load-more{width:100%;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;margin-top:4px}
-.load-more:active{background:rgba(255,255,255,0.08)}
-
-/* ===== WALLET PAGE ===== */
-.wallet-header{padding:20px 20px 16px;text-align:center}
-.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
-.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.1) 0%,transparent 70%);pointer-events:none}
-.wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
-.wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
-.wbal-sub{font-size:13px;color:var(--text3)}
-
-.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
-.wallet-action-btn{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s}
-.wallet-action-btn:active{background:rgba(255,255,255,0.08);transform:scale(0.97)}
-.wallet-action-btn.primary{background:linear-gradient(135deg,var(--orange),var(--orange2));border:none}
-.wallet-action-icon{font-size:24px}
-.wallet-action-label{font-size:13px;font-weight:700;color:var(--text)}
-.wallet-action-btn.primary .wallet-action-label{color:#fff}
-
-.wallet-form-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
-.wallet-form-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
-.wallet-input:focus{border-color:rgba(247,147,26,0.5)}
-.wallet-input::placeholder{color:var(--text3)}
-.wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
-.wallet-submit:disabled{opacity:0.5;cursor:default}
-
-.tx-section{padding:0 16px 16px}
-.tx-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
-.tx-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
-.tx-label{font-size:13px;color:var(--text)}
-.tx-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px}
-.tx-badge.ok{background:rgba(34,197,94,0.15);color:var(--green)}
-.tx-badge.pend{background:rgba(247,147,26,0.12);color:var(--orange)}
-.tx-badge.err{background:rgba(239,68,68,0.15);color:var(--red)}
-
-/* ===== Lucky Wheel Card (Home) ===== */
-.wheel-card-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s;position:relative;overflow:hidden}
-.wheel-card-btn:active{transform:scale(0.97)}
-.wheel-card-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
-.wheel-card-icon{font-size:30px;flex-shrink:0;animation:wheelSpinIdle 6s linear infinite}
-@keyframes wheelSpinIdle{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.wheel-card-text{flex:1;text-align:left}
-.wheel-card-title{font-size:17px;font-weight:800;color:#fff;display:block}
-.wheel-card-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
-.wheel-card-badge{min-width:26px;height:26px;padding:0 8px;border-radius:14px;background:#fff;color:var(--orange2);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 3px rgba(255,255,255,0.2);position:relative;z-index:1}
-
-/* ===== LUCKY WHEEL PAGE ===== */
-.wheel-page-header{display:flex;align-items:center;gap:12px;padding:16px 20px 8px}
-.back-btn{width:36px;height:36px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.back-btn:active{background:rgba(255,255,255,0.1)}
-
-.wheel-info-banner{margin:8px 16px 16px;padding:14px 16px;border-radius:14px;background:rgba(247,147,26,0.1);border:1px solid rgba(247,147,26,0.25);display:flex;align-items:center;gap:12px}
-.wheel-info-emoji{font-size:26px;flex-shrink:0}
-.wheel-info-text{font-size:13px;color:var(--text2);line-height:1.5}
-.wheel-info-text b{color:var(--orange)}
-
-.wheel-stage{display:flex;flex-direction:column;align-items:center;padding:8px 20px 4px;position:relative}
-.wheel-pointer{font-size:24px;line-height:1;color:var(--orange);margin-bottom:-6px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
-.wheel-outer-wrap{position:relative;width:270px;height:270px}
-.wheel-outer{width:100%;height:100%;border-radius:50%;background:linear-gradient(145deg,#2a1d00,#161616);padding:9px;box-shadow:0 0 0 4px rgba(247,147,26,0.3),0 10px 30px rgba(0,0,0,0.55)}
-.wheel-circle{width:100%;height:100%;border-radius:50%;position:relative;transition:transform 4.5s cubic-bezier(0.17,0.89,0.32,1.05);border:2px solid rgba(255,255,255,0.08);overflow:hidden}
-.wheel-seg{position:absolute;left:50%;top:0;width:0;height:50%;transform-origin:50% 100%;display:flex;justify-content:center;align-items:flex-start;pointer-events:none}
-.wheel-seg-text{display:inline-block;margin-top:16px;font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.7);white-space:nowrap}
-.wheel-hub{position:absolute;top:50%;left:50%;width:62px;height:62px;margin:-31px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 0 0 6px var(--bg),0 4px 14px rgba(247,147,26,0.5);z-index:6;border:none;text-align:center;line-height:1.1;letter-spacing:0.5px}
-.wheel-hub:active{transform:translate(-1px,-1px) scale(0.96)}
-.wheel-hub:disabled{opacity:0.5;cursor:default}
-.wheel-spins-left{text-align:center;font-size:13px;color:var(--text2);margin:16px 0 4px}
-.wheel-spins-left b{color:var(--orange);font-size:16px}
-.wheel-cta-section{padding:18px 16px 8px}
-
-/* ===== Add-Task: quantity chips & price box ===== */
-.qty-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-.qty-chip{padding:8px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;transition:all 0.15s}
-.qty-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
-.price-box{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;background:rgba(247,147,26,0.08);border:1px solid rgba(247,147,26,0.25);margin-bottom:10px}
-.price-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
-.price-usd{font-size:12px;color:var(--text3);margin-top:2px}
-.price-val{font-size:17px;font-weight:800;color:var(--orange)}
-
-/* Toast */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(247,147,26,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(247,147,26,0.4)}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.error{background:rgba(239,68,68,0.95);box-shadow:0 4px 20px rgba(239,68,68,0.4)}
-
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(4px)}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:#141414;border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);border-top:1px solid var(--glass-border)}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 20px}
-.modal-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:16px}
-.modal-input{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:12px;font-family:inherit;transition:border-color 0.2s}
-.modal-input:focus{border-color:rgba(247,147,26,0.5)}
-.modal-input::placeholder{color:var(--text3)}
-.modal-submit{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
-.modal-submit:active{transform:scale(0.97)}
-.modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
-.modal-close:active{background:var(--glass)}
-
-.modal-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px}
-.modal-req-list{list-style:none;padding:0;margin:8px 0 18px;display:flex;flex-direction:column;gap:6px}
-.modal-req-list li{font-size:12.5px;color:var(--text2);line-height:1.5}
-.modal-field-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px}
-.modal-textarea{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:14px;font-family:inherit;resize:vertical;min-height:64px;transition:border-color 0.2s}
-.modal-textarea:focus{border-color:rgba(247,147,26,0.5)}
-.modal-textarea::placeholder{color:var(--text3)}
-.modal-disclaimer{font-size:11px;color:var(--text3);line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px solid var(--glass-border)}
-.modal-disclaimer ul{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:4px}
-.modal-success{text-align:center}
-.modal-success-icon{font-size:48px;margin-bottom:10px}
-.modal-success-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:10px}
-.modal-success-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px}
-.modal-success-list{list-style:none;padding:0;margin:0 0 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
-.modal-success-list li{font-size:12.5px;color:var(--text2)}
-
-.empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
-
-/* ===== FORCE-SUB (Mandatory Subscription) GATE ===== */
-.forcesub-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998;padding:24px;overflow-y:auto}
-.forcesub-screen.show{display:flex}
-.forcesub-card{width:100%;max-width:380px;text-align:center}
-.forcesub-emoji{font-size:56px;margin-bottom:12px}
-.forcesub-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px}
-.forcesub-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
-.forcesub-list{margin-bottom:20px;text-align:left}
-.forcesub-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:10px}
-.forcesub-item-icon{font-size:22px;flex-shrink:0}
-.forcesub-item-title{flex:1;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.forcesub-item-btn{padding:8px 16px;border-radius:18px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:12px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
-.forcesub-item-btn:active{transform:scale(0.94)}
-.forcesub-verify-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
-.forcesub-verify-btn:active{transform:scale(0.97)}
-.forcesub-verify-btn:disabled{opacity:0.6}
+  #footer-credit{
+    position:absolute; bottom:8px; right:12px; font-size:10px; color:rgba(255,255,255,0.25);
+    pointer-events:none;
+  }
 </style>
 </head>
 <body>
 
-<!-- Loading -->
-<div class="loading-screen" id="loadingScreen">
-  <div class="ld-coin ld-coin-1"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
-  <div class="ld-coin ld-coin-2"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
-  <div class="ld-coin ld-coin-3"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
-  <div class="ld-coin ld-coin-4"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
-
-  <div class="ld-avatar-wrap">
-    <div class="ld-orbit"></div>
-    <div class="ld-ring"></div>
-    <img class="ld-avatar" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png" alt="SHIBA">
+<div id="stage">
+  <div id="loading">
+    <div>Loading assets…</div>
+    <div class="bar"><div class="fill" id="loadFill"></div></div>
   </div>
 
-  <div class="ld-kicker">LOADING</div>
-  <div class="ld-title"><span class="ld-title-accent">SHIB</span> REWARDS</div>
-  <div class="ld-subtitle">أكمل المهام واربح عملات <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+  <canvas id="scene" width="960" height="780"></canvas>
 
-  <div class="loading-bar"><div class="loading-fill"></div></div>
+  <div class="hud-pill" id="rateFurnace"><span class="lbl">GLASS</span><span id="rateFurnaceVal">0/min</span></div>
+  <div class="hud-pill" id="coinsPill"><div class="coin-icon"></div><span id="coinsVal">0</span></div>
+  <div class="hud-pill" id="rateTanks"><span class="lbl">CHIPS</span><span id="rateTanksVal">0/min</span></div>
 
-  <div class="ld-status">
-    <div class="ld-status-main">جارٍ التحميل...</div>
-    <div class="ld-status-sub">يرجى الانتظار <span class="ld-heart">❤</span></div>
-  </div>
-
-  <div class="ld-features">
-    <div class="ld-feature">
-      <div class="ld-feature-icon">📋</div>
-      <div class="ld-feature-title">مهام سهلة</div>
-      <div class="ld-feature-sub">نفذ المهام واربح</div>
-    </div>
-    <div class="ld-feature">
-      <div class="ld-feature-icon ld-feature-icon-coin"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
-      <div class="ld-feature-title">اربح <span class="ld-accent">SHIB</span></div>
-      <div class="ld-feature-sub">اجمع عملات <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
-    </div>
-    <div class="ld-feature">
-      <div class="ld-feature-icon">⚡</div>
-      <div class="ld-feature-title">سحب فوري</div>
-      <div class="ld-feature-sub">حول أرباحك بسهولة</div>
-    </div>
-  </div>
-
-  <div class="ld-powered"><span>🐾</span> POWERED BY <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> <span>🐾</span></div>
+  <button id="upgradeBtn" class="pulse">
+    Speed Up Production
+    <small id="upgradeCost">Cost: 20</small>
+  </button>
+  <div id="footer-credit">original assets &amp; code</div>
 </div>
-
-<!-- Mandatory Subscription Gate -->
-<div class="forcesub-screen" id="forceSubScreen">
-  <div class="forcesub-card">
-    <div class="forcesub-emoji">🔒</div>
-    <div class="forcesub-title">Join to Continue</div>
-    <div class="forcesub-desc">You must join the channels below to use the bot and unlock your referral reward.</div>
-    <div class="forcesub-list" id="forceSubList"></div>
-    <button class="forcesub-verify-btn" id="forceSubVerifyBtn" onclick="verifyForceSub()">✅ Verify Membership</button>
-  </div>
-</div>
-
-<div class="app" id="mainApp" style="display:none">
-  <div class="pages">
-
-    <!-- HOME -->
-    <div class="page active" id="page-home">
-      <div class="home-header">
-        <div class="user-info">
-          <div class="avatar" id="homeAvatar">👤</div>
-          <div class="user-name-wrap">
-            <span class="user-greeting">Welcome back</span>
-            <span class="user-name" id="homeName">Player</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="balance-section">
-        <div class="balance-card">
-          <div class="balance-label">Your Balance</div>
-          <div class="balance-amount">
-            <span class="balance-num" id="homeTon">0</span>
-            <span class="balance-currency"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span>
-          </div>
-          <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
-          <div class="balance-logo">🐕</div>
-        </div>
-      </div>
-
-      <div class="stats-section">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-val" id="statTotalRefs">0</div>
-            <div class="stat-lbl">Total Referrals</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val orange" id="statActiveRefs">0</div>
-            <div class="stat-lbl">Active Refs</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val orange" id="statEarned">0</div>
-            <div class="stat-lbl"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Earned</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="invite-section">
-        <button class="wheel-card-btn" id="homeWheelBtn" onclick="switchPage('wheel')">
-          <div class="wheel-card-icon">🎡</div>
-          <div class="wheel-card-text">
-            <span class="wheel-card-title">Lucky Wheel</span>
-            <span class="wheel-card-sub" id="homeWheelSub">Spin &amp; win up to 10,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA">!</span>
-          </div>
-          <div class="wheel-card-badge" id="homeWheelBadge" style="display:none">0</div>
-        </button>
-      </div>
-
-      <div>
-        <div class="section-header">
-          <div class="section-title">Recent Activity</div>
-        </div>
-        <div class="rewards-section" id="homeActivity">
-          <div class="empty-state">No activity yet</div>
-        </div>
-      </div>
-
-      <div class="promo-section">
-        <div class="promo-card">
-          <div class="promo-emoji">🚀</div>
-          <div class="promo-content">
-            <div class="promo-title">Big Rewards Await!</div>
-            <div class="promo-desc">Invite friends, complete tasks and earn real <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> rewards!</div>
-            <button class="promo-btn" onclick="switchPage('tasks')">Let's Go!</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TASKS -->
-    <div class="page" id="page-tasks">
-      <div class="tasks-header"><div class="page-title">Tasks</div></div>
-
-      <div class="combo-section">
-        <div class="combo-card">
-          <div class="combo-top">
-            <div class="combo-title">Daily Combo</div>
-            <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
-          </div>
-          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> reward</div>
-          <div class="combo-slots">
-            <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
-            <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
-            <div class="combo-slot" id="slot-2"><span class="combo-slot-num">3</span><span class="combo-slot-icon" id="si-2">?</span></div>
-            <div class="combo-slot" id="slot-3"><span class="combo-slot-num">4</span><span class="combo-slot-icon" id="si-3">?</span></div>
-          </div>
-          <div class="combo-items">
-            <div class="combo-item" onclick="selectCombo(this,'🦴')">🦴</div>
-            <div class="combo-item" onclick="selectCombo(this,'🏠')">🏠</div>
-            <div class="combo-item" onclick="selectCombo(this,'🎾')">🎾</div>
-            <div class="combo-item" onclick="selectCombo(this,'🍖')">🍖</div>
-          </div>
-          <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">Check Combo</button>
-        </div>
-      </div>
-
-      <div class="tabs-section">
-        <div class="tabs">
-          <div class="tab active" onclick="switchTab(this,'channels')">Channels</div>
-          <div class="tab" onclick="switchTab(this,'bots')">Bots</div>
-          <div class="tab" onclick="switchTab(this,'invite')">Invite</div>
-        </div>
-      </div>
-      <div class="tasks-list">
-        <div class="tasks-group-label" id="tasksGroupLabel">Join Channels</div>
-        <div id="tasksContent"></div>
-      </div>
-      <div class="add-task-section">
-        <button class="add-task-btn" onclick="openAddTaskModal()"><span style="font-size:20px">+</span><span>Add Task</span></button>
-        <div class="add-task-sub">Submit your channel / bot to get reward</div>
-      </div>
-    </div>
-
-    <!-- REFERRALS -->
-    <div class="page" id="page-refs">
-      <div class="ref-banner">
-        <span class="ref-emoji">🐶</span>
-        <div class="ref-banner-title">Invite friends and earn</div>
-        <span class="ref-banner-pct" id="refPct">4,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span>
-        <div class="ref-banner-desc">for every friend who joins &amp; verifies using your link!</div>
-      </div>
-
-      <div class="ref-link-section">
-        <div class="ref-link-card">
-          <div class="ref-link-label">Your Referral Link</div>
-          <div class="ref-link-row">
-            <div class="ref-link-url" id="refLinkUrl">Loading...</div>
-            <button class="copy-btn" onclick="copyRefLink()">Copy</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="ref-stats">
-        <div class="ref-stats-grid">
-          <div class="ref-stat-card">
-            <div class="ref-stat-val" id="refTotal">0</div>
-            <div class="ref-stat-lbl">Total Refs</div>
-          </div>
-          <div class="ref-stat-card">
-            <div class="ref-stat-val orange"><span class="active-dot"></span><span id="refActive">0</span></div>
-            <div class="ref-stat-lbl">Active Refs</div>
-          </div>
-          <div class="ref-stat-card">
-            <div class="ref-stat-val orange" id="refTotalEarned">0</div>
-            <div class="ref-stat-lbl"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Earned</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="ref-list-section">
-        <div class="ref-list-title">Referral List</div>
-        <div id="refList"><div class="empty-state">No referrals yet</div></div>
-        <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMoreRefs()">Load More</button>
-      </div>
-    </div>
-
-    <!-- WALLET -->
-    <div class="page" id="page-wallet">
-      <div class="wallet-header"><div class="page-title">Wallet</div></div>
-
-      <div class="wallet-bal-card">
-        <div class="wbal-label"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Balance</div>
-        <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
-        <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> from tasks &amp; referrals</div>
-      </div>
-
-      <div class="wallet-actions">
-        <div class="wallet-action-btn primary" onclick="openWithdrawForm()">
-          <div class="wallet-action-icon">💸</div>
-          <div class="wallet-action-label">Withdraw <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
-        </div>
-        <div class="wallet-action-btn" onclick="switchPage('tasks')">
-          <div class="wallet-action-icon">📋</div>
-          <div class="wallet-action-label">Earn More</div>
-        </div>
-      </div>
-
-      <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
-        <div class="wallet-form-title"><span>💸</span><span>Withdraw <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span></div>
-        <input class="wallet-input" id="withdrawWallet" placeholder="SHIBA BEP-20 wallet address (0x...)">
-        <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in SHIBA">
-        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
-        <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal</button>
-        <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
-      </div>
-
-      <div class="tx-section">
-        <div class="tx-title">Transaction History</div>
-        <div id="walletHistory"><div class="empty-state">No transactions yet</div></div>
-      </div>
-    </div>
-
-    <!-- LUCKY WHEEL -->
-    <div class="page" id="page-wheel">
-      <div class="wheel-page-header">
-        <button class="back-btn" onclick="switchPage('home')">←</button>
-        <div class="page-title">🎡 Lucky Wheel</div>
-      </div>
-
-      <div class="wheel-info-banner">
-        <div class="wheel-info-emoji">🎯</div>
-        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></b>!</div>
-      </div>
-
-      <div class="wheel-stage">
-        <div class="wheel-pointer">▼</div>
-        <div class="wheel-outer-wrap">
-          <div class="wheel-outer">
-            <div class="wheel-circle" id="wheelCircle"></div>
-          </div>
-          <button class="wheel-hub" id="wheelSpinBtn" onclick="spinWheel()" disabled>SPIN</button>
-        </div>
-      </div>
-
-      <div class="wheel-spins-left">Spins available: <b id="wheelSpinsLeft">0</b></div>
-
-      <div class="wheel-cta-section">
-        <button class="invite-btn" onclick="shareInvite()">
-          <div class="invite-icon">✈️</div>
-          <div class="invite-text">
-            <span class="invite-title">Invite Friends</span>
-            <span class="invite-sub">Every 2 active referrals = 1 free spin!</span>
-          </div>
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Bottom Nav -->
-  <div class="nav">
-    <div class="nav-item active" onclick="switchPage('home')" id="nav-home">
-      <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
-    </div>
-    <div class="nav-item" onclick="switchPage('tasks')" id="nav-tasks">
-      <div class="nav-icon">📋</div><div class="nav-label">Tasks</div>
-    </div>
-    <div class="nav-item" onclick="switchPage('refs')" id="nav-refs">
-      <div class="nav-icon">👥</div><div class="nav-label">Referrals</div>
-    </div>
-    <div class="nav-item" onclick="switchPage('wallet')" id="nav-wallet">
-      <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Task Modal -->
-<div class="modal-overlay" id="addTaskModal" onclick="closeModalOutside(event,'addTaskModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-
-    <div id="addTaskFormView">
-      <div class="modal-title">📢 Promote Your Channel</div>
-      <div class="modal-desc">Add your channel as a task — our users will join it and earn <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA">, helping you get real, active members fast.</div>
-
-      <div class="modal-field-label">Channel Link</div>
-      <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
-
-      <div class="modal-field-label">Members You Need</div>
-      <div class="qty-chips" id="qtyChips">
-        <div class="qty-chip" onclick="selectQty(100,this)">100</div>
-        <div class="qty-chip" onclick="selectQty(500,this)">500</div>
-        <div class="qty-chip" onclick="selectQty(1000,this)">1,000</div>
-        <div class="qty-chip" onclick="selectQty(2000,this)">2,000</div>
-        <div class="qty-chip" onclick="selectQty(5000,this)">5,000</div>
-        <div class="qty-chip" onclick="selectQty(10000,this)">10,000</div>
-      </div>
-      <input class="modal-input" id="addTaskMembers" type="number" inputmode="numeric" min="100" step="100" placeholder="Or enter a custom amount (multiples of 100)" oninput="updateTaskPrice()">
-
-      <div class="price-box">
-        <div>
-          <div class="price-lbl">Total Cost</div>
-          <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
-        </div>
-        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
-      </div>
-      <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing: every 100 members = 200,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> (≈ $1). Our team will contact you with payment details before your task goes live.</div>
-
-      <div class="modal-field-label">Additional Notes (Optional)</div>
-      <textarea class="modal-textarea" id="addTaskDesc" placeholder="Anything you'd like us to know..."></textarea>
-
-      <button class="modal-submit" id="addTaskSubmitBtn" onclick="submitAddTask()">📤 Submit Request</button>
-      <button class="modal-close" onclick="closeModal('addTaskModal')">Cancel</button>
-
-      <div class="modal-disclaimer">
-        By submitting this request, you confirm that:
-        <ul>
-          <li>• You own or manage this channel.</li>
-          <li>• You agree to the price calculated for the members requested.</li>
-          <li>• Our team will contact you with payment details to activate the task.</li>
-          <li>• The task goes live on the Tasks page once payment is confirmed.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div id="addTaskSuccessView" class="modal-success" style="display:none">
-      <div class="modal-success-icon">✅</div>
-      <div class="modal-success-title">Request Submitted</div>
-      <div class="modal-success-desc">Your request has been received. Our team will review it and contact you with payment details to activate:</div>
-      <ul class="modal-success-list">
-        <li>☑️ Channel: <span id="successChannelLink"></span></li>
-        <li>☑️ Members requested: <span id="successMembers"></span></li>
-        <li>☑️ Total cost: <span id="successPrice"></span></li>
-      </ul>
-      <button class="modal-close" onclick="closeModal('addTaskModal')">Close</button>
-    </div>
-  </div>
-</div>
-
-
-<div class="toast" id="toast"></div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────────────
-var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
-var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
+/* =========================================================================
+   PIPEWORKS IDLE — a from-scratch idle factory chain.
+   Architecture (kept deliberately separated, per spec):
+     1. AssetLoader   - loads the user's PNG sprite sheet once
+     2. Easing        - pure math, reused by every animated value
+     3. ParticleSystem - pooled smoke/spark/bubble particles
+     4. PipeNetwork    - static pipe sprites + animated flow overlay
+     5. ResourceOrb    - a resource traveling a polyline at constant speed
+     6. Factory        - the production state machine (Idle→Working→
+                         Processing→Ready→Output→Idle) + its own visual FX
+     7. Game           - owns the update(dt)/render() loop (rAF), HUD sync
+   Rendering is single-canvas (2D context) for the scene; the HUD (numbers,
+   the upgrade button) is plain DOM so text stays crisp and cheap to update.
+   ========================================================================= */
 
-// أيقونة عملة SHIBA — تُستخدم بدل كتابة كلمة "SHIBA" في أي نص يُولَّد من الجافاسكريبت
-var SHIBA_ICON = '<img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" class="shiba-icon-inline" alt="SHIBA">';
+const IMG_BASE = "images/"; // adjust if you place this file elsewhere relative to /images
 
-// مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
-var PRICE_PER_100_SHIBA = 200000;
-var PRICE_PER_100_USD   = 1;
+// ---------------------------------------------------------------------
+// 1) ASSET LOADER
+// ---------------------------------------------------------------------
+const ASSET_LIST = {
+  grass:      "Grass Tile.png",
+  grassDark:  "Dark Grass Tile.png",
+  pipeStraight: "Straight Pipe.png",
+  pipeCorner:   "Corner Pipe.png",
+  pipeT:        "T Pipe.png",
+  pipeCross:    "Cross_Pipe.png",
+  furnace:    "Furnace.png",
+  tankBlue:   "Blue_Tank.png",
+  tankOrange: "Orange_Tank.png",
+  conveyor:   "Conveyor_Factory.png",
+  resSand:    "Sand.png",
+  resGlass:   "Glass.png",
+  resBottleBlue:   "Blue_Bottle.png",
+  resBottleOrange: "Orange_Bottle.png",
+  resChip:    "chip.png"
+};
+const IMAGES = {};
+let loadedCount = 0;
+const failedFiles = [];
+const totalToLoad = Object.keys(ASSET_LIST).length;
 
-// إعدادات افتراضية لعجلة الحظ (تُستخدم فقط لو السيرفر لم يرسلها بعد)
-var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
-var wheelRotation = 0;
-var wheelSpinning = false;
-
-// ── State ───────────────────────────────────────────────────────────
-var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
-
-var currentTab = 'channels';
-
-// ── Boot ─────────────────────────────────────────────────────────────
-(function boot(){
-  var tries = 0;
-  var iv = setInterval(function(){
-    tries++;
-    if (window.Telegram && window.Telegram.WebApp){
-      clearInterval(iv);
-      try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(_){}
-      S.initData = Telegram.WebApp.initData || '';
-      loadState();
-    } else if (tries > 40){
-      clearInterval(iv);
-      loadState(); // dev mode fallback (not inside Telegram)
-    }
-  }, 100);
-})();
-
-// ── API ──────────────────────────────────────────────────────────────
-// worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
-async function api(action, data){
-  var payload = data || {};
-  // ── إضافة بصمة الجهاز تلقائياً لكل طلب (Anti-Fraud) ──────────
-  try {
-    if (window.AntiFraud) {
-      var fraud = await window.AntiFraud.collect();
-      payload._deviceFingerprint = fraud.fingerprint;
-      payload._deviceId          = fraud.deviceId;
-      payload._suspiciousFlags   = fraud.suspiciousFlags;
-    }
-  } catch(_) {}
-  // ─────────────────────────────────────────────────────────────────
-  return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json', 'Authorization':'tma '+S.initData },
-    body: JSON.stringify(payload)
-  }).then(function(r){ return r.json(); });
-}
-
-// ── Load state ───────────────────────────────────────────────────────
-function loadState(){
-  api('getState', { _initData: S.initData }).then(function(res){
-    if (!res || !res.success){
-      showMockData();
-      return;
-    }
-    S.data = res.data;
-    S.user = res.data.user;
-    S.refs = res.data.referrals || [];
-    showApp();
-    render();
-  }).catch(function(){
-    showMockData();
+function loadAssets(onDone){
+  Object.entries(ASSET_LIST).forEach(([key, file])=>{
+    const img = new Image();
+    img.onload = ()=>{
+      loadedCount++;
+      document.getElementById('loadFill').style.width = (loadedCount/totalToLoad*100)+"%";
+      if(loadedCount === totalToLoad) finishLoading(onDone);
+    };
+    img.onerror = ()=>{
+      loadedCount++;
+      failedFiles.push(IMG_BASE + file);
+      document.getElementById('loadFill').style.width = (loadedCount/totalToLoad*100)+"%";
+      if(loadedCount === totalToLoad) finishLoading(onDone);
+    };
+    img.src = IMG_BASE + file;
+    IMAGES[key] = img;
   });
 }
 
-// Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
-function showMockData(){
-  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'123456', wallet:'' };
-  S.data = {
-    referrals:[], balanceLogs:[], withdrawals:[],
-    tasks:[
-      {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:500,status:'active'},
-      {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'},
-      {id:'invite_1',category:'invite',title:'دعوة 1 مستخدم',reward:1000,requiredReferrals:1,status:'active'},
-      {id:'invite_10',category:'invite',title:'دعوة 10 مستخدمين',reward:10000,requiredReferrals:10,status:'active'},
-      {id:'invite_25',category:'invite',title:'دعوة 25 مستخدم',reward:25000,requiredReferrals:25,status:'active'},
-      {id:'invite_50',category:'invite',title:'دعوة 50 مستخدم',reward:50000,requiredReferrals:50,status:'active'},
-      {id:'invite_100',category:'invite',title:'دعوة 100 مستخدم',reward:100000,requiredReferrals:100,status:'active'}
-    ],
-    completedTasks:[],
-    combo:{ solvedToday:false, reward:5000 },
-    wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
-    config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
-    forceSub:{ required:false, passed:true, channels:[] }
-  };
-  S.refs = [];
-  showApp();
-  render();
-}
-
-function showApp(){
-  document.getElementById('loadingScreen').classList.add('hidden');
-  var fs = (S.data && S.data.forceSub) || { required:false, passed:true, channels:[] };
-  if (fs.required && !fs.passed){
-    renderForceSub(fs);
-    document.getElementById('forceSubScreen').classList.add('show');
-    document.getElementById('mainApp').style.display = 'none';
-  } else {
-    document.getElementById('forceSubScreen').classList.remove('show');
-    document.getElementById('mainApp').style.display = 'flex';
+function finishLoading(onDone){
+  if(failedFiles.length){
+    // Don't silently render a blank canvas — show exactly what's missing.
+    const box = document.getElementById('loading');
+    box.innerHTML =
+      '<div style="color:#ff9d9d;font-weight:700;">Could not load '+failedFiles.length+' image(s)</div>' +
+      '<div style="font-size:12px;max-width:640px;text-align:left;line-height:1.6;color:#cbd5e1;">' +
+        failedFiles.map(f=>'&bull; '+f).join('<br>') +
+      '</div>' +
+      '<div style="font-size:12px;color:#9fb0d0;max-width:640px;">This file expects an <b>images/</b> folder ' +
+      'sitting right next to it (same directory), containing the exact filenames above — including spaces and ' +
+      'capitalization. If you\'re opening this from disk, keep index.html and images/ together and open ' +
+      'index.html directly. If you\'re hosting it (e.g. GitHub Pages), double-check the images/ folder was ' +
+      'actually deployed and the filenames match exactly (hosts are case-sensitive).</div>';
+    console.error('Missing image assets:', failedFiles);
+    return; // stop here so the failure is visible instead of an empty canvas
   }
+  onDone();
 }
 
-// ── Mandatory Subscription (Force-Sub) ──────────────────────────────────
-function renderForceSub(fs){
-  var list = document.getElementById('forceSubList');
-  var channels = (fs && fs.channels) || [];
-  if (!channels.length){
-    list.innerHTML = '<div class="empty-state">No channels configured</div>';
-    return;
+// ---------------------------------------------------------------------
+// 2) EASING — every tween in the game pulls from this single table
+// ---------------------------------------------------------------------
+const Ease = {
+  linear: t=>t,
+  outCubic: t=> 1-Math.pow(1-t,3),
+  inOutSine: t=> -(Math.cos(Math.PI*t)-1)/2,
+  outBack: t=>{ const c1=1.70158, c3=c1+1; return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2); },
+  outElastic: t=>{
+    const c4 = (2*Math.PI)/3;
+    return t===0?0:t===1?1: Math.pow(2,-10*t)*Math.sin((t*10-0.75)*c4)+1;
+  },
+  outQuad: t=> 1-(1-t)*(1-t)
+};
+
+// ---------------------------------------------------------------------
+// small canvas helper: draw an image centered at (x,y), optional rotation
+// ---------------------------------------------------------------------
+function drawCentered(ctx, img, x, y, w, h, rotDeg=0, alpha=1){
+  if(!img || !img.complete) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y);
+  if(rotDeg) ctx.rotate(rotDeg * Math.PI/180);
+  ctx.drawImage(img, -w/2, -h/2, w, h);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------
+// 3) PARTICLE SYSTEM — one pooled array, particles are recycled (no GC churn)
+// ---------------------------------------------------------------------
+class ParticleSystem{
+  constructor(max=220){
+    this.pool = new Array(max).fill(null).map(()=>({active:false}));
   }
-  list.innerHTML = channels.map(function(c,i){
-    return '<div class="forcesub-item">'+
-      '<div class="forcesub-item-icon">📢</div>'+
-      '<div class="forcesub-item-title">'+esc(c.title)+'</div>'+
-      '<button class="forcesub-item-btn" onclick="openForceSubChannel('+i+')">Join</button>'+
-    '</div>';
-  }).join('');
-}
-
-function openForceSubChannel(i){
-  var fs = S.data && S.data.forceSub;
-  if (!fs || !fs.channels || !fs.channels[i]) return;
-  var link = fs.channels[i].link;
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try { Telegram.WebApp.openTelegramLink(link); return; } catch(_){}
+  spawn(opts){
+    const p = this.pool.find(p=>!p.active);
+    if(!p) return;
+    Object.assign(p, {
+      active:true, age:0,
+      x:opts.x, y:opts.y,
+      vx:opts.vx||0, vy:opts.vy|| -20,
+      life: opts.life||1,
+      size: opts.size||4,
+      color: opts.color||"255,255,255",
+      grow: opts.grow||0,
+      kind: opts.kind||"dot",
+      drift: opts.drift||0
+    });
   }
-  window.open(link, '_blank');
-}
-
-function verifyForceSub(){
-  var btn = document.getElementById('forceSubVerifyBtn');
-  btn.disabled = true; btn.textContent = 'Checking...';
-  api('checkForceSub', {}).then(function(res){
-    btn.disabled = false; btn.textContent = '✅ Verify Membership';
-    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
-    if (res.data.passed){
-      showToast('Verified! Welcome aboard 🎉');
-      document.getElementById('forceSubScreen').classList.remove('show');
-      document.getElementById('mainApp').style.display = 'flex';
-      // إعادة تحميل الحالة بالكامل لضمان ظهور أي تحديثات (تفعيل مكافأة الداعي إن وُجد)
-      loadState();
-    } else {
-      S.data.forceSub = S.data.forceSub || {};
-      S.data.forceSub.channels = res.data.channels;
-      renderForceSub(S.data.forceSub);
-      showToast('You haven\u2019t joined all channels yet. Join them, then verify again.','error');
+  update(dt){
+    for(const p of this.pool){
+      if(!p.active) continue;
+      p.age += dt;
+      if(p.age >= p.life){ p.active=false; continue; }
+      p.x += p.vx*dt + Math.sin(p.age*3+p.x)*p.drift*dt;
+      p.y += p.vy*dt;
+      p.size += p.grow*dt;
     }
-  }).catch(function(){
-    btn.disabled = false; btn.textContent = '✅ Verify Membership';
-    showToast('Network error','error');
-  });
-}
-
-// ── Render ────────────────────────────────────────────────────────────
-function render(){
-  var u = S.user; var d = S.data; var cfg = d.config || {};
-  // Header
-  var av = document.getElementById('homeAvatar');
-  if (u.photoUrl) av.innerHTML = '<img src="'+u.photoUrl+'" alt="">';
-  else av.textContent = (u.firstName||'P')[0].toUpperCase();
-  document.getElementById('homeName').textContent = u.firstName || 'Player';
-  // Balance
-  document.getElementById('homeTon').textContent = fmtShiba(u.balance);
-  // Stats — "Active" = passed mandatory subscription (real, verified referral)
-  var totalRefs = S.refs.length;
-  var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
-  var activeRefs = activeRefsList.length;
-  var totalRefEarned = activeRefsList.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
-  document.getElementById('statTotalRefs').textContent = totalRefs;
-  document.getElementById('statActiveRefs').textContent = activeRefs;
-  document.getElementById('statEarned').textContent = fmtShiba(totalRefEarned);
-  // Referral reward (used on Referrals page)
-  var refReward = cfg.referralReward || 4000;
-  // Activity log
-  renderActivity(d.balanceLogs || []);
-  // Refs page
-  document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
-  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
-  document.getElementById('refTotal').textContent = totalRefs;
-  document.getElementById('refActive').textContent = activeRefs;
-  document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
-  renderRefs(0);
-  // Wallet (Balance & History)
-  document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
-  renderWalletHistory(d.balanceLogs||[]);
-  // Combo
-  renderComboState();
-  // Tasks
-  renderTasks(currentTab);
-  // Lucky Wheel
-  renderWheelInfo();
-}
-
-function renderActivity(log){
-  var el = document.getElementById('homeActivity');
-  if (!log.length){ el.innerHTML = '<div class="empty-state">No activity yet</div>'; return; }
-  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥', withdrawal:'💸', wheel_spin:'🎡' };
-  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdrawal:'Withdrawal', wheel_spin:'Lucky Wheel' };
-  el.innerHTML = log.slice(0,5).map(function(e){
-    var icon = icons[e.type] || '✅';
-    var amount = e.amount;
-    var isNeg = (parseFloat(amount)||0) < 0;
-    var label = labels[e.type] || (e.type||'').replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
-    var ts = e.ts ? timeAgo(e.ts) : '';
-    var amountHtml = '';
-    if (amount){
-      amountHtml = '<div class="reward-amount"'+(isNeg?' style="color:var(--red)"':'')+'>'+(isNeg?'-':'+')+fmtShiba(Math.abs(amount))+' '+SHIBA_ICON+'</div>';
-    }
-    return '<div class="reward-item">'+
-      '<div class="reward-icon">'+icon+'</div>'+
-      '<div class="reward-info">'+
-        '<div class="reward-name">'+label+'</div>'+
-        amountHtml+
-      '</div>'+
-      '<div class="reward-time">'+ts+'</div>'+
-    '</div>';
-  }).join('');
-}
-
-function renderRefs(page){
-  var el = document.getElementById('refList');
-  var refs = S.refs;
-  if (!refs.length){ el.innerHTML = '<div class="empty-state">No referrals yet</div>'; return; }
-  var visible = refs.slice(0, 5 + page*5);
-  el.innerHTML = visible.map(function(r){
-    var name = r.firstName || r.name || 'Unknown';
-    var handle = r.username ? '@'+r.username : '';
-    var isActive = r.status === 'active';
-    var earned = fmtShiba(isActive ? (r.reward || 0) : 0);
-    var badge = isActive
-      ? '<span class="ref-user-badge active">Active</span>'
-      : '<span class="ref-user-badge new">Pending Sub</span>';
-    var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
-    var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-    return '<div class="ref-user-item">'+
-      '<div class="ref-user-avatar">'+av+'</div>'+
-      '<div class="ref-user-info">'+
-        '<div class="ref-user-name">'+esc(name)+'</div>'+
-        '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
-        badge+
-      '</div>'+
-      '<div class="ref-user-earn">'+
-        '<span class="ref-user-earn-val">+'+earned+'</span>'+
-        '<span class="ref-user-earn-lbl">'+SHIBA_ICON+'</span>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-  var loadBtn = document.getElementById('loadMoreBtn');
-  if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
-}
-
-function loadMoreRefs(){
-  S.refPage++;
-  renderRefs(S.refPage);
-}
-
-function renderWalletHistory(logs){
-  var withdrawals = (S.data && S.data.withdrawals) || [];
-  var entries = [];
-  (logs||[]).forEach(function(l){
-    if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
-    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel' };
-    var label = labels[l.type] || (l.type||'Reward');
-    entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' '+SHIBA_ICON, cls:'ok', txt:'Done' });
-  });
-  withdrawals.forEach(function(w){
-    var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
-    var txt = w.status==='completed' ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
-    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtShiba(w.amount)+' '+SHIBA_ICON, cls:cls, txt:txt });
-  });
-  entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
-  if (!entries.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
-  document.getElementById('walletHistory').innerHTML = entries.map(function(r){
-    return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>';
-  }).join('');
-}
-
-// ── Withdraw SHIBA ──────────────────────────────────────────────────────
-function openWithdrawForm(){
-  var cfg = (S.data && S.data.config) || {};
-  if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
-  var minW = cfg.minWithdrawal || 50000;
-  document.getElementById('withdrawMinNote').innerHTML = 'Minimum withdrawal: '+fmtShiba(minW)+' '+SHIBA_ICON;
-  document.getElementById('withdrawWallet').value = (S.user && S.user.wallet) || '';
-  document.getElementById('withdrawAmount').value = '';
-  document.getElementById('withdrawFormCard').style.display = 'block';
-}
-
-function closeWithdrawForm(){
-  document.getElementById('withdrawFormCard').style.display = 'none';
-}
-
-function submitWithdrawal(){
-  var wallet = document.getElementById('withdrawWallet').value.trim();
-  var amount = parseFloat(document.getElementById('withdrawAmount').value);
-  if (!wallet){ showToast('Enter your '+SHIBA_ICON+' BEP-20 wallet address','error',true); return; }
-  if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)){ showToast('Invalid BEP-20 address. It must start with 0x and be 42 characters long','error'); return; }
-  if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
-  if (S.user && amount > (S.user.balance||0)){ showToast('Insufficient balance','error'); return; }
-  var btn = document.getElementById('withdrawSubmitBtn');
-  btn.disabled = true; btn.textContent = 'Submitting...';
-  api('requestWithdrawal', { walletAddress:wallet, amount:amount }).then(function(res){
-    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
-    if (!res.success){ showToast(res.error||'Withdrawal failed','error'); return; }
-    S.user.balance = res.data.shibaBalance;
-    S.user.wallet = wallet;
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
-    S.data.withdrawals = S.data.withdrawals || [];
-    S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, status:'pending', ts:Date.now() });
-    renderWalletHistory(S.data.balanceLogs||[]);
-    closeWithdrawForm();
-    showToast('Withdrawal request submitted ✅');
-  }).catch(function(){
-    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
-    showToast('Network error','error');
-  });
-}
-
-// ── Tasks ─────────────────────────────────────────────────────────────
-function renderTasks(tab){
-  var labels = { channels:'Join Channels', bots:'Join Bots', invite:'Invite Tasks' };
-  document.getElementById('tasksGroupLabel').textContent = labels[tab];
-  var completed = (S.data && S.data.completedTasks) || [];
-  var allTasks = (S.data && S.data.tasks) || [];
-
-  if (tab === 'invite'){
-    var refCount = S.refs.length;
-    var list = allTasks.filter(function(t){ return t.category==='invite'; });
-    if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No invite tasks right now</div>'; return; }
-    document.getElementById('tasksContent').innerHTML = list.map(function(t){
-      var required = t.requiredReferrals || t.requiredCount || 0;
-      var done = completed.indexOf(t.id) > -1;
-      var eligible = refCount >= required;
-      var btnClass = done ? 'done' : (eligible ? 'join' : 'verify');
-      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+required);
-      var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+t.id+'\')' : '');
-      return '<div class="task-item">'+
-        '<div class="task-logo">👥</div>'+
-        '<div class="task-info">'+
-          '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
-          '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
-        '</div>'+
-        '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
-      '</div>';
-    }).join('');
-    return;
   }
-
-  var list = allTasks.filter(function(t){ return t.category===tab; });
-  if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
-  document.getElementById('tasksContent').innerHTML = list.map(function(t){
-    var done = completed.indexOf(t.id) > -1;
-    var waitUntil = S.taskWaitUntil && S.taskWaitUntil[t.id];
-    var waiting = !done && waitUntil && waitUntil > Date.now();
-    var st = done ? 'done' : (waiting ? 'waiting' : ((S.taskJoined && S.taskJoined[t.id]) ? 'verify' : 'join'));
-    var btnClass = st==='join'?'join':st==='waiting'?'verify':st==='verify'?'verify':'done';
-    var secsLeft = waiting ? Math.max(1, Math.ceil((waitUntil-Date.now())/1000)) : 0;
-    var btnText  = st==='join'?'Join':st==='waiting'?('⏳ '+secsLeft+'s'):st==='verify'?'Verify':'✓ Done';
-    var disabledAttr = st==='waiting' ? 'disabled' : '';
-    var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
-    return '<div class="task-item">'+
-      '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
-      '<div class="task-info">'+
-        '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
-        '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
-      '</div>'+
-      '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+disabledAttr+'>'+btnText+'</button>'+
-    '</div>';
-  }).join('');
-}
-
-function switchTab(el, tab){
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  el.classList.add('active');
-  currentTab = tab;
-  renderTasks(tab);
-}
-
-S.taskJoined = {};
-S.taskWaitUntil = {};
-var BOT_TASK_WAIT_SECONDS = 52;
-
-function doJoinTask(id){
-  var list = (S.data && S.data.tasks) || [];
-  var task = list.find(function(t){ return t.id===id; });
-  S.taskJoined[id] = true;
-  if (task && task.category === 'bots'){
-    // مهام البوتات مفيش تحقق حقيقي ممكن، فبنفرض فترة انتظار حقيقية
-    // (مُسجَّلة في السيرفر عبر startTask) قبل تفعيل زر Verify
-    S.taskWaitUntil[id] = Date.now() + BOT_TASK_WAIT_SECONDS*1000;
-    api('startTask', { taskId:id }).catch(function(){});
-  } else {
-    delete S.taskWaitUntil[id];
-  }
-  renderTasks(currentTab);
-  showToast('Joined! Click Verify to claim your reward ✓');
-  if (task && task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
-  } else if (task && task.link){
-    window.open(task.link, '_blank');
-  }
-}
-
-// عداد تنازلي حقيقي لمهام البوتات: يحدّث الزر كل ثانية وينقله لحالة
-// Verify تلقائيًا لما تنتهي الفترة (التطبيق الفعلي للحد الأدنى بيتم
-// التحقق منه في السيرفر برضه، فمحاولة التحايل من الواجهة مش هتفيد)
-setInterval(function(){
-  if (!S.taskWaitUntil) return;
-  var ids = Object.keys(S.taskWaitUntil);
-  if (!ids.length) return;
-  var now = Date.now();
-  var expired = false;
-  ids.forEach(function(id){
-    if (S.taskWaitUntil[id] <= now){ delete S.taskWaitUntil[id]; expired = true; }
-  });
-  if (currentPage === 'tasks' && currentTab !== 'invite'){ renderTasks(currentTab); }
-}, 1000);
-
-function doVerifyTask(id){
-  api('verifyTask', { taskId:id }).then(function(res){
-    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
-    S.data.completedTasks = S.data.completedTasks || [];
-    S.data.completedTasks.push(id);
-    S.user.balance = res.data.shibaBalance;
-    delete S.taskJoined[id];
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
-    renderTasks(currentTab);
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
-  }).catch(function(){ showToast('Network error','error'); });
-}
-
-function doClaimInvite(id){
-  api('claimTask', { taskId:id }).then(function(res){
-    if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
-    S.data.completedTasks = S.data.completedTasks || [];
-    S.data.completedTasks.push(id);
-    S.user.balance = res.data.shibaBalance;
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
-    renderTasks(currentTab);
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
-  }).catch(function(){ showToast('Network error','error'); });
-}
-
-// ── Daily Combo (server-validated) ──────────────────────────────────
-function renderComboState(){
-  var combo = (S.data && S.data.combo) || {};
-  var btn = document.getElementById('comboCheckBtn');
-  var desc = document.getElementById('comboDesc');
-  var reward = combo.reward || 5000;
-  if (combo.solvedToday){
-    btn.disabled = true;
-    btn.textContent = '✓ Claimed Today';
-    desc.textContent = 'Come back tomorrow for a new combo!';
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = 'Check Combo — '+fmtShiba(reward)+' '+SHIBA_ICON;
-    desc.innerHTML = 'Find the correct combination and claim your '+SHIBA_ICON+' reward';
-  }
-}
-
-function selectCombo(el, emoji){
-  if (S.data && S.data.combo && S.data.combo.solvedToday) return;
-  if (S.comboFilled >= 4) return;
-  if (el.classList.contains('selected')) return;
-  el.classList.add('selected');
-  el.onclick = null;
-  document.getElementById('si-'+S.comboFilled).textContent = emoji;
-  document.getElementById('slot-'+S.comboFilled).classList.add('filled');
-  S.comboFilled++;
-  S.comboSel.push(emoji);
-}
-
-function checkCombo(){
-  if (S.data && S.data.combo && S.data.combo.solvedToday){ showToast('Already claimed today\u2019s combo!'); return; }
-  if (S.comboFilled < 4){ showToast('Select all 4 items first!'); return; }
-  var btn = document.getElementById('comboCheckBtn');
-  btn.disabled = true; btn.textContent = 'Checking...';
-  api('checkCombo', { selection:S.comboSel }).then(function(res){
-    if (!res.success){
-      showToast(res.error||'Failed.','error');
-      renderComboState();
-      resetCombo();
-      return;
-    }
-    if (!res.data.correct){
-      showToast('❌ Wrong combination. Try again!','error');
-      renderComboState();
-      resetCombo();
-      return;
-    }
-    S.user.balance = res.data.shibaBalance;
-    S.data.combo.solvedToday = true;
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
-    showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+'!',null,true);
-    renderComboState();
-    resetCombo();
-  }).catch(function(){
-    showToast('Network error','error');
-    renderComboState();
-    resetCombo();
-  });
-}
-
-function resetCombo(){
-  S.comboFilled = 0; S.comboSel = [];
-  for (var i=0;i<4;i++){
-    document.getElementById('si-'+i).textContent='?';
-    document.getElementById('slot-'+i).classList.remove('filled');
-  }
-  document.querySelectorAll('.combo-item').forEach(function(item){
-    item.classList.remove('selected');
-    var emoji = item.textContent;
-    item.onclick = (function(e){ return function(){ selectCombo(item,e); }; })(emoji);
-  });
-}
-
-// ── Lucky Wheel (server-validated spins) ───────────────────────────────
-function renderWheelInfo(){
-  var w = (S.data && S.data.wheel) || { spinsAvailable:0, spinsUsed:0, segments:WHEEL_DEFAULT_SEGMENTS, referralsPerSpin:2 };
-  var segments = w.segments || WHEEL_DEFAULT_SEGMENTS;
-  var spins = w.spinsAvailable || 0;
-
-  document.getElementById('wheelSpinsLeft').textContent = spins;
-  document.getElementById('wheelRefsPerSpin').textContent = w.referralsPerSpin || 2;
-
-  var badge = document.getElementById('homeWheelBadge');
-  if (spins > 0){ badge.style.display = 'flex'; badge.textContent = spins; }
-  else { badge.style.display = 'none'; }
-  document.getElementById('homeWheelSub').textContent = spins > 0
-    ? spins+' free spin'+(spins>1?'s':'')+' available — tap to spin!'
-    : 'Invite friends to earn free spins!';
-
-  var btn = document.getElementById('wheelSpinBtn');
-  if (btn && !wheelSpinning){ btn.disabled = spins <= 0; btn.textContent = 'SPIN'; }
-
-  renderWheelCircle(segments);
-}
-
-function renderWheelCircle(segments){
-  var n = segments.length;
-  var slice = 360 / n;
-  var colorA = '#241a02', colorB = '#f7931a';
-  var gradParts = [];
-  var labelsHtml = '';
-  for (var i=0;i<n;i++){
-    var start = i*slice, end = start+slice;
-    gradParts.push((i%2===0?colorA:colorB)+' '+start+'deg '+end+'deg');
-    var center = start + slice/2;
-    labelsHtml += '<div class="wheel-seg" style="transform:rotate('+center+'deg)">'+
-      '<span class="wheel-seg-text" style="transform:rotate(-'+center+'deg)">'+fmtNum(segments[i])+'</span>'+
-    '</div>';
-  }
-  var circle = document.getElementById('wheelCircle');
-  if (!circle) return;
-  circle.style.background = 'conic-gradient(from 0deg, '+gradParts.join(', ')+')';
-  circle.innerHTML = labelsHtml;
-}
-
-function spinWheel(){
-  if (wheelSpinning) return;
-  var spins = (S.data && S.data.wheel && S.data.wheel.spinsAvailable) || 0;
-  if (spins <= 0){ showToast('No spins available. Invite more friends! 🎯','error'); return; }
-
-  wheelSpinning = true;
-  var btn = document.getElementById('wheelSpinBtn');
-  btn.disabled = true; btn.textContent = '...';
-
-  api('spinWheel', {}).then(function(res){
-    if (!res.success){
-      wheelSpinning = false;
-      showToast(res.error||'Could not spin','error');
-      renderWheelInfo();
-      return;
-    }
-    var segments = (S.data.wheel && S.data.wheel.segments) || WHEEL_DEFAULT_SEGMENTS;
-    var n = segments.length;
-    var slice = 360 / n;
-    var centerAngle = res.data.segmentIndex*slice + slice/2;
-    var extraSpins = 5;
-    var currentMod = wheelRotation % 360;
-    wheelRotation = wheelRotation + extraSpins*360 + (360 - centerAngle) - currentMod;
-
-    var circle = document.getElementById('wheelCircle');
-    circle.style.transform = 'rotate('+wheelRotation+'deg)';
-
-    setTimeout(function(){
-      wheelSpinning = false;
-      S.user.balance = res.data.shibaBalance;
-      S.data.wheel = S.data.wheel || {};
-      S.data.wheel.spinsAvailable = res.data.spinsAvailable;
-      S.data.wheel.spinsUsed = res.data.spinsUsed;
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
-      renderWheelInfo();
-      if (res.data.reward > 0){
-        showToast('🎉 You won '+fmtShiba(res.data.reward)+' '+SHIBA_ICON+'!',null,true);
+  render(ctx){
+    for(const p of this.pool){
+      if(!p.active) continue;
+      const t = p.age/p.life;
+      const alpha = 1 - t;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0,alpha);
+      if(p.kind==="spark"){
+        ctx.fillStyle = `rgb(${p.color})`;
+        ctx.shadowColor = `rgb(${p.color})`;
+        ctx.shadowBlur = 8;
       } else {
-        showToast('😬 No reward this time. Try again next spin!');
+        ctx.fillStyle = `rgba(${p.color},${0.85})`;
       }
-    }, 4600);
-  }).catch(function(){
-    wheelSpinning = false;
-    showToast('Network error','error');
-    renderWheelInfo();
-  });
-}
-
-// ── Wallet actions ─────────────────────────────────────────────────────
-// (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
-
-// ── Invite / copy ─────────────────────────────────────────────────────
-// مهم جدًا: نستخدم ?startapp= وليس ?start= لأن هذا تطبيق Mini App (ويب)
-// وليس بوت أوامر تقليدي. رابط ?start= يفتح شات البوت فقط ويرسل أمر /start
-// كرسالة عادية، وهذا لا يضع الكود داخل initData بالمرة فلا يتم تتبع
-// الإحالة أبدًا. رابط ?startapp= هو الصيغة الرسمية لفتح الـ Mini App
-// مباشرة مع تمرير الكود في initData.start_param (راجع توثيق تيليجرام:
-// Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
-function shareInvite(){
-  if (!S.user) return;
-  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
-  var link = 'https://t.me/'+botUser+'?startapp='+S.user.referralCode;
-  var text  = 'Join me on SHIB Rewards and earn real SHIBA!';
-  var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
-  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
-  }
-  copyToClipboard(link);
-  showToast('Invite link copied! 🎉');
-}
-
-// نسخ نص إلى الكليبورد فعليًا (مع Fallback للمتصفحات/الإصدارات القديمة
-// التي لا تدعم navigator.clipboard داخل WebView تيليجرام)
-function copyToClipboard(text){
-  if (navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
-  } else {
-    fallbackCopy(text);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,Math.max(0,p.size),0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
 }
 
-function fallbackCopy(text){
-  try{
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  } catch(_){}
+// ---------------------------------------------------------------------
+// 4) FLOATING TEXT (+1 / +5 / +10, smoothly rising & fading)
+// ---------------------------------------------------------------------
+class FloatingTexts{
+  constructor(){ this.items = []; }
+  spawn(x,y,text,color="#59e39d"){
+    this.items.push({x,y,text,color,age:0,life:1.1});
+  }
+  update(dt){
+    this.items.forEach(i=>i.age+=dt);
+    this.items = this.items.filter(i=>i.age < i.life);
+  }
+  render(ctx){
+    ctx.textAlign="center";
+    ctx.font="bold 15px Segoe UI, Arial";
+    for(const i of this.items){
+      const t = i.age/i.life;
+      const y = i.y - Ease.outCubic(t)*40;
+      const alpha = 1 - Ease.inOutSine(t);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = i.color;
+      ctx.shadowColor = i.color;
+      ctx.shadowBlur = 6;
+      ctx.fillText(i.text, i.x, y);
+      ctx.restore();
+    }
+  }
 }
 
-function copyRefLink(){
-  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
-  var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
-  copyToClipboard(link);
-  showToast('Referral link copied! 📋');
+// ---------------------------------------------------------------------
+// PIPE VISUALS — rotation lookup derived from inspecting the actual art:
+//   Straight Pipe.png : default ports {left,right}   (horizontal)
+//   Corner Pipe.png    : default ports {top,left}
+//   T Pipe.png         : default ports {left,right,bottom}
+//   Cross_Pipe.png     : ports {top,right,bottom,left} (symmetric, no rotation)
+// Rotating the corner 90/180/270 deg (clockwise) sweeps the port pair:
+//   0:{top,left}  90:{top,right}  180:{right,bottom}  270:{bottom,left}
+// ---------------------------------------------------------------------
+class Pipe{
+  constructor(img, x, y, rot, w, h){ Object.assign(this,{img,x,y,rot,w,h}); }
+  draw(ctx){ drawCentered(ctx, this.img, this.x, this.y, this.w, this.h, this.rot); }
 }
 
-// ── Page switching ────────────────────────────────────────────────────
-var currentPage = 'home';
-function switchPage(name){
-  if (currentPage===name) return;
-  var prev = document.getElementById('page-'+currentPage);
-  var next = document.getElementById('page-'+name);
-  prev.classList.remove('active'); prev.classList.add('prev');
-  setTimeout(function(){ prev.classList.remove('prev'); }, 350);
-  next.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
-  var navEl = document.getElementById('nav-'+name);
-  if (navEl) navEl.classList.add('active');
-  currentPage = name;
+// A PolyPath is the *functional* travel-line a resource orb follows.
+// It also draws the animated green flow (dash-offset) directly above the pipe sprites.
+class PolyPath{
+  constructor(points, glowColor="120,230,160"){
+    this.points = points; // [{x,y}, ...] orthogonal waypoints
+    this.glowColor = glowColor;
+    this.segLens = [];
+    this.total = 0;
+    for(let i=0;i<points.length-1;i++){
+      const dx=points[i+1].x-points[i].x, dy=points[i+1].y-points[i].y;
+      const len = Math.hypot(dx,dy);
+      this.segLens.push(len);
+      this.total += len;
+    }
+    this.flowPhase = Math.random()*20;
+    this.active = 0; // ramps up/down for glow intensity (smoothed)
+  }
+  pointAt(t){
+    let dist = t*this.total;
+    for(let i=0;i<this.segLens.length;i++){
+      if(dist <= this.segLens[i] || i===this.segLens.length-1){
+        const segT = this.segLens[i] ? dist/this.segLens[i] : 0;
+        const a = this.points[i], b = this.points[i+1];
+        return { x: a.x + (b.x-a.x)*Math.min(segT,1), y: a.y + (b.y-a.y)*Math.min(segT,1) };
+      }
+      dist -= this.segLens[i];
+    }
+    return this.points[this.points.length-1];
+  }
+  update(dt){
+    this.flowPhase += dt*36; // dash scroll speed
+    this.active += ((this.active>0?1:0.15) - this.active) * Math.min(1, dt*3); // decays back to a dim idle glow
+  }
+  pulse(){ this.active = 1; }
+  drawFlow(ctx){
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    const glowStrength = 0.35 + this.active*0.65;
+    ctx.strokeStyle = `rgba(${this.glowColor},${0.18+0.5*glowStrength})`;
+    ctx.lineWidth = 10;
+    ctx.shadowColor = `rgba(${this.glowColor},0.9)`;
+    ctx.shadowBlur = 10 * glowStrength;
+    ctx.beginPath();
+    this.points.forEach((p,i)=> i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+
+    // moving dash segments = flowing energy / directional particles
+    ctx.setLineDash([10,16]);
+    ctx.lineDashOffset = -this.flowPhase;
+    ctx.strokeStyle = `rgba(${this.glowColor},${0.7*glowStrength+0.2})`;
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    this.points.forEach((p,i)=> i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
-// ── Modals ─────────────────────────────────────────────────────────────
-function openAddTaskModal(){
-  document.getElementById('addTaskFormView').style.display = 'block';
-  document.getElementById('addTaskSuccessView').style.display = 'none';
-  document.getElementById('addTaskLink').value = '';
-  document.getElementById('addTaskMembers').value = '';
-  document.getElementById('addTaskDesc').value = '';
-  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
-  updateTaskPrice();
-  document.getElementById('addTaskModal').classList.add('open');
+// ---------------------------------------------------------------------
+// 5) RESOURCE ORB — travels a PolyPath at constant speed, with a
+//    scale/bounce spawn tween and a scale/fade arrival tween.
+// ---------------------------------------------------------------------
+class ResourceOrb{
+  constructor(path, img, size, travelTime, onArrive, glowColor){
+    this.path = path;
+    this.img = img;
+    this.size = size;
+    this.travelTime = travelTime;
+    this.t = 0;
+    this.onArrive = onArrive;
+    this.glowColor = glowColor;
+    this.dead = false;
+    this.spawnAge = 0;
+    this.arrived = false;
+    path.pulse();
+    game.particles.spawn({x:path.points[0].x,y:path.points[0].y,vx:0,vy:0,life:0.35,size:14,color:glowColor,kind:"flash"});
+  }
+  update(dt){
+    if(this.arrived) return;
+    this.spawnAge += dt;
+    this.t += dt/this.travelTime;
+    if(this.t >= 1){
+      this.t = 1;
+      this.arrived = true;
+      this.path.pulse();
+      const end = this.path.pointAt(1);
+      game.particles.spawn({x:end.x,y:end.y,vx:0,vy:0,life:0.35,size:14,color:this.glowColor,kind:"flash"});
+      this.onArrive && this.onArrive();
+      this.dead = true;
+    }
+  }
+  render(ctx){
+    const p = this.path.pointAt(this.t);
+    // spawn scale-up with slight overshoot ("bounce"), settle quickly
+    const spawnT = Math.min(1, this.spawnAge/0.28);
+    const scale = Ease.outBack(spawnT);
+    const bounce = Math.sin(Math.min(1,this.spawnAge/0.5)*Math.PI*3) * (1-spawnT) * 3;
+    ctx.save();
+    ctx.shadowColor = `rgba(${this.glowColor},0.9)`;
+    ctx.shadowBlur = 12;
+    drawCentered(ctx, this.img, p.x, p.y - bounce, this.size*scale, this.size*scale);
+    ctx.restore();
+  }
 }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
 
-// ── Promote Your Channel: quantity chips + live price calculator ──────
-function selectQty(n, el){
-  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
-  el.classList.add('active');
-  document.getElementById('addTaskMembers').value = n;
-  updateTaskPrice();
+// ---------------------------------------------------------------------
+// 6) FACTORY — the production state machine.
+//    States: IDLE -> WORKING -> PROCESSING -> READY -> OUTPUT -> IDLE
+//    A factory only leaves IDLE when its input requirement is satisfied
+//    (producers have no requirement; consumers need buffered input).
+//    Every factory runs its own independent timer -> fully asynchronous.
+// ---------------------------------------------------------------------
+const State = { IDLE:"IDLE", WORKING:"WORKING", PROCESSING:"PROCESSING", READY:"READY", OUTPUT:"OUTPUT" };
+
+class Factory{
+  constructor(cfg){
+    Object.assign(this, cfg);
+    // cfg: id, kind ('furnace'|'tank'|'conveyor'), img, x, y, w, h,
+    //      needs: {resourceKey:count} or null for producers,
+    //      outputs: [{path, img, size, travelTime, toFactory, glowColor}],
+    //      baseDurations: {working,processing,ready,output}, tint
+    this.state = State.IDLE;
+    this.timer = 0;
+    this.buffer = {}; // for consumers: how many of each input resource are waiting
+    if(this.needs) Object.keys(this.needs).forEach(k=>this.buffer[k]=0);
+    this.cyclesDone = 0;
+    this.recentOutputs = []; // timestamps, for rate/min smoothing
+    this.jitter = Math.random()*10;
+    this.gateOpen = 0; // 0..1 tween for output gate
+    this.liquidFill = 0; // for tanks
+    this.beltScroll = 0; // for conveyor
+    this.lightBlink = 0;
+  }
+  durations(){
+    const m = game.speedMultiplier;
+    return {
+      working: this.baseDurations.working/m,
+      processing: this.baseDurations.processing/m,
+      ready: this.baseDurations.ready/m,
+      output: this.baseDurations.output/m
+    };
+  }
+  canStart(){
+    if(!this.needs) return true;
+    return Object.entries(this.needs).every(([k,n])=> this.buffer[k] >= n);
+  }
+  receive(resourceKey){
+    if(this.buffer[resourceKey] !== undefined) this.buffer[resourceKey]++;
+  }
+  update(dt){
+    const d = this.durations();
+    this.lightBlink += dt;
+    switch(this.state){
+      case State.IDLE:
+        this.liquidFill += (0 - this.liquidFill)*Math.min(1,dt*2);
+        if(this.canStart()){
+          if(this.needs) Object.keys(this.needs).forEach(k=>this.buffer[k]-=this.needs[k]);
+          this.state = State.WORKING; this.timer = 0;
+        }
+        break;
+      case State.WORKING:
+        this.timer += dt;
+        this.beltScroll += dt*60;
+        if(this.kind==="furnace" && Math.random()<dt*4){
+          game.particles.spawn({x:this.x+ (Math.random()-0.5)*20, y:this.y-this.h*0.28, vx:(Math.random()-0.5)*8, vy:-26-Math.random()*14, life:1.1+Math.random()*0.4, size:5+Math.random()*4, color:"200,205,215", kind:"smoke", grow:6});
+        }
+        if(this.timer >= d.working){ this.state=State.PROCESSING; this.timer=0; }
+        break;
+      case State.PROCESSING:
+        this.timer += dt;
+        {
+          const p = Math.min(1,this.timer/d.processing);
+          if(this.kind==="tank"){
+            this.liquidFill = Ease.inOutSine(p);
+            if(Math.random()<dt*10){
+              game.particles.spawn({x:this.x+(Math.random()-0.5)*this.w*0.32, y:this.y+this.h*0.28, vx:0, vy:-18-Math.random()*10, life:0.9, size:2+Math.random()*2, color:this.tint, kind:"bubble"});
+            }
+          }
+          if(this.kind==="furnace" && Math.random()<dt*6){
+            game.particles.spawn({x:this.x+(Math.random()-0.5)*20, y:this.y-this.h*0.28, vx:(Math.random()-0.5)*10, vy:-30-Math.random()*16, life:1.2, size:5+Math.random()*5, color:"210,215,225", kind:"smoke", grow:7});
+          }
+          if(this.kind==="conveyor"){
+            this.beltScroll += dt*90;
+            if(Math.random()<dt*8){
+              game.particles.spawn({x:this.x+this.w*0.15,y:this.y+this.h*0.32,vx:40+Math.random()*20,vy:-6,life:0.5,size:2.5,color:"255,210,120",kind:"spark"});
+            }
+          }
+        }
+        if(this.timer >= d.processing){ this.state=State.READY; this.timer=0; }
+        break;
+      case State.READY:
+        this.timer += dt;
+        if(this.timer >= d.ready){ this.state=State.OUTPUT; this.timer=0; this.gateOpen=0; this.doOutput(); }
+        break;
+      case State.OUTPUT:
+        this.timer += dt;
+        this.gateOpen = Ease.outCubic(Math.min(1,this.timer/(d.output*0.6)));
+        if(this.timer >= d.output){
+          this.state = State.IDLE; this.timer=0;
+          this.recentOutputs.push(performance.now());
+        }
+        break;
+    }
+  }
+  doOutput(){
+    this.cyclesDone++;
+    // spawn a resource orb on every configured outgoing path
+    (this.outputs||[]).forEach(o=>{
+      const orb = new ResourceOrb(o.path, o.img, o.size, o.travelTime, ()=>{
+        o.toFactory && o.toFactory.receive(o.resourceKey);
+        o.onArriveExtra && o.onArriveExtra();
+      }, o.glowColor);
+      game.orbs.push(orb);
+    });
+    game.particles.spawn({x:this.x,y:this.y-this.h*0.15,vx:0,vy:-10,life:0.5,size:this.w*0.5,color:this.tint,kind:"ringflash"});
+  }
+  rateSmoothed(){
+    const now = performance.now();
+    this.recentOutputs = this.recentOutputs.filter(t=> now-t < 20000);
+    return this.recentOutputs.length * 3; // events in last 20s -> per-min
+  }
+  glowColorForState(){
+    switch(this.state){
+      case State.WORKING: return "90,230,150";
+      case State.PROCESSING: return "255,170,70";
+      case State.READY: return "255,230,120";
+      case State.OUTPUT: return "255,230,120";
+      default: return "80,100,130";
+    }
+  }
+  progress(){
+    const d = this.durations();
+    if(this.state===State.WORKING) return this.timer/d.working;
+    if(this.state===State.PROCESSING) return this.timer/d.processing;
+    return null;
+  }
+  render(ctx){
+    ctx.save();
+    // ambient glow plate under the machine, color = current state
+    const glow = this.glowColorForState();
+    const pulse = (this.state===State.READY) ? (0.6+0.4*Math.sin(this.lightBlink*10)) : 1;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const grad = ctx.createRadialGradient(this.x,this.y+this.h*0.32,4,this.x,this.y+this.h*0.32,this.w*0.62);
+    grad.addColorStop(0, `rgba(${glow},${0.28*pulse})`);
+    grad.addColorStop(1, `rgba(${glow},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.ellipse(this.x,this.y+this.h*0.32,this.w*0.62,this.h*0.30,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    // machine vibration during WORKING (small jitter offset)
+    let jx=0, jy=0;
+    if(this.state===State.WORKING){
+      jx = Math.sin(performance.now()/40 + this.jitter)*1.1;
+      jy = Math.cos(performance.now()/55 + this.jitter)*0.8;
+    }
+    // READY pulse: subtle scale breathing
+    const readyScale = this.state===State.READY ? 1+0.02*Math.sin(this.lightBlink*10) : 1;
+
+    drawCentered(ctx, this.img, this.x+jx, this.y+jy, this.w*readyScale, this.h*readyScale);
+
+    // tank liquid overlay: tint the glass region with a rising fill + shine sweep
+    if(this.kind==="tank"){
+      const glassX = this.x - this.w*0.20, glassY = this.y - this.h*0.28;
+      const glassW = this.w*0.40, glassH = this.h*0.46;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(glassX, glassY, glassW, glassH);
+      ctx.clip();
+      const fillH = glassH*this.liquidFill;
+      const wobble = Math.sin(performance.now()/220)*2;
+      ctx.fillStyle = this.tintRGBA(0.55);
+      ctx.beginPath();
+      ctx.moveTo(glassX, glassY+glassH-fillH+wobble);
+      ctx.lineTo(glassX+glassW, glassY+glassH-fillH-wobble);
+      ctx.lineTo(glassX+glassW, glassY+glassH);
+      ctx.lineTo(glassX, glassY+glassH);
+      ctx.closePath(); ctx.fill();
+      // occasional glass shine sweep
+      const shineT = (performance.now()/1000 + this.jitter) % 4;
+      if(shineT < 1){
+        const sx = glassX - glassW + shineT*glassW*3;
+        ctx.fillStyle = "rgba(255,255,255,0.18)";
+        ctx.save();
+        ctx.translate(sx, glassY+glassH/2);
+        ctx.rotate(-0.4);
+        ctx.fillRect(-6,-glassH,12,glassH*2);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    // conveyor blinking status lights (matches the little display on the sprite)
+    if(this.kind==="conveyor"){
+      const lx = this.x - this.w*0.30, ly = this.y - this.h*0.02;
+      for(let i=0;i<3;i++){
+        const on = this.state!==State.IDLE && (Math.floor(this.lightBlink*3+i)%3===0);
+        ctx.fillStyle = on ? "rgba(120,230,255,0.95)" : "rgba(60,90,110,0.4)";
+        ctx.shadowColor = "rgba(120,230,255,0.9)";
+        ctx.shadowBlur = on?8:0;
+        ctx.beginPath(); ctx.arc(lx+i*10, ly, 2.6, 0, Math.PI*2); ctx.fill();
+      }
+    }
+
+    // furnace / conveyor gate flash + belt tick marks near the output mouth during OUTPUT
+    if(this.state===State.OUTPUT){
+      ctx.save();
+      ctx.globalAlpha = 1-this.gateOpen*0.5;
+      ctx.fillStyle = "rgba(255,235,180,0.5)";
+      ctx.shadowColor = "rgba(255,235,180,0.9)";
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.ellipse(this.x, this.y+this.h*0.34, this.w*0.22*this.gateOpen+2, this.h*0.06, 0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+  tintRGBA(a){ return `rgba(${this.tint},${a})`; }
 }
 
-function updateTaskPrice(){
-  var members = parseInt(document.getElementById('addTaskMembers').value) || 0;
-  var units = Math.ceil(members / 100);
-  var priceShiba = members > 0 ? units * PRICE_PER_100_SHIBA : 0;
-  var priceUsd = members > 0 ? units * PRICE_PER_100_USD : 0;
-  document.getElementById('addTaskPriceShiba').innerHTML = fmtNum(priceShiba) + ' ' + SHIBA_ICON;
-  document.getElementById('addTaskPriceUsd').textContent = '≈ $' + priceUsd.toLocaleString('en-US');
-  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){
-    var chipVal = parseInt(c.textContent.replace(/,/g,'')) || 0;
-    c.classList.toggle('active', chipVal===members);
+// ---------------------------------------------------------------------
+// 7) GAME — owns everything, drives the single rAF loop
+// ---------------------------------------------------------------------
+const game = {
+  particles: new ParticleSystem(260),
+  floaters: new FloatingTexts(),
+  orbs: [],
+  factories: [],
+  pipesVisual: [],
+  paths: [],
+  coins: 0,
+  coinsDisplay: 0,
+  speedMultiplier: 1,
+  upgradeLevel: 0,
+  lastTime: 0
+};
+
+function buildWorld(){
+  const c = { furnace:{x:480,y:135}, blue:{x:300,y:405}, orange:{x:660,y:405}, conv:{x:480,y:615} };
+
+  // ---- pipe VISUALS (static sprites, placed & rotated per the port lookup) ----
+  const P = IMAGES;
+  game.pipesVisual = [
+    // furnace -> split
+    new Pipe(P.pipeStraight, 480, 213, 90, 60, 24),
+    new Pipe(P.pipeT, 480, 240, 180, 70, 44),          // split: ports {left,right,top}
+    // left branch down to blue tank (horizontal run widened to fully bridge the T and the elbow)
+    new Pipe(P.pipeStraight, 384, 240, 0, 130, 24),
+    new Pipe(P.pipeCorner, 300, 240, 180, 46, 48),      // ports {right,bottom}
+    new Pipe(P.pipeStraight, 300, 278, 90, 66, 24),
+    // right branch down to orange tank
+    new Pipe(P.pipeStraight, 576, 240, 0, 130, 24),
+    new Pipe(P.pipeCorner, 660, 240, 270, 46, 48),      // ports {left,bottom}
+    new Pipe(P.pipeStraight, 660, 278, 90, 66, 24),
+    // blue tank -> merge
+    new Pipe(P.pipeStraight, 300, 512, 90, 60, 24),
+    new Pipe(P.pipeCorner, 300, 545, 90, 46, 48),       // ports {right,top}
+    new Pipe(P.pipeStraight, 384, 545, 0, 130, 24),
+    // orange tank -> merge
+    new Pipe(P.pipeStraight, 660, 512, 90, 60, 24),
+    new Pipe(P.pipeCorner, 660, 545, 0, 46, 48),        // ports {top,left}
+    new Pipe(P.pipeStraight, 576, 545, 0, 130, 24),
+    // merge -> conveyor
+    new Pipe(P.pipeT, 480, 545, 0, 70, 44),             // ports {left,right,bottom}
+    new Pipe(P.pipeStraight, 480, 572, 90, 60, 24),
+  ];
+
+  // ---- functional travel paths (orthogonal, matches pipe centerlines) ----
+  const pathFurnaceToBlue = new PolyPath([
+    {x:480,y:200},{x:480,y:240},{x:300,y:240},{x:300,y:302}
+  ], "120,230,160");
+  const pathFurnaceToOrange = new PolyPath([
+    {x:480,y:200},{x:480,y:240},{x:660,y:240},{x:660,y:302}
+  ], "120,230,160");
+  const pathBlueToConv = new PolyPath([
+    {x:300,y:498},{x:300,y:545},{x:480,y:545},{x:480,y:588}
+  ], "120,190,255");
+  const pathOrangeToConv = new PolyPath([
+    {x:660,y:498},{x:660,y:545},{x:480,y:545},{x:480,y:588}
+  ], "255,160,90");
+  game.paths = [pathFurnaceToBlue, pathFurnaceToOrange, pathBlueToConv, pathOrangeToConv];
+
+  // ---- factories ----
+  const furnace = new Factory({
+    id:"furnace", kind:"furnace", img:P.furnace, x:c.furnace.x, y:c.furnace.y, w:170, h:170*383/444,
+    needs:null, tint:"255,180,90",
+    baseDurations:{working:1.1, processing:1.3, ready:0.35, output:0.5}
   });
-}
-
-function submitAddTask(){
-  var link = document.getElementById('addTaskLink').value.trim();
-  var members = parseInt(document.getElementById('addTaskMembers').value);
-  var desc = document.getElementById('addTaskDesc').value.trim();
-  if (!link){ showToast('Please enter your channel link!','error'); return; }
-  if (!members || members < 100){ showToast('Please select or enter at least 100 members!','error'); return; }
-  var units = Math.ceil(members/100);
-  var priceShiba = units * PRICE_PER_100_SHIBA;
-  var priceUsd = units * PRICE_PER_100_USD;
-  var btn = document.getElementById('addTaskSubmitBtn');
-  btn.disabled = true; btn.textContent = 'Submitting...';
-  api('submitTaskSuggestion', { link:link, membersNeeded:members, desc:desc }).then(function(res){
-    btn.disabled = false; btn.textContent = '📤 Submit Request';
-    if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
-    document.getElementById('successChannelLink').textContent = link;
-    document.getElementById('successMembers').textContent = fmtNum(members);
-    document.getElementById('successPrice').innerHTML = fmtNum(priceShiba)+' '+SHIBA_ICON+' (≈ $'+priceUsd.toLocaleString('en-US')+')';
-    document.getElementById('addTaskFormView').style.display = 'none';
-    document.getElementById('addTaskSuccessView').style.display = 'block';
-  }).catch(function(){
-    btn.disabled = false; btn.textContent = '📤 Submit Request';
-    showToast('Network error','error');
+  const tankBlue = new Factory({
+    id:"tankBlue", kind:"tank", img:P.tankBlue, x:c.blue.x, y:c.blue.y, w:150, h:150*384/295,
+    needs:{glass:1}, tint:"70,160,255",
+    baseDurations:{working:0.7, processing:1.6, ready:0.3, output:0.45}
   });
+  const tankOrange = new Factory({
+    id:"tankOrange", kind:"tank", img:P.tankOrange, x:c.orange.x, y:c.orange.y, w:150, h:150*389/295,
+    needs:{glass:1}, tint:"255,140,60",
+    baseDurations:{working:0.7, processing:1.6, ready:0.3, output:0.45}
+  });
+  const conveyor = new Factory({
+    id:"conveyor", kind:"conveyor", img:P.conveyor, x:c.conv.x, y:c.conv.y, w:190, h:190*376/470,
+    needs:{bottleBlue:1, bottleOrange:1}, tint:"180,140,255",
+    baseDurations:{working:0.9, processing:1.2, ready:0.3, output:0.5}
+  });
+
+  furnace.outputs = [
+    {path:pathFurnaceToBlue, img:P.resGlass, size:34, travelTime:0.9, toFactory:tankBlue, resourceKey:"glass", glowColor:"120,230,160"},
+    {path:pathFurnaceToOrange, img:P.resGlass, size:34, travelTime:0.9, toFactory:tankOrange, resourceKey:"glass", glowColor:"120,230,160"}
+  ];
+  tankBlue.outputs = [
+    {path:pathBlueToConv, img:P.resBottleBlue, size:34, travelTime:0.85, toFactory:conveyor, resourceKey:"bottleBlue", glowColor:"120,190,255"}
+  ];
+  tankOrange.outputs = [
+    {path:pathOrangeToConv, img:P.resBottleOrange, size:34, travelTime:0.85, toFactory:conveyor, resourceKey:"bottleOrange", glowColor:"255,160,90"}
+  ];
+  conveyor.outputs = []; // handled specially: sells directly to storage below
+
+  const baseConveyorDoOutput = conveyor.doOutput.bind(conveyor);
+  conveyor.doOutput = function(){
+    baseConveyorDoOutput();
+    const start = {x:conveyor.x, y:conveyor.y+conveyor.h*0.30};
+    const end = {x:conveyor.x+230, y:conveyor.y+40};
+    const path = new PolyPath([start,{x:start.x+80,y:start.y+10},end], "255,215,130");
+    const orb = new ResourceOrb(path, IMAGES.resChip, 30, 0.55, ()=>{
+      const gain = 1 + Math.floor(game.upgradeLevel/3);
+      game.coins += gain;
+      game.floaters.spawn(end.x, end.y-10, "+"+gain, "#ffd27a");
+      game.storageRate.push(performance.now());
+    }, "255,215,130");
+    game.orbs.push(orb);
+  };
+
+  game.factories = [furnace, tankBlue, tankOrange, conveyor];
+  game.storageRate = [];
+  game.storagePoint = {x: c.conv.x+230, y:c.conv.y+40};
+  game.sandDecor = {x:c.furnace.x-95, y:c.furnace.y+55, w:70, h:70*274/398};
 }
 
-// ── Daily combo countdown (resets at UTC midnight) ─────────────────────
-(function timerTick(){
-  setInterval(function(){
-    var el = document.getElementById('comboTimer'); if(!el) return;
-    var now = new Date();
-    var nextUtcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1);
-    var s = Math.max(0, Math.floor((nextUtcMidnight - now.getTime())/1000));
-    el.textContent=[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(function(n){ return String(n).padStart(2,'0'); }).join(':');
-  },1000);
-})();
-
-// ── Toast ──────────────────────────────────────────────────────────────
-var _toastTimer;
-function showToast(msg, type, isHtml){
-  var el = document.getElementById('toast');
-  if (isHtml) el.innerHTML = msg; else el.textContent = msg;
-  el.className = 'toast' + (type==='error'?' error':'');
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+// ---------------------------------------------------------------------
+// GROUND — tiled grass with a slightly darker "clean" pad under the
+// production column, per spec ("factory area remains clean").
+// ---------------------------------------------------------------------
+function drawGround(ctx){
+  const tile = IMAGES.grass, tileDark = IMAGES.grassDark;
+  const step = 92;
+  for(let y=-10;y<820;y+=step){
+    for(let x=-10;x<980;x+=step){
+      drawCentered(ctx, tile, x+step/2, y+step/2, step+2, step+2);
+    }
+  }
+  // dark pad strip behind the factory column
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  for(const cx of [480]){
+    for(let y=40; y<720; y+=step){
+      drawCentered(ctx, tileDark, cx, y, step+4, step+4);
+    }
+  }
+  ctx.restore();
 }
 
-// ── Utils ──────────────────────────────────────────────────────────────
-function fmtNum(n){ return (parseInt(n)||0).toLocaleString('en-US'); }
-function fmtShiba(n){ return Math.round(parseFloat(n)||0).toLocaleString('en-US'); }
-function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){ return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-function timeAgo(ts){
-  var d=(Date.now()-ts)/1000;
-  if(d<60) return 'just now';
-  if(d<3600) return Math.floor(d/60)+'m ago';
-  if(d<86400) return Math.floor(d/3600)+'h ago';
-  return Math.floor(d/86400)+'d ago';
+// ---------------------------------------------------------------------
+// MAIN LOOP
+// ---------------------------------------------------------------------
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+
+function update(dt){
+  game.factories.forEach(f=>f.update(dt));
+  game.paths.forEach(p=>p.update(dt));
+  game.orbs.forEach(o=>o.update(dt));
+  game.orbs = game.orbs.filter(o=>!o.dead);
+  game.particles.update(dt);
+  game.floaters.update(dt);
+  game.coinsDisplay += (game.coins - game.coinsDisplay) * Math.min(1, dt*6);
+  syncHUD();
 }
+
+function render(){
+  ctx.clearRect(0,0,960,780);
+  drawGround(ctx);
+
+  // z-order: pipes (static) -> flow overlay -> sand decor -> factories -> orbs -> particles -> floating text
+  game.pipesVisual.forEach(p=>p.draw(ctx));
+  game.paths.forEach(p=>p.drawFlow(ctx));
+
+  drawCentered(ctx, IMAGES.resSand, game.sandDecor.x, game.sandDecor.y, game.sandDecor.w, game.sandDecor.h);
+
+  game.factories.forEach(f=>f.render(ctx));
+
+  // progress bars under each working/processing factory
+  game.factories.forEach(f=>{
+    const p = f.progress();
+    if(p===null) return;
+    const bw = f.w*0.55, bx = f.x-bw/2, by = f.y+f.h*0.52;
+    ctx.save();
+    ctx.fillStyle = "rgba(10,14,20,0.55)";
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,7,4); ctx.fill();
+    const col = f.state===State.PROCESSING ? "255,170,70" : "90,230,150";
+    ctx.fillStyle = `rgb(${col})`;
+    ctx.shadowColor = `rgb(${col})`; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.roundRect(bx,by,bw*Math.min(1,p),7,4); ctx.fill();
+    ctx.restore();
+  });
+
+  game.orbs.forEach(o=>o.render(ctx));
+  game.particles.render(ctx);
+
+  // storage collector (simple original glowing crate — no reference art needed)
+  drawStorage(ctx);
+
+  game.floaters.render(ctx);
+}
+
+function drawStorage(ctx){
+  const {x,y} = game.storagePoint;
+  ctx.save();
+  ctx.translate(x,y);
+  const grad = ctx.createRadialGradient(0,10,2,0,10,50);
+  grad.addColorStop(0,"rgba(255,210,120,0.35)"); grad.addColorStop(1,"rgba(255,210,120,0)");
+  ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(0,10,50,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#2a2035";
+  ctx.strokeStyle = "rgba(255,210,120,0.8)";
+  ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-26,-14,52,40,8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="rgba(255,210,120,0.9)";
+  ctx.font="bold 11px Segoe UI";
+  ctx.textAlign="center";
+  ctx.fillText("STORAGE", 0, 34);
+  ctx.restore();
+}
+
+let acc=0;
+function loop(now){
+  if(!game.lastTime) game.lastTime = now;
+  let dt = (now - game.lastTime)/1000;
+  dt = Math.min(dt, 0.05); // clamp to avoid spiral-of-death on tab-switch
+  game.lastTime = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ---------------------------------------------------------------------
+// HUD sync (DOM writes only when the displayed integer actually changes)
+// ---------------------------------------------------------------------
+let lastHud = {coins:null, rF:null, rC:null, cost:null};
+function syncHUD(){
+  const coinsInt = Math.round(game.coinsDisplay);
+  if(coinsInt !== lastHud.coins){ document.getElementById('coinsVal').textContent = coinsInt; lastHud.coins = coinsInt; }
+
+  const furnace = game.factories[0];
+  const rF = Math.round(furnace.rateSmoothed());
+  if(rF !== lastHud.rF){ document.getElementById('rateFurnaceVal').textContent = rF+"/min"; lastHud.rF = rF; }
+
+  const now = performance.now();
+  game.storageRate = (game.storageRate||[]).filter(t=>now-t<20000);
+  const rC = Math.round(game.storageRate.length*3);
+  if(rC !== lastHud.rC){ document.getElementById('rateTanksVal').textContent = rC+"/min"; lastHud.rC = rC; }
+
+  const cost = upgradeCost();
+  if(cost !== lastHud.cost){ document.getElementById('upgradeCost').textContent = "Cost: "+cost; lastHud.cost = cost; }
+  document.getElementById('upgradeBtn').disabled = game.coins < cost;
+}
+
+function upgradeCost(){ return Math.round(20*Math.pow(1.18, game.upgradeLevel)); }
+document.getElementById('upgradeBtn').addEventListener('click', ()=>{
+  const cost = upgradeCost();
+  if(game.coins < cost) return;
+  game.coins -= cost;
+  game.upgradeLevel++;
+  game.speedMultiplier = 1 + game.upgradeLevel*0.09;
+});
+
+// ---------------------------------------------------------------------
+// BOOT
+// ---------------------------------------------------------------------
+loadAssets(()=>{
+  buildWorld();
+  document.getElementById('loading').style.display='none';
+  requestAnimationFrame(loop);
+});
 </script>
 </body>
 </html>
