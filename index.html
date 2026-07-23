@@ -1,121 +1,1084 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pipeworks Idle — Factory Chain</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Coins Rewards</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root{
-    --panel-bg: rgba(18,22,30,0.82);
-    --panel-border: rgba(140,170,255,0.18);
-    --text-main: #eaf0ff;
-    --text-dim: #9fb0d0;
-    --accent-green: #59e39d;
-    --accent-amber: #ffb84d;
-    --accent-blue: #5fb6ff;
-  }
-  html,body{height:100%;}
-  body{
-    margin:0; display:flex; align-items:center; justify-content:center;
-    min-height:100vh;
-    background: radial-gradient(ellipse at 50% -10%, #24303f 0%, #0d1420 55%, #070b12 100%);
-    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    color: var(--text-main);
-    overflow:hidden;
-  }
-  #stage{
-    position:relative;
-    width:960px; height:860px;
-    border-radius:14px;
-    overflow:hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(140,170,255,0.08);
-  }
-  canvas{ position:absolute; top:0; left:0; display:block; }
-  #loading{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    flex-direction:column; gap:10px; background:#0b1018; z-index:50;
-    font-size:14px; color:var(--text-dim); letter-spacing:.5px;
-  }
-  #loading .bar{ width:220px; height:6px; border-radius:4px; background:#1c2534; overflow:hidden; }
-  #loading .fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--accent-green),var(--accent-blue)); transition:width .15s ease-out; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;
+  --orange:#a855f7;--orange2:#7c1fd6;
+  --orange-dim:rgba(168,85,247,0.15);--orange-dim2:rgba(168,85,247,0.08);
+  --purple:#a855f7;--purple2:#7c1fd6;
+  --purple-dim:rgba(168,85,247,0.15);--purple-dim2:rgba(168,85,247,0.08);
+  --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+  --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
+  --green:#22c55e;--red:#ef4444;
+  --radius:16px;--radius-sm:10px;
+  --img-coin:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png');
+  --img-coin-stack:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766314/ChatGPT_Image_Jul_23_2026_03_25_51_AM_kntreu.png');
+  --img-crown:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766780/ChatGPT_Image_Jul_23_2026_03_32_15_AM_orm5lj.png');
+  --img-avatar:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png');
+  --img-bg:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766740/ChatGPT_Image_Jul_23_2026_03_32_23_AM_iuxdc4.png');
+}
+html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)),var(--img-bg) center top/cover no-repeat,var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
 
-  /* ---- HUD ---- */
-  .hud-pill{
-    position:absolute; display:flex; align-items:center; gap:8px;
-    background:var(--panel-bg); border:1px solid var(--panel-border);
-    border-radius:10px; padding:6px 12px; font-size:13px; font-weight:600;
-    backdrop-filter: blur(6px); box-shadow:0 4px 14px rgba(0,0,0,.35);
-    pointer-events:none;
-  }
-  .hud-pill .lbl{ color:var(--text-dim); font-weight:500; font-size:11px; }
-  #rateFurnace{ top:26px; left:24px; }
-  #rateTanks{ top:26px; right:24px; }
-  #coinsPill{
-    top:26px; left:50%; transform:translateX(-50%);
-    font-size:16px; padding:8px 18px; gap:10px;
-  }
-  #coinsPill .coin-icon{
-    width:16px;height:16px;border-radius:50%;
-    background: radial-gradient(circle at 35% 30%, #ffe9a8, var(--accent-amber) 60%, #b0781f 100%);
-    box-shadow:0 0 8px rgba(255,184,77,.7);
-  }
-  #upgradeBtn{
-    position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
-    background:linear-gradient(180deg,#2a3a52,#182234);
-    border:1px solid rgba(140,170,255,0.35);
-    color:var(--text-main); border-radius:12px; padding:12px 22px;
-    font-size:14px; font-weight:700; cursor:pointer; letter-spacing:.3px;
-    box-shadow:0 6px 18px rgba(0,0,0,.4);
-    transition:transform .12s ease;
-  }
-  #upgradeBtn small{ display:block; font-weight:500; font-size:11px; color:var(--accent-amber); margin-top:2px;}
-  #upgradeBtn:active{ transform:translateX(-50%) scale(.96); }
-  #upgradeBtn.pulse{ animation: btnpulse 1.6s ease-in-out infinite; }
-  @keyframes btnpulse{
-    0%,100%{ box-shadow:0 6px 18px rgba(0,0,0,.4), 0 0 0 0 rgba(89,227,157,.45); }
-    50%{ box-shadow:0 6px 18px rgba(0,0,0,.4), 0 0 0 8px rgba(89,227,157,0); }
-  }
-  #upgradeBtn:disabled{ opacity:.45; cursor:not-allowed; animation:none; }
+/* Coin icon — used inline anywhere a coin amount appears in copy */
+.coin-icon-inline{height:0.95em;width:0.95em;vertical-align:-0.15em;object-fit:contain;display:inline-block;margin:0 1px}
 
-  #footer-credit{
-    position:absolute; bottom:8px; right:12px; font-size:10px; color:rgba(255,255,255,0.25);
-    pointer-events:none;
-  }
+/* Pages */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);padding-bottom:80px;-webkit-overflow-scrolling:touch}
+.page.active{transform:translateX(0)}
+.page.prev{transform:translateX(-30%)}
+.page::-webkit-scrollbar{width:0}
+
+/* Nav */
+.nav{position:absolute;bottom:0;left:0;right:0;height:72px;background:rgba(10,10,10,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--glass-border);display:flex;align-items:center;z-index:100;padding:0 8px;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;cursor:pointer;border-radius:12px;transition:background 0.2s;position:relative}
+.nav-item:active{background:var(--glass)}
+.nav-icon{font-size:22px;transition:all 0.2s;color:var(--text3)}
+.nav-label{font-size:10px;font-weight:500;letter-spacing:0.3px;color:var(--text3);transition:color 0.2s}
+.nav-item.active .nav-icon{color:var(--orange);transform:translateY(-1px)}
+.nav-item.active .nav-label{color:var(--orange)}
+
+/* Glass */
+.glass-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(10px)}
+
+/* ===== TASKS PAGE ===== */
+.tasks-header{padding:20px 20px 16px;text-align:center}
+.page-title{font-size:22px;font-weight:800;color:var(--text)}
+
+.combo-section{padding:0 16px 16px}
+.combo-card{padding:20px;border-radius:18px;background:linear-gradient(145deg,#0f0800,#111111);border:1px solid rgba(168,85,247,0.3)}
+.combo-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px}
+.combo-title-row{display:flex;align-items:center;gap:8px}
+.combo-title-icon{font-size:18px}
+.combo-title{font-size:17px;font-weight:800;color:var(--purple);letter-spacing:0.3px}
+.combo-reset-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:8px 14px;text-align:center;flex-shrink:0}
+.combo-reset-lbl{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.6px;margin-bottom:3px}
+.combo-timer{display:flex;align-items:center;justify-content:center;gap:6px}
+.timer-val{font-size:14px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums}
+.combo-desc{font-size:13px;color:var(--text2);margin-bottom:16px}
+.combo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.combo-slot{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(168,85,247,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all 0.2s}
+.combo-slot.filled{background:rgba(168,85,247,0.1);border-color:var(--orange);border-style:solid}
+.combo-slot-num{font-size:11px;color:var(--text3);font-weight:600}
+.combo-slot-icon{font-size:28px}
+.combo-items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.combo-item{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all 0.2s}
+.combo-item:active{transform:scale(0.93)}
+.combo-item.selected{border-color:var(--orange);background:rgba(168,85,247,0.15)}
+.combo-check-btn{width:100%;padding:16px 20px;border-radius:14px;background:linear-gradient(135deg,var(--purple2),var(--purple));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s;display:flex;align-items:center;justify-content:space-between}
+.combo-check-btn:active{transform:scale(0.97)}
+.combo-check-btn .cb-price{display:flex;align-items:center;gap:5px;font-weight:800}
+.combo-check-btn .cb-price img{height:1.1em;width:1.1em;object-fit:contain}
+.combo-check-btn:disabled{opacity:0.6}
+
+.tabs-section{padding:0 16px 12px}
+.tabs{display:flex;gap:6px;background:var(--glass);border-radius:24px;padding:4px;border:1px solid var(--glass-border)}
+.tab{flex:1;padding:9px 6px;border-radius:20px;text-align:center;font-size:12.5px;font-weight:700;color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
+
+.tasks-list{padding:0 16px 8px}
+.tasks-group-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px}
+.task-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.task-logo{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:rgba(0,136,204,0.15);border:1px solid rgba(0,136,204,0.25)}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-reward{font-size:12px;color:var(--orange);font-weight:700;margin-top:2px}
+.task-btn{padding:8px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.task-btn:disabled{opacity:0.55;cursor:default}
+.task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
+.task-btn.verify{background:rgba(168,85,247,0.15);color:var(--orange);border:1px solid rgba(168,85,247,0.3)}
+.task-btn.done{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+
+/* ===== DAILY LOGIN REWARDS ===== */
+.dl-section{padding:4px 16px 20px}
+.dl-card{padding:18px 16px 16px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-border)}
+.dl-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.dl-header-icon{font-size:22px}
+.dl-title{font-size:15px;font-weight:800;color:var(--purple);letter-spacing:0.3px}
+.dl-sub{font-size:11.5px;color:var(--text2);margin-top:2px}
+
+.dl-track{margin-bottom:16px}
+.dl-track:last-child{margin-bottom:0}
+.dl-track-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dl-track-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;letter-spacing:0.3px}
+.dl-track-badge.free{background:rgba(34,197,94,0.15);color:var(--green)}
+.dl-track-badge.premium{background:rgba(247,197,26,0.15);color:#ffcf40}
+.dl-track-desc{font-size:11px;color:var(--text3);margin-top:3px}
+
+.dl-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dl-day{position:relative;aspect-ratio:1/1.15;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:default;transition:all 0.15s}
+.dl-day.claimable{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange);cursor:pointer}
+.dl-day.claimable:active{transform:scale(0.94)}
+.dl-day.claimed{opacity:0.55}
+.dl-day.locked{opacity:0.65}
+.dl-day-today-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;background:var(--orange);color:#fff;padding:2px 6px;border-radius:6px;letter-spacing:0.3px;white-space:nowrap}
+.dl-track.premium .dl-day.claimable{border-color:#ffcf40;box-shadow:0 0 0 1px #ffcf40}
+.dl-track.premium .dl-day-today-tag{background:linear-gradient(135deg,var(--purple2),var(--purple))}
+.dl-day-icon{width:26px;height:26px;object-fit:contain}
+.dl-day-icon.lock{font-size:15px;filter:grayscale(1);opacity:0.6}
+.dl-day-amt{font-size:10px;font-weight:800;color:var(--text)}
+.dl-day-lbl{font-size:8px;font-weight:700;color:var(--text3);letter-spacing:0.3px}
+
+.dl-unlock-btn{width:100%;margin-top:10px;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text2);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s}
+.dl-unlock-btn:active{background:var(--glass)}
+
+/* ===== Premium Login Modal (centered card) ===== */
+.modal-overlay.center{align-items:center;justify-content:center;padding:20px}
+.premium-modal{background:#141020;border-radius:22px;padding:26px 22px 22px;width:100%;max-width:380px;border:1px solid rgba(168,85,247,0.35);position:relative;text-align:left}
+.premium-modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.premium-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.premium-crown-icon{width:64px;height:64px;object-fit:contain;flex-shrink:0}
+.premium-hero-title{font-size:12px;font-weight:800;color:var(--text2);letter-spacing:0.5px;margin-bottom:2px}
+.premium-hero-name{font-size:22px;font-weight:900;background:linear-gradient(135deg,#c084fc,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.15}
+.premium-hero-desc{font-size:12.5px;color:var(--text2);margin-top:6px}
+.premium-features{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.premium-feature{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.premium-feature:last-child{border-bottom:none}
+.premium-feature-icon{font-size:18px;flex-shrink:0}
+.premium-feature-title{font-size:12.5px;font-weight:800;color:#ffcf40;margin-bottom:2px}
+.premium-feature-desc{font-size:11.5px;color:var(--text2);line-height:1.4}
+.premium-pay-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px}
+.premium-pay-lbl{font-size:10.5px;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px}
+.premium-pay-amt{display:flex;align-items:center;justify-content:center;gap:8px;font-size:26px;font-weight:900;color:var(--text)}
+.premium-pay-amt img{width:26px;height:26px;object-fit:contain}
+.premium-unlock-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#ffcf40,#f7931a);border:none;font-size:15px;font-weight:800;color:#1a1200;cursor:pointer;transition:transform 0.15s}
+.premium-unlock-btn:active{transform:scale(0.97)}
+.premium-unlock-btn:disabled{opacity:0.6}
+
+/* ===== REFERRALS PAGE ===== */
+.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(168,85,247,0.25);text-align:center;position:relative;overflow:hidden}
+.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(168,85,247,0.18) 0%,transparent 70%)}
+.ref-emoji{font-size:56px;margin-bottom:10px;display:block;position:relative}
+.ref-banner-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;position:relative}
+.ref-banner-pct{font-size:28px;font-weight:900;color:var(--orange);display:block;margin-bottom:8px;position:relative}
+.ref-banner-desc{font-size:13px;color:var(--text2);position:relative}
+
+.ref-link-section{padding:0 16px 16px}
+.ref-link-card{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)}
+.ref-link-label{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
+.ref-link-row{display:flex;align-items:center;gap:10px}
+.ref-link-url{flex:1;font-size:12px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,0.06)}
+.copy-btn{padding:10px 18px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:13px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
+.copy-btn:active{transform:scale(0.94)}
+
+.ref-stats{padding:0 16px 16px}
+.ref-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ref-stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
+.ref-stat-val{font-size:18px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+.ref-stat-val.orange{color:var(--orange)}
+.ref-stat-lbl{font-size:10px;color:var(--text3)}
+.active-dot{width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;margin-right:4px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.ref-list-section{padding:0 16px 16px}
+.ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
+.ref-user-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(168,85,247,0.25)}
+.ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ref-user-info{flex:1;min-width:0}
+.ref-user-name{font-size:14px;font-weight:600;color:var(--text)}
+.ref-user-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.ref-user-earn{text-align:right}
+.ref-user-earn-val{font-size:14px;font-weight:800;color:var(--orange);display:block}
+.ref-user-earn-lbl{font-size:10px;color:var(--text3)}
+.ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
+.ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
+.ref-user-badge.new{background:rgba(168,85,247,0.12);color:var(--orange)}
+.load-more{width:100%;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;margin-top:4px}
+.load-more:active{background:rgba(255,255,255,0.08)}
+
+/* ===== WALLET PAGE ===== */
+.wallet-header{padding:20px 20px 16px;text-align:center}
+.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(168,85,247,0.25);position:relative;overflow:hidden}
+.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(168,85,247,0.1) 0%,transparent 70%);pointer-events:none}
+.wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
+.wbal-sub{font-size:13px;color:var(--text3)}
+
+.wallet-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.wallet-action-btn{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s}
+.wallet-action-btn:active{background:rgba(255,255,255,0.08);transform:scale(0.97)}
+.wallet-action-btn.primary{background:linear-gradient(135deg,var(--orange),var(--orange2));border:none}
+.wallet-action-icon{font-size:24px}
+.wallet-action-label{font-size:13px;font-weight:700;color:var(--text)}
+.wallet-action-btn.primary .wallet-action-label{color:#fff}
+
+.wallet-form-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
+.wallet-form-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
+.wallet-input:focus{border-color:rgba(168,85,247,0.5)}
+.wallet-input::placeholder{color:var(--text3)}
+.wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
+.wallet-submit:disabled{opacity:0.5;cursor:default}
+
+.tx-section{padding:0 16px 16px}
+.tx-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+.tx-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.tx-label{font-size:13px;color:var(--text)}
+.tx-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px}
+.tx-badge.ok{background:rgba(34,197,94,0.15);color:var(--green)}
+.tx-badge.pend{background:rgba(168,85,247,0.12);color:var(--orange)}
+.tx-badge.err{background:rgba(239,68,68,0.15);color:var(--red)}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(168,85,247,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(168,85,247,0.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{background:rgba(239,68,68,0.95);box-shadow:0 4px 20px rgba(239,68,68,0.4)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(4px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#141414;border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);border-top:1px solid var(--glass-border)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:16px}
+.modal-input{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:12px;font-family:inherit;transition:border-color 0.2s}
+.modal-input:focus{border-color:rgba(168,85,247,0.5)}
+.modal-input::placeholder{color:var(--text3)}
+.modal-submit{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
+.modal-submit:active{transform:scale(0.97)}
+.modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
+.modal-close:active{background:var(--glass)}
+
+.empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
 </style>
 </head>
 <body>
 
-<div id="stage">
-  <div id="loading">
-    <div>Loading assets…</div>
-    <div class="bar"><div class="fill" id="loadFill"></div></div>
+<div class="app" id="mainApp" style="display:none">
+  <div class="pages">
+
+    <!-- TASKS -->
+    <div class="page active" id="page-tasks">
+      <div class="tasks-header"><div class="page-title">Tasks</div></div>
+
+      <div class="combo-section">
+        <div class="combo-card">
+          <div class="combo-top">
+            <div class="combo-title-row">
+              <span class="combo-title-icon">🧩</span>
+              <span class="combo-title">Daily Combo</span>
+            </div>
+            <div class="combo-reset-box">
+              <div class="combo-reset-lbl">DAILY RESET</div>
+              <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
+            </div>
+          </div>
+          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your reward! 😈</div>
+          <div class="combo-slots">
+            <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
+            <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
+            <div class="combo-slot" id="slot-2"><span class="combo-slot-num">3</span><span class="combo-slot-icon" id="si-2">?</span></div>
+            <div class="combo-slot" id="slot-3"><span class="combo-slot-num">4</span><span class="combo-slot-icon" id="si-3">?</span></div>
+          </div>
+          <div class="combo-items">
+            <div class="combo-item" onclick="selectCombo(this,'🦴')">🦴</div>
+            <div class="combo-item" onclick="selectCombo(this,'🏠')">🏠</div>
+            <div class="combo-item" onclick="selectCombo(this,'🎾')">🎾</div>
+            <div class="combo-item" onclick="selectCombo(this,'🍖')">🍖</div>
+          </div>
+          <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">
+            <span>CHECK COMBO</span>
+            <span class="cb-price" id="comboBtnPrice"><img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins">5,000</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs-section">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'channels')">Channels</div>
+          <div class="tab" onclick="switchTab(this,'bots')">Bots</div>
+          <div class="tab" onclick="switchTab(this,'invite')">Invite</div>
+        </div>
+      </div>
+      <div class="tasks-list">
+        <div class="tasks-group-label" id="tasksGroupLabel">Join Channels</div>
+        <div id="tasksContent"></div>
+      </div>
+
+      <!-- DAILY LOGIN REWARDS -->
+      <div class="dl-section">
+        <div class="dl-card">
+          <div class="dl-header">
+            <span class="dl-header-icon">🗓️</span>
+            <div>
+              <div class="dl-title">DAILY LOGIN REWARDS</div>
+              <div class="dl-sub">Login every day and keep your streak!</div>
+            </div>
+          </div>
+
+          <div class="dl-track free">
+            <div class="dl-track-top">
+              <div>
+                <span class="dl-track-badge free">🎁 FREE TRACK</span>
+                <div class="dl-track-desc">Claim daily rewards!</div>
+              </div>
+            </div>
+            <div class="dl-days" id="dlFreeDays"></div>
+          </div>
+
+          <div class="dl-track premium">
+            <div class="dl-track-top">
+              <div>
+                <span class="dl-track-badge premium">👑 PREMIUM TRACK</span>
+                <div class="dl-track-desc">Unlock bigger rewards!</div>
+              </div>
+            </div>
+            <div class="dl-days" id="dlPremiumDays"></div>
+            <button class="dl-unlock-btn" id="dlUnlockBtn" onclick="openPremiumModal()">🔒 Unlock Premium</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REFERRALS -->
+    <div class="page" id="page-refs">
+      <div class="ref-banner">
+        <span class="ref-emoji">🐶</span>
+        <div class="ref-banner-title">Invite friends and earn</div>
+        <span class="ref-banner-pct" id="refPct">4,000 <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></span>
+        <div class="ref-banner-desc">for every friend who joins &amp; verifies using your link!</div>
+      </div>
+
+      <div class="ref-link-section">
+        <div class="ref-link-card">
+          <div class="ref-link-label">Your Referral Link</div>
+          <div class="ref-link-row">
+            <div class="ref-link-url" id="refLinkUrl">Loading...</div>
+            <button class="copy-btn" onclick="copyRefLink()">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-stats">
+        <div class="ref-stats-grid">
+          <div class="ref-stat-card">
+            <div class="ref-stat-val" id="refTotal">0</div>
+            <div class="ref-stat-lbl">Total Refs</div>
+          </div>
+          <div class="ref-stat-card">
+            <div class="ref-stat-val orange"><span class="active-dot"></span><span id="refActive">0</span></div>
+            <div class="ref-stat-lbl">Active Refs</div>
+          </div>
+          <div class="ref-stat-card">
+            <div class="ref-stat-val orange" id="refTotalEarned">0</div>
+            <div class="ref-stat-lbl"><img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"> Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-list-section">
+        <div class="ref-list-title">Referral List</div>
+        <div id="refList"><div class="empty-state">No referrals yet</div></div>
+        <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMoreRefs()">Load More</button>
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div class="page" id="page-wallet">
+      <div class="wallet-header"><div class="page-title">Wallet</div></div>
+
+      <div class="wallet-bal-card">
+        <div class="wbal-label"><img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"> Balance</div>
+        <div class="wbal-amount" id="walletTon">0 <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></div>
+        <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"> from tasks &amp; referrals</div>
+      </div>
+
+      <div class="wallet-actions">
+        <div class="wallet-action-btn primary" onclick="openWithdrawForm()">
+          <div class="wallet-action-icon">💸</div>
+          <div class="wallet-action-label">Withdraw <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></div>
+        </div>
+        <div class="wallet-action-btn" onclick="switchPage('tasks')">
+          <div class="wallet-action-icon">📋</div>
+          <div class="wallet-action-label">Earn More</div>
+        </div>
+      </div>
+
+      <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
+        <div class="wallet-form-title"><span>💸</span><span>Withdraw <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></span></div>
+        <input class="wallet-input" id="withdrawWallet" placeholder="Coins BEP-20 wallet address (0x...)">
+        <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in Coins">
+        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></div>
+        <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal</button>
+        <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
+      </div>
+
+      <div class="tx-section">
+        <div class="tx-title">Transaction History</div>
+        <div id="walletHistory"><div class="empty-state">No transactions yet</div></div>
+      </div>
+    </div>
+
   </div>
 
-  <canvas id="scene" width="960" height="860"></canvas>
-
-  <div class="hud-pill" id="rateFurnace"><span class="lbl">GLASS</span><span id="rateFurnaceVal">0/min</span></div>
-  <div class="hud-pill" id="coinsPill"><div class="coin-icon"></div><span id="coinsVal">0</span></div>
-  <div class="hud-pill" id="rateTanks"><span class="lbl">CHIPS</span><span id="rateTanksVal">0/min</span></div>
-
-  <button id="upgradeBtn" class="pulse">
-    Speed Up Production
-    <small id="upgradeCost">Cost: 20</small>
-  </button>
-  <div id="footer-credit">original assets &amp; code</div>
+  <!-- Bottom Nav -->
+  <div class="nav">
+    <div class="nav-item active" onclick="switchPage('tasks')" id="nav-tasks">
+      <div class="nav-icon">📋</div><div class="nav-label">Tasks</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('refs')" id="nav-refs">
+      <div class="nav-icon">👥</div><div class="nav-label">Referrals</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('wallet')" id="nav-wallet">
+      <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
+    </div>
+  </div>
 </div>
 
-<!-- Modules load in dependency order. Each attaches itself to the shared
-     window.PW namespace instead of polluting globals; Game.js is the only
-     file that wires them together. -->
-<script src="js/AnimationSystem.js"></script>
-<script src="js/Renderer.js"></script>
-<script src="js/ParticleSystem.js"></script>
-<script src="js/PipeSystem.js"></script>
-<script src="js/ResourceSystem.js"></script>
-<script src="js/ProductionSystem.js"></script>
-<script src="js/FactorySystem.js"></script>
-<script src="js/UISystem.js"></script>
-<script src="js/AssetLoader.js"></script>
-<script src="js/Game.js"></script>
+<!-- Premium Daily Login Modal -->
+<div class="modal-overlay center" id="premiumModal" onclick="closeModalOutside(event,'premiumModal')">
+  <div class="premium-modal">
+    <button class="premium-modal-close" onclick="closeModal('premiumModal')">✕</button>
+
+    <div class="premium-hero">
+      <img class="premium-crown-icon" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766780/ChatGPT_Image_Jul_23_2026_03_32_15_AM_orm5lj.png" alt="Premium">
+      <div>
+        <div class="premium-hero-title">UNLOCK PREMIUM</div>
+        <div class="premium-hero-name">Daily Login</div>
+        <div class="premium-hero-desc">Get bigger rewards every day!</div>
+      </div>
+    </div>
+
+    <div class="premium-features">
+      <div class="premium-feature">
+        <span class="premium-feature-icon">🎁</span>
+        <div>
+          <div class="premium-feature-title">Bigger Daily Rewards</div>
+          <div class="premium-feature-desc">Get up to <span id="premiumMaxReward">250K</span> coins in Premium Track!</div>
+        </div>
+      </div>
+      <div class="premium-feature">
+        <span class="premium-feature-icon">🛡️</span>
+        <div>
+          <div class="premium-feature-title">Keep Your Streak Safe</div>
+          <div class="premium-feature-desc">Miss a day? Your streak won't be lost!</div>
+        </div>
+      </div>
+      <div class="premium-feature">
+        <span class="premium-feature-icon">⚡</span>
+        <div>
+          <div class="premium-feature-title">One-Time Purchase</div>
+          <div class="premium-feature-desc">Pay once and enjoy premium rewards forever!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="premium-pay-box">
+      <div class="premium-pay-lbl">ONE-TIME PAYMENT</div>
+      <div class="premium-pay-amt"><img src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"><span id="premiumPrice">30,000</span></div>
+    </div>
+
+    <button class="premium-unlock-btn" id="premiumUnlockBtn" onclick="unlockPremiumLogin()">Unlock Premium</button>
+  </div>
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────
+var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
+var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
+
+// أيقونة عملة Coins — تُستخدم بدل كتابة كلمة "Coins" في أي نص يُولَّد من الجافاسكريبت
+var COIN_ICON = '<img src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" class="coin-icon-inline" alt="Coins">';
+
+// ── State ───────────────────────────────────────────────────────────
+var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
+
+var currentTab = 'channels';
+
+// ── Boot ─────────────────────────────────────────────────────────────
+(function boot(){
+  var tries = 0;
+  var iv = setInterval(function(){
+    tries++;
+    if (window.Telegram && window.Telegram.WebApp){
+      clearInterval(iv);
+      try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(_){}
+      S.initData = Telegram.WebApp.initData || '';
+      loadState();
+    } else if (tries > 40){
+      clearInterval(iv);
+      loadState(); // dev mode fallback (not inside Telegram)
+    }
+  }, 100);
+})();
+
+// ── API ──────────────────────────────────────────────────────────────
+// worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
+async function api(action, data){
+  var payload = data || {};
+  return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'tma '+S.initData },
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json(); });
+}
+
+// ── Load state ───────────────────────────────────────────────────────
+function loadState(){
+  api('getState', { _initData: S.initData }).then(function(res){
+    if (!res || !res.success){
+      showMockData();
+      return;
+    }
+    S.data = res.data;
+    S.user = res.data.user;
+    S.refs = res.data.referrals || [];
+    showApp();
+    render();
+  }).catch(function(){
+    showMockData();
+  });
+}
+
+// Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
+function showMockData(){
+  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'123456', wallet:'' };
+  S.data = {
+    referrals:[], balanceLogs:[], withdrawals:[],
+    tasks:[
+      {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:500,status:'active'},
+      {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'},
+      {id:'invite_1',category:'invite',title:'دعوة 1 مستخدم',reward:1000,requiredReferrals:1,status:'active'},
+      {id:'invite_10',category:'invite',title:'دعوة 10 مستخدمين',reward:10000,requiredReferrals:10,status:'active'},
+      {id:'invite_25',category:'invite',title:'دعوة 25 مستخدم',reward:25000,requiredReferrals:25,status:'active'},
+      {id:'invite_50',category:'invite',title:'دعوة 50 مستخدم',reward:50000,requiredReferrals:50,status:'active'},
+      {id:'invite_100',category:'invite',title:'دعوة 100 مستخدم',reward:100000,requiredReferrals:100,status:'active'}
+    ],
+    completedTasks:[],
+    combo:{ solvedToday:false, reward:5000 },
+    dailyLogin:{
+      day:3, freeClaimedToday:false, premiumClaimedToday:false, premiumUnlocked:false,
+      freeRewards:[5000,8000,12000,20000,30000,45000,70000],
+      premiumRewards:[25000,35000,50000,75000,100000,150000,250000],
+      premiumPrice:30000
+    },
+    config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true }
+  };
+  S.refs = [];
+  showApp();
+  render();
+}
+
+function showApp(){
+  document.getElementById('mainApp').style.display = 'flex';
+}
+
+// ── Render ────────────────────────────────────────────────────────────
+function render(){
+  var u = S.user; var d = S.data; var cfg = d.config || {};
+  // Stats used on Referrals page
+  var totalRefs = S.refs.length;
+  var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
+  var activeRefs = activeRefsList.length;
+  var totalRefEarned = activeRefsList.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
+  // Referral reward (used on Referrals page)
+  var refReward = cfg.referralReward || 4000;
+  // Refs page
+  document.getElementById('refPct').innerHTML = fmtCoin(refReward)+' '+COIN_ICON;
+  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
+  document.getElementById('refTotal').textContent = totalRefs;
+  document.getElementById('refActive').textContent = activeRefs;
+  document.getElementById('refTotalEarned').textContent = fmtCoin(totalRefEarned);
+  renderRefs(0);
+  // Wallet (Balance & History)
+  document.getElementById('walletTon').innerHTML = fmtCoin(u.balance) + ' ' + COIN_ICON;
+  renderWalletHistory(d.balanceLogs||[]);
+  // Combo
+  renderComboState();
+  // Tasks
+  renderTasks(currentTab);
+  // Daily Login Rewards
+  renderDailyLogin();
+}
+
+function renderRefs(page){
+  var el = document.getElementById('refList');
+  var refs = S.refs;
+  if (!refs.length){ el.innerHTML = '<div class="empty-state">No referrals yet</div>'; return; }
+  var visible = refs.slice(0, 5 + page*5);
+  el.innerHTML = visible.map(function(r){
+    var name = r.firstName || r.name || 'Unknown';
+    var handle = r.username ? '@'+r.username : '';
+    var isActive = r.status === 'active';
+    var earned = fmtCoin(isActive ? (r.reward || 0) : 0);
+    var badge = isActive
+      ? '<span class="ref-user-badge active">Active</span>'
+      : '<span class="ref-user-badge new">Pending Sub</span>';
+    var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
+    var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    return '<div class="ref-user-item">'+
+      '<div class="ref-user-avatar">'+av+'</div>'+
+      '<div class="ref-user-info">'+
+        '<div class="ref-user-name">'+esc(name)+'</div>'+
+        '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
+        badge+
+      '</div>'+
+      '<div class="ref-user-earn">'+
+        '<span class="ref-user-earn-val">+'+earned+'</span>'+
+        '<span class="ref-user-earn-lbl">'+COIN_ICON+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  var loadBtn = document.getElementById('loadMoreBtn');
+  if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
+}
+
+function loadMoreRefs(){
+  S.refPage++;
+  renderRefs(S.refPage);
+}
+
+function renderWalletHistory(logs){
+  var withdrawals = (S.data && S.data.withdrawals) || [];
+  var entries = [];
+  (logs||[]).forEach(function(l){
+    if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
+    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
+    var label = labels[l.type] || (l.type||'Reward');
+    entries.push({ ts:l.ts||0, label:label+' +'+fmtCoin(l.amount)+' '+COIN_ICON, cls:'ok', txt:'Done' });
+  });
+  withdrawals.forEach(function(w){
+    var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
+    var txt = w.status==='completed' ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
+    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtCoin(w.amount)+' '+COIN_ICON, cls:cls, txt:txt });
+  });
+  entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+  if (!entries.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
+  document.getElementById('walletHistory').innerHTML = entries.map(function(r){
+    return '<div class="tx-item"><span class="tx-label">'+r.label+'</span><span class="tx-badge '+r.cls+'">'+r.txt+'</span></div>';
+  }).join('');
+}
+
+// ── Withdraw Coins ──────────────────────────────────────────────────────
+function openWithdrawForm(){
+  var cfg = (S.data && S.data.config) || {};
+  if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
+  var minW = cfg.minWithdrawal || 50000;
+  document.getElementById('withdrawMinNote').innerHTML = 'Minimum withdrawal: '+fmtCoin(minW)+' '+COIN_ICON;
+  document.getElementById('withdrawWallet').value = (S.user && S.user.wallet) || '';
+  document.getElementById('withdrawAmount').value = '';
+  document.getElementById('withdrawFormCard').style.display = 'block';
+}
+
+function closeWithdrawForm(){
+  document.getElementById('withdrawFormCard').style.display = 'none';
+}
+
+function submitWithdrawal(){
+  var wallet = document.getElementById('withdrawWallet').value.trim();
+  var amount = parseFloat(document.getElementById('withdrawAmount').value);
+  if (!wallet){ showToast('Enter your '+COIN_ICON+' BEP-20 wallet address','error',true); return; }
+  if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)){ showToast('Invalid BEP-20 address. It must start with 0x and be 42 characters long','error'); return; }
+  if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
+  if (S.user && amount > (S.user.balance||0)){ showToast('Insufficient balance','error'); return; }
+  var btn = document.getElementById('withdrawSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('requestWithdrawal', { walletAddress:wallet, amount:amount }).then(function(res){
+    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
+    if (!res.success){ showToast(res.error||'Withdrawal failed','error'); return; }
+    S.user.balance = res.data.coinBalance;
+    S.user.wallet = wallet;
+    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    S.data.withdrawals = S.data.withdrawals || [];
+    S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, status:'pending', ts:Date.now() });
+    renderWalletHistory(S.data.balanceLogs||[]);
+    closeWithdrawForm();
+    showToast('Withdrawal request submitted ✅');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Submit Withdrawal';
+    showToast('Network error','error');
+  });
+}
+
+// ── Tasks ─────────────────────────────────────────────────────────────
+function renderTasks(tab){
+  var labels = { channels:'Join Channels', bots:'Join Bots', invite:'Invite Tasks' };
+  document.getElementById('tasksGroupLabel').textContent = labels[tab];
+  var completed = (S.data && S.data.completedTasks) || [];
+  var allTasks = (S.data && S.data.tasks) || [];
+
+  if (tab === 'invite'){
+    var refCount = S.refs.length;
+    var list = allTasks.filter(function(t){ return t.category==='invite'; });
+    if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No invite tasks right now</div>'; return; }
+    document.getElementById('tasksContent').innerHTML = list.map(function(t){
+      var required = t.requiredReferrals || t.requiredCount || 0;
+      var done = completed.indexOf(t.id) > -1;
+      var eligible = refCount >= required;
+      var btnClass = done ? 'done' : (eligible ? 'join' : 'verify');
+      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+required);
+      var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+t.id+'\')' : '');
+      return '<div class="task-item">'+
+        '<div class="task-logo">👥</div>'+
+        '<div class="task-info">'+
+          '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
+          '<div class="task-reward">+'+fmtCoin(t.reward)+' '+COIN_ICON+'</div>'+
+        '</div>'+
+        '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
+      '</div>';
+    }).join('');
+    return;
+  }
+
+  var list = allTasks.filter(function(t){ return t.category===tab; });
+  if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
+  document.getElementById('tasksContent').innerHTML = list.map(function(t){
+    var done = completed.indexOf(t.id) > -1;
+    var waitUntil = S.taskWaitUntil && S.taskWaitUntil[t.id];
+    var waiting = !done && waitUntil && waitUntil > Date.now();
+    var st = done ? 'done' : (waiting ? 'waiting' : ((S.taskJoined && S.taskJoined[t.id]) ? 'verify' : 'join'));
+    var btnClass = st==='join'?'join':st==='waiting'?'verify':st==='verify'?'verify':'done';
+    var secsLeft = waiting ? Math.max(1, Math.ceil((waitUntil-Date.now())/1000)) : 0;
+    var btnText  = st==='join'?'Join':st==='waiting'?('⏳ '+secsLeft+'s'):st==='verify'?'Verify':'✓ Done';
+    var disabledAttr = st==='waiting' ? 'disabled' : '';
+    var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
+    return '<div class="task-item">'+
+      '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
+      '<div class="task-info">'+
+        '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
+        '<div class="task-reward">+'+fmtCoin(t.reward)+' '+COIN_ICON+'</div>'+
+      '</div>'+
+      '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+disabledAttr+'>'+btnText+'</button>'+
+    '</div>';
+  }).join('');
+}
+
+function switchTab(el, tab){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  currentTab = tab;
+  renderTasks(tab);
+}
+
+S.taskJoined = {};
+S.taskWaitUntil = {};
+var BOT_TASK_WAIT_SECONDS = 52;
+
+function doJoinTask(id){
+  var list = (S.data && S.data.tasks) || [];
+  var task = list.find(function(t){ return t.id===id; });
+  S.taskJoined[id] = true;
+  if (task && task.category === 'bots'){
+    // مهام البوتات مفيش تحقق حقيقي ممكن، فبنفرض فترة انتظار حقيقية
+    // (مُسجَّلة في السيرفر عبر startTask) قبل تفعيل زر Verify
+    S.taskWaitUntil[id] = Date.now() + BOT_TASK_WAIT_SECONDS*1000;
+    api('startTask', { taskId:id }).catch(function(){});
+  } else {
+    delete S.taskWaitUntil[id];
+  }
+  renderTasks(currentTab);
+  showToast('Joined! Click Verify to claim your reward ✓');
+  if (task && task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
+  } else if (task && task.link){
+    window.open(task.link, '_blank');
+  }
+}
+
+// عداد تنازلي حقيقي لمهام البوتات: يحدّث الزر كل ثانية وينقله لحالة
+// Verify تلقائيًا لما تنتهي الفترة (التطبيق الفعلي للحد الأدنى بيتم
+// التحقق منه في السيرفر برضه، فمحاولة التحايل من الواجهة مش هتفيد)
+setInterval(function(){
+  if (!S.taskWaitUntil) return;
+  var ids = Object.keys(S.taskWaitUntil);
+  if (!ids.length) return;
+  var now = Date.now();
+  var expired = false;
+  ids.forEach(function(id){
+    if (S.taskWaitUntil[id] <= now){ delete S.taskWaitUntil[id]; expired = true; }
+  });
+  if (currentPage === 'tasks' && currentTab !== 'invite'){ renderTasks(currentTab); }
+}, 1000);
+
+function doVerifyTask(id){
+  api('verifyTask', { taskId:id }).then(function(res){
+    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
+    S.data.completedTasks = S.data.completedTasks || [];
+    S.data.completedTasks.push(id);
+    S.user.balance = res.data.coinBalance;
+    delete S.taskJoined[id];
+    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    renderTasks(currentTab);
+    showToast('+'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+' added! 🎉',null,true);
+  }).catch(function(){ showToast('Network error','error'); });
+}
+
+function doClaimInvite(id){
+  api('claimTask', { taskId:id }).then(function(res){
+    if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
+    S.data.completedTasks = S.data.completedTasks || [];
+    S.data.completedTasks.push(id);
+    S.user.balance = res.data.coinBalance;
+    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    renderTasks(currentTab);
+    showToast('+'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+' added! 🎉',null,true);
+  }).catch(function(){ showToast('Network error','error'); });
+}
+
+// ── Daily Combo (server-validated) ──────────────────────────────────
+function renderComboState(){
+  var combo = (S.data && S.data.combo) || {};
+  var btn = document.getElementById('comboCheckBtn');
+  var desc = document.getElementById('comboDesc');
+  var reward = combo.reward || 5000;
+  if (combo.solvedToday){
+    btn.disabled = true;
+    btn.innerHTML = '<span>✓ CLAIMED TODAY</span>';
+    desc.textContent = 'Come back tomorrow for a new combo!';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '<span>CHECK COMBO</span><span class="cb-price">'+COIN_ICON+fmtCoin(reward)+'</span>';
+    desc.innerHTML = 'Find the correct combination and claim your reward! 😈';
+  }
+}
+
+function selectCombo(el, emoji){
+  if (S.data && S.data.combo && S.data.combo.solvedToday) return;
+  if (S.comboFilled >= 4) return;
+  if (el.classList.contains('selected')) return;
+  el.classList.add('selected');
+  el.onclick = null;
+  document.getElementById('si-'+S.comboFilled).textContent = emoji;
+  document.getElementById('slot-'+S.comboFilled).classList.add('filled');
+  S.comboFilled++;
+  S.comboSel.push(emoji);
+}
+
+function checkCombo(){
+  if (S.data && S.data.combo && S.data.combo.solvedToday){ showToast('Already claimed today\u2019s combo!'); return; }
+  if (S.comboFilled < 4){ showToast('Select all 4 items first!'); return; }
+  var btn = document.getElementById('comboCheckBtn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+  api('checkCombo', { selection:S.comboSel }).then(function(res){
+    if (!res.success){
+      showToast(res.error||'Failed.','error');
+      renderComboState();
+      resetCombo();
+      return;
+    }
+    if (!res.data.correct){
+      showToast('❌ Wrong combination. Try again!','error');
+      renderComboState();
+      resetCombo();
+      return;
+    }
+    S.user.balance = res.data.coinBalance;
+    S.data.combo.solvedToday = true;
+    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    showToast('🎉 Correct! +'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+'!',null,true);
+    renderComboState();
+    resetCombo();
+  }).catch(function(){
+    showToast('Network error','error');
+    renderComboState();
+    resetCombo();
+  });
+}
+
+function resetCombo(){
+  S.comboFilled = 0; S.comboSel = [];
+  for (var i=0;i<4;i++){
+    document.getElementById('si-'+i).textContent='?';
+    document.getElementById('slot-'+i).classList.remove('filled');
+  }
+  document.querySelectorAll('.combo-item').forEach(function(item){
+    item.classList.remove('selected');
+    var emoji = item.textContent;
+    item.onclick = (function(e){ return function(){ selectCombo(item,e); }; })(emoji);
+  });
+}
+
+// ── Wallet actions ─────────────────────────────────────────────────────
+// (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
+
+// نسخ نص إلى الكليبورد فعليًا (مع Fallback للمتصفحات/الإصدارات القديمة
+// التي لا تدعم navigator.clipboard داخل WebView تيليجرام)
+function copyToClipboard(text){
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch(_){}
+}
+
+function copyRefLink(){
+  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
+  copyToClipboard(link);
+  showToast('Referral link copied! 📋');
+}
+
+// ── Page switching ────────────────────────────────────────────────────
+var currentPage = 'tasks';
+function switchPage(name){
+  if (currentPage===name) return;
+  var prev = document.getElementById('page-'+currentPage);
+  var next = document.getElementById('page-'+name);
+  prev.classList.remove('active'); prev.classList.add('prev');
+  setTimeout(function(){ prev.classList.remove('prev'); }, 350);
+  next.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  var navEl = document.getElementById('nav-'+name);
+  if (navEl) navEl.classList.add('active');
+  currentPage = name;
+}
+
+// ── Modals ─────────────────────────────────────────────────────────────
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
+
+// ── Daily Login Rewards ──────────────────────────────────────────────
+function fmtShort(n){
+  n = parseFloat(n)||0;
+  if (n >= 1000000) return (n/1000000).toFixed(n%1000000===0?0:1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(n%1000===0?0:1)+'K';
+  return String(n);
+}
+
+function renderDailyLogin(){
+  var dl = (S.data && S.data.dailyLogin) || {};
+  var day = dl.day || 1;
+  var freeRewards = dl.freeRewards || [5000,8000,12000,20000,30000,45000,70000];
+  var premiumRewards = dl.premiumRewards || [25000,35000,50000,75000,100000,150000,250000];
+
+  document.getElementById('dlFreeDays').innerHTML = freeRewards.map(function(amt, i){
+    var d = i+1;
+    var isToday = d===day;
+    var isPast = d < day || (d===day && dl.freeClaimedToday);
+    var cls = 'dl-day' + (isPast ? ' claimed' : (isToday && !dl.freeClaimedToday ? ' claimable' : ''));
+    var onclick = (isToday && !dl.freeClaimedToday) ? 'claimDailyLogin(\'free\')' : '';
+    return '<div class="'+cls+'" onclick="'+onclick+'">'+
+      (isToday && !dl.freeClaimedToday ? '<span class="dl-day-today-tag">TODAY</span>' : '')+
+      '<img class="dl-day-icon" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766314/ChatGPT_Image_Jul_23_2026_03_25_51_AM_kntreu.png" alt="">'+
+      '<div class="dl-day-amt">'+fmtShort(amt)+'</div>'+
+      '<div class="dl-day-lbl">DAY '+d+'</div>'+
+    '</div>';
+  }).join('');
+
+  document.getElementById('dlPremiumDays').innerHTML = premiumRewards.map(function(amt, i){
+    var d = i+1;
+    var isToday = d===day;
+    var isPast = d < day || (d===day && dl.premiumClaimedToday);
+    var locked = !dl.premiumUnlocked;
+    var cls = 'dl-day' + (locked ? ' locked' : (isPast ? ' claimed' : (isToday && !dl.premiumClaimedToday ? ' claimable' : '')));
+    var onclick = (!locked && isToday && !dl.premiumClaimedToday) ? 'claimDailyLogin(\'premium\')' : (locked ? 'openPremiumModal()' : '');
+    return '<div class="'+cls+'" onclick="'+onclick+'">'+
+      (!locked && isToday && !dl.premiumClaimedToday ? '<span class="dl-day-today-tag">TODAY</span>' : '')+
+      (locked
+        ? '<span class="dl-day-icon lock">🔒</span>'
+        : '<img class="dl-day-icon" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766314/ChatGPT_Image_Jul_23_2026_03_25_51_AM_kntreu.png" alt="">'
+      )+
+      '<div class="dl-day-amt">'+fmtShort(amt)+'</div>'+
+      '<div class="dl-day-lbl">DAY '+d+'</div>'+
+    '</div>';
+  }).join('');
+
+  var unlockBtn = document.getElementById('dlUnlockBtn');
+  if (dl.premiumUnlocked){
+    unlockBtn.style.display = 'none';
+  } else {
+    unlockBtn.style.display = 'flex';
+    unlockBtn.innerHTML = '🔒 Unlock Premium — '+COIN_ICON+fmtCoin(dl.premiumPrice||30000);
+  }
+
+  document.getElementById('premiumMaxReward').textContent = fmtShort(premiumRewards[premiumRewards.length-1]||250000);
+  document.getElementById('premiumPrice').textContent = fmtCoin(dl.premiumPrice||30000);
+}
+
+function claimDailyLogin(track){
+  api('claimDailyLogin', { track:track }).then(function(res){
+    if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
+    S.user.balance = res.data.coinBalance;
+    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    S.data.dailyLogin = S.data.dailyLogin || {};
+    S.data.dailyLogin.day = res.data.day;
+    if (track === 'free') S.data.dailyLogin.freeClaimedToday = true;
+    else S.data.dailyLogin.premiumClaimedToday = true;
+    renderDailyLogin();
+    showToast('+'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+' added! 🎉',null,true);
+  }).catch(function(){ showToast('Network error','error'); });
+}
+
+function openPremiumModal(){
+  document.getElementById('premiumModal').classList.add('open');
+}
+
+function unlockPremiumLogin(){
+  var btn = document.getElementById('premiumUnlockBtn');
+  btn.disabled = true; btn.textContent = 'Processing...';
+  api('unlockPremiumLogin', {}).then(function(res){
+    btn.disabled = false; btn.textContent = 'Unlock Premium';
+    if (!res.success){ showToast(res.error||'Could not unlock','error'); return; }
+    S.user.balance = res.data.coinBalance;
+    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    S.data.dailyLogin = S.data.dailyLogin || {};
+    S.data.dailyLogin.premiumUnlocked = true;
+    renderDailyLogin();
+    closeModal('premiumModal');
+    showToast('👑 Premium unlocked!');
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Unlock Premium';
+    showToast('Network error','error');
+  });
+}
+
+// ── Daily combo countdown (resets at UTC midnight) ─────────────────────
+(function timerTick(){
+  setInterval(function(){
+    var el = document.getElementById('comboTimer'); if(!el) return;
+    var now = new Date();
+    var nextUtcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1);
+    var s = Math.max(0, Math.floor((nextUtcMidnight - now.getTime())/1000));
+    el.textContent=[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(function(n){ return String(n).padStart(2,'0'); }).join(':');
+  },1000);
+})();
+
+// ── Toast ──────────────────────────────────────────────────────────────
+var _toastTimer;
+function showToast(msg, type, isHtml){
+  var el = document.getElementById('toast');
+  if (isHtml) el.innerHTML = msg; else el.textContent = msg;
+  el.className = 'toast' + (type==='error'?' error':'');
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────
+function fmtNum(n){ return (parseInt(n)||0).toLocaleString('en-US'); }
+function fmtCoin(n){ return Math.round(parseFloat(n)||0).toLocaleString('en-US'); }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){ return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function timeAgo(ts){
+  var d=(Date.now()-ts)/1000;
+  if(d<60) return 'just now';
+  if(d<3600) return Math.floor(d/60)+'m ago';
+  if(d<86400) return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
+</script>
 </body>
 </html>
