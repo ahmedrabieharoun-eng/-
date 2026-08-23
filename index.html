@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,7 +208,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .games-header .page-title{text-align:left}
 .games-subtitle{font-size:13px;color:var(--text2);margin-top:5px}
 .games-balance{margin:0 16px 14px;padding:18px;border-radius:18px;background:linear-gradient(135deg,rgba(35,183,243,.18),rgba(89,120,245,.08));border:1px solid rgba(35,183,243,.3);display:flex;align-items:center;gap:12px}
-.games-balance-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0798df,#5978f5);display:flex;align-items:center;justify-content:center;font-size:25px;box-shadow:0 0 20px rgba(35,183,243,.3)}
+.games-balance-icon{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(35,183,243,.3);overflow:hidden}.games-balance-icon img{width:40px;height:40px;object-fit:contain;border-radius:50%}
 .games-balance-copy{flex:1}.games-balance-label{font-size:11px;color:var(--text2)}.games-balance-value{font-size:27px;font-weight:800;margin-top:2px}.games-balance-value span{font-size:13px;color:var(--text2)}
 .games-section-title{padding:0 20px 10px;color:var(--text2);font-size:13px;letter-spacing:.7px;text-transform:uppercase}
 .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 18px}
@@ -225,12 +224,11 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .rush-status{text-align:center;color:#fff;font-size:18px;font-weight:800;margin:8px 0}.rush-status span{color:#f7c948}.rush-cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#fff;cursor:pointer;transition:transform .15s,background .2s}.rush-cell:active{transform:scale(.95)}.rush-cell.safe{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.55)}.rush-cell.bomb{background:rgba(239,68,68,.28);border-color:#ef4444}.rush-cashout{background:linear-gradient(135deg,#f5a524,#f97316);margin-top:16px}.dial-wrap{display:flex;align-items:center;justify-content:center;gap:12px;margin:54px auto 28px}.number-dial{width:126px;height:126px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#50f5dc;border:5px solid #22e6d0;background:radial-gradient(circle,#123d48,#07161f 65%);box-shadow:0 0 22px rgba(34,230,208,.5),inset 0 0 20px rgba(34,230,208,.2)}.number-dial.spinning{animation:dialSpin .65s ease-in-out}.dial-x{font-size:26px;color:#fff;font-weight:900}.dial-result{text-align:center;color:#9ffbed;font-size:15px;min-height:24px}.xo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:330px;margin:36px auto 16px}.xo-cell{aspect-ratio:1;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.07);color:#fff;font-size:42px;font-weight:900;cursor:pointer}.xo-cell.x{color:#4dd9ff}.xo-cell.o{color:#ff70bd}.xo-status{text-align:center;color:var(--text2);font-size:14px;min-height:22px}@keyframes dialSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(.86)}100%{transform:rotate(360deg) scale(1)}}.fruit-machine{max-width:360px;margin:28px auto 0;padding:15px;border-radius:24px;background:linear-gradient(145deg,#292a35,#11121b);border:2px solid #5ee35b;box-shadow:0 0 24px rgba(94,227,91,.22)}.fruit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.fruit-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#252631;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:42px}.fruit-cell.win{outline:3px solid #f7c948;box-shadow:0 0 18px #f7c948}.fruit-spin{background:linear-gradient(135deg,#36c95f,#159447);margin:18px auto 0}.fruit-paytable{text-align:center;color:var(--text2);font-size:12px;margin-top:14px}
 
 /* ===== REFERRALS PAGE ===== */
-.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(147,92,246,0.25);text-align:center;position:relative;overflow:hidden}
-.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(147,92,246,0.18) 0%,transparent 70%)}
-.ref-emoji{font-size:56px;margin-bottom:10px;display:block;position:relative}
+.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(135deg,rgba(35,183,243,.28),rgba(89,120,245,.16));border:1px solid rgba(35,183,243,.45);text-align:center;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(35,183,243,.12)}
+.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:240px;height:130px;background:radial-gradient(ellipse,rgba(35,183,243,.22) 0%,transparent 70%)}
 .ref-banner-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;position:relative}
-.ref-banner-pct{font-size:28px;font-weight:900;color:var(--orange);display:block;margin-bottom:8px;position:relative}
-.ref-banner-desc{font-size:13px;color:var(--text2);position:relative}
+.ref-banner-pct{font-size:28px;font-weight:900;color:#fff;display:block;margin-bottom:8px;position:relative}.ref-banner-pct .shiba-icon-inline{width:52px;height:52px;vertical-align:-18px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.3))}
+.ref-banner-desc{font-size:13px;color:#e6f7ff;position:relative;line-height:1.7}
 
 .ref-link-section{padding:0 16px 16px}
 .ref-link-card{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)}
@@ -241,7 +239,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .copy-btn:active{transform:scale(0.94)}
 
 .ref-stats{padding:0 16px 16px}
-.ref-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ref-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .ref-stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
 .ref-stat-val{font-size:18px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
 .ref-stat-val.orange{color:var(--orange)}
@@ -251,7 +249,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 .ref-list-section{padding:0 16px 16px}
 .ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
-.ref-user-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.ref-user-item{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
 .ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(147,92,246,0.25)}
 .ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ref-user-info{flex:1;min-width:0}
@@ -260,6 +258,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ref-user-earn{text-align:right}
 .ref-user-earn-val{font-size:14px;font-weight:800;color:var(--orange);display:block}
 .ref-user-earn-lbl{font-size:10px;color:var(--text3)}
+.ref-user-details{flex-basis:100%;margin-top:-5px;padding-top:9px;border-top:1px solid var(--glass-border);font-size:11px;color:var(--text2);line-height:1.7}.ref-user-details b{color:var(--orange)}.ref-user-badge.fraud{background:rgba(239,68,68,.14);color:#ff7777}.ref-user-badge.inactive{background:rgba(245,165,36,.14);color:#f5b642}
 .ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
 .ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
 .ref-user-badge.new{background:rgba(147,92,246,0.12);color:var(--orange)}
@@ -539,7 +538,6 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <div class="page" id="page-tasks">
       <div class="tasks-header"><div class="page-title">Earn</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Complete tasks and collect PMT rewards</div></div>
       <div class="tabs-section"><div class="tabs">
-        <div class="tab" onclick="switchTab(this,'partner')">✈️ Partner</div>
         <div class="tab active" onclick="switchTab(this,'ads')">▣ Ads</div>
         <div class="tab" onclick="switchTab(this,'channels')">🔗 User Tasks</div>
       </div></div>
@@ -556,7 +554,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <!-- GAMES -->
     <div class="page" id="page-games">
       <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
-      <div class="games-balance"><div class="games-balance-icon">◆</div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
+      <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
         <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
@@ -576,10 +574,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <!-- REFERRALS -->
     <div class="page" id="page-refs">
       <div class="ref-banner">
-        <span class="ref-emoji">🐶</span>
         <div class="ref-banner-title">Invite friends and earn</div>
         <span class="ref-banner-pct" id="refPct">4,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
-        <div class="ref-banner-desc">for every friend who joins &amp; verifies using your link!</div>
+         <div class="ref-banner-desc">تُفعَّل الإحالة بعد مشاهدة 10 إعلانات.<br>تحصل على مكافأة الإحالة، بالإضافة إلى 10% من كل أرباح إحالتك بعد تفعيلها.</div>
       </div>
 
       <div class="ref-link-section">
@@ -603,8 +600,12 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
             <div class="ref-stat-lbl">Active Refs</div>
           </div>
           <div class="ref-stat-card">
+            <div class="ref-stat-val" id="refInactive">0</div>
+            <div class="ref-stat-lbl">Inactive Refs</div>
+          </div>
+          <div class="ref-stat-card">
             <div class="ref-stat-val orange" id="refTotalEarned">0</div>
-            <div class="ref-stat-lbl"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> Earned</div>
+            <div class="ref-stat-lbl">Your 10% Commission</div>
           </div>
         </div>
       </div>
@@ -798,7 +799,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 <script>
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
-var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
+var BOT_USER = 'jygjhvjbot'; // يوزر بوت التليجرام (بدون @)
 
 // أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
@@ -907,7 +908,6 @@ function showMockData(){
   S.data = {
     referrals:[], balanceLogs:[], withdrawals:[],
     tasks:[
-      {id:'p1',category:'partner',partner:true,title:'Official Telegram Channel',link:'https://t.me/yourchannel',reward:200,status:'active'},
       {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:500,status:'active'},
        {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'}
     ],
@@ -1005,7 +1005,8 @@ function render(){
   var totalRefs = S.refs.length;
   var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
   var activeRefs = activeRefsList.length;
-  var totalRefEarned = activeRefsList.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
+   var refStats = d.referralStats || {};
+   var totalRefEarned = refStats.commissionEarned || 0;
    var stats = d.stats || {};
    document.getElementById('statEarnedToday').textContent = fmtShiba(stats.earnedToday || 0);
    document.getElementById('statAdsToday').textContent = stats.adsWatchedToday || 0;
@@ -1024,9 +1025,11 @@ function render(){
    if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
   document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
-  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
+  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+BOT_USER+'?startapp='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
+   document.getElementById('refInactive').textContent = refStats.inactive ?? Math.max(0,totalRefs-activeRefs);
+   document.getElementById('refFraud').textContent = refStats.multipleAccounts || 0;
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
   // Wallet (Balance & History)
@@ -1117,10 +1120,12 @@ function renderRefs(page){
     var name = r.firstName || r.name || 'Unknown';
     var handle = r.username ? '@'+r.username : '';
     var isActive = r.status === 'active';
-    var earned = fmtShiba(isActive ? (r.reward || 0) : 0);
-    var badge = isActive
-      ? '<span class="ref-user-badge active">Active</span>'
-      : '<span class="ref-user-badge new">Pending Sub</span>';
+    var earned = fmtShiba(r.totalEarned || 0);
+    var badge = r.fraudMultipleAccounts
+      ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
+      : isActive
+        ? '<span class="ref-user-badge active">Active</span>'
+        : '<span class="ref-user-badge inactive">Inactive</span>';
     var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
     var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
     return '<div class="ref-user-item">'+
@@ -1131,8 +1136,13 @@ function renderRefs(page){
         badge+
       '</div>'+
       '<div class="ref-user-earn">'+
-        '<span class="ref-user-earn-val">+'+earned+'</span>'+
-        '<span class="ref-user-earn-lbl">'+SHIBA_ICON+'</span>'+
+         '<span class="ref-user-earn-val">'+earned+'</span>'+
+         '<span class="ref-user-earn-lbl">Total earned</span>'+
+      '</div>'+
+      '<div class="ref-user-details">'+
+        (isActive ? '✅ نشط · إجمالي ربحه: <b>'+earned+' PMT</b> · عمولتك 10%: <b>'+fmtShiba(r.referrerEarned||0)+' PMT</b>' :
+          r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
+          '📺 شاهد '+(r.adsWatched||0)+' من '+(r.adsRequired||10)+' إعلانات · متبقي <b>'+(r.adsRemaining||0)+'</b> لتفعيل الإحالة')+
       '</div>'+
     '</div>';
   }).join('');
@@ -1210,7 +1220,7 @@ function submitWithdrawal(){
 
 // ── Tasks ─────────────────────────────────────────────────────────────
 function renderTasks(tab){
-  var labels = { partner:'Partner Channels', ads:'Advertisements', channels:'User Channels & Bots' };
+  var labels = { ads:'Advertisements', channels:'User Channels & Bots' };
   document.getElementById('tasksGroupLabel').textContent = labels[tab];
   var addSection = document.querySelector('.add-task-section');
   if (addSection) addSection.style.display = tab === 'channels' ? 'block' : 'none';
@@ -1228,9 +1238,7 @@ function renderTasks(tab){
     return;
   }
 
-  var list = tab === 'partner'
-    ? allTasks.filter(function(t){ return t.category==='partner' || t.partner === true; })
-    : allTasks.filter(function(t){ return t.category==='channels' || t.category==='bots'; });
+  var list = allTasks.filter(function(t){ return t.category==='channels' || t.category==='bots'; });
   if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
   document.getElementById('tasksContent').innerHTML = list.map(function(t){
     var done = completed.indexOf(t.id) > -1;
@@ -1500,7 +1508,7 @@ function spinWheel(){
 // Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
 function shareInvite(){
   if (!S.user) return;
-  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var botUser = BOT_USER;
   var link = 'https://t.me/'+botUser+'?startapp='+S.user.referralCode;
   var text  = 'Join me on PlayMint and earn real PMT!';
   var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
@@ -1535,7 +1543,7 @@ function fallbackCopy(text){
 }
 
 function copyRefLink(){
-  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var botUser = BOT_USER;
   var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
   copyToClipboard(link);
   showToast('Referral link copied! 📋');
