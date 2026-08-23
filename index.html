@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -372,14 +371,14 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 #addTaskModal .modal-field-label:has(+ .modal-input){margin:0 0 -25px 15px;position:relative;z-index:1;pointer-events:none}
 #addTaskModal #taskCategoryChips{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
 #addTaskModal #taskCategoryChips .qty-chip{padding:13px 8px;border-radius:12px;text-align:center;font-size:12px;background:rgba(255,255,255,.07);border-color:transparent}
-#addTaskModal #taskCategoryChips .qty-chip.active{background:#c99205;color:#0a0a0a;border-color:#e5b62b}
+#addTaskModal #taskCategoryChips .qty-chip.active{background:#0798df;color:#fff;border-color:#35baf4;box-shadow:0 4px 12px rgba(0,152,223,.2)}
 #addTaskModal #qtyChips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
 #addTaskModal #qtyChips .qty-chip{padding:11px 4px;border-radius:12px;text-align:center;background:rgba(255,255,255,.07);border-color:transparent;font-size:14px;color:#fff}
-#addTaskModal #qtyChips .qty-chip::after{content:'\\A' attr(data-ton);white-space:pre;color:#c99205;font-size:9px;font-weight:500}
+#addTaskModal #qtyChips .qty-chip::after{content:'\A' attr(data-ton);white-space:pre;color:#0798df;font-size:9px;font-weight:500}
 #addTaskModal #addTaskMembers,#addTaskModal .price-box,#addTaskModal #addTaskDesc,#addTaskModal .modal-disclaimer{display:none}
 #addTaskModal .modal-field-label:has(+ #addTaskDesc){display:none}
 #addTaskModal .modal-submit{margin-top:8px;padding:17px;border-radius:16px;background:#0798df;font-size:16px;letter-spacing:.4px;box-shadow:0 5px 15px rgba(0,152,223,.25)}
-#addTaskModal .modal-close{margin-top:10px;border-color:rgba(201,146,5,.35);color:#aaa;text-transform:uppercase;font-size:12px}
+#addTaskModal .modal-close{margin-top:10px;border-color:rgba(35,183,243,.35);color:#aaa;text-transform:uppercase;font-size:12px}
 #addTaskModal .task-channel-warning{display:none;padding:10px;border:1px solid #d09a08;border-radius:12px;color:#eab52b;font-size:11px;font-weight:600;line-height:1.35;margin:-2px 0 14px;background:rgba(201,146,5,.08)}
 
 .empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
@@ -677,8 +676,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
        <div class="modal-field-label">Task Name</div>
        <input class="modal-input" id="addTaskName" placeholder="e.g. Join my channel or start my bot">
-      <div class="modal-field-label">Channel Link</div>
-      <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
+       <div class="modal-field-label" id="addTaskLinkLabel">Channel Link</div>
+       <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
 
        <div class="modal-field-label">Category</div>
        <div class="qty-chips" id="taskCategoryChips">
@@ -1508,6 +1507,8 @@ function openModal(id){ document.getElementById(id).classList.add('open'); }
 function openAddTaskModal(){
   selectedTaskCategory = 'channels';
   document.querySelectorAll('#taskCategoryChips .qty-chip').forEach(function(c){ c.classList.toggle('active', c.getAttribute('data-category') === 'channels'); });
+  document.getElementById('addTaskLinkLabel').textContent = 'Channel Link';
+  document.getElementById('addTaskLink').placeholder = 'https://t.me/yourchannel';
   document.getElementById('taskChannelWarning').style.display = 'block';
   document.getElementById('addTaskName').value = '';
   document.getElementById('addTaskFormView').style.display = 'block';
@@ -1525,6 +1526,10 @@ function selectTaskCategory(category, el){
   selectedTaskCategory = category;
   document.querySelectorAll('#taskCategoryChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
+  var linkLabel = document.getElementById('addTaskLinkLabel');
+  var linkInput = document.getElementById('addTaskLink');
+  if (linkLabel) linkLabel.textContent = category === 'bots' ? 'Bot Link' : 'Channel Link';
+  if (linkInput) linkInput.placeholder = category === 'bots' ? 'https://t.me/yourbot' : 'https://t.me/yourchannel';
   var warning = document.getElementById('taskChannelWarning');
   if (warning) warning.style.display = category === 'channels' ? 'block' : 'none';
 }
