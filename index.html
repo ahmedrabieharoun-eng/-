@@ -1,33 +1,77 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Coins Rewards</title>
+<title>SHIB Rewards</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="anti-fraud-frontend.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;
-  --orange:#a855f7;--orange2:#7c1fd6;
-  --orange-dim:rgba(168,85,247,0.15);--orange-dim2:rgba(168,85,247,0.08);
-  --purple:#a855f7;--purple2:#7c1fd6;
-  --purple-dim:rgba(168,85,247,0.15);--purple-dim2:rgba(168,85,247,0.08);
+  --orange:#f7931a;--orange2:#ff6b00;
+  --orange-dim:rgba(247,147,26,0.15);--orange-dim2:rgba(247,147,26,0.08);
   --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
   --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
   --green:#22c55e;--red:#ef4444;
   --radius:16px;--radius-sm:10px;
-  --img-coin:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png');
-  --img-coin-stack:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766314/ChatGPT_Image_Jul_23_2026_03_25_51_AM_kntreu.png');
-  --img-crown:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766780/ChatGPT_Image_Jul_23_2026_03_32_15_AM_orm5lj.png');
+  --img-coin:url('https://cryptologos.cc/logos/shiba-inu-shib-logo.svg');
   --img-avatar:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png');
-  --img-bg:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766740/ChatGPT_Image_Jul_23_2026_03_32_23_AM_iuxdc4.png');
+  --img-bg:url('https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686989/c43e799a-6f1d-41d3-8df1-55d86d19c99e_p6mzt0.png');
 }
 html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)),var(--img-bg) center top/cover no-repeat,var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
 
-/* Coin icon — used inline anywhere a coin amount appears in copy */
-.coin-icon-inline{height:0.95em;width:0.95em;vertical-align:-0.15em;object-fit:contain;display:inline-block;margin:0 1px}
+/* SHIBA coin icon — used inline anywhere the word "SHIBA" appears in copy */
+.shiba-icon-inline{height:0.95em;width:0.95em;vertical-align:-0.15em;object-fit:contain;display:inline-block;margin:0 1px}
+
+/* Loading */
+.loading-screen{position:fixed;inset:0;background:linear-gradient(rgba(8,6,4,.18),rgba(8,6,4,.34)),var(--img-bg) center top/cover no-repeat;background-color:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:999;padding:34px 24px;overflow-y:auto;text-align:center}
+.loading-screen.hidden{display:none}
+
+.ld-coin{position:absolute;border-radius:50%;overflow:hidden;box-shadow:0 0 18px rgba(247,147,26,0.55),0 4px 10px rgba(0,0,0,0.5);animation:ld-float 3.6s ease-in-out infinite}
+.ld-coin img{width:100%;height:100%;display:block;object-fit:cover}
+.ld-coin-1{width:54px;height:54px;top:9%;left:8%;animation-delay:0s}
+.ld-coin-2{width:62px;height:62px;top:19%;right:7%;animation-delay:0.6s}
+.ld-coin-3{width:62px;height:62px;top:50%;left:4%;animation-delay:1.2s}
+.ld-coin-4{width:64px;height:64px;top:58%;right:4%;animation-delay:1.8s}
+@keyframes ld-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.ld-avatar-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.ld-orbit{position:absolute;width:118%;height:40%;border:2px solid rgba(247,147,26,0.65);border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 16px rgba(247,147,26,0.35)}
+.ld-ring{position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid var(--orange);box-shadow:0 0 24px rgba(247,147,26,0.6),0 0 60px rgba(247,147,26,0.35),inset 0 0 30px rgba(247,147,26,0.15);animation:ld-spin 14s linear infinite}
+@keyframes ld-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.ld-avatar{position:relative;width:72%;height:72%;border-radius:50%;object-fit:cover;z-index:2;box-shadow:0 0 0 4px rgba(10,10,10,0.6)}
+
+.ld-kicker{font-size:13px;font-weight:700;letter-spacing:6px;color:var(--orange)}
+.ld-title{font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px}
+.ld-title-accent{color:var(--orange)}
+.ld-subtitle{font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;direction:rtl}
+.ld-subtitle .shiba-icon-inline{height:1.05em;width:1.05em}
+
+.loading-bar{width:min(86%,320px);height:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(247,147,26,0.3);border-radius:20px;overflow:hidden;margin-top:4px}
+.loading-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:20px;animation:load 1.8s ease-in-out infinite;box-shadow:0 0 14px rgba(247,147,26,0.6)}
+@keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+.ld-status{margin-top:0}
+.ld-status-main{font-size:14px;color:var(--orange2);font-weight:600;direction:rtl}
+.ld-status-sub{font-size:12.5px;color:var(--text2);margin-top:4px;direction:rtl}
+.ld-heart{color:#ff4d4d}
+
+.ld-features{width:100%;max-width:380px;margin-top:12px;border:1px solid rgba(247,147,26,0.25);border-radius:16px;background:rgba(10,8,4,0.55);display:flex;padding:16px 6px}
+.ld-feature{flex:1;text-align:center;padding:0 6px;position:relative;direction:rtl}
+.ld-feature+.ld-feature::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:1px;background:rgba(255,255,255,0.12)}
+.ld-feature-icon{font-size:24px;margin-bottom:8px;color:var(--orange)}
+.ld-feature-icon-coin{width:30px;height:30px;border-radius:50%;overflow:hidden;margin:0 auto 8px;box-shadow:0 0 10px rgba(247,147,26,0.5)}
+.ld-feature-icon-coin img{width:100%;height:100%;object-fit:cover}
+.ld-feature-title{font-size:12.5px;font-weight:700;color:#fff}
+.ld-feature-title .ld-accent{color:var(--orange)}
+.ld-feature-sub{font-size:10.5px;color:var(--text3);margin-top:3px;display:flex;align-items:center;justify-content:center;gap:3px}
+
+.ld-powered{margin-top:14px;padding:8px 18px;border:1px solid rgba(247,147,26,0.3);border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--orange);display:flex;align-items:center;gap:8px;background:rgba(247,147,26,0.06)}
 
 /* Pages */
 .pages{flex:1;overflow:hidden;position:relative}
@@ -48,40 +92,90 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 /* Glass */
 .glass-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(10px)}
 
+/* ===== HOME PAGE ===== */
+.home-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between}
+.user-info{display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff4500);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;border:2px solid rgba(247,147,26,0.4);flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.user-name-wrap{display:flex;flex-direction:column}
+.user-greeting{font-size:11px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase}
+.user-name{font-size:16px;font-weight:700;color:var(--text)}
+
+.balance-section{padding:0 16px 16px}
+.balance-card{padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
+.balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.12) 0%,transparent 70%);pointer-events:none}
+.balance-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.balance-amount{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.balance-num{font-size:38px;font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1}
+.balance-currency{font-size:18px;font-weight:700;color:var(--orange)}
+.balance-sub{font-size:13px;color:var(--text3)}
+.balance-logo{position:absolute;right:20px;bottom:18px;font-size:44px;opacity:0.55}
+
+.stats-section{padding:0 16px 16px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{padding:14px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);text-align:center}
+.stat-val{font-size:17px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
+.stat-val.orange{color:var(--orange)}
+.stat-lbl{font-size:10px;color:var(--text3);letter-spacing:0.2px}
+
+.invite-section{padding:0 16px 16px}
+.invite-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s,opacity 0.15s;position:relative;overflow:hidden}
+.invite-btn:active{transform:scale(0.97)}
+.invite-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
+.invite-icon{font-size:28px;flex-shrink:0}
+.invite-text{text-align:left}
+.invite-title{font-size:17px;font-weight:800;color:#fff;display:block}
+.invite-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px}
+.section-title{font-size:16px;font-weight:700;color:var(--text)}
+.view-all{font-size:12px;color:var(--orange);cursor:pointer;font-weight:600}
+
+.rewards-section{padding:0 16px 16px}
+.reward-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.reward-icon{width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.reward-info{flex:1}
+.reward-name{font-size:14px;font-weight:600;color:var(--text)}
+.reward-amount{font-size:13px;color:var(--green);font-weight:700}
+.reward-time{font-size:11px;color:var(--text3)}
+
+.promo-section{padding:0 16px 16px}
+.promo-card{padding:20px;border-radius:18px;background:linear-gradient(135deg,#1a0e00,#0f0700);border:1px solid rgba(247,147,26,0.2);display:flex;gap:16px;align-items:center;position:relative;overflow:hidden}
+.promo-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(247,147,26,0.15),transparent 70%)}
+.promo-emoji{font-size:52px;flex-shrink:0}
+.promo-content{flex:1}
+.promo-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
+.promo-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.promo-btn{display:inline-block;padding:8px 20px;background:linear-gradient(135deg,var(--orange),var(--orange2));border-radius:20px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;border:none;transition:transform 0.15s}
+.promo-btn:active{transform:scale(0.95)}
+
 /* ===== TASKS PAGE ===== */
 .tasks-header{padding:20px 20px 16px;text-align:center}
 .page-title{font-size:22px;font-weight:800;color:var(--text)}
 
 .combo-section{padding:0 16px 16px}
-.combo-card{padding:20px;border-radius:18px;background:linear-gradient(145deg,#0f0800,#111111);border:1px solid rgba(168,85,247,0.3)}
-.combo-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px}
-.combo-title-row{display:flex;align-items:center;gap:8px}
-.combo-title-icon{font-size:18px}
-.combo-title{font-size:17px;font-weight:800;color:var(--purple);letter-spacing:0.3px}
-.combo-reset-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:8px 14px;text-align:center;flex-shrink:0}
-.combo-reset-lbl{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.6px;margin-bottom:3px}
-.combo-timer{display:flex;align-items:center;justify-content:center;gap:6px}
-.timer-val{font-size:14px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums}
+.combo-card{padding:20px;border-radius:18px;background:linear-gradient(145deg,#0f0800,#111111);border:1px solid rgba(247,147,26,0.3)}
+.combo-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.combo-title{font-size:18px;font-weight:800;color:var(--text)}
+.combo-timer{display:flex;align-items:center;gap:6px;background:rgba(247,147,26,0.12);padding:6px 12px;border-radius:20px;border:1px solid rgba(247,147,26,0.25)}
+.timer-val{font-size:13px;font-weight:700;color:var(--orange);font-variant-numeric:tabular-nums}
 .combo-desc{font-size:13px;color:var(--text2);margin-bottom:16px}
 .combo-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.combo-slot{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(168,85,247,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all 0.2s}
-.combo-slot.filled{background:rgba(168,85,247,0.1);border-color:var(--orange);border-style:solid}
+.combo-slot{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all 0.2s}
+.combo-slot.filled{background:rgba(247,147,26,0.1);border-color:var(--orange);border-style:solid}
 .combo-slot-num{font-size:11px;color:var(--text3);font-weight:600}
 .combo-slot-icon{font-size:28px}
 .combo-items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .combo-item{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all 0.2s}
 .combo-item:active{transform:scale(0.93)}
-.combo-item.selected{border-color:var(--orange);background:rgba(168,85,247,0.15)}
-.combo-check-btn{width:100%;padding:16px 20px;border-radius:14px;background:linear-gradient(135deg,var(--purple2),var(--purple));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s;display:flex;align-items:center;justify-content:space-between}
+.combo-item.selected{border-color:var(--orange);background:rgba(247,147,26,0.15)}
+.combo-check-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s}
 .combo-check-btn:active{transform:scale(0.97)}
-.combo-check-btn .cb-price{display:flex;align-items:center;gap:5px;font-weight:800}
-.combo-check-btn .cb-price img{height:1.1em;width:1.1em;object-fit:contain}
-.combo-check-btn:disabled{opacity:0.6}
 
 .tabs-section{padding:0 16px 12px}
-.tabs{display:flex;gap:6px;background:var(--glass);border-radius:24px;padding:4px;border:1px solid var(--glass-border)}
-.tab{flex:1;padding:9px 6px;border-radius:20px;text-align:center;font-size:12.5px;font-weight:700;color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.tab.active{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
+.tabs{display:flex;gap:6px;background:var(--glass);border-radius:12px;padding:4px;border:1px solid var(--glass-border)}
+.tab{flex:1;padding:8px 6px;border-radius:10px;text-align:center;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab.active{background:var(--orange);color:#fff}
 
 .tasks-list{padding:0 16px 8px}
 .tasks-group-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px}
@@ -91,70 +185,18 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .task-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-reward{font-size:12px;color:var(--orange);font-weight:700;margin-top:2px}
 .task-btn{padding:8px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;flex-shrink:0}
-.task-btn:disabled{opacity:0.55;cursor:default}
 .task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
-.task-btn.verify{background:rgba(168,85,247,0.15);color:var(--orange);border:1px solid rgba(168,85,247,0.3)}
+.task-btn.verify{background:rgba(247,147,26,0.15);color:var(--orange);border:1px solid rgba(247,147,26,0.3)}
 .task-btn.done{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
 
-/* ===== DAILY LOGIN REWARDS ===== */
-.dl-section{padding:4px 16px 20px}
-.dl-card{padding:18px 16px 16px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-border)}
-.dl-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.dl-header-icon{font-size:22px}
-.dl-title{font-size:15px;font-weight:800;color:var(--purple);letter-spacing:0.3px}
-.dl-sub{font-size:11.5px;color:var(--text2);margin-top:2px}
-
-.dl-track{margin-bottom:16px}
-.dl-track:last-child{margin-bottom:0}
-.dl-track-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
-.dl-track-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;letter-spacing:0.3px}
-.dl-track-badge.free{background:rgba(34,197,94,0.15);color:var(--green)}
-.dl-track-badge.premium{background:rgba(247,197,26,0.15);color:#ffcf40}
-.dl-track-desc{font-size:11px;color:var(--text3);margin-top:3px}
-
-.dl-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.dl-day{position:relative;aspect-ratio:1/1.15;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:default;transition:all 0.15s}
-.dl-day.claimable{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange);cursor:pointer}
-.dl-day.claimable:active{transform:scale(0.94)}
-.dl-day.claimed{opacity:0.55}
-.dl-day.locked{opacity:0.65}
-.dl-day-today-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;background:var(--orange);color:#fff;padding:2px 6px;border-radius:6px;letter-spacing:0.3px;white-space:nowrap}
-.dl-track.premium .dl-day.claimable{border-color:#ffcf40;box-shadow:0 0 0 1px #ffcf40}
-.dl-track.premium .dl-day-today-tag{background:linear-gradient(135deg,var(--purple2),var(--purple))}
-.dl-day-icon{width:26px;height:26px;object-fit:contain}
-.dl-day-icon.lock{font-size:15px;filter:grayscale(1);opacity:0.6}
-.dl-day-amt{font-size:10px;font-weight:800;color:var(--text)}
-.dl-day-lbl{font-size:8px;font-weight:700;color:var(--text3);letter-spacing:0.3px}
-
-.dl-unlock-btn{width:100%;margin-top:10px;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text2);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s}
-.dl-unlock-btn:active{background:var(--glass)}
-
-/* ===== Premium Login Modal (centered card) ===== */
-.modal-overlay.center{align-items:center;justify-content:center;padding:20px}
-.premium-modal{background:#141020;border-radius:22px;padding:26px 22px 22px;width:100%;max-width:380px;border:1px solid rgba(168,85,247,0.35);position:relative;text-align:left}
-.premium-modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.premium-hero{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.premium-crown-icon{width:64px;height:64px;object-fit:contain;flex-shrink:0}
-.premium-hero-title{font-size:12px;font-weight:800;color:var(--text2);letter-spacing:0.5px;margin-bottom:2px}
-.premium-hero-name{font-size:22px;font-weight:900;background:linear-gradient(135deg,#c084fc,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.15}
-.premium-hero-desc{font-size:12.5px;color:var(--text2);margin-top:6px}
-.premium-features{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px 16px;margin-bottom:18px}
-.premium-feature{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
-.premium-feature:last-child{border-bottom:none}
-.premium-feature-icon{font-size:18px;flex-shrink:0}
-.premium-feature-title{font-size:12.5px;font-weight:800;color:#ffcf40;margin-bottom:2px}
-.premium-feature-desc{font-size:11.5px;color:var(--text2);line-height:1.4}
-.premium-pay-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;margin-bottom:14px}
-.premium-pay-lbl{font-size:10.5px;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px}
-.premium-pay-amt{display:flex;align-items:center;justify-content:center;gap:8px;font-size:26px;font-weight:900;color:var(--text)}
-.premium-pay-amt img{width:26px;height:26px;object-fit:contain}
-.premium-unlock-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#ffcf40,#f7931a);border:none;font-size:15px;font-weight:800;color:#1a1200;cursor:pointer;transition:transform 0.15s}
-.premium-unlock-btn:active{transform:scale(0.97)}
-.premium-unlock-btn:disabled{opacity:0.6}
+.add-task-section{padding:0 16px 16px}
+.add-task-btn{width:100%;padding:16px;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(247,147,26,0.3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:14px;font-weight:600}
+.add-task-btn:active{background:var(--orange-dim)}
+.add-task-sub{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
 
 /* ===== REFERRALS PAGE ===== */
-.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(168,85,247,0.25);text-align:center;position:relative;overflow:hidden}
-.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(168,85,247,0.18) 0%,transparent 70%)}
+.ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(247,147,26,0.25);text-align:center;position:relative;overflow:hidden}
+.ref-banner::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:100px;background:radial-gradient(ellipse,rgba(247,147,26,0.18) 0%,transparent 70%)}
 .ref-emoji{font-size:56px;margin-bottom:10px;display:block;position:relative}
 .ref-banner-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;position:relative}
 .ref-banner-pct{font-size:28px;font-weight:900;color:var(--orange);display:block;margin-bottom:8px;position:relative}
@@ -180,7 +222,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ref-list-section{padding:0 16px 16px}
 .ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
 .ref-user-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
-.ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(168,85,247,0.25)}
+.ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(247,147,26,0.25)}
 .ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ref-user-info{flex:1;min-width:0}
 .ref-user-name{font-size:14px;font-weight:600;color:var(--text)}
@@ -190,14 +232,14 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ref-user-earn-lbl{font-size:10px;color:var(--text3)}
 .ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
 .ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
-.ref-user-badge.new{background:rgba(168,85,247,0.12);color:var(--orange)}
+.ref-user-badge.new{background:rgba(247,147,26,0.12);color:var(--orange)}
 .load-more{width:100%;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;margin-top:4px}
 .load-more:active{background:rgba(255,255,255,0.08)}
 
 /* ===== WALLET PAGE ===== */
 .wallet-header{padding:20px 20px 16px;text-align:center}
-.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(168,85,247,0.25);position:relative;overflow:hidden}
-.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(168,85,247,0.1) 0%,transparent 70%);pointer-events:none}
+.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(247,147,26,0.25);position:relative;overflow:hidden}
+.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(247,147,26,0.1) 0%,transparent 70%);pointer-events:none}
 .wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
 .wbal-sub{font-size:13px;color:var(--text3)}
@@ -213,7 +255,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .wallet-form-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
 .wallet-form-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
-.wallet-input:focus{border-color:rgba(168,85,247,0.5)}
+.wallet-input:focus{border-color:rgba(247,147,26,0.5)}
 .wallet-input::placeholder{color:var(--text3)}
 .wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
 .wallet-submit:disabled{opacity:0.5;cursor:default}
@@ -224,11 +266,55 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .tx-label{font-size:13px;color:var(--text)}
 .tx-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px}
 .tx-badge.ok{background:rgba(34,197,94,0.15);color:var(--green)}
-.tx-badge.pend{background:rgba(168,85,247,0.12);color:var(--orange)}
+.tx-badge.pend{background:rgba(247,147,26,0.12);color:var(--orange)}
 .tx-badge.err{background:rgba(239,68,68,0.15);color:var(--red)}
 
+/* ===== Lucky Wheel Card (Home) ===== */
+.wheel-card-btn{width:100%;padding:18px 24px;border-radius:16px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;cursor:pointer;display:flex;align-items:center;gap:14px;transition:transform 0.15s;position:relative;overflow:hidden}
+.wheel-card-btn:active{transform:scale(0.97)}
+.wheel-card-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent,rgba(255,255,255,0.08));pointer-events:none}
+.wheel-card-icon{font-size:30px;flex-shrink:0;animation:wheelSpinIdle 6s linear infinite}
+@keyframes wheelSpinIdle{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.wheel-card-text{flex:1;text-align:left}
+.wheel-card-title{font-size:17px;font-weight:800;color:#fff;display:block}
+.wheel-card-sub{font-size:12px;color:rgba(255,255,255,0.75);display:block;margin-top:2px}
+.wheel-card-badge{min-width:26px;height:26px;padding:0 8px;border-radius:14px;background:#fff;color:var(--orange2);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 3px rgba(255,255,255,0.2);position:relative;z-index:1}
+
+/* ===== LUCKY WHEEL PAGE ===== */
+.wheel-page-header{display:flex;align-items:center;gap:12px;padding:16px 20px 8px}
+.back-btn{width:36px;height:36px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.back-btn:active{background:rgba(255,255,255,0.1)}
+
+.wheel-info-banner{margin:8px 16px 16px;padding:14px 16px;border-radius:14px;background:rgba(247,147,26,0.1);border:1px solid rgba(247,147,26,0.25);display:flex;align-items:center;gap:12px}
+.wheel-info-emoji{font-size:26px;flex-shrink:0}
+.wheel-info-text{font-size:13px;color:var(--text2);line-height:1.5}
+.wheel-info-text b{color:var(--orange)}
+
+.wheel-stage{display:flex;flex-direction:column;align-items:center;padding:8px 20px 4px;position:relative}
+.wheel-pointer{font-size:24px;line-height:1;color:var(--orange);margin-bottom:-6px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
+.wheel-outer-wrap{position:relative;width:270px;height:270px}
+.wheel-outer{width:100%;height:100%;border-radius:50%;background:linear-gradient(145deg,#2a1d00,#161616);padding:9px;box-shadow:0 0 0 4px rgba(247,147,26,0.3),0 10px 30px rgba(0,0,0,0.55)}
+.wheel-circle{width:100%;height:100%;border-radius:50%;position:relative;transition:transform 4.5s cubic-bezier(0.17,0.89,0.32,1.05);border:2px solid rgba(255,255,255,0.08);overflow:hidden}
+.wheel-seg{position:absolute;left:50%;top:0;width:0;height:50%;transform-origin:50% 100%;display:flex;justify-content:center;align-items:flex-start;pointer-events:none}
+.wheel-seg-text{display:inline-block;margin-top:16px;font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.7);white-space:nowrap}
+.wheel-hub{position:absolute;top:50%;left:50%;width:62px;height:62px;margin:-31px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 0 0 6px var(--bg),0 4px 14px rgba(247,147,26,0.5);z-index:6;border:none;text-align:center;line-height:1.1;letter-spacing:0.5px}
+.wheel-hub:active{transform:translate(-1px,-1px) scale(0.96)}
+.wheel-hub:disabled{opacity:0.5;cursor:default}
+.wheel-spins-left{text-align:center;font-size:13px;color:var(--text2);margin:16px 0 4px}
+.wheel-spins-left b{color:var(--orange);font-size:16px}
+.wheel-cta-section{padding:18px 16px 8px}
+
+/* ===== Add-Task: quantity chips & price box ===== */
+.qty-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.qty-chip{padding:8px 14px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;transition:all 0.15s}
+.qty-chip.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.price-box{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;background:rgba(247,147,26,0.08);border:1px solid rgba(247,147,26,0.25);margin-bottom:10px}
+.price-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px}
+.price-usd{font-size:12px;color:var(--text3);margin-top:2px}
+.price-val{font-size:17px;font-weight:800;color:var(--orange)}
+
 /* Toast */
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(168,85,247,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(168,85,247,0.4)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(247,147,26,0.95);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:700;z-index:999;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 4px 20px rgba(247,147,26,0.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.error{background:rgba(239,68,68,0.95);box-shadow:0 4px 20px rgba(239,68,68,0.4)}
 
@@ -240,38 +326,194 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .modal-handle{width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 20px}
 .modal-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:16px}
 .modal-input{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:12px;font-family:inherit;transition:border-color 0.2s}
-.modal-input:focus{border-color:rgba(168,85,247,0.5)}
+.modal-input:focus{border-color:rgba(247,147,26,0.5)}
 .modal-input::placeholder{color:var(--text3)}
 .modal-submit{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
 .modal-submit:active{transform:scale(0.97)}
 .modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
 .modal-close:active{background:var(--glass)}
 
+.modal-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px}
+.modal-req-list{list-style:none;padding:0;margin:8px 0 18px;display:flex;flex-direction:column;gap:6px}
+.modal-req-list li{font-size:12.5px;color:var(--text2);line-height:1.5}
+.modal-field-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.modal-textarea{width:100%;padding:14px 16px;border-radius:12px;background:var(--bg3);border:1px solid var(--glass-border);font-size:14px;color:var(--text);outline:none;margin-bottom:14px;font-family:inherit;resize:vertical;min-height:64px;transition:border-color 0.2s}
+.modal-textarea:focus{border-color:rgba(247,147,26,0.5)}
+.modal-textarea::placeholder{color:var(--text3)}
+.modal-disclaimer{font-size:11px;color:var(--text3);line-height:1.6;margin-top:14px;padding-top:14px;border-top:1px solid var(--glass-border)}
+.modal-disclaimer ul{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:4px}
+.modal-success{text-align:center}
+.modal-success-icon{font-size:48px;margin-bottom:10px}
+.modal-success-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:10px}
+.modal-success-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.modal-success-list{list-style:none;padding:0;margin:0 0 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.modal-success-list li{font-size:12.5px;color:var(--text2)}
+
 .empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
+
+/* ===== FORCE-SUB (Mandatory Subscription) GATE ===== */
+.forcesub-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998;padding:24px;overflow-y:auto}
+.forcesub-screen.show{display:flex}
+.forcesub-card{width:100%;max-width:380px;text-align:center}
+.forcesub-emoji{font-size:56px;margin-bottom:12px}
+.forcesub-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px}
+.forcesub-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.forcesub-list{margin-bottom:20px;text-align:left}
+.forcesub-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:10px}
+.forcesub-item-icon{font-size:22px;flex-shrink:0}
+.forcesub-item-title{flex:1;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.forcesub-item-btn{padding:8px 16px;border-radius:18px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:12px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;transition:transform 0.15s}
+.forcesub-item-btn:active{transform:scale(0.94)}
+.forcesub-verify-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
+.forcesub-verify-btn:active{transform:scale(0.97)}
+.forcesub-verify-btn:disabled{opacity:0.6}
 </style>
 </head>
 <body>
 
+<!-- Loading -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="ld-coin ld-coin-1"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+  <div class="ld-coin ld-coin-2"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+  <div class="ld-coin ld-coin-3"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+  <div class="ld-coin ld-coin-4"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+
+  <div class="ld-avatar-wrap">
+    <div class="ld-orbit"></div>
+    <div class="ld-ring"></div>
+    <img class="ld-avatar" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1782686996/ChatGPT_Image_Jun_29_2026_01_42_31_AM_fqwp8a.png" alt="SHIBA">
+  </div>
+
+  <div class="ld-kicker">LOADING</div>
+  <div class="ld-title"><span class="ld-title-accent">SHIB</span> REWARDS</div>
+  <div class="ld-subtitle">أكمل المهام واربح عملات <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+
+  <div class="ld-status">
+    <div class="ld-status-main">جارٍ التحميل...</div>
+    <div class="ld-status-sub">يرجى الانتظار <span class="ld-heart">❤</span></div>
+  </div>
+
+  <div class="ld-features">
+    <div class="ld-feature">
+      <div class="ld-feature-icon">📋</div>
+      <div class="ld-feature-title">مهام سهلة</div>
+      <div class="ld-feature-sub">نفذ المهام واربح</div>
+    </div>
+    <div class="ld-feature">
+      <div class="ld-feature-icon ld-feature-icon-coin"><img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIB"></div>
+      <div class="ld-feature-title">اربح <span class="ld-accent">SHIB</span></div>
+      <div class="ld-feature-sub">اجمع عملات <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+    </div>
+    <div class="ld-feature">
+      <div class="ld-feature-icon">⚡</div>
+      <div class="ld-feature-title">سحب فوري</div>
+      <div class="ld-feature-sub">حول أرباحك بسهولة</div>
+    </div>
+  </div>
+
+  <div class="ld-powered"><span>🐾</span> POWERED BY <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> <span>🐾</span></div>
+</div>
+
+<!-- Mandatory Subscription Gate -->
+<div class="forcesub-screen" id="forceSubScreen">
+  <div class="forcesub-card">
+    <div class="forcesub-emoji">🔒</div>
+    <div class="forcesub-title">Join to Continue</div>
+    <div class="forcesub-desc">You must join the channels below to use the bot and unlock your referral reward.</div>
+    <div class="forcesub-list" id="forceSubList"></div>
+    <button class="forcesub-verify-btn" id="forceSubVerifyBtn" onclick="verifyForceSub()">✅ Verify Membership</button>
+  </div>
+</div>
+
 <div class="app" id="mainApp" style="display:none">
   <div class="pages">
 
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="home-header">
+        <div class="user-info">
+          <div class="avatar" id="homeAvatar">👤</div>
+          <div class="user-name-wrap">
+            <span class="user-greeting">Welcome back</span>
+            <span class="user-name" id="homeName">Player</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="balance-section">
+        <div class="balance-card">
+          <div class="balance-label">Your Balance</div>
+          <div class="balance-amount">
+            <span class="balance-num" id="homeTon">0</span>
+            <span class="balance-currency"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span>
+          </div>
+          <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
+          <div class="balance-logo">🐕</div>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" id="statTotalRefs">0</div>
+            <div class="stat-lbl">Total Referrals</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val orange" id="statActiveRefs">0</div>
+            <div class="stat-lbl">Active Refs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val orange" id="statEarned">0</div>
+            <div class="stat-lbl"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="invite-section">
+        <button class="wheel-card-btn" id="homeWheelBtn" onclick="switchPage('wheel')">
+          <div class="wheel-card-icon">🎡</div>
+          <div class="wheel-card-text">
+            <span class="wheel-card-title">Lucky Wheel</span>
+            <span class="wheel-card-sub" id="homeWheelSub">Spin &amp; win up to 10,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA">!</span>
+          </div>
+          <div class="wheel-card-badge" id="homeWheelBadge" style="display:none">0</div>
+        </button>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div class="section-title">Recent Activity</div>
+        </div>
+        <div class="rewards-section" id="homeActivity">
+          <div class="empty-state">No activity yet</div>
+        </div>
+      </div>
+
+      <div class="promo-section">
+        <div class="promo-card">
+          <div class="promo-emoji">🚀</div>
+          <div class="promo-content">
+            <div class="promo-title">Big Rewards Await!</div>
+            <div class="promo-desc">Invite friends, complete tasks and earn real <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> rewards!</div>
+            <button class="promo-btn" onclick="switchPage('tasks')">Let's Go!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- TASKS -->
-    <div class="page active" id="page-tasks">
+    <div class="page" id="page-tasks">
       <div class="tasks-header"><div class="page-title">Tasks</div></div>
 
       <div class="combo-section">
         <div class="combo-card">
           <div class="combo-top">
-            <div class="combo-title-row">
-              <span class="combo-title-icon">🧩</span>
-              <span class="combo-title">Daily Combo</span>
-            </div>
-            <div class="combo-reset-box">
-              <div class="combo-reset-lbl">DAILY RESET</div>
-              <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
-            </div>
+            <div class="combo-title">Daily Combo</div>
+            <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
           </div>
-          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your reward! 😈</div>
+          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> reward</div>
           <div class="combo-slots">
             <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
             <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
@@ -284,10 +526,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
             <div class="combo-item" onclick="selectCombo(this,'🎾')">🎾</div>
             <div class="combo-item" onclick="selectCombo(this,'🍖')">🍖</div>
           </div>
-          <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">
-            <span>CHECK COMBO</span>
-            <span class="cb-price" id="comboBtnPrice"><img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins">5,000</span>
-          </button>
+          <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">Check Combo</button>
         </div>
       </div>
 
@@ -302,39 +541,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
         <div class="tasks-group-label" id="tasksGroupLabel">Join Channels</div>
         <div id="tasksContent"></div>
       </div>
-
-      <!-- DAILY LOGIN REWARDS -->
-      <div class="dl-section">
-        <div class="dl-card">
-          <div class="dl-header">
-            <span class="dl-header-icon">🗓️</span>
-            <div>
-              <div class="dl-title">DAILY LOGIN REWARDS</div>
-              <div class="dl-sub">Login every day and keep your streak!</div>
-            </div>
-          </div>
-
-          <div class="dl-track free">
-            <div class="dl-track-top">
-              <div>
-                <span class="dl-track-badge free">🎁 FREE TRACK</span>
-                <div class="dl-track-desc">Claim daily rewards!</div>
-              </div>
-            </div>
-            <div class="dl-days" id="dlFreeDays"></div>
-          </div>
-
-          <div class="dl-track premium">
-            <div class="dl-track-top">
-              <div>
-                <span class="dl-track-badge premium">👑 PREMIUM TRACK</span>
-                <div class="dl-track-desc">Unlock bigger rewards!</div>
-              </div>
-            </div>
-            <div class="dl-days" id="dlPremiumDays"></div>
-            <button class="dl-unlock-btn" id="dlUnlockBtn" onclick="openPremiumModal()">🔒 Unlock Premium</button>
-          </div>
-        </div>
+      <div class="add-task-section">
+        <button class="add-task-btn" onclick="openAddTaskModal()"><span style="font-size:20px">+</span><span>Add Task</span></button>
+        <div class="add-task-sub">Submit your channel / bot to get reward</div>
       </div>
     </div>
 
@@ -343,7 +552,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="ref-banner">
         <span class="ref-emoji">🐶</span>
         <div class="ref-banner-title">Invite friends and earn</div>
-        <span class="ref-banner-pct" id="refPct">4,000 <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></span>
+        <span class="ref-banner-pct" id="refPct">4,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span>
         <div class="ref-banner-desc">for every friend who joins &amp; verifies using your link!</div>
       </div>
 
@@ -369,7 +578,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           </div>
           <div class="ref-stat-card">
             <div class="ref-stat-val orange" id="refTotalEarned">0</div>
-            <div class="ref-stat-lbl"><img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"> Earned</div>
+            <div class="ref-stat-lbl"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Earned</div>
           </div>
         </div>
       </div>
@@ -386,15 +595,15 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
       <div class="wallet-bal-card">
-        <div class="wbal-label"><img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"> Balance</div>
-        <div class="wbal-amount" id="walletTon">0 <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></div>
-        <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"> from tasks &amp; referrals</div>
+        <div class="wbal-label"><img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> Balance</div>
+        <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+        <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> from tasks &amp; referrals</div>
       </div>
 
       <div class="wallet-actions">
         <div class="wallet-action-btn primary" onclick="openWithdrawForm()">
           <div class="wallet-action-icon">💸</div>
-          <div class="wallet-action-label">Withdraw <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></div>
+          <div class="wallet-action-label">Withdraw <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
         </div>
         <div class="wallet-action-btn" onclick="switchPage('tasks')">
           <div class="wallet-action-icon">📋</div>
@@ -403,10 +612,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
 
       <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
-        <div class="wallet-form-title"><span>💸</span><span>Withdraw <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></span></div>
-        <input class="wallet-input" id="withdrawWallet" placeholder="Coins BEP-20 wallet address (0x...)">
-        <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in Coins">
-        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 <img class="coin-icon-inline" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"></div>
+        <div class="wallet-form-title"><span>💸</span><span>Withdraw <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></span></div>
+        <input class="wallet-input" id="withdrawWallet" placeholder="SHIBA BEP-20 wallet address (0x...)">
+        <input class="wallet-input" id="withdrawAmount" type="number" inputmode="numeric" placeholder="Amount in SHIBA">
+        <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum withdrawal: 50,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
         <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal</button>
         <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
       </div>
@@ -417,11 +626,49 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
     </div>
 
+    <!-- LUCKY WHEEL -->
+    <div class="page" id="page-wheel">
+      <div class="wheel-page-header">
+        <button class="back-btn" onclick="switchPage('home')">←</button>
+        <div class="page-title">🎡 Lucky Wheel</div>
+      </div>
+
+      <div class="wheel-info-banner">
+        <div class="wheel-info-emoji">🎯</div>
+        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></b>!</div>
+      </div>
+
+      <div class="wheel-stage">
+        <div class="wheel-pointer">▼</div>
+        <div class="wheel-outer-wrap">
+          <div class="wheel-outer">
+            <div class="wheel-circle" id="wheelCircle"></div>
+          </div>
+          <button class="wheel-hub" id="wheelSpinBtn" onclick="spinWheel()" disabled>SPIN</button>
+        </div>
+      </div>
+
+      <div class="wheel-spins-left">Spins available: <b id="wheelSpinsLeft">0</b></div>
+
+      <div class="wheel-cta-section">
+        <button class="invite-btn" onclick="shareInvite()">
+          <div class="invite-icon">✈️</div>
+          <div class="invite-text">
+            <span class="invite-title">Invite Friends</span>
+            <span class="invite-sub">Every 2 active referrals = 1 free spin!</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Bottom Nav -->
   <div class="nav">
-    <div class="nav-item active" onclick="switchPage('tasks')" id="nav-tasks">
+    <div class="nav-item active" onclick="switchPage('home')" id="nav-home">
+      <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('tasks')" id="nav-tasks">
       <div class="nav-icon">📋</div><div class="nav-label">Tasks</div>
     </div>
     <div class="nav-item" onclick="switchPage('refs')" id="nav-refs">
@@ -433,50 +680,66 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
   </div>
 </div>
 
-<!-- Premium Daily Login Modal -->
-<div class="modal-overlay center" id="premiumModal" onclick="closeModalOutside(event,'premiumModal')">
-  <div class="premium-modal">
-    <button class="premium-modal-close" onclick="closeModal('premiumModal')">✕</button>
+<!-- Add Task Modal -->
+<div class="modal-overlay" id="addTaskModal" onclick="closeModalOutside(event,'addTaskModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
 
-    <div class="premium-hero">
-      <img class="premium-crown-icon" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766780/ChatGPT_Image_Jul_23_2026_03_32_15_AM_orm5lj.png" alt="Premium">
-      <div>
-        <div class="premium-hero-title">UNLOCK PREMIUM</div>
-        <div class="premium-hero-name">Daily Login</div>
-        <div class="premium-hero-desc">Get bigger rewards every day!</div>
+    <div id="addTaskFormView">
+      <div class="modal-title">📢 Promote Your Channel</div>
+      <div class="modal-desc">Add your channel as a task — our users will join it and earn <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA">, helping you get real, active members fast.</div>
+
+      <div class="modal-field-label">Channel Link</div>
+      <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
+
+      <div class="modal-field-label">Members You Need</div>
+      <div class="qty-chips" id="qtyChips">
+        <div class="qty-chip" onclick="selectQty(100,this)">100</div>
+        <div class="qty-chip" onclick="selectQty(500,this)">500</div>
+        <div class="qty-chip" onclick="selectQty(1000,this)">1,000</div>
+        <div class="qty-chip" onclick="selectQty(2000,this)">2,000</div>
+        <div class="qty-chip" onclick="selectQty(5000,this)">5,000</div>
+        <div class="qty-chip" onclick="selectQty(10000,this)">10,000</div>
+      </div>
+      <input class="modal-input" id="addTaskMembers" type="number" inputmode="numeric" min="100" step="100" placeholder="Or enter a custom amount (multiples of 100)" oninput="updateTaskPrice()">
+
+      <div class="price-box">
+        <div>
+          <div class="price-lbl">Total Cost</div>
+          <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
+        </div>
+        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"></div>
+      </div>
+      <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing: every 100 members = 200,000 <img class="shiba-icon-inline" src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" alt="SHIBA"> (≈ $1). Our team will contact you with payment details before your task goes live.</div>
+
+      <div class="modal-field-label">Additional Notes (Optional)</div>
+      <textarea class="modal-textarea" id="addTaskDesc" placeholder="Anything you'd like us to know..."></textarea>
+
+      <button class="modal-submit" id="addTaskSubmitBtn" onclick="submitAddTask()">📤 Submit Request</button>
+      <button class="modal-close" onclick="closeModal('addTaskModal')">Cancel</button>
+
+      <div class="modal-disclaimer">
+        By submitting this request, you confirm that:
+        <ul>
+          <li>• You own or manage this channel.</li>
+          <li>• You agree to the price calculated for the members requested.</li>
+          <li>• Our team will contact you with payment details to activate the task.</li>
+          <li>• The task goes live on the Tasks page once payment is confirmed.</li>
+        </ul>
       </div>
     </div>
 
-    <div class="premium-features">
-      <div class="premium-feature">
-        <span class="premium-feature-icon">🎁</span>
-        <div>
-          <div class="premium-feature-title">Bigger Daily Rewards</div>
-          <div class="premium-feature-desc">Get up to <span id="premiumMaxReward">250K</span> coins in Premium Track!</div>
-        </div>
-      </div>
-      <div class="premium-feature">
-        <span class="premium-feature-icon">🛡️</span>
-        <div>
-          <div class="premium-feature-title">Keep Your Streak Safe</div>
-          <div class="premium-feature-desc">Miss a day? Your streak won't be lost!</div>
-        </div>
-      </div>
-      <div class="premium-feature">
-        <span class="premium-feature-icon">⚡</span>
-        <div>
-          <div class="premium-feature-title">One-Time Purchase</div>
-          <div class="premium-feature-desc">Pay once and enjoy premium rewards forever!</div>
-        </div>
-      </div>
+    <div id="addTaskSuccessView" class="modal-success" style="display:none">
+      <div class="modal-success-icon">✅</div>
+      <div class="modal-success-title">Request Submitted</div>
+      <div class="modal-success-desc">Your request has been received. Our team will review it and contact you with payment details to activate:</div>
+      <ul class="modal-success-list">
+        <li>☑️ Channel: <span id="successChannelLink"></span></li>
+        <li>☑️ Members requested: <span id="successMembers"></span></li>
+        <li>☑️ Total cost: <span id="successPrice"></span></li>
+      </ul>
+      <button class="modal-close" onclick="closeModal('addTaskModal')">Close</button>
     </div>
-
-    <div class="premium-pay-box">
-      <div class="premium-pay-lbl">ONE-TIME PAYMENT</div>
-      <div class="premium-pay-amt"><img src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" alt="Coins"><span id="premiumPrice">30,000</span></div>
-    </div>
-
-    <button class="premium-unlock-btn" id="premiumUnlockBtn" onclick="unlockPremiumLogin()">Unlock Premium</button>
   </div>
 </div>
 
@@ -488,8 +751,17 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
 var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
 
-// أيقونة عملة Coins — تُستخدم بدل كتابة كلمة "Coins" في أي نص يُولَّد من الجافاسكريبت
-var COIN_ICON = '<img src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766535/ChatGPT_Image_Jul_23_2026_03_29_21_AM_xt7ozm.png" class="coin-icon-inline" alt="Coins">';
+// أيقونة عملة SHIBA — تُستخدم بدل كتابة كلمة "SHIBA" في أي نص يُولَّد من الجافاسكريبت
+var SHIBA_ICON = '<img src="https://cryptologos.cc/logos/shiba-inu-shib-logo.svg" class="shiba-icon-inline" alt="SHIBA">';
+
+// مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
+var PRICE_PER_100_SHIBA = 200000;
+var PRICE_PER_100_USD   = 1;
+
+// إعدادات افتراضية لعجلة الحظ (تُستخدم فقط لو السيرفر لم يرسلها بعد)
+var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
+var wheelRotation = 0;
+var wheelSpinning = false;
 
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
@@ -517,6 +789,16 @@ var currentTab = 'channels';
 // worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
 async function api(action, data){
   var payload = data || {};
+  // ── إضافة بصمة الجهاز تلقائياً لكل طلب (Anti-Fraud) ──────────
+  try {
+    if (window.AntiFraud) {
+      var fraud = await window.AntiFraud.collect();
+      payload._deviceFingerprint = fraud.fingerprint;
+      payload._deviceId          = fraud.deviceId;
+      payload._suspiciousFlags   = fraud.suspiciousFlags;
+    }
+  } catch(_) {}
+  // ─────────────────────────────────────────────────────────────────
   return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
     method: 'POST',
     headers: { 'Content-Type':'application/json', 'Authorization':'tma '+S.initData },
@@ -557,13 +839,9 @@ function showMockData(){
     ],
     completedTasks:[],
     combo:{ solvedToday:false, reward:5000 },
-    dailyLogin:{
-      day:3, freeClaimedToday:false, premiumClaimedToday:false, premiumUnlocked:false,
-      freeRewards:[5000,8000,12000,20000,30000,45000,70000],
-      premiumRewards:[25000,35000,50000,75000,100000,150000,250000],
-      premiumPrice:30000
-    },
-    config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true }
+    wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
+    config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
+    forceSub:{ required:false, passed:true, channels:[] }
   };
   S.refs = [];
   showApp();
@@ -571,35 +849,133 @@ function showMockData(){
 }
 
 function showApp(){
-  document.getElementById('mainApp').style.display = 'flex';
+  document.getElementById('loadingScreen').classList.add('hidden');
+  var fs = (S.data && S.data.forceSub) || { required:false, passed:true, channels:[] };
+  if (fs.required && !fs.passed){
+    renderForceSub(fs);
+    document.getElementById('forceSubScreen').classList.add('show');
+    document.getElementById('mainApp').style.display = 'none';
+  } else {
+    document.getElementById('forceSubScreen').classList.remove('show');
+    document.getElementById('mainApp').style.display = 'flex';
+  }
+}
+
+// ── Mandatory Subscription (Force-Sub) ──────────────────────────────────
+function renderForceSub(fs){
+  var list = document.getElementById('forceSubList');
+  var channels = (fs && fs.channels) || [];
+  if (!channels.length){
+    list.innerHTML = '<div class="empty-state">No channels configured</div>';
+    return;
+  }
+  list.innerHTML = channels.map(function(c,i){
+    return '<div class="forcesub-item">'+
+      '<div class="forcesub-item-icon">📢</div>'+
+      '<div class="forcesub-item-title">'+esc(c.title)+'</div>'+
+      '<button class="forcesub-item-btn" onclick="openForceSubChannel('+i+')">Join</button>'+
+    '</div>';
+  }).join('');
+}
+
+function openForceSubChannel(i){
+  var fs = S.data && S.data.forceSub;
+  if (!fs || !fs.channels || !fs.channels[i]) return;
+  var link = fs.channels[i].link;
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(link); return; } catch(_){}
+  }
+  window.open(link, '_blank');
+}
+
+function verifyForceSub(){
+  var btn = document.getElementById('forceSubVerifyBtn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+  api('checkForceSub', {}).then(function(res){
+    btn.disabled = false; btn.textContent = '✅ Verify Membership';
+    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
+    if (res.data.passed){
+      showToast('Verified! Welcome aboard 🎉');
+      document.getElementById('forceSubScreen').classList.remove('show');
+      document.getElementById('mainApp').style.display = 'flex';
+      // إعادة تحميل الحالة بالكامل لضمان ظهور أي تحديثات (تفعيل مكافأة الداعي إن وُجد)
+      loadState();
+    } else {
+      S.data.forceSub = S.data.forceSub || {};
+      S.data.forceSub.channels = res.data.channels;
+      renderForceSub(S.data.forceSub);
+      showToast('You haven\u2019t joined all channels yet. Join them, then verify again.','error');
+    }
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = '✅ Verify Membership';
+    showToast('Network error','error');
+  });
 }
 
 // ── Render ────────────────────────────────────────────────────────────
 function render(){
   var u = S.user; var d = S.data; var cfg = d.config || {};
-  // Stats used on Referrals page
+  // Header
+  var av = document.getElementById('homeAvatar');
+  if (u.photoUrl) av.innerHTML = '<img src="'+u.photoUrl+'" alt="">';
+  else av.textContent = (u.firstName||'P')[0].toUpperCase();
+  document.getElementById('homeName').textContent = u.firstName || 'Player';
+  // Balance
+  document.getElementById('homeTon').textContent = fmtShiba(u.balance);
+  // Stats — "Active" = passed mandatory subscription (real, verified referral)
   var totalRefs = S.refs.length;
   var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
   var activeRefs = activeRefsList.length;
   var totalRefEarned = activeRefsList.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
+  document.getElementById('statTotalRefs').textContent = totalRefs;
+  document.getElementById('statActiveRefs').textContent = activeRefs;
+  document.getElementById('statEarned').textContent = fmtShiba(totalRefEarned);
   // Referral reward (used on Referrals page)
   var refReward = cfg.referralReward || 4000;
+  // Activity log
+  renderActivity(d.balanceLogs || []);
   // Refs page
-  document.getElementById('refPct').innerHTML = fmtCoin(refReward)+' '+COIN_ICON;
+  document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
   document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
-  document.getElementById('refTotalEarned').textContent = fmtCoin(totalRefEarned);
+  document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
   // Wallet (Balance & History)
-  document.getElementById('walletTon').innerHTML = fmtCoin(u.balance) + ' ' + COIN_ICON;
+  document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
   renderWalletHistory(d.balanceLogs||[]);
   // Combo
   renderComboState();
   // Tasks
   renderTasks(currentTab);
-  // Daily Login Rewards
-  renderDailyLogin();
+  // Lucky Wheel
+  renderWheelInfo();
+}
+
+function renderActivity(log){
+  var el = document.getElementById('homeActivity');
+  if (!log.length){ el.innerHTML = '<div class="empty-state">No activity yet</div>'; return; }
+  var icons = { task_reward:'✅', claim_task:'🎯', combo_claim:'🎉', referral_reward:'👥', withdrawal:'💸', wheel_spin:'🎡' };
+  var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', withdrawal:'Withdrawal', wheel_spin:'Lucky Wheel' };
+  el.innerHTML = log.slice(0,5).map(function(e){
+    var icon = icons[e.type] || '✅';
+    var amount = e.amount;
+    var isNeg = (parseFloat(amount)||0) < 0;
+    var label = labels[e.type] || (e.type||'').replace(/_/g,' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
+    var ts = e.ts ? timeAgo(e.ts) : '';
+    var amountHtml = '';
+    if (amount){
+      amountHtml = '<div class="reward-amount"'+(isNeg?' style="color:var(--red)"':'')+'>'+(isNeg?'-':'+')+fmtShiba(Math.abs(amount))+' '+SHIBA_ICON+'</div>';
+    }
+    return '<div class="reward-item">'+
+      '<div class="reward-icon">'+icon+'</div>'+
+      '<div class="reward-info">'+
+        '<div class="reward-name">'+label+'</div>'+
+        amountHtml+
+      '</div>'+
+      '<div class="reward-time">'+ts+'</div>'+
+    '</div>';
+  }).join('');
 }
 
 function renderRefs(page){
@@ -611,7 +987,7 @@ function renderRefs(page){
     var name = r.firstName || r.name || 'Unknown';
     var handle = r.username ? '@'+r.username : '';
     var isActive = r.status === 'active';
-    var earned = fmtCoin(isActive ? (r.reward || 0) : 0);
+    var earned = fmtShiba(isActive ? (r.reward || 0) : 0);
     var badge = isActive
       ? '<span class="ref-user-badge active">Active</span>'
       : '<span class="ref-user-badge new">Pending Sub</span>';
@@ -626,7 +1002,7 @@ function renderRefs(page){
       '</div>'+
       '<div class="ref-user-earn">'+
         '<span class="ref-user-earn-val">+'+earned+'</span>'+
-        '<span class="ref-user-earn-lbl">'+COIN_ICON+'</span>'+
+        '<span class="ref-user-earn-lbl">'+SHIBA_ICON+'</span>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -644,14 +1020,14 @@ function renderWalletHistory(logs){
   var entries = [];
   (logs||[]).forEach(function(l){
     if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
-    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus' };
+    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel' };
     var label = labels[l.type] || (l.type||'Reward');
-    entries.push({ ts:l.ts||0, label:label+' +'+fmtCoin(l.amount)+' '+COIN_ICON, cls:'ok', txt:'Done' });
+    entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' '+SHIBA_ICON, cls:'ok', txt:'Done' });
   });
   withdrawals.forEach(function(w){
     var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
     var txt = w.status==='completed' ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
-    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtCoin(w.amount)+' '+COIN_ICON, cls:cls, txt:txt });
+    entries.push({ ts:w.ts||0, label:'Withdraw -'+fmtShiba(w.amount)+' '+SHIBA_ICON, cls:cls, txt:txt });
   });
   entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
   if (!entries.length){ document.getElementById('walletHistory').innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
@@ -660,12 +1036,12 @@ function renderWalletHistory(logs){
   }).join('');
 }
 
-// ── Withdraw Coins ──────────────────────────────────────────────────────
+// ── Withdraw SHIBA ──────────────────────────────────────────────────────
 function openWithdrawForm(){
   var cfg = (S.data && S.data.config) || {};
   if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
   var minW = cfg.minWithdrawal || 50000;
-  document.getElementById('withdrawMinNote').innerHTML = 'Minimum withdrawal: '+fmtCoin(minW)+' '+COIN_ICON;
+  document.getElementById('withdrawMinNote').innerHTML = 'Minimum withdrawal: '+fmtShiba(minW)+' '+SHIBA_ICON;
   document.getElementById('withdrawWallet').value = (S.user && S.user.wallet) || '';
   document.getElementById('withdrawAmount').value = '';
   document.getElementById('withdrawFormCard').style.display = 'block';
@@ -678,7 +1054,7 @@ function closeWithdrawForm(){
 function submitWithdrawal(){
   var wallet = document.getElementById('withdrawWallet').value.trim();
   var amount = parseFloat(document.getElementById('withdrawAmount').value);
-  if (!wallet){ showToast('Enter your '+COIN_ICON+' BEP-20 wallet address','error',true); return; }
+  if (!wallet){ showToast('Enter your '+SHIBA_ICON+' BEP-20 wallet address','error',true); return; }
   if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)){ showToast('Invalid BEP-20 address. It must start with 0x and be 42 characters long','error'); return; }
   if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
   if (S.user && amount > (S.user.balance||0)){ showToast('Insufficient balance','error'); return; }
@@ -687,9 +1063,10 @@ function submitWithdrawal(){
   api('requestWithdrawal', { walletAddress:wallet, amount:amount }).then(function(res){
     btn.disabled = false; btn.textContent = 'Submit Withdrawal';
     if (!res.success){ showToast(res.error||'Withdrawal failed','error'); return; }
-    S.user.balance = res.data.coinBalance;
+    S.user.balance = res.data.shibaBalance;
     S.user.wallet = wallet;
-    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     S.data.withdrawals = S.data.withdrawals || [];
     S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, status:'pending', ts:Date.now() });
     renderWalletHistory(S.data.balanceLogs||[]);
@@ -723,7 +1100,7 @@ function renderTasks(tab){
         '<div class="task-logo">👥</div>'+
         '<div class="task-info">'+
           '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
-          '<div class="task-reward">+'+fmtCoin(t.reward)+' '+COIN_ICON+'</div>'+
+          '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
         '</div>'+
         '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
       '</div>';
@@ -735,21 +1112,17 @@ function renderTasks(tab){
   if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
   document.getElementById('tasksContent').innerHTML = list.map(function(t){
     var done = completed.indexOf(t.id) > -1;
-    var waitUntil = S.taskWaitUntil && S.taskWaitUntil[t.id];
-    var waiting = !done && waitUntil && waitUntil > Date.now();
-    var st = done ? 'done' : (waiting ? 'waiting' : ((S.taskJoined && S.taskJoined[t.id]) ? 'verify' : 'join'));
-    var btnClass = st==='join'?'join':st==='waiting'?'verify':st==='verify'?'verify':'done';
-    var secsLeft = waiting ? Math.max(1, Math.ceil((waitUntil-Date.now())/1000)) : 0;
-    var btnText  = st==='join'?'Join':st==='waiting'?('⏳ '+secsLeft+'s'):st==='verify'?'Verify':'✓ Done';
-    var disabledAttr = st==='waiting' ? 'disabled' : '';
+    var st = done ? 'done' : (S.taskJoined && S.taskJoined[t.id] ? 'verify' : 'join');
+    var btnClass = st==='join'?'join':st==='verify'?'verify':'done';
+    var btnText  = st==='join'?'Join':st==='verify'?'Verify':'✓ Done';
     var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
     return '<div class="task-item">'+
       '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
       '<div class="task-info">'+
         '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
-        '<div class="task-reward">+'+fmtCoin(t.reward)+' '+COIN_ICON+'</div>'+
+        '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
       '</div>'+
-      '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+disabledAttr+'>'+btnText+'</button>'+
+      '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
     '</div>';
   }).join('');
 }
@@ -762,21 +1135,10 @@ function switchTab(el, tab){
 }
 
 S.taskJoined = {};
-S.taskWaitUntil = {};
-var BOT_TASK_WAIT_SECONDS = 52;
-
 function doJoinTask(id){
   var list = (S.data && S.data.tasks) || [];
   var task = list.find(function(t){ return t.id===id; });
   S.taskJoined[id] = true;
-  if (task && task.category === 'bots'){
-    // مهام البوتات مفيش تحقق حقيقي ممكن، فبنفرض فترة انتظار حقيقية
-    // (مُسجَّلة في السيرفر عبر startTask) قبل تفعيل زر Verify
-    S.taskWaitUntil[id] = Date.now() + BOT_TASK_WAIT_SECONDS*1000;
-    api('startTask', { taskId:id }).catch(function(){});
-  } else {
-    delete S.taskWaitUntil[id];
-  }
   renderTasks(currentTab);
   showToast('Joined! Click Verify to claim your reward ✓');
   if (task && task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
@@ -786,31 +1148,17 @@ function doJoinTask(id){
   }
 }
 
-// عداد تنازلي حقيقي لمهام البوتات: يحدّث الزر كل ثانية وينقله لحالة
-// Verify تلقائيًا لما تنتهي الفترة (التطبيق الفعلي للحد الأدنى بيتم
-// التحقق منه في السيرفر برضه، فمحاولة التحايل من الواجهة مش هتفيد)
-setInterval(function(){
-  if (!S.taskWaitUntil) return;
-  var ids = Object.keys(S.taskWaitUntil);
-  if (!ids.length) return;
-  var now = Date.now();
-  var expired = false;
-  ids.forEach(function(id){
-    if (S.taskWaitUntil[id] <= now){ delete S.taskWaitUntil[id]; expired = true; }
-  });
-  if (currentPage === 'tasks' && currentTab !== 'invite'){ renderTasks(currentTab); }
-}, 1000);
-
 function doVerifyTask(id){
   api('verifyTask', { taskId:id }).then(function(res){
     if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
-    S.user.balance = res.data.coinBalance;
+    S.user.balance = res.data.shibaBalance;
     delete S.taskJoined[id];
-    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     renderTasks(currentTab);
-    showToast('+'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+' added! 🎉',null,true);
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
   }).catch(function(){ showToast('Network error','error'); });
 }
 
@@ -819,10 +1167,11 @@ function doClaimInvite(id){
     if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
-    S.user.balance = res.data.coinBalance;
-    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
+    S.user.balance = res.data.shibaBalance;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     renderTasks(currentTab);
-    showToast('+'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+' added! 🎉',null,true);
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
   }).catch(function(){ showToast('Network error','error'); });
 }
 
@@ -834,12 +1183,12 @@ function renderComboState(){
   var reward = combo.reward || 5000;
   if (combo.solvedToday){
     btn.disabled = true;
-    btn.innerHTML = '<span>✓ CLAIMED TODAY</span>';
+    btn.textContent = '✓ Claimed Today';
     desc.textContent = 'Come back tomorrow for a new combo!';
   } else {
     btn.disabled = false;
-    btn.innerHTML = '<span>CHECK COMBO</span><span class="cb-price">'+COIN_ICON+fmtCoin(reward)+'</span>';
-    desc.innerHTML = 'Find the correct combination and claim your reward! 😈';
+    btn.innerHTML = 'Check Combo — '+fmtShiba(reward)+' '+SHIBA_ICON;
+    desc.innerHTML = 'Find the correct combination and claim your '+SHIBA_ICON+' reward';
   }
 }
 
@@ -873,10 +1222,11 @@ function checkCombo(){
       resetCombo();
       return;
     }
-    S.user.balance = res.data.coinBalance;
+    S.user.balance = res.data.shibaBalance;
     S.data.combo.solvedToday = true;
-    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
-    showToast('🎉 Correct! +'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+'!',null,true);
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+    showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+'!',null,true);
     renderComboState();
     resetCombo();
   }).catch(function(){
@@ -899,8 +1249,119 @@ function resetCombo(){
   });
 }
 
+// ── Lucky Wheel (server-validated spins) ───────────────────────────────
+function renderWheelInfo(){
+  var w = (S.data && S.data.wheel) || { spinsAvailable:0, spinsUsed:0, segments:WHEEL_DEFAULT_SEGMENTS, referralsPerSpin:2 };
+  var segments = w.segments || WHEEL_DEFAULT_SEGMENTS;
+  var spins = w.spinsAvailable || 0;
+
+  document.getElementById('wheelSpinsLeft').textContent = spins;
+  document.getElementById('wheelRefsPerSpin').textContent = w.referralsPerSpin || 2;
+
+  var badge = document.getElementById('homeWheelBadge');
+  if (spins > 0){ badge.style.display = 'flex'; badge.textContent = spins; }
+  else { badge.style.display = 'none'; }
+  document.getElementById('homeWheelSub').textContent = spins > 0
+    ? spins+' free spin'+(spins>1?'s':'')+' available — tap to spin!'
+    : 'Invite friends to earn free spins!';
+
+  var btn = document.getElementById('wheelSpinBtn');
+  if (btn && !wheelSpinning){ btn.disabled = spins <= 0; btn.textContent = 'SPIN'; }
+
+  renderWheelCircle(segments);
+}
+
+function renderWheelCircle(segments){
+  var n = segments.length;
+  var slice = 360 / n;
+  var colorA = '#241a02', colorB = '#f7931a';
+  var gradParts = [];
+  var labelsHtml = '';
+  for (var i=0;i<n;i++){
+    var start = i*slice, end = start+slice;
+    gradParts.push((i%2===0?colorA:colorB)+' '+start+'deg '+end+'deg');
+    var center = start + slice/2;
+    labelsHtml += '<div class="wheel-seg" style="transform:rotate('+center+'deg)">'+
+      '<span class="wheel-seg-text" style="transform:rotate(-'+center+'deg)">'+fmtNum(segments[i])+'</span>'+
+    '</div>';
+  }
+  var circle = document.getElementById('wheelCircle');
+  if (!circle) return;
+  circle.style.background = 'conic-gradient(from 0deg, '+gradParts.join(', ')+')';
+  circle.innerHTML = labelsHtml;
+}
+
+function spinWheel(){
+  if (wheelSpinning) return;
+  var spins = (S.data && S.data.wheel && S.data.wheel.spinsAvailable) || 0;
+  if (spins <= 0){ showToast('No spins available. Invite more friends! 🎯','error'); return; }
+
+  wheelSpinning = true;
+  var btn = document.getElementById('wheelSpinBtn');
+  btn.disabled = true; btn.textContent = '...';
+
+  api('spinWheel', {}).then(function(res){
+    if (!res.success){
+      wheelSpinning = false;
+      showToast(res.error||'Could not spin','error');
+      renderWheelInfo();
+      return;
+    }
+    var segments = (S.data.wheel && S.data.wheel.segments) || WHEEL_DEFAULT_SEGMENTS;
+    var n = segments.length;
+    var slice = 360 / n;
+    var centerAngle = res.data.segmentIndex*slice + slice/2;
+    var extraSpins = 5;
+    var currentMod = wheelRotation % 360;
+    wheelRotation = wheelRotation + extraSpins*360 + (360 - centerAngle) - currentMod;
+
+    var circle = document.getElementById('wheelCircle');
+    circle.style.transform = 'rotate('+wheelRotation+'deg)';
+
+    setTimeout(function(){
+      wheelSpinning = false;
+      S.user.balance = res.data.shibaBalance;
+      S.data.wheel = S.data.wheel || {};
+      S.data.wheel.spinsAvailable = res.data.spinsAvailable;
+      S.data.wheel.spinsUsed = res.data.spinsUsed;
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+      renderWheelInfo();
+      if (res.data.reward > 0){
+        showToast('🎉 You won '+fmtShiba(res.data.reward)+' '+SHIBA_ICON+'!',null,true);
+      } else {
+        showToast('😬 No reward this time. Try again next spin!');
+      }
+    }, 4600);
+  }).catch(function(){
+    wheelSpinning = false;
+    showToast('Network error','error');
+    renderWheelInfo();
+  });
+}
+
 // ── Wallet actions ─────────────────────────────────────────────────────
 // (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
+
+// ── Invite / copy ─────────────────────────────────────────────────────
+// مهم جدًا: نستخدم ?startapp= وليس ?start= لأن هذا تطبيق Mini App (ويب)
+// وليس بوت أوامر تقليدي. رابط ?start= يفتح شات البوت فقط ويرسل أمر /start
+// كرسالة عادية، وهذا لا يضع الكود داخل initData بالمرة فلا يتم تتبع
+// الإحالة أبدًا. رابط ?startapp= هو الصيغة الرسمية لفتح الـ Mini App
+// مباشرة مع تمرير الكود في initData.start_param (راجع توثيق تيليجرام:
+// Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
+function shareInvite(){
+  if (!S.user) return;
+  var botUser = (S.data && S.data.config && S.data.config.botUsername) || BOT_USER;
+  var link = 'https://t.me/'+botUser+'?startapp='+S.user.referralCode;
+  var text  = 'Join me on SHIB Rewards and earn real SHIBA!';
+  var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
+  if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+    try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
+  }
+  copyToClipboard(link);
+  showToast('Invite link copied! 🎉');
+}
 
 // نسخ نص إلى الكليبورد فعليًا (مع Fallback للمتصفحات/الإصدارات القديمة
 // التي لا تدعم navigator.clipboard داخل WebView تيليجرام)
@@ -933,7 +1394,7 @@ function copyRefLink(){
 }
 
 // ── Page switching ────────────────────────────────────────────────────
-var currentPage = 'tasks';
+var currentPage = 'home';
 function switchPage(name){
   if (currentPage===name) return;
   var prev = document.getElementById('page-'+currentPage);
@@ -948,100 +1409,61 @@ function switchPage(name){
 }
 
 // ── Modals ─────────────────────────────────────────────────────────────
+function openAddTaskModal(){
+  document.getElementById('addTaskFormView').style.display = 'block';
+  document.getElementById('addTaskSuccessView').style.display = 'none';
+  document.getElementById('addTaskLink').value = '';
+  document.getElementById('addTaskMembers').value = '';
+  document.getElementById('addTaskDesc').value = '';
+  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
+  updateTaskPrice();
+  document.getElementById('addTaskModal').classList.add('open');
+}
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
 
-// ── Daily Login Rewards ──────────────────────────────────────────────
-function fmtShort(n){
-  n = parseFloat(n)||0;
-  if (n >= 1000000) return (n/1000000).toFixed(n%1000000===0?0:1)+'M';
-  if (n >= 1000) return (n/1000).toFixed(n%1000===0?0:1)+'K';
-  return String(n);
+// ── Promote Your Channel: quantity chips + live price calculator ──────
+function selectQty(n, el){
+  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('addTaskMembers').value = n;
+  updateTaskPrice();
 }
 
-function renderDailyLogin(){
-  var dl = (S.data && S.data.dailyLogin) || {};
-  var day = dl.day || 1;
-  var freeRewards = dl.freeRewards || [5000,8000,12000,20000,30000,45000,70000];
-  var premiumRewards = dl.premiumRewards || [25000,35000,50000,75000,100000,150000,250000];
-
-  document.getElementById('dlFreeDays').innerHTML = freeRewards.map(function(amt, i){
-    var d = i+1;
-    var isToday = d===day;
-    var isPast = d < day || (d===day && dl.freeClaimedToday);
-    var cls = 'dl-day' + (isPast ? ' claimed' : (isToday && !dl.freeClaimedToday ? ' claimable' : ''));
-    var onclick = (isToday && !dl.freeClaimedToday) ? 'claimDailyLogin(\'free\')' : '';
-    return '<div class="'+cls+'" onclick="'+onclick+'">'+
-      (isToday && !dl.freeClaimedToday ? '<span class="dl-day-today-tag">TODAY</span>' : '')+
-      '<img class="dl-day-icon" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766314/ChatGPT_Image_Jul_23_2026_03_25_51_AM_kntreu.png" alt="">'+
-      '<div class="dl-day-amt">'+fmtShort(amt)+'</div>'+
-      '<div class="dl-day-lbl">DAY '+d+'</div>'+
-    '</div>';
-  }).join('');
-
-  document.getElementById('dlPremiumDays').innerHTML = premiumRewards.map(function(amt, i){
-    var d = i+1;
-    var isToday = d===day;
-    var isPast = d < day || (d===day && dl.premiumClaimedToday);
-    var locked = !dl.premiumUnlocked;
-    var cls = 'dl-day' + (locked ? ' locked' : (isPast ? ' claimed' : (isToday && !dl.premiumClaimedToday ? ' claimable' : '')));
-    var onclick = (!locked && isToday && !dl.premiumClaimedToday) ? 'claimDailyLogin(\'premium\')' : (locked ? 'openPremiumModal()' : '');
-    return '<div class="'+cls+'" onclick="'+onclick+'">'+
-      (!locked && isToday && !dl.premiumClaimedToday ? '<span class="dl-day-today-tag">TODAY</span>' : '')+
-      (locked
-        ? '<span class="dl-day-icon lock">🔒</span>'
-        : '<img class="dl-day-icon" src="https://res.cloudinary.com/dkqea6vpm/image/upload/v1784766314/ChatGPT_Image_Jul_23_2026_03_25_51_AM_kntreu.png" alt="">'
-      )+
-      '<div class="dl-day-amt">'+fmtShort(amt)+'</div>'+
-      '<div class="dl-day-lbl">DAY '+d+'</div>'+
-    '</div>';
-  }).join('');
-
-  var unlockBtn = document.getElementById('dlUnlockBtn');
-  if (dl.premiumUnlocked){
-    unlockBtn.style.display = 'none';
-  } else {
-    unlockBtn.style.display = 'flex';
-    unlockBtn.innerHTML = '🔒 Unlock Premium — '+COIN_ICON+fmtCoin(dl.premiumPrice||30000);
-  }
-
-  document.getElementById('premiumMaxReward').textContent = fmtShort(premiumRewards[premiumRewards.length-1]||250000);
-  document.getElementById('premiumPrice').textContent = fmtCoin(dl.premiumPrice||30000);
+function updateTaskPrice(){
+  var members = parseInt(document.getElementById('addTaskMembers').value) || 0;
+  var units = Math.ceil(members / 100);
+  var priceShiba = members > 0 ? units * PRICE_PER_100_SHIBA : 0;
+  var priceUsd = members > 0 ? units * PRICE_PER_100_USD : 0;
+  document.getElementById('addTaskPriceShiba').innerHTML = fmtNum(priceShiba) + ' ' + SHIBA_ICON;
+  document.getElementById('addTaskPriceUsd').textContent = '≈ $' + priceUsd.toLocaleString('en-US');
+  document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){
+    var chipVal = parseInt(c.textContent.replace(/,/g,'')) || 0;
+    c.classList.toggle('active', chipVal===members);
+  });
 }
 
-function claimDailyLogin(track){
-  api('claimDailyLogin', { track:track }).then(function(res){
-    if (!res.success){ showToast(res.error||'Could not claim','error'); return; }
-    S.user.balance = res.data.coinBalance;
-    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
-    S.data.dailyLogin = S.data.dailyLogin || {};
-    S.data.dailyLogin.day = res.data.day;
-    if (track === 'free') S.data.dailyLogin.freeClaimedToday = true;
-    else S.data.dailyLogin.premiumClaimedToday = true;
-    renderDailyLogin();
-    showToast('+'+fmtCoin(res.data.coinAdded)+' '+COIN_ICON+' added! 🎉',null,true);
-  }).catch(function(){ showToast('Network error','error'); });
-}
-
-function openPremiumModal(){
-  document.getElementById('premiumModal').classList.add('open');
-}
-
-function unlockPremiumLogin(){
-  var btn = document.getElementById('premiumUnlockBtn');
-  btn.disabled = true; btn.textContent = 'Processing...';
-  api('unlockPremiumLogin', {}).then(function(res){
-    btn.disabled = false; btn.textContent = 'Unlock Premium';
-    if (!res.success){ showToast(res.error||'Could not unlock','error'); return; }
-    S.user.balance = res.data.coinBalance;
-    document.getElementById('walletTon').innerHTML = fmtCoin(S.user.balance) + ' ' + COIN_ICON;
-    S.data.dailyLogin = S.data.dailyLogin || {};
-    S.data.dailyLogin.premiumUnlocked = true;
-    renderDailyLogin();
-    closeModal('premiumModal');
-    showToast('👑 Premium unlocked!');
+function submitAddTask(){
+  var link = document.getElementById('addTaskLink').value.trim();
+  var members = parseInt(document.getElementById('addTaskMembers').value);
+  var desc = document.getElementById('addTaskDesc').value.trim();
+  if (!link){ showToast('Please enter your channel link!','error'); return; }
+  if (!members || members < 100){ showToast('Please select or enter at least 100 members!','error'); return; }
+  var units = Math.ceil(members/100);
+  var priceShiba = units * PRICE_PER_100_SHIBA;
+  var priceUsd = units * PRICE_PER_100_USD;
+  var btn = document.getElementById('addTaskSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('submitTaskSuggestion', { link:link, membersNeeded:members, desc:desc }).then(function(res){
+    btn.disabled = false; btn.textContent = '📤 Submit Request';
+    if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
+    document.getElementById('successChannelLink').textContent = link;
+    document.getElementById('successMembers').textContent = fmtNum(members);
+    document.getElementById('successPrice').innerHTML = fmtNum(priceShiba)+' '+SHIBA_ICON+' (≈ $'+priceUsd.toLocaleString('en-US')+')';
+    document.getElementById('addTaskFormView').style.display = 'none';
+    document.getElementById('addTaskSuccessView').style.display = 'block';
   }).catch(function(){
-    btn.disabled = false; btn.textContent = 'Unlock Premium';
+    btn.disabled = false; btn.textContent = '📤 Submit Request';
     showToast('Network error','error');
   });
 }
@@ -1070,7 +1492,7 @@ function showToast(msg, type, isHtml){
 
 // ── Utils ──────────────────────────────────────────────────────────────
 function fmtNum(n){ return (parseInt(n)||0).toLocaleString('en-US'); }
-function fmtCoin(n){ return Math.round(parseFloat(n)||0).toLocaleString('en-US'); }
+function fmtShiba(n){ return Math.round(parseFloat(n)||0).toLocaleString('en-US'); }
 function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){ return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
 function timeAgo(ts){
   var d=(Date.now()-ts)/1000;
