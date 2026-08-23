@@ -50,9 +50,17 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ld-subtitle{font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;direction:rtl}
 .ld-subtitle .shiba-icon-inline{height:1.05em;width:1.05em}
 
-.loading-bar{width:min(86%,320px);height:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(147,92,246,0.3);border-radius:20px;overflow:hidden;margin-top:4px}
-.loading-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:20px;animation:load 1.8s ease-in-out infinite;box-shadow:0 0 14px rgba(147,92,246,0.6)}
-@keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+.loading-panel{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.loading-label{font-size:11.5px;font-weight:700;letter-spacing:4px;color:rgba(255,255,255,0.75);text-transform:uppercase;text-shadow:0 1px 4px rgba(0,0,0,0.6)}
+.loading-label .ld-dot{display:inline-block;animation:ld-dot-pulse 1.4s ease-in-out infinite;opacity:0.25}
+.loading-label .ld-dot:nth-child(2){animation-delay:0.2s}
+.loading-label .ld-dot:nth-child(3){animation-delay:0.4s}
+@keyframes ld-dot-pulse{0%,60%,100%{opacity:0.25}30%{opacity:1}}
+.loading-bar{width:min(86%,320px);height:10px;background:rgba(10,6,20,0.55);border:1px solid rgba(155,92,246,0.35);border-radius:20px;overflow:hidden;position:relative;box-shadow:inset 0 2px 5px rgba(0,0,0,0.5),0 0 22px rgba(155,92,246,0.3);backdrop-filter:blur(6px)}
+.loading-fill{height:100%;width:0%;border-radius:20px;position:relative;background:linear-gradient(90deg,#6d28d9,#9b5cf6 55%,#f5c94b 100%);box-shadow:0 0 14px rgba(155,92,246,0.75),0 0 6px rgba(245,201,75,0.6);transition:width 0.4s cubic-bezier(0.4,0,0.2,1)}
+.loading-fill::after{content:'';position:absolute;inset:0;width:36%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.65),transparent);animation:ld-shine 1.35s linear infinite}
+@keyframes ld-shine{0%{transform:translateX(-140%)}100%{transform:translateX(380%)}}
+.loading-percent{font-size:13px;font-weight:800;letter-spacing:0.5px;color:#f5c94b;text-shadow:0 0 10px rgba(245,201,75,0.55);font-variant-numeric:tabular-nums}
 
 .ld-status{margin-top:0}
 .ld-status-main{font-size:14px;color:var(--orange2);font-weight:600;direction:rtl}
@@ -371,7 +379,11 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 <!-- Loading -->
 <div class="loading-screen" id="loadingScreen">
-  <div class="loading-bar"><div class="loading-fill"></div></div>
+  <div class="loading-panel">
+    <div class="loading-label">LOADING<span class="ld-dot">.</span><span class="ld-dot">.</span><span class="ld-dot">.</span></div>
+    <div class="loading-bar"><div class="loading-fill" id="loadingFill"></div></div>
+    <div class="loading-percent" id="loadingPercent">0%</div>
+  </div>
 </div>
 
 <!-- Mandatory Subscription Gate -->
@@ -726,6 +738,32 @@ var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, 
 
 var currentTab = 'channels';
 
+// ── Loading progress bar (eases toward ~92% while waiting, then completes) ──
+var _ldProgress = 0, _ldTimer = null;
+function _ldSetPercent(p){
+  var fill = document.getElementById('loadingFill');
+  var pct  = document.getElementById('loadingPercent');
+  if (fill) fill.style.width = p + '%';
+  if (pct)  pct.textContent  = Math.round(p) + '%';
+}
+function startLoadingProgress(){
+  _ldProgress = 0;
+  _ldSetPercent(0);
+  clearInterval(_ldTimer);
+  _ldTimer = setInterval(function(){
+    var remaining = 92 - _ldProgress;
+    var step = Math.max(remaining * 0.06, 0.15);
+    _ldProgress = Math.min(_ldProgress + step, 92);
+    _ldSetPercent(_ldProgress);
+    if (_ldProgress >= 92) clearInterval(_ldTimer);
+  }, 90);
+}
+function finishLoadingProgress(){
+  clearInterval(_ldTimer);
+  _ldSetPercent(100);
+}
+startLoadingProgress();
+
 // ── Boot ─────────────────────────────────────────────────────────────
 (function boot(){
   var tries = 0;
@@ -807,7 +845,10 @@ function showMockData(){
 }
 
 function showApp(){
-  document.getElementById('loadingScreen').classList.add('hidden');
+  finishLoadingProgress();
+  setTimeout(function(){
+    document.getElementById('loadingScreen').classList.add('hidden');
+  }, 260);
   var fs = (S.data && S.data.forceSub) || { required:false, passed:true, channels:[] };
   if (fs.required && !fs.passed){
     renderForceSub(fs);
