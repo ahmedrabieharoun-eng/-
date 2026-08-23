@@ -249,13 +249,13 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 .ref-list-section{padding:0 16px 16px}
 .ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
-.ref-user-item{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px;border-radius:18px;background:linear-gradient(145deg,rgba(52,38,30,.72),rgba(24,21,20,.92));border:1px solid rgba(255,255,255,.13);margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.ref-user-item{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border-radius:18px;background:linear-gradient(145deg,rgba(52,38,30,.72),rgba(24,21,20,.92));border:1px solid rgba(255,255,255,.13);margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.22);direction:rtl}
 .ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(147,92,246,0.25)}
 .ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ref-user-info{flex:1;min-width:0}
 .ref-user-name{font-size:14px;font-weight:600;color:var(--text)}
 .ref-user-meta{font-size:11px;color:var(--text3);margin-top:2px}
-.ref-user-earn{text-align:right}
+.ref-user-earn{text-align:left;min-width:78px;direction:ltr}
 .ref-user-earn-val{font-size:14px;font-weight:800;color:var(--orange);display:block}
 .ref-user-earn-lbl{font-size:10px;color:var(--text3)}
 .ref-user-details{flex-basis:100%;margin-top:-5px;padding-top:9px;border-top:1px solid var(--glass-border);font-size:11px;color:var(--text2);line-height:1.7}.ref-user-details b{color:var(--orange)}.ref-user-badge.fraud{background:rgba(239,68,68,.14);color:#ff7777}.ref-user-badge.inactive{background:rgba(245,165,36,.14);color:#f5b642}
@@ -1187,9 +1187,10 @@ function renderRefs(page){
            : isActive
           ? '<span class="ref-user-badge active">Active</span>'
           : '<span class="ref-user-badge inactive">Inactive</span>';
-      var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
-      var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-       var days = r.days || [1,2,3].map(function(day){ return {day:day,adsWatched:0,adsRequired:10,claimed:false}; });
+       var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
+       var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+        var days = r.days || [1,2,3].map(function(day){ return {day:day,adsWatched:0,adsRequired:10,claimed:false}; });
+        var completedDays = days.filter(function(d){ return d.claimed; }).length;
        var daysHtml = '<div class="ref-days">'+days.map(function(d){
          return '<div class="ref-day '+(d.claimed?'done':'')+'">'+
            '<div class="ref-day-title">'+(d.claimed?'✓ ':'')+'Day '+d.day+'</div>'+
@@ -1201,12 +1202,12 @@ function renderRefs(page){
           : '<div class="ref-earned-total">You earned '+earned+' GD from this user</div>';
        htmlParts.push('<div class="ref-user-item">'+
         '<div class="ref-user-avatar">'+av+'</div>'+
-        '<div class="ref-user-info">'+
+         '<div class="ref-user-info">'+
           '<div class="ref-user-name">'+esc(name)+'</div>'+
-          '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
-          badge+
+           '<div class="ref-user-meta">'+esc(handle)+(date?' · Joined '+date:'')+'</div>'+
         '</div>'+
         '<div class="ref-user-earn">'+
+            badge+
            '<span class="ref-user-earn-val">'+earned+'</span>'+
            '<span class="ref-user-earn-lbl">Total earned</span>'+
         '</div>'+
