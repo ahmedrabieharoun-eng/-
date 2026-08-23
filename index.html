@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1074,7 +1076,11 @@ function render(){
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
    document.getElementById('refInactive').textContent = refStats.inactive ?? Math.max(0,totalRefs-activeRefs);
-   document.getElementById('refFraud').textContent = refStats.multipleAccounts || 0;
+    // لا يوجد كارت مستقل لعدد الحسابات المتعددة في واجهة الإحالات الحالية.
+    // كان الوصول إلى عنصر غير موجود هنا يوقف render() بالكامل، وبالتالي لا
+    // يتم رسم قائمة الإحالات ولا يتم تحديث رصيد/سجل المحفظة.
+    var fraudEl = document.getElementById('refFraud');
+    if (fraudEl) fraudEl.textContent = refStats.multipleAccounts || 0;
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
   // Wallet (Balance & History)
@@ -1159,40 +1165,54 @@ function renderActivity(log){
 function renderRefs(page){
   var el = document.getElementById('refList');
   var refs = S.refs;
-  if (!refs.length){ el.innerHTML = '<div class="empty-state">No referrals yet</div>'; return; }
+  if (!refs || !refs.length){ el.innerHTML = '<div class="empty-state">No referrals yet</div>'; return; }
   var visible = refs.slice(0, 5 + page*5);
-  el.innerHTML = visible.map(function(r){
-    var name = r.firstName || r.name || 'Unknown';
-    var handle = r.username ? '@'+r.username : '';
-    var isActive = r.status === 'active';
-    var earned = fmtShiba(r.totalEarned || 0);
-    var badge = r.fraudMultipleAccounts
-      ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
-      : isActive
-        ? '<span class="ref-user-badge active">Active</span>'
-        : '<span class="ref-user-badge inactive">Inactive</span>';
-    var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
-    var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-    return '<div class="ref-user-item">'+
-      '<div class="ref-user-avatar">'+av+'</div>'+
-      '<div class="ref-user-info">'+
-        '<div class="ref-user-name">'+esc(name)+'</div>'+
-        '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
-        badge+
-      '</div>'+
-      '<div class="ref-user-earn">'+
-         '<span class="ref-user-earn-val">'+earned+'</span>'+
-         '<span class="ref-user-earn-lbl">Total earned</span>'+
-      '</div>'+
-      '<div class="ref-user-details">'+
-        (isActive ? '✅ نشط · إجمالي ربحه: <b>'+earned+' PMT</b> · عمولتك 10%: <b>'+fmtShiba(r.referrerEarned||0)+' PMT</b>' :
-          r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
-          '📺 شاهد '+(r.adsWatched||0)+' من '+(r.adsRequired||10)+' إعلانات · متبقي <b>'+(r.adsRemaining||0)+'</b> لتفعيل الإحالة')+
-      '</div>'+
-    '</div>';
-  }).join('');
+  var htmlParts = [];
+  visible.forEach(function(r){
+    try {
+      if (!r) throw new Error('empty referral entry');
+      var name = r.firstName || r.name || 'Unknown';
+      if (typeof name !== 'string' || !name.length) name = 'Unknown';
+      var handle = r.username ? '@'+r.username : '';
+      var isActive = r.status === 'active';
+      var earned = fmtShiba(r.totalEarned || 0);
+      var badge = r.fraudMultipleAccounts
+        ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
+        : isActive
+          ? '<span class="ref-user-badge active">Active</span>'
+          : '<span class="ref-user-badge inactive">Inactive</span>';
+      var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
+      var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      htmlParts.push('<div class="ref-user-item">'+
+        '<div class="ref-user-avatar">'+av+'</div>'+
+        '<div class="ref-user-info">'+
+          '<div class="ref-user-name">'+esc(name)+'</div>'+
+          '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
+          badge+
+        '</div>'+
+        '<div class="ref-user-earn">'+
+           '<span class="ref-user-earn-val">'+earned+'</span>'+
+           '<span class="ref-user-earn-lbl">Total earned</span>'+
+        '</div>'+
+        '<div class="ref-user-details">'+
+          (isActive ? '✅ نشط · إجمالي ربحه: <b>'+earned+' PMT</b> · عمولتك 10%: <b>'+fmtShiba(r.referrerEarned||0)+' PMT</b>' :
+            r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
+            '📺 شاهد '+(r.adsWatched||0)+' من '+(r.adsRequired||10)+' إعلانات · متبقي <b>'+(r.adsRemaining||0)+'</b> لتفعيل الإحالة')+
+        '</div>'+
+      '</div>');
+    } catch (err) {
+      // منسجّلش الخطأ يكسر القايمة كلها — بس نطبعه في الـ console عشان
+      // نقدر نشخّص أي حقل ناقص في بيانات الإحالة من غير ما المستخدم
+      // يشوف صفحة فاضية.
+      console.error('renderRefs: failed to render one referral entry', err, r);
+      htmlParts.push('<div class="ref-user-item"><div class="ref-user-info"><div class="ref-user-name">'+esc((r && (r.firstName||r.username)) || 'Unknown')+'</div></div></div>');
+    }
+  });
+  el.innerHTML = htmlParts.join('');
   var loadBtn = document.getElementById('loadMoreBtn');
-  if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
+  if (loadBtn) {
+    if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
+  }
 }
 
 function loadMoreRefs(){
