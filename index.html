@@ -817,7 +817,7 @@ var wheelSpinning = false;
 var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gameFinished = false;
 
 // ── State ───────────────────────────────────────────────────────────
-var S = { initData:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
+var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
 
 var currentTab = 'ads';
 
@@ -857,6 +857,7 @@ startLoadingProgress();
       S.inTelegram = true;
       try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(_){}
       S.initData = Telegram.WebApp.initData || '';
+      S.startParam = (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) || '';
       loadState();
     } else if (tries > 40){
       clearInterval(iv);
@@ -888,7 +889,7 @@ async function api(action, data){
 
 // ── Load state ───────────────────────────────────────────────────────
 function loadState(){
-  api('getState', { _initData: S.initData }).then(function(res){
+  api('getState', { _initData: S.initData, _startParam: S.startParam }).then(function(res){
     if (!res || !res.success){
       if (S.inTelegram) showLoadError((res && res.error) || 'تعذر تحميل حساب تيليجرام');
       else showMockData();
