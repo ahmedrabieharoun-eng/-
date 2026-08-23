@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +11,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;
-  --orange:#9b5cf6;--orange2:#7c3aed;
-  --orange-dim:rgba(147,92,246,0.15);--orange-dim2:rgba(147,92,246,0.08);
+   --bg:#0b1020;--bg2:#12182a;--bg3:#1b2237;
+   --orange:#23b7f3;--orange2:#5978f5;
+   --orange-dim:rgba(35,183,243,0.15);--orange-dim2:rgba(35,183,243,0.08);
   --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
   --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
   --green:#22c55e;--red:#ef4444;
@@ -373,6 +375,29 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .forcesub-verify-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s,opacity 0.15s}
 .forcesub-verify-btn:active{transform:scale(0.97)}
 .forcesub-verify-btn:disabled{opacity:0.6}
+
+/* PMT home refresh */
+.home-header{padding-top:20px}
+.balance-card{background:linear-gradient(135deg,#13a8df 0%,#198ee0 48%,#5969ef 100%);border:0;box-shadow:0 14px 34px rgba(18,154,230,.22)}
+.balance-card::before{background:radial-gradient(circle,rgba(255,255,255,.28),transparent 68%)}
+.balance-label{color:rgba(255,255,255,.78)}
+.balance-num,.balance-currency{color:#fff}
+.balance-currency .shiba-icon-inline{width:46px;height:46px;vertical-align:-12px;margin-left:3px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.22))}
+.balance-sub{color:rgba(255,255,255,.72)}
+.balance-logo{opacity:.3}
+.home-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.home-action{border:0;border-radius:13px;padding:13px 10px;font-size:14px;font-weight:800;cursor:pointer}
+.home-action.earn{background:#fff;color:#1676aa}.home-action.withdraw{background:rgba(255,255,255,.18);color:#fff}
+.bonus-card,.redeem-card{margin:0 16px 12px;padding:15px;border-radius:16px;background:rgba(31,37,58,.9);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:13px}
+.feature-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.feature-icon.gold{background:linear-gradient(135deg,#f7ad16,#ffdf65)}.feature-icon.purple{background:linear-gradient(135deg,#8e5cf6,#c18dff)}
+.feature-copy{flex:1;min-width:0}.feature-title{font-weight:800;font-size:15px}.feature-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.feature-btn{border:0;border-radius:12px;padding:11px 15px;background:linear-gradient(135deg,#7189ff,#5c6ff0);color:#fff;font-weight:800;cursor:pointer}
+.feature-btn:disabled{opacity:.55}
+.stats-section{padding-bottom:18px}.stat-card{background:rgba(31,37,58,.72)}.stat-val.orange{color:#55caff}
+.how-title{padding:0 20px 10px;color:var(--text2);font-size:13px;font-weight:800;letter-spacing:1px}
+.how-card{margin:0 16px 16px;padding:15px;border-radius:16px;background:rgba(31,37,58,.72);border:1px solid rgba(255,255,255,.07)}
+.how-row{display:flex;align-items:center;gap:12px;padding:5px 0}.how-num{width:28px;height:28px;border-radius:50%;background:rgba(35,183,243,.16);color:#55caff;display:flex;align-items:center;justify-content:center;font-weight:800}.how-row b{font-size:14px}.how-row span{font-size:12px;color:var(--text2);display:block;margin-top:2px}
 </style>
 </head>
 <body>
@@ -412,7 +437,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
         </div>
       </div>
 
-      <div class="balance-section">
+       <div class="balance-section">
         <div class="balance-card">
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
@@ -420,57 +445,47 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
             <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
           </div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
-          <div class="balance-logo">🐕</div>
+           <div class="balance-logo">💠</div>
+           <div class="home-actions">
+             <button class="home-action earn" onclick="switchPage('tasks')">⚡ Earn</button>
+             <button class="home-action withdraw" onclick="switchPage('wallet')">▣ Withdraw</button>
+           </div>
         </div>
       </div>
+
+       <div class="bonus-card">
+         <div class="feature-icon gold">🎁</div>
+         <div class="feature-copy"><div class="feature-title">Daily Bonus</div><div class="feature-sub" id="dailyBonusSub">Come back every day · +500 PMT</div></div>
+         <button class="feature-btn" id="dailyBonusBtn" onclick="claimDailyBonus()">Claim</button>
+       </div>
+       <div class="redeem-card">
+         <div class="feature-icon purple">🎟️</div>
+         <div class="feature-copy"><div class="feature-title">Redeem Code</div><div class="feature-sub">Have a promo code? Claim your reward</div></div>
+         <button class="feature-btn" onclick="openModal('redeemModal')">Redeem</button>
+       </div>
 
       <div class="stats-section">
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-val" id="statTotalRefs">0</div>
-            <div class="stat-lbl">Total Referrals</div>
+             <div class="stat-val orange" id="statEarnedToday">0</div>
+             <div class="stat-lbl">Earned today</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val orange" id="statActiveRefs">0</div>
-            <div class="stat-lbl">Active Refs</div>
+             <div class="stat-val" id="statAdsToday">0</div>
+             <div class="stat-lbl">Ads watched</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val orange" id="statEarned">0</div>
-            <div class="stat-lbl"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> Earned</div>
+             <div class="stat-val orange" id="statFriendsInvited">0</div>
+             <div class="stat-lbl">Friends invited</div>
           </div>
         </div>
       </div>
+       <div class="how-title">— HOW IT WORKS</div>
+       <div class="how-card">
+         <div class="how-row"><div class="how-num">1</div><div><b>Watch ads</b><span>Every ad adds PMT to your balance instantly</span></div></div>
+         <div class="how-row"><div class="how-num">2</div><div><b>Invite friends</b><span>Earn more PMT when your friends join</span></div></div>
+       </div>
 
-      <div class="invite-section">
-        <button class="wheel-card-btn" id="homeWheelBtn" onclick="switchPage('wheel')">
-          <div class="wheel-card-icon">🎡</div>
-          <div class="wheel-card-text">
-            <span class="wheel-card-title">Lucky Wheel</span>
-            <span class="wheel-card-sub" id="homeWheelSub">Spin &amp; win up to 10,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">!</span>
-          </div>
-          <div class="wheel-card-badge" id="homeWheelBadge" style="display:none">0</div>
-        </button>
-      </div>
-
-      <div>
-        <div class="section-header">
-          <div class="section-title">Recent Activity</div>
-        </div>
-        <div class="rewards-section" id="homeActivity">
-          <div class="empty-state">No activity yet</div>
-        </div>
-      </div>
-
-      <div class="promo-section">
-        <div class="promo-card">
-          <div class="promo-emoji">🚀</div>
-          <div class="promo-content">
-            <div class="promo-title">Big Rewards Await!</div>
-            <div class="promo-desc">Invite friends, complete tasks and earn real <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> rewards!</div>
-            <button class="promo-btn" onclick="switchPage('tasks')">Let's Go!</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- TASKS -->
@@ -713,6 +728,18 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
   </div>
 </div>
 
+<!-- Redeem Code Modal -->
+<div class="modal-overlay" id="redeemModal" onclick="closeModalOutside(event,'redeemModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎟️ Redeem Code</div>
+    <div class="modal-desc">Enter a valid code to receive its PMT reward.</div>
+    <input class="modal-input" id="redeemCodeInput" maxlength="64" autocomplete="off" placeholder="Enter redeem code">
+    <button class="modal-submit" id="redeemSubmitBtn" onclick="redeemCode()">Redeem Reward</button>
+    <button class="modal-close" onclick="closeModal('redeemModal')">Cancel</button>
+  </div>
+</div>
+
 
 <div class="toast" id="toast"></div>
 
@@ -721,7 +748,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
 var BOT_USER = 'testtt1257bot'; // يوزر بوت التليجرام (بدون @)
 
-// أيقونة عملة SHIBA — تُستخدم بدل كتابة كلمة "SHIBA" في أي نص يُولَّد من الجافاسكريبت
+// أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
 
 // مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
@@ -821,7 +848,7 @@ function loadState(){
 
 // Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
 function showMockData(){
-  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'123456', wallet:'' };
+  S.user = { firstName:'Demo', lastName:'User', username:'demo_user', photoUrl:'', balance:5000, referralCode:'123456', wallet:'', dailyBonusDate:null };
   S.data = {
     referrals:[], balanceLogs:[], withdrawals:[],
     tasks:[
@@ -836,7 +863,9 @@ function showMockData(){
     completedTasks:[],
     combo:{ solvedToday:false, reward:5000 },
     wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
-    config:{ referralReward:4000, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
+    config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
+    daily:{ reward:500, claimed:false },
+    stats:{ adsWatchedToday:0, friendsInvited:0, earnedToday:0 },
     forceSub:{ required:false, passed:true, channels:[] }
   };
   S.refs = [];
@@ -926,13 +955,22 @@ function render(){
   var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
   var activeRefs = activeRefsList.length;
   var totalRefEarned = activeRefsList.reduce(function(sum,r){ return sum + (parseFloat(r.reward)||0); },0);
-  document.getElementById('statTotalRefs').textContent = totalRefs;
-  document.getElementById('statActiveRefs').textContent = activeRefs;
-  document.getElementById('statEarned').textContent = fmtShiba(totalRefEarned);
+   var stats = d.stats || {};
+   document.getElementById('statEarnedToday').textContent = fmtShiba(stats.earnedToday || 0);
+   document.getElementById('statAdsToday').textContent = stats.adsWatchedToday || 0;
+   document.getElementById('statFriendsInvited').textContent = stats.friendsInvited ?? totalRefs;
+   var dailyBtn = document.getElementById('dailyBonusBtn');
+   if (dailyBtn) {
+     dailyBtn.disabled = !!(d.daily && d.daily.claimed);
+     dailyBtn.textContent = d.daily && d.daily.claimed ? 'Claimed' : 'Claim';
+   }
+   var dailySub = document.getElementById('dailyBonusSub');
+   if (dailySub) dailySub.textContent = 'Come back every day · +'+fmtShiba((d.daily && d.daily.reward) || 500)+' PMT';
   // Referral reward (used on Referrals page)
   var refReward = cfg.referralReward || 4000;
   // Activity log
-  renderActivity(d.balanceLogs || []);
+   var activity = document.getElementById('homeActivity');
+   if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
   document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
   document.getElementById('refLinkUrl').textContent = 'https://t.me/'+(cfg.botUsername||BOT_USER)+'?startapp='+u.referralCode;
@@ -948,7 +986,39 @@ function render(){
   // Tasks
   renderTasks(currentTab);
   // Lucky Wheel
-  renderWheelInfo();
+   renderWheelInfo();
+}
+
+function claimDailyBonus(){
+  var btn = document.getElementById('dailyBonusBtn');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true; btn.textContent = '...';
+  api('claimDailyBonus', {}).then(function(res){
+    if (!res.success){ btn.disabled=false; btn.textContent='Claim'; showToast(res.error||'Could not claim bonus','error'); return; }
+    S.user.balance = res.data.shibaBalance;
+    S.data.daily = S.data.daily || {};
+    S.data.daily.claimed = true;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    btn.textContent = 'Claimed';
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
+  }).catch(function(){ btn.disabled=false; btn.textContent='Claim'; showToast('Network error','error'); });
+}
+
+function redeemCode(){
+  var input = document.getElementById('redeemCodeInput');
+  var btn = document.getElementById('redeemSubmitBtn');
+  var code = (input.value||'').trim();
+  if (!code){ showToast('Enter a redeem code','error'); return; }
+  btn.disabled=true; btn.textContent='Checking...';
+  api('redeemCode', {code:code}).then(function(res){
+    btn.disabled=false; btn.textContent='Redeem Reward';
+    if (!res.success){ showToast(res.error||'Invalid code','error'); return; }
+    S.user.balance = res.data.shibaBalance;
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    input.value='';
+    closeModal('redeemModal');
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
+  }).catch(function(){ btn.disabled=false; btn.textContent='Redeem Reward'; showToast('Network error','error'); });
 }
 
 function renderActivity(log){
@@ -1257,12 +1327,15 @@ function renderWheelInfo(){
   document.getElementById('wheelSpinsLeft').textContent = spins;
   document.getElementById('wheelRefsPerSpin').textContent = w.referralsPerSpin || 2;
 
-  var badge = document.getElementById('homeWheelBadge');
-  if (spins > 0){ badge.style.display = 'flex'; badge.textContent = spins; }
-  else { badge.style.display = 'none'; }
-  document.getElementById('homeWheelSub').textContent = spins > 0
-    ? spins+' free spin'+(spins>1?'s':'')+' available — tap to spin!'
-    : 'Invite friends to earn free spins!';
+   var badge = document.getElementById('homeWheelBadge');
+   if (badge) {
+     if (spins > 0){ badge.style.display = 'flex'; badge.textContent = spins; }
+     else { badge.style.display = 'none'; }
+   }
+   var homeWheelSub = document.getElementById('homeWheelSub');
+   if (homeWheelSub) homeWheelSub.textContent = spins > 0
+     ? spins+' free spin'+(spins>1?'s':'')+' available — tap to spin!'
+     : 'Invite friends to earn free spins!';
 
   var btn = document.getElementById('wheelSpinBtn');
   if (btn && !wheelSpinning){ btn.disabled = spins <= 0; btn.textContent = 'SPIN'; }
@@ -1408,6 +1481,7 @@ function switchPage(name){
 }
 
 // ── Modals ─────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
 function openAddTaskModal(){
   document.getElementById('addTaskFormView').style.display = 'block';
   document.getElementById('addTaskSuccessView').style.display = 'none';
