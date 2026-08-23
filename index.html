@@ -798,6 +798,15 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
 var BOT_USER = 'jygjhvjbot'; // يوزر بوت التليجرام (بدون @)
+// اسم الـ Mini App المسجّل في BotFather (Short Name) — لازم يتحط هنا لأن
+// البوت ده "بوت أزرار" وميني آبه مش الـ Main App الافتراضي، فرابط
+// t.me/BOT?startapp=CODE لوحده مش هيفتح الميني آب، لازم يبقى
+// t.me/BOT/APP_SHORT_NAME?startapp=CODE (تأكد إن القيمة دي مطابقة
+// تمامًا لاسم الـ short name اللي عملته بـ /newapp في BotFather)
+var BOT_APP_SHORT_NAME = 'app';
+function buildRefLink(code){
+  return 'https://t.me/'+BOT_USER+'/'+BOT_APP_SHORT_NAME+'?startapp='+code;
+}
 
 // أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
@@ -1061,13 +1070,13 @@ function render(){
    if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
   document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
-  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+BOT_USER+'?startapp='+u.referralCode;
+  document.getElementById('refLinkUrl').textContent = buildRefLink(u.referralCode);
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
    document.getElementById('refInactive').textContent = refStats.inactive ?? Math.max(0,totalRefs-activeRefs);
    document.getElementById('refFraud').textContent = refStats.multipleAccounts || 0;
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
-  try { renderRefs(0); } catch(err){ console.error('[render] renderRefs crashed:', err); }
+  renderRefs(0);
   // Wallet (Balance & History)
   document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
   renderWalletHistory(d.balanceLogs||[]);
@@ -1152,48 +1161,38 @@ function renderRefs(page){
   var refs = S.refs;
   if (!refs.length){ el.innerHTML = '<div class="empty-state">No referrals yet</div>'; return; }
   var visible = refs.slice(0, 5 + page*5);
-  // مهم: بننده كل عنصر لوحده جوه try/catch — عشان لو حاجة واحدة فيها بيانات
-  // ناقصة/غريبة، ماتوقفش عرض بقية القايمة كلها (وماترجعش "No referrals yet"
-  // غلط مع إن فيه إحالات فعلاً مسجّلة).
-  var itemsHtml = visible.map(function(r){
-    try {
-      var name = r.firstName || r.name || r.username || 'Unknown';
-      var handle = r.username ? '@'+r.username : '';
-      var isActive = r.status === 'active';
-      var earned = fmtShiba(r.totalEarned || 0);
-      var badge = r.fraudMultipleAccounts
-        ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
-        : isActive
-          ? '<span class="ref-user-badge active">Active</span>'
-          : '<span class="ref-user-badge inactive">Inactive</span>';
-      var initial = (String(name).trim()[0] || '?').toUpperCase();
-      var av = r.photoUrl ? '<img src="'+esc(r.photoUrl)+'" alt="">' : esc(initial);
-      var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-      return '<div class="ref-user-item">'+
-        '<div class="ref-user-avatar">'+av+'</div>'+
-        '<div class="ref-user-info">'+
-          '<div class="ref-user-name">'+esc(name)+'</div>'+
-          '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
-          badge+
-        '</div>'+
-        '<div class="ref-user-earn">'+
-           '<span class="ref-user-earn-val">'+earned+'</span>'+
-           '<span class="ref-user-earn-lbl">Total earned</span>'+
-        '</div>'+
-        '<div class="ref-user-details">'+
-          (isActive ? '✅ نشط · إجمالي ربحه: <b>'+earned+' PMT</b> · عمولتك 10%: <b>'+fmtShiba(r.referrerEarned||0)+' PMT</b>' :
-            r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
-            '📺 شاهد '+(r.adsWatched||0)+' من '+(r.adsRequired||10)+' إعلانات · متبقي <b>'+(r.adsRemaining||0)+'</b> لتفعيل الإحالة')+
-        '</div>'+
-      '</div>';
-    } catch (err) {
-      console.error('[renderRefs] failed to render one referral item:', err, r);
-      return '<div class="ref-user-item"><div class="ref-user-info"><div class="ref-user-name">'+esc(r && (r.firstName||r.username) || 'Unknown')+'</div></div></div>';
-    }
+  el.innerHTML = visible.map(function(r){
+    var name = r.firstName || r.name || 'Unknown';
+    var handle = r.username ? '@'+r.username : '';
+    var isActive = r.status === 'active';
+    var earned = fmtShiba(r.totalEarned || 0);
+    var badge = r.fraudMultipleAccounts
+      ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
+      : isActive
+        ? '<span class="ref-user-badge active">Active</span>'
+        : '<span class="ref-user-badge inactive">Inactive</span>';
+    var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name[0].toUpperCase());
+    var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    return '<div class="ref-user-item">'+
+      '<div class="ref-user-avatar">'+av+'</div>'+
+      '<div class="ref-user-info">'+
+        '<div class="ref-user-name">'+esc(name)+'</div>'+
+        '<div class="ref-user-meta">'+esc(handle)+(date?' · '+date:'')+'</div>'+
+        badge+
+      '</div>'+
+      '<div class="ref-user-earn">'+
+         '<span class="ref-user-earn-val">'+earned+'</span>'+
+         '<span class="ref-user-earn-lbl">Total earned</span>'+
+      '</div>'+
+      '<div class="ref-user-details">'+
+        (isActive ? '✅ نشط · إجمالي ربحه: <b>'+earned+' PMT</b> · عمولتك 10%: <b>'+fmtShiba(r.referrerEarned||0)+' PMT</b>' :
+          r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
+          '📺 شاهد '+(r.adsWatched||0)+' من '+(r.adsRequired||10)+' إعلانات · متبقي <b>'+(r.adsRemaining||0)+'</b> لتفعيل الإحالة')+
+      '</div>'+
+    '</div>';
   }).join('');
-  el.innerHTML = itemsHtml || '<div class="empty-state">No referrals yet</div>';
   var loadBtn = document.getElementById('loadMoreBtn');
-  if (loadBtn) { if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; } }
+  if (visible.length < refs.length){ loadBtn.style.display='block'; } else { loadBtn.style.display='none'; }
 }
 
 function loadMoreRefs(){
@@ -1554,8 +1553,7 @@ function spinWheel(){
 // Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
 function shareInvite(){
   if (!S.user) return;
-  var botUser = BOT_USER;
-  var link = 'https://t.me/'+botUser+'?startapp='+S.user.referralCode;
+  var link = buildRefLink(S.user.referralCode);
   var text  = 'Join me on PlayMint and earn real PMT!';
   var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
@@ -1589,8 +1587,7 @@ function fallbackCopy(text){
 }
 
 function copyRefLink(){
-  var botUser = BOT_USER;
-  var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
+  var link = buildRefLink(S.user ? S.user.referralCode : '0');
   copyToClipboard(link);
   showToast('Referral link copied! 📋');
 }
