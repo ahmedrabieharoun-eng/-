@@ -817,7 +817,7 @@ var wheelSpinning = false;
 var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gameFinished = false;
 
 // ── State ───────────────────────────────────────────────────────────
-var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
+var S = { initData:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
 
 var currentTab = 'ads';
 
@@ -854,6 +854,7 @@ startLoadingProgress();
     tries++;
     if (window.Telegram && window.Telegram.WebApp){
       clearInterval(iv);
+      S.inTelegram = true;
       try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(_){}
       S.initData = Telegram.WebApp.initData || '';
       loadState();
@@ -889,7 +890,8 @@ async function api(action, data){
 function loadState(){
   api('getState', { _initData: S.initData }).then(function(res){
     if (!res || !res.success){
-      showMockData();
+      if (S.inTelegram) showLoadError((res && res.error) || 'تعذر تحميل حساب تيليجرام');
+      else showMockData();
       return;
     }
     S.data = res.data;
@@ -897,9 +899,31 @@ function loadState(){
     S.refs = res.data.referrals || [];
     showApp();
     render();
-  }).catch(function(){
-    showMockData();
+  }).catch(function(err){
+    if (S.inTelegram) showLoadError('تعذر الاتصال بالسيرفر. حاول فتح التطبيق من زر البوت داخل تيليجرام.');
+    else showMockData();
   });
+}
+
+function showLoadError(message){
+  clearInterval(_ldTimer);
+  var screen = document.getElementById('loadingScreen');
+  var panel = screen && screen.querySelector('.loading-panel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  var title = document.createElement('div');
+  title.className = 'loading-label';
+  title.textContent = 'تعذر تحميل الحساب';
+  var detail = document.createElement('div');
+  detail.style.cssText = 'margin-top:14px;color:var(--text2);font-size:12px;line-height:1.7;max-width:280px;text-align:center;direction:rtl';
+  detail.textContent = message;
+  var hint = document.createElement('div');
+  hint.style.cssText = 'margin-top:10px;color:var(--text3);font-size:11px;text-align:center;direction:rtl';
+  hint.textContent = 'افتح الـ Mini App من زر البوت داخل تيليجرام، وليس من رابط معاينة عادي.';
+  panel.appendChild(title);
+  panel.appendChild(detail);
+  panel.appendChild(hint);
+  screen.classList.remove('hidden');
 }
 
 // Graceful fallback when API is unreachable / not inside Telegram (dev preview only)
