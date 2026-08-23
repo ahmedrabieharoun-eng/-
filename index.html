@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -798,15 +800,6 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
 var BOT_USER = 'jygjhvjbot'; // يوزر بوت التليجرام (بدون @)
-// اسم الـ Mini App المسجّل في BotFather (Short Name) — لازم يتحط هنا لأن
-// البوت ده "بوت أزرار" وميني آبه مش الـ Main App الافتراضي، فرابط
-// t.me/BOT?startapp=CODE لوحده مش هيفتح الميني آب، لازم يبقى
-// t.me/BOT/APP_SHORT_NAME?startapp=CODE (تأكد إن القيمة دي مطابقة
-// تمامًا لاسم الـ short name اللي عملته بـ /newapp في BotFather)
-var BOT_APP_SHORT_NAME = 'app';
-function buildRefLink(code){
-  return 'https://t.me/'+BOT_USER+'/'+BOT_APP_SHORT_NAME+'?startapp='+code;
-}
 
 // أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
@@ -1070,7 +1063,7 @@ function render(){
    if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
   document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
-  document.getElementById('refLinkUrl').textContent = buildRefLink(u.referralCode);
+  document.getElementById('refLinkUrl').textContent = 'https://t.me/'+BOT_USER+'?startapp='+u.referralCode;
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
    document.getElementById('refInactive').textContent = refStats.inactive ?? Math.max(0,totalRefs-activeRefs);
@@ -1553,7 +1546,8 @@ function spinWheel(){
 // Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
 function shareInvite(){
   if (!S.user) return;
-  var link = buildRefLink(S.user.referralCode);
+  var botUser = BOT_USER;
+  var link = 'https://t.me/'+botUser+'?startapp='+S.user.referralCode;
   var text  = 'Join me on PlayMint and earn real PMT!';
   var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
@@ -1587,7 +1581,8 @@ function fallbackCopy(text){
 }
 
 function copyRefLink(){
-  var link = buildRefLink(S.user ? S.user.referralCode : '0');
+  var botUser = BOT_USER;
+  var link = 'https://t.me/'+botUser+'?startapp='+(S.user ? S.user.referralCode : '0');
   copyToClipboard(link);
   showToast('Referral link copied! 📋');
 }
