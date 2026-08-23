@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PlayMint</title>
+<title>Gram Drop</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="11638380" data-sdk="show_11638380"></script>
 <script src="anti-fraud-frontend.js"></script>
@@ -249,7 +249,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 .ref-list-section{padding:0 16px 16px}
 .ref-list-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px}
-.ref-user-item{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.ref-user-item{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px;border-radius:18px;background:linear-gradient(145deg,rgba(52,38,30,.72),rgba(24,21,20,.92));border:1px solid rgba(255,255,255,.13);margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.22)}
 .ref-user-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(147,92,246,0.25)}
 .ref-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ref-user-info{flex:1;min-width:0}
@@ -259,6 +259,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ref-user-earn-val{font-size:14px;font-weight:800;color:var(--orange);display:block}
 .ref-user-earn-lbl{font-size:10px;color:var(--text3)}
 .ref-user-details{flex-basis:100%;margin-top:-5px;padding-top:9px;border-top:1px solid var(--glass-border);font-size:11px;color:var(--text2);line-height:1.7}.ref-user-details b{color:var(--orange)}.ref-user-badge.fraud{background:rgba(239,68,68,.14);color:#ff7777}.ref-user-badge.inactive{background:rgba(245,165,36,.14);color:#f5b642}
+.ref-days{flex-basis:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;direction:rtl}
+.ref-day{padding:9px 3px;border-radius:11px;text-align:center;font-size:10px;background:rgba(154,57,48,.18);border:1px solid rgba(231,92,80,.45);color:#ff8b83;line-height:1.45}
+.ref-day.done{background:rgba(38,113,48,.28);border-color:rgba(82,190,91,.65);color:#82e59b}
+.ref-day-title{font-weight:800}.ref-earned-total{flex-basis:100%;text-align:center;color:var(--green);font-size:11px;padding-top:3px;font-weight:700}
 .ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
 .ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
 .ref-user-badge.new{background:rgba(147,92,246,0.12);color:var(--orange)}
@@ -488,7 +492,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-            <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
+             <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"></span>
           </div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
            <div class="balance-logo">💠</div>
@@ -501,7 +505,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
        <div class="bonus-card">
          <div class="feature-icon gold">🎁</div>
-         <div class="feature-copy"><div class="feature-title">Daily Bonus</div><div class="feature-sub" id="dailyBonusSub">Come back every day · +500 PMT</div></div>
+         <div class="feature-copy"><div class="feature-title">Daily Bonus</div><div class="feature-sub" id="dailyBonusSub">Come back every day · +500 GD</div></div>
          <button class="feature-btn" id="dailyBonusBtn" onclick="claimDailyBonus()">Claim</button>
        </div>
        <div class="redeem-card">
@@ -528,15 +532,15 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
        <div class="how-title">— HOW IT WORKS</div>
        <div class="how-card">
-         <div class="how-row"><div class="how-num">1</div><div><b>Watch ads</b><span>Every ad adds PMT to your balance instantly</span></div></div>
-         <div class="how-row"><div class="how-num">2</div><div><b>Invite friends</b><span>Earn more PMT when your friends join</span></div></div>
+         <div class="how-row"><div class="how-num">1</div><div><b>Watch ads</b><span>Every ad adds GD to your balance instantly</span></div></div>
+         <div class="how-row"><div class="how-num">2</div><div><b>Invite friends</b><span>Earn more GD when your friends join</span></div></div>
        </div>
 
     </div>
 
     <!-- TASKS -->
     <div class="page" id="page-tasks">
-      <div class="tasks-header"><div class="page-title">Earn</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Complete tasks and collect PMT rewards</div></div>
+       <div class="tasks-header"><div class="page-title">Earn</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Complete tasks and collect GD rewards</div></div>
       <div class="tabs-section"><div class="tabs">
         <div class="tab active" onclick="switchTab(this,'ads')">▣ Ads</div>
         <div class="tab" onclick="switchTab(this,'channels')">🔗 User Tasks</div>
@@ -554,13 +558,13 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <!-- GAMES -->
     <div class="page" id="page-games">
       <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
-      <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
+         <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>GD</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
-        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('wheel')"><div class="game-card-icon">🎡</div><div class="game-card-title">Number Clash</div><div class="game-card-type">Spin × spin</div><span class="game-card-limit">up to 81 PMT</span><span class="game-card-plays" id="plays-wheel">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 150 PMT</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 600 PMT</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 GD</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('wheel')"><div class="game-card-icon">🎡</div><div class="game-card-title">Number Clash</div><div class="game-card-type">Spin × spin</div><span class="game-card-limit">up to 81 GD</span><span class="game-card-plays" id="plays-wheel">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 150 GD</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 600 GD</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
       </div>
     </div>
 
@@ -573,10 +577,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
     <!-- REFERRALS -->
     <div class="page" id="page-refs">
-      <div class="ref-banner">
-        <div class="ref-banner-title">Invite friends and earn</div>
-        <span class="ref-banner-pct" id="refPct">4,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
-         <div class="ref-banner-desc">تُفعَّل الإحالة بعد مشاهدة 10 إعلانات.<br>تحصل على مكافأة الإحالة، بالإضافة إلى 10% من كل أرباح إحالتك بعد تفعيلها.</div>
+       <div class="ref-banner">
+         <div class="ref-banner-title">Invite friends and earn</div>
+         <span class="ref-banner-pct" id="refPct">2,000 GD</span>
+          <div class="ref-banner-desc">كل إحالة تشاهد 10 إعلانات يوميًا لمدة 3 أيام.<br>تحصل على مكافأة يومية، بالإضافة إلى 10% من كل أرباح إحالتك بعد تفعيلها.</div>
       </div>
 
       <div class="ref-link-section">
@@ -611,7 +615,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
 
       <div class="ref-list-section">
-        <div class="ref-list-title">Referral List</div>
+       <div class="ref-list-title">Referral List · 3 Daily Bonuses</div>
         <div id="refList"><div class="empty-state">No referrals yet</div></div>
         <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMoreRefs()">Load More</button>
       </div>
@@ -622,9 +626,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
       <div class="wallet-bal-card">
-        <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> Balance</div>
+       <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"> Balance</div>
         <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
-        <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> from tasks &amp; referrals</div>
+         <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"> from tasks &amp; referrals</div>
       </div>
 
       <div class="wallet-actions">
@@ -960,7 +964,7 @@ function showMockData(){
     ],
     completedTasks:[],
     wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
-    config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
+    config:{ referralReward:2000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
     daily:{ reward:500, claimed:false },
     stats:{ adsWatchedToday:0, friendsInvited:0, earnedToday:0 },
     gamePlays:{coin:0,merge:0,flappy:0,gem:0},
@@ -1050,7 +1054,7 @@ function render(){
   document.getElementById('homeTon').textContent = fmtShiba(u.balance);
   // Stats — "Active" = passed mandatory subscription (real, verified referral)
   var totalRefs = S.refs.length;
-  var activeRefsList = S.refs.filter(function(r){ return r.status === 'active'; });
+   var activeRefsList = S.refs.filter(function(r){ return r.status === 'active' || r.status === 'completed'; });
   var activeRefs = activeRefsList.length;
    var refStats = d.referralStats || {};
    var totalRefEarned = refStats.commissionEarned || 0;
@@ -1064,14 +1068,14 @@ function render(){
      dailyBtn.textContent = d.daily && d.daily.claimed ? 'Claimed' : 'Claim';
    }
    var dailySub = document.getElementById('dailyBonusSub');
-   if (dailySub) dailySub.textContent = 'Come back every day · +'+fmtShiba((d.daily && d.daily.reward) || 500)+' PMT';
+   if (dailySub) dailySub.textContent = 'Come back every day · +'+fmtShiba((d.daily && d.daily.reward) || 500)+' GD';
   // Referral reward (used on Referrals page)
-  var refReward = cfg.referralReward || 4000;
+   var refReward = cfg.referralReward || 2000;
   // Activity log
    var activity = document.getElementById('homeActivity');
    if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
-  document.getElementById('refPct').innerHTML = fmtShiba(refReward)+' '+SHIBA_ICON;
+   document.getElementById('refPct').textContent = fmtShiba(refReward)+' GD / day × 3';
   document.getElementById('refLinkUrl').textContent = buildRefLink(u.referralCode);
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
@@ -1096,7 +1100,7 @@ function render(){
 function renderGames(){
   var balance = (S.user && S.user.balance) || 0;
   var balanceEl = document.getElementById('gamesBalance');
-  if (balanceEl) balanceEl.innerHTML = fmtShiba(balance)+' <span>PMT</span>';
+   if (balanceEl) balanceEl.innerHTML = fmtShiba(balance)+' <span>GD</span>';
   var plays = (S.data && S.data.gamePlays) || {};
   ['gem','wheel','xo','fruit'].forEach(function(key){
     var el = document.getElementById('plays-'+key);
@@ -1115,7 +1119,7 @@ function claimDailyBonus(){
     S.data.daily.claimed = true;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     btn.textContent = 'Claimed';
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
+     showToast('+'+fmtShiba(res.data.shibaAdded)+' GD added 🎉', null, true);
   }).catch(function(){ btn.disabled=false; btn.textContent='Claim'; showToast('Network error','error'); });
 }
 
@@ -1132,7 +1136,7 @@ function redeemCode(){
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     input.value='';
     closeModal('redeemModal');
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
+     showToast('+'+fmtShiba(res.data.shibaAdded)+' GD added 🎉', null, true);
   }).catch(function(){ btn.disabled=false; btn.textContent='Redeem Reward'; showToast('Network error','error'); });
 }
 
@@ -1175,15 +1179,27 @@ function renderRefs(page){
       if (typeof name !== 'string' || !name.length) name = 'Unknown';
       var handle = r.username ? '@'+r.username : '';
       var isActive = r.status === 'active';
-      var earned = fmtShiba(r.totalEarned || 0);
-      var badge = r.fraudMultipleAccounts
+       var earned = fmtShiba(r.totalReferralEarned || 0);
+       var badge = r.fraudMultipleAccounts
         ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
-        : isActive
+         : r.status === 'completed'
+           ? '<span class="ref-user-badge active">Completed</span>'
+           : isActive
           ? '<span class="ref-user-badge active">Active</span>'
           : '<span class="ref-user-badge inactive">Inactive</span>';
       var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
       var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-      htmlParts.push('<div class="ref-user-item">'+
+       var days = r.days || [1,2,3].map(function(day){ return {day:day,adsWatched:0,adsRequired:10,claimed:false}; });
+       var daysHtml = '<div class="ref-days">'+days.map(function(d){
+         return '<div class="ref-day '+(d.claimed?'done':'')+'">'+
+           '<div class="ref-day-title">'+(d.claimed?'✓ ':'')+'Day '+d.day+'</div>'+
+           '<div>ads '+Math.min(d.adsWatched||0,10)+'/10</div>'+
+         '</div>';
+       }).join('')+'</div>';
+        var earnedTotal = completedDays >= 3
+          ? '<div class="ref-earned-total">All 3 daily bonuses earned — '+earned+' GD total ✓</div>'
+          : '<div class="ref-earned-total">You earned '+earned+' GD from this user</div>';
+       htmlParts.push('<div class="ref-user-item">'+
         '<div class="ref-user-avatar">'+av+'</div>'+
         '<div class="ref-user-info">'+
           '<div class="ref-user-name">'+esc(name)+'</div>'+
@@ -1194,10 +1210,12 @@ function renderRefs(page){
            '<span class="ref-user-earn-val">'+earned+'</span>'+
            '<span class="ref-user-earn-lbl">Total earned</span>'+
         '</div>'+
-        '<div class="ref-user-details">'+
-          (isActive ? '✅ نشط · إجمالي ربحه: <b>'+earned+' PMT</b> · عمولتك 10%: <b>'+fmtShiba(r.referrerEarned||0)+' PMT</b>' :
-            r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
-            '📺 شاهد '+(r.adsWatched||0)+' من '+(r.adsRequired||10)+' إعلانات · متبقي <b>'+(r.adsRemaining||0)+'</b> لتفعيل الإحالة')+
+         daysHtml+
+         earnedTotal+
+         '<div class="ref-user-details">'+
+           (r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
+            r.completedDays >= 3 ? '✅ أكمل الأيام الثلاثة واستلمت كل المكافآت' :
+             '📺 يشاهد 10 إعلانات يوميًا لمدة 3 أيام · المكافأة اليومية: <b>'+fmtShiba(r.reward||0)+' GD</b>')+
         '</div>'+
       '</div>');
     } catch (err) {
@@ -1340,7 +1358,7 @@ function watchMonetag(){
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
       renderTasks('ads');
-      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+       showToast('+'+fmtShiba(res.data.shibaAdded)+' GD added 🎉',null,true);
     });
   }).catch(function(){ showToast('The ad could not be completed','error'); });
 }
@@ -1574,7 +1592,7 @@ function spinWheel(){
 function shareInvite(){
   if (!S.user) return;
   var link = buildRefLink(S.user.referralCode);
-  var text  = 'Join me on PlayMint and earn real PMT!';
+   var text  = 'Join me on Gram Drop and earn real GD!';
   var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
     try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
