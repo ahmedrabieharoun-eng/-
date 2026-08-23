@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Gram Drop</title>
+<title>Pmt Gram</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="11638380" data-sdk="show_11638380"></script>
 <script src="anti-fraud-frontend.js"></script>
@@ -505,7 +505,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
        <div class="bonus-card">
          <div class="feature-icon gold">🎁</div>
-         <div class="feature-copy"><div class="feature-title">Daily Bonus</div><div class="feature-sub" id="dailyBonusSub">Come back every day · +500 GD</div></div>
+         <div class="feature-copy"><div class="feature-title">Daily Bonus</div><div class="feature-sub" id="dailyBonusSub">Come back every day · +500 PMT</div></div>
          <button class="feature-btn" id="dailyBonusBtn" onclick="claimDailyBonus()">Claim</button>
        </div>
        <div class="redeem-card">
@@ -532,15 +532,15 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
        <div class="how-title">— HOW IT WORKS</div>
        <div class="how-card">
-         <div class="how-row"><div class="how-num">1</div><div><b>Watch ads</b><span>Every ad adds GD to your balance instantly</span></div></div>
-         <div class="how-row"><div class="how-num">2</div><div><b>Invite friends</b><span>Earn more GD when your friends join</span></div></div>
+         <div class="how-row"><div class="how-num">1</div><div><b>Watch ads</b><span>Every ad adds PMT to your balance instantly</span></div></div>
+         <div class="how-row"><div class="how-num">2</div><div><b>Invite friends</b><span>Earn more PMT when your friends join</span></div></div>
        </div>
 
     </div>
 
     <!-- TASKS -->
     <div class="page" id="page-tasks">
-       <div class="tasks-header"><div class="page-title">Earn</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Complete tasks and collect GD rewards</div></div>
+       <div class="tasks-header"><div class="page-title">Earn</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Complete tasks and collect PMT rewards</div></div>
       <div class="tabs-section"><div class="tabs">
         <div class="tab active" onclick="switchTab(this,'ads')">▣ Ads</div>
         <div class="tab" onclick="switchTab(this,'channels')">🔗 User Tasks</div>
@@ -558,13 +558,13 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <!-- GAMES -->
     <div class="page" id="page-games">
       <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
-         <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>GD</span></div></div></div>
+          <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
-        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 GD</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('wheel')"><div class="game-card-icon">🎡</div><div class="game-card-title">Number Clash</div><div class="game-card-type">Spin × spin</div><span class="game-card-limit">up to 81 GD</span><span class="game-card-plays" id="plays-wheel">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 150 GD</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 600 GD</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('wheel')"><div class="game-card-icon">🎡</div><div class="game-card-title">Number Clash</div><div class="game-card-type">Spin × spin</div><span class="game-card-limit">up to 81 PMT</span><span class="game-card-plays" id="plays-wheel">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 150 PMT</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 600 PMT</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
       </div>
     </div>
 
@@ -579,8 +579,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <div class="page" id="page-refs">
        <div class="ref-banner">
          <div class="ref-banner-title">Invite friends and earn</div>
-         <span class="ref-banner-pct" id="refPct">2,000 GD</span>
-          <div class="ref-banner-desc">كل إحالة تشاهد 10 إعلانات يوميًا لمدة 3 أيام.<br>تحصل على مكافأة يومية، بالإضافة إلى 10% من كل أرباح إحالتك بعد تفعيلها.</div>
+          <span class="ref-banner-pct" id="refPct">4,000 PMT</span>
+          <div class="ref-banner-desc">Each referral watches 10 ads per day for 3 days.<br>You earn a daily bonus plus 10% of everything they make after activation.</div>
       </div>
 
       <div class="ref-link-section">
@@ -626,9 +626,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
       <div class="wallet-bal-card">
-       <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"> Balance</div>
+       <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> Balance</div>
         <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
-         <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="GD"> from tasks &amp; referrals</div>
+         <div class="wbal-sub" id="walletCoinsInfo">Earn <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> from tasks &amp; referrals</div>
       </div>
 
       <div class="wallet-actions">
@@ -964,7 +964,7 @@ function showMockData(){
     ],
     completedTasks:[],
     wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
-    config:{ referralReward:2000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
+    config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
     daily:{ reward:500, claimed:false },
     stats:{ adsWatchedToday:0, friendsInvited:0, earnedToday:0 },
     gamePlays:{coin:0,merge:0,flappy:0,gem:0},
@@ -1068,14 +1068,14 @@ function render(){
      dailyBtn.textContent = d.daily && d.daily.claimed ? 'Claimed' : 'Claim';
    }
    var dailySub = document.getElementById('dailyBonusSub');
-   if (dailySub) dailySub.textContent = 'Come back every day · +'+fmtShiba((d.daily && d.daily.reward) || 500)+' GD';
+   if (dailySub) dailySub.textContent = 'Come back every day · +'+fmtShiba((d.daily && d.daily.reward) || 500)+' PMT';
   // Referral reward (used on Referrals page)
    var refReward = cfg.referralReward || 2000;
   // Activity log
    var activity = document.getElementById('homeActivity');
    if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
-   document.getElementById('refPct').textContent = fmtShiba(refReward)+' GD / day × 3';
+   document.getElementById('refPct').textContent = fmtShiba(refReward)+' PMT / day × 3';
   document.getElementById('refLinkUrl').textContent = buildRefLink(u.referralCode);
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
@@ -1100,7 +1100,7 @@ function render(){
 function renderGames(){
   var balance = (S.user && S.user.balance) || 0;
   var balanceEl = document.getElementById('gamesBalance');
-   if (balanceEl) balanceEl.innerHTML = fmtShiba(balance)+' <span>GD</span>';
+   if (balanceEl) balanceEl.innerHTML = fmtShiba(balance)+' <span>PMT</span>';
   var plays = (S.data && S.data.gamePlays) || {};
   ['gem','wheel','xo','fruit'].forEach(function(key){
     var el = document.getElementById('plays-'+key);
@@ -1119,7 +1119,7 @@ function claimDailyBonus(){
     S.data.daily.claimed = true;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     btn.textContent = 'Claimed';
-     showToast('+'+fmtShiba(res.data.shibaAdded)+' GD added 🎉', null, true);
+     showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
   }).catch(function(){ btn.disabled=false; btn.textContent='Claim'; showToast('Network error','error'); });
 }
 
@@ -1136,7 +1136,7 @@ function redeemCode(){
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     input.value='';
     closeModal('redeemModal');
-     showToast('+'+fmtShiba(res.data.shibaAdded)+' GD added 🎉', null, true);
+     showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
   }).catch(function(){ btn.disabled=false; btn.textContent='Redeem Reward'; showToast('Network error','error'); });
 }
 
@@ -1190,16 +1190,17 @@ function renderRefs(page){
        var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
        var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
         var days = r.days || [1,2,3].map(function(day){ return {day:day,adsWatched:0,adsRequired:10,claimed:false}; });
-        var completedDays = days.filter(function(d){ return d.claimed; }).length;
+        var completedDays = days.filter(function(d){ return d.claimed || Number(d.adsWatched || 0) >= 10; }).length;
        var daysHtml = '<div class="ref-days">'+days.map(function(d){
-         return '<div class="ref-day '+(d.claimed?'done':'')+'">'+
-           '<div class="ref-day-title">'+(d.claimed?'✓ ':'')+'Day '+d.day+'</div>'+
+          var dayDone = d.claimed || Number(d.adsWatched || 0) >= 10;
+          return '<div class="ref-day '+(dayDone?'done':'')+'">'+
+            '<div class="ref-day-title">'+(dayDone?'✓ ':'')+'Day '+d.day+'</div>'+
            '<div>ads '+Math.min(d.adsWatched||0,10)+'/10</div>'+
          '</div>';
        }).join('')+'</div>';
         var earnedTotal = completedDays >= 3
-          ? '<div class="ref-earned-total">All 3 daily bonuses earned — '+earned+' GD total ✓</div>'
-          : '<div class="ref-earned-total">You earned '+earned+' GD from this user</div>';
+          ? '<div class="ref-earned-total">All 3 daily bonuses earned — '+earned+' PMT total ✓</div>'
+          : '<div class="ref-earned-total">You earned '+earned+' PMT from this user</div>';
        htmlParts.push('<div class="ref-user-item">'+
         '<div class="ref-user-avatar">'+av+'</div>'+
          '<div class="ref-user-info">'+
@@ -1215,8 +1216,8 @@ function renderRefs(page){
          earnedTotal+
          '<div class="ref-user-details">'+
            (r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
-            r.completedDays >= 3 ? '✅ أكمل الأيام الثلاثة واستلمت كل المكافآت' :
-             '📺 يشاهد 10 إعلانات يوميًا لمدة 3 أيام · المكافأة اليومية: <b>'+fmtShiba(r.reward||0)+' GD</b>')+
+            completedDays >= 3 ? '✅ All 3 daily bonuses have been earned' :
+              '📺 Watches 10 ads per day for 3 days · Daily reward: <b>'+fmtShiba(r.reward||0)+' PMT</b>')+
         '</div>'+
       '</div>');
     } catch (err) {
@@ -1359,7 +1360,7 @@ function watchMonetag(){
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
       renderTasks('ads');
-       showToast('+'+fmtShiba(res.data.shibaAdded)+' GD added 🎉',null,true);
+        showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
     });
   }).catch(function(){ showToast('The ad could not be completed','error'); });
 }
@@ -1593,7 +1594,7 @@ function spinWheel(){
 function shareInvite(){
   if (!S.user) return;
   var link = buildRefLink(S.user.referralCode);
-   var text  = 'Join me on Gram Drop and earn real GD!';
+   var text  = 'Join me on Pmt Gram and earn real PMT!';
   var url   = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
   if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
     try { Telegram.WebApp.openTelegramLink(url); return; } catch(_){}
@@ -1659,7 +1660,7 @@ var gemState={bombs:[],found:0,rewards:[50,150,300,400,600,700]};
 function renderGemRush(board){
   var cells=[0,1,2,3,4,5,6,7,8].sort(function(){return Math.random()-.5;});
   gemState={bombs:cells.slice(0,3),found:0,rewards:[50,150,300,400,600,700]};
-  board.innerHTML='<div class="game-help">شرح اللعبة: أمامك 9 خانات؛ فيها 6 جواهر و3 قنابل. اجمع الجواهر واسحب مكافأتك، لأن اختيار قنبلة ينهي الجولة ويصفر المكافأة.</div><div class="rush-status">رصيد الجولة: <span id="rushReward">0</span> PMT</div><div class="gem-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="gem-cell rush-cell" onclick="pickRush(this,'+i+')">?</button>';}).join('')+'</div><button id="rushCashout" class="game-action rush-cashout" onclick="cashoutRush()" disabled>اسحب 0 PMT</button>';
+  board.innerHTML='<div class="game-help">Collect the gems and cash out your reward. Choosing a bomb ends the round.</div><div class="rush-status">Round balance: <span id="rushReward">0</span> PMT</div><div class="gem-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="gem-cell rush-cell" onclick="pickRush(this,'+i+')">?</button>';}).join('')+'</div><button id="rushCashout" class="game-action rush-cashout" onclick="cashoutRush()" disabled>Cash out 0 PMT</button>';
 }
 function pickRush(el,index){if(gameFinished||el.disabled)return;el.disabled=true;if(gemState.bombs.indexOf(index)>-1){el.textContent='💣';el.classList.add('bomb');gameScore=0;document.getElementById('rushReward').textContent='0';finishGame();return;}gemState.found++;gameScore=gemState.rewards[gemState.found-1];el.textContent='💎';el.classList.add('safe');document.getElementById('rushReward').textContent=gameScore;var cash=document.getElementById('rushCashout');cash.disabled=false;cash.textContent='اسحب '+gameScore+' PMT';if(gemState.found===6)finishGame();}
 function cashoutRush(){if(!gameFinished&&gemState.found>0)finishGame();}
@@ -1687,7 +1688,7 @@ function finishGame(){
       document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
       document.getElementById('gameResult').innerHTML=(key==='gem' && score===0)
         ? '<b>💣 Game Over</b>لقد اخترت قنبلة، خسرت مكافأة الجولة ولم تحصل على أي عملات.'
-        : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b>تمت إضافة المكافأة إلى رصيدك';
+        : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b> Reward added to your balance';
       renderGames();
     }).catch(function(){ showToast('Network error','error'); });
   });
