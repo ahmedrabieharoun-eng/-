@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -202,6 +203,26 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .add-task-btn{width:100%;padding:16px;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(147,92,246,0.3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:14px;font-weight:600}
 .add-task-btn:active{background:var(--orange-dim)}
 .add-task-sub{text-align:center;font-size:11px;color:var(--text3);margin-top:8px}
+
+/* ===== GAMES PAGE ===== */
+.games-header{padding:20px 20px 14px}
+.games-header .page-title{text-align:left}
+.games-subtitle{font-size:13px;color:var(--text2);margin-top:5px}
+.games-balance{margin:0 16px 14px;padding:18px;border-radius:18px;background:linear-gradient(135deg,rgba(35,183,243,.18),rgba(89,120,245,.08));border:1px solid rgba(35,183,243,.3);display:flex;align-items:center;gap:12px}
+.games-balance-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0798df,#5978f5);display:flex;align-items:center;justify-content:center;font-size:25px;box-shadow:0 0 20px rgba(35,183,243,.3)}
+.games-balance-copy{flex:1}.games-balance-label{font-size:11px;color:var(--text2)}.games-balance-value{font-size:27px;font-weight:800;margin-top:2px}.games-balance-value span{font-size:13px;color:var(--text2)}
+.games-section-title{padding:0 20px 10px;color:var(--text2);font-size:13px;letter-spacing:.7px;text-transform:uppercase}
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 18px}
+.game-card{padding:16px 10px 14px;border-radius:18px;background:rgba(22,25,43,.9);border:1px solid rgba(255,255,255,.08);text-align:center;cursor:pointer;transition:transform .15s,border-color .15s}
+.game-card:active{transform:scale(.97)}.game-card-icon{width:56px;height:56px;margin:0 auto 10px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:29px;background:linear-gradient(135deg,#0798df,#5978f5);box-shadow:0 0 18px rgba(35,183,243,.25)}
+.game-card:nth-child(2) .game-card-icon{background:linear-gradient(135deg,#7452e8,#a97aff)}.game-card:nth-child(3) .game-card-icon{background:linear-gradient(135deg,#0fa7ba,#27d6e6)}.game-card:nth-child(4) .game-card-icon{background:linear-gradient(135deg,#e63491,#ff68bf)}
+.game-card-title{font-size:15px;font-weight:800}.game-card-type{font-size:11px;color:var(--text3);margin:4px 0 9px}.game-card-limit{display:inline-block;padding:4px 8px;border-radius:10px;background:rgba(34,197,94,.13);color:var(--green);font-size:10px;font-weight:700}.game-card-plays{display:block;margin-top:6px;color:var(--text3);font-size:10px}
+.game-play-page{background:#17192d}.game-play-header{display:flex;align-items:center;gap:12px;padding:14px 16px}.game-play-title{font-size:18px;font-weight:800;flex:1}.game-timer{padding:8px 12px;border-radius:18px;background:var(--glass);color:var(--text2);font-size:12px}
+.game-board{margin:0 16px;height:calc(100vh - 230px);min-height:440px;border-radius:20px;background:linear-gradient(160deg,#082f4c,#111c35);border:1px solid rgba(35,183,243,.25);position:relative;overflow:hidden;padding:18px}
+.game-board.gem{background:linear-gradient(160deg,#321044,#181532)}.game-board.merge{background:linear-gradient(160deg,#242456,#102f59)}
+.game-help{text-align:center;color:var(--text2);font-size:13px;margin:12px 0}.game-action{display:block;margin:14px auto;padding:14px 28px;border:0;border-radius:16px;background:linear-gradient(135deg,#0798df,#5978f5);color:#fff;font-size:15px;font-weight:800;cursor:pointer}.game-action:disabled{opacity:.5}
+.coin-target{position:absolute;width:48px;height:48px;border:0;border-radius:50%;background:#0798df;box-shadow:0 0 18px rgba(35,183,243,.7);font-size:25px;cursor:pointer}.gem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:45px}.gem-cell{aspect-ratio:1;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:29px;cursor:pointer}.gem-cell.bomb{background:rgba(239,68,68,.2)}.merge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:90px auto 20px;max-width:340px;padding:12px;border-radius:18px;background:rgba(255,255,255,.08)}.merge-cell{aspect-ratio:1;border-radius:11px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}.flappy-coin{position:absolute;width:42px;height:42px;border-radius:50%;background:#0798df;box-shadow:0 0 18px #0798df;display:flex;align-items:center;justify-content:center;font-size:22px;left:48px;top:50%}.flappy-pipe{position:absolute;width:62px;background:linear-gradient(90deg,#0877a5,#1fc9ed,#0877a5);border-radius:8px;right:35px}.game-result{text-align:center;padding:20px;font-size:16px;color:var(--text2)}.game-result b{display:block;color:#fff;font-size:30px;margin:6px}
+.rush-status{text-align:center;color:#fff;font-size:18px;font-weight:800;margin:8px 0}.rush-status span{color:#f7c948}.rush-cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#fff;cursor:pointer;transition:transform .15s,background .2s}.rush-cell:active{transform:scale(.95)}.rush-cell.safe{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.55)}.rush-cell.bomb{background:rgba(239,68,68,.28);border-color:#ef4444}.rush-cashout{background:linear-gradient(135deg,#f5a524,#f97316);margin-top:16px}.dial-wrap{display:flex;align-items:center;justify-content:center;gap:12px;margin:54px auto 28px}.number-dial{width:126px;height:126px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#50f5dc;border:5px solid #22e6d0;background:radial-gradient(circle,#123d48,#07161f 65%);box-shadow:0 0 22px rgba(34,230,208,.5),inset 0 0 20px rgba(34,230,208,.2)}.number-dial.spinning{animation:dialSpin .65s ease-in-out}.dial-x{font-size:26px;color:#fff;font-weight:900}.dial-result{text-align:center;color:#9ffbed;font-size:15px;min-height:24px}.xo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:330px;margin:36px auto 16px}.xo-cell{aspect-ratio:1;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.07);color:#fff;font-size:42px;font-weight:900;cursor:pointer}.xo-cell.x{color:#4dd9ff}.xo-cell.o{color:#ff70bd}.xo-status{text-align:center;color:var(--text2);font-size:14px;min-height:22px}@keyframes dialSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(.86)}100%{transform:rotate(360deg) scale(1)}}.fruit-machine{max-width:360px;margin:28px auto 0;padding:15px;border-radius:24px;background:linear-gradient(145deg,#292a35,#11121b);border:2px solid #5ee35b;box-shadow:0 0 24px rgba(94,227,91,.22)}.fruit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.fruit-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#252631;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:42px}.fruit-cell.win{outline:3px solid #f7c948;box-shadow:0 0 18px #f7c948}.fruit-spin{background:linear-gradient(135deg,#36c95f,#159447);margin:18px auto 0}.fruit-paytable{text-align:center;color:var(--text2);font-size:12px;margin-top:14px}
 
 /* ===== REFERRALS PAGE ===== */
 .ref-banner{margin:16px 16px 12px;padding:24px 20px;border-radius:18px;background:linear-gradient(145deg,#150900,#0f0f0f);border:1px solid rgba(147,92,246,0.25);text-align:center;position:relative;overflow:hidden}
@@ -532,6 +553,26 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
     </div>
 
+    <!-- GAMES -->
+    <div class="page" id="page-games">
+      <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
+      <div class="games-balance"><div class="games-balance-icon">◆</div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
+      <div class="games-section-title">— MINI GAMES</div>
+      <div class="games-grid">
+        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('wheel')"><div class="game-card-icon">🎡</div><div class="game-card-title">Number Clash</div><div class="game-card-type">Spin × spin</div><span class="game-card-limit">up to 81 PMT</span><span class="game-card-plays" id="plays-wheel">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 150 PMT</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 600 PMT</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
+      </div>
+    </div>
+
+    <!-- GAME PLAY -->
+    <div class="page" id="page-game-play">
+      <div class="game-play-header"><button class="back-btn" onclick="closeGame()">×</button><div class="game-play-title" id="gamePlayTitle">Gem Rush</div><div class="game-timer" id="gameTimer">30s</div></div>
+      <div class="game-board" id="gameBoard"></div>
+      <div class="game-result" id="gameResult"></div>
+    </div>
+
     <!-- REFERRALS -->
     <div class="page" id="page-refs">
       <div class="ref-banner">
@@ -656,6 +697,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <div class="nav-item" onclick="switchPage('tasks')" id="nav-tasks">
       <div class="nav-icon">📋</div><div class="nav-label">Tasks</div>
     </div>
+    <div class="nav-item" onclick="switchPage('games')" id="nav-games">
+      <div class="nav-icon">🎮</div><div class="nav-label">Games</div>
+    </div>
     <div class="nav-item" onclick="switchPage('refs')" id="nav-refs">
       <div class="nav-icon">👥</div><div class="nav-label">Referrals</div>
     </div>
@@ -769,6 +813,7 @@ var selectedTaskCategory = 'channels';
 var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
 var wheelRotation = 0;
 var wheelSpinning = false;
+var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gameFinished = false;
 
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
@@ -871,6 +916,7 @@ function showMockData(){
     config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
     daily:{ reward:500, claimed:false },
     stats:{ adsWatchedToday:0, friendsInvited:0, earnedToday:0 },
+    gamePlays:{coin:0,merge:0,flappy:0,gem:0},
     forceSub:{ required:false, passed:true, channels:[] }
   };
   S.refs = [];
@@ -990,6 +1036,18 @@ function render(){
   renderTasks(currentTab);
   // Lucky Wheel
    renderWheelInfo();
+   renderGames();
+}
+
+function renderGames(){
+  var balance = (S.user && S.user.balance) || 0;
+  var balanceEl = document.getElementById('gamesBalance');
+  if (balanceEl) balanceEl.innerHTML = fmtShiba(balance)+' <span>PMT</span>';
+  var plays = (S.data && S.data.gamePlays) || {};
+  ['gem','wheel','xo','fruit'].forEach(function(key){
+    var el = document.getElementById('plays-'+key);
+    if (el) el.textContent = Math.max(0,3-(plays[key]||0))+'/3 left today';
+  });
 }
 
 function claimDailyBonus(){
@@ -1483,6 +1541,71 @@ function copyRefLink(){
   showToast('Referral link copied! 📋');
 }
 
+// ── Mini games ─────────────────────────────────────────────────────────
+function showGameAd(){
+  var fn = window.show_11638380;
+  if (typeof fn !== 'function') return Promise.resolve();
+  try { return Promise.resolve(fn()).catch(function(){}); } catch(_){ return Promise.resolve(); }
+}
+function startGame(key){
+  var names = {gem:'Gem Rush',wheel:'Number Clash',xo:'XO vs CPU',fruit:'Fruit Slots'};
+  var plays = (S.data && S.data.gamePlays) || {};
+  if ((plays[key]||0) >= 3){ showToast('You have used all 3 plays for today','error'); return; }
+  showGameAd().then(function(){
+    activeGame = key; gameScore = 0; gameFinished = false; gameStartedAt = Date.now();
+    document.getElementById('gamePlayTitle').textContent = names[key];
+    document.getElementById('gameResult').innerHTML = '';
+    switchPage('game-play');
+    renderGameBoard(key);
+  });
+}
+function renderGameBoard(key){
+  var board=document.getElementById('gameBoard'); board.className='game-board '+(key==='gem'?'gem':''); clearInterval(gameTimerId);
+  var seconds=key==='gem'?45:30; document.getElementById('gameTimer').textContent=seconds+'s';
+  gameTimerId=setInterval(function(){seconds--;document.getElementById('gameTimer').textContent=Math.max(0,seconds)+'s';if(seconds<=0)finishGame();},1000);
+  if(key==='gem')renderGemRush(board);else if(key==='wheel')renderNumberClash(board);else if(key==='xo')renderXO(board);else renderFruitSlots(board);
+}
+var gemState={bombs:[],found:0,rewards:[50,150,300,400,600,700]};
+function renderGemRush(board){
+  var cells=[0,1,2,3,4,5,6,7,8].sort(function(){return Math.random()-.5;});
+  gemState={bombs:cells.slice(0,3),found:0,rewards:[50,150,300,400,600,700]};
+  board.innerHTML='<div class="game-help">شرح اللعبة: أمامك 9 خانات؛ فيها 6 جواهر و3 قنابل. اجمع الجواهر واسحب مكافأتك، لأن اختيار قنبلة ينهي الجولة ويصفر المكافأة.</div><div class="rush-status">رصيد الجولة: <span id="rushReward">0</span> PMT</div><div class="gem-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="gem-cell rush-cell" onclick="pickRush(this,'+i+')">?</button>';}).join('')+'</div><button id="rushCashout" class="game-action rush-cashout" onclick="cashoutRush()" disabled>اسحب 0 PMT</button>';
+}
+function pickRush(el,index){if(gameFinished||el.disabled)return;el.disabled=true;if(gemState.bombs.indexOf(index)>-1){el.textContent='💣';el.classList.add('bomb');gameScore=0;document.getElementById('rushReward').textContent='0';finishGame();return;}gemState.found++;gameScore=gemState.rewards[gemState.found-1];el.textContent='💎';el.classList.add('safe');document.getElementById('rushReward').textContent=gameScore;var cash=document.getElementById('rushCashout');cash.disabled=false;cash.textContent='اسحب '+gameScore+' PMT';if(gemState.found===6)finishGame();}
+function cashoutRush(){if(!gameFinished&&gemState.found>0)finishGame();}
+function renderNumberClash(board){board.innerHTML='<div class="game-help">شرح اللعبة: اضغط SPIN لتدوير الدائرتين. مكافأتك تساوي الرقم الكبير × الرقم الصغير.</div><div class="dial-wrap"><div id="dialLarge" class="number-dial">?</div><div class="dial-x">×</div><div id="dialSmall" class="number-dial">?</div></div><div id="dialResult" class="dial-result"></div><button id="dialSpin" class="game-action" onclick="spinNumberClash()">SPIN</button>';}
+function spinNumberClash(){if(gameFinished)return;var a=document.getElementById('dialLarge'),b=document.getElementById('dialSmall'),btn=document.getElementById('dialSpin');btn.disabled=true;a.classList.add('spinning');b.classList.add('spinning');setTimeout(function(){var x=1+Math.floor(Math.random()*9),y=1+Math.floor(Math.random()*9);a.textContent=x;b.textContent=y;gameScore=x*y;document.getElementById('dialResult').textContent=x+' × '+y+' = '+gameScore+' PMT';finishGame();},700);}
+var xoState=[];
+function renderXO(board){xoState=Array(9).fill('');board.innerHTML='<div class="game-help">شرح اللعبة: أنت X. اختر 3 خانات متتالية أفقيًا أو رأسيًا أو مائلًا قبل الكمبيوتر للفوز.</div><div id="xoStatus" class="xo-status">دورك الآن</div><div class="xo-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="xo-cell" onclick="playXO('+i+')"></button>';}).join('')+'</div>';}
+function xoWinner(){var lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(var i=0;i<lines.length;i++){var l=lines[i];if(xoState[l[0]]&&xoState[l[0]]===xoState[l[1]]&&xoState[l[1]]===xoState[l[2]])return xoState[l[0]];}return xoState.indexOf('')<0?'draw':null;}
+function paintXO(){document.querySelectorAll('.xo-cell').forEach(function(c,i){c.textContent=xoState[i];c.className='xo-cell '+(xoState[i]||'').toLowerCase();});}
+function playXO(i){if(gameFinished||xoState[i])return;xoState[i]='X';paintXO();var result=xoWinner();if(result){gameScore=result==='X'?150:0;finishGame();return;}document.getElementById('xoStatus').textContent='الكمبيوتر يفكر...';setTimeout(function(){if(gameFinished)return;var open=xoState.map(function(v,n){return v?null:n;}).filter(function(v){return v!==null;});var pick=open[Math.floor(Math.random()*open.length)];xoState[pick]='O';paintXO();var r=xoWinner();if(r){gameScore=r==='draw'?40:r==='X'?150:0;finishGame();}else document.getElementById('xoStatus').textContent='دورك الآن';},350);}
+var fruitSymbols=['🍒','🍉','❤️','💎'],fruitValues={'🍒':80,'🍉':140,'❤️':20,'💎':600};
+function renderFruitSlots(board){board.innerHTML='<div class="game-help">شرح اللعبة: اضغط SPIN. تحتاج إلى 3 رموز متشابهة بجانب بعض أو فوق بعض أو في خط مائل للفوز.</div><div class="fruit-machine"><div id="fruitGrid" class="fruit-grid"></div><button id="fruitSpin" class="game-action fruit-spin" onclick="spinFruitSlots()">SPIN</button></div><div class="fruit-paytable">❤️ 20 · 🍒 80 · 🍉 140 · 💎 600 PMT</div>';drawFruitGrid(Array(9).fill('❔'));}
+function drawFruitGrid(grid){document.getElementById('fruitGrid').innerHTML=grid.map(function(s){return '<div class="fruit-cell">'+s+'</div>';}).join('');}
+function spinFruitSlots(){if(gameFinished)return;var btn=document.getElementById('fruitSpin');btn.disabled=true;var grid=Array(9).fill(0).map(function(){return fruitSymbols[Math.floor(Math.random()*fruitSymbols.length)];});drawFruitGrid(grid);setTimeout(function(){var lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],win=null;for(var i=0;i<lines.length;i++){var l=lines[i];if(grid[l[0]]===grid[l[1]]&&grid[l[1]]===grid[l[2]]){win=l;break;}}if(win){var sym=grid[win[0]];gameScore=fruitValues[sym]||20;win.forEach(function(n){document.querySelectorAll('.fruit-cell')[n].classList.add('win');});}else gameScore=0;finishGame();},500);}
+function finishGame(){
+  if(gameFinished || !activeGame) return;
+  gameFinished=true; clearInterval(gameTimerId);
+  var key=activeGame, score=Math.min(key==='gem'?700:600,Math.max(0,gameScore));
+  showGameAd().then(function(){
+    api('playGame',{game:key,score:score}).then(function(res){
+      if(!res.success){ showToast(res.error||'Game unavailable','error'); return; }
+      S.user.balance=res.data.shibaBalance;
+      S.data.gamePlays=res.data.gamePlays||S.data.gamePlays||{};
+      document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
+      document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
+      document.getElementById('gameResult').innerHTML=(key==='gem' && score===0)
+        ? '<b>💣 Game Over</b>لقد اخترت قنبلة، خسرت مكافأة الجولة ولم تحصل على أي عملات.'
+        : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b>تمت إضافة المكافأة إلى رصيدك';
+      renderGames();
+    }).catch(function(){ showToast('Network error','error'); });
+  });
+}
+function closeGame(){
+  clearInterval(gameTimerId); activeGame=null; gameFinished=true; switchPage('games'); renderGames();
+}
+
 // ── Page switching ────────────────────────────────────────────────────
 var currentPage = 'home';
 function switchPage(name){
@@ -1490,6 +1613,7 @@ function switchPage(name){
     currentTab = 'ads';
     setTimeout(function(){ renderTasks('ads'); }, 0);
   }
+  if (name === 'games') renderGames();
   if (currentPage===name) return;
   var prev = document.getElementById('page-'+currentPage);
   var next = document.getElementById('page-'+name);
