@@ -821,6 +821,19 @@ var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, re
 
 var currentTab = 'ads';
 
+function getTelegramStartParam(){
+  var unsafe = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};
+  var candidates = [
+    unsafe.start_param,
+    new URLSearchParams(window.location.search || '').get('tgWebAppStartParam'),
+    new URLSearchParams(window.location.hash.replace(/^#/, '') || '').get('tgWebAppStartParam')
+  ];
+  for (var i=0; i<candidates.length; i++){
+    if (candidates[i] && /^[A-Za-z0-9_-]{1,128}$/.test(candidates[i])) return candidates[i];
+  }
+  return '';
+}
+
 // ── Loading progress bar (eases toward ~92% while waiting, then completes) ──
 var _ldProgress = 0, _ldTimer = null;
 function _ldSetPercent(p){
@@ -857,7 +870,7 @@ startLoadingProgress();
       S.inTelegram = true;
       try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(_){}
       S.initData = Telegram.WebApp.initData || '';
-      S.startParam = (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) || '';
+      S.startParam = getTelegramStartParam();
       loadState();
     } else if (tries > 40){
       clearInterval(iv);
