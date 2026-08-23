@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PlayMint</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://libtl.com/sdk.js" data-zone="11638380" data-sdk="show_11638380"></script>
 <script src="anti-fraud-frontend.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -357,6 +359,29 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .modal-success-list{list-style:none;padding:0;margin:0 0 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
 .modal-success-list li{font-size:12.5px;color:var(--text2)}
 
+/* Add Task reference design */
+#addTaskModal{align-items:center;background:rgba(3,5,8,.78);backdrop-filter:blur(5px)}
+#addTaskModal .modal{width:calc(100% - 32px);max-width:460px;max-height:calc(100vh - 34px);overflow-y:auto;padding:18px 20px 18px;border-radius:24px;background:linear-gradient(145deg,rgba(35,34,31,.98),rgba(17,17,16,.99));border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 45px rgba(0,0,0,.55);transform:scale(.96) translateY(18px)}
+#addTaskModal.open .modal{transform:scale(1) translateY(0)}
+#addTaskModal .modal-handle{display:none}
+#addTaskModal .modal-title{text-align:center;text-transform:uppercase;font-size:28px;line-height:1.05;letter-spacing:.3px;margin:0 0 6px}
+#addTaskModal .modal-desc{text-align:center;font-size:12px;line-height:1.35;margin-bottom:18px}
+#addTaskModal .modal-input{height:66px;padding:27px 15px 9px;border-radius:17px;background:rgba(5,5,5,.78);border:1px solid rgba(255,255,255,.13);font-size:15px;font-weight:600;margin-bottom:14px}
+#addTaskModal .modal-input::before{content:''}
+#addTaskModal .modal-field-label{font-size:10px;font-weight:500;text-transform:uppercase;margin:0 0 6px;color:#999}
+#addTaskModal .modal-field-label:has(+ .modal-input){margin:0 0 -25px 15px;position:relative;z-index:1;pointer-events:none}
+#addTaskModal #taskCategoryChips{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+#addTaskModal #taskCategoryChips .qty-chip{padding:13px 8px;border-radius:12px;text-align:center;font-size:12px;background:rgba(255,255,255,.07);border-color:transparent}
+#addTaskModal #taskCategoryChips .qty-chip.active{background:#c99205;color:#0a0a0a;border-color:#e5b62b}
+#addTaskModal #qtyChips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
+#addTaskModal #qtyChips .qty-chip{padding:11px 4px;border-radius:12px;text-align:center;background:rgba(255,255,255,.07);border-color:transparent;font-size:14px;color:#fff}
+#addTaskModal #qtyChips .qty-chip::after{content:'\\A' attr(data-ton);white-space:pre;color:#c99205;font-size:9px;font-weight:500}
+#addTaskModal #addTaskMembers,#addTaskModal .price-box,#addTaskModal #addTaskDesc,#addTaskModal .modal-disclaimer{display:none}
+#addTaskModal .modal-field-label:has(+ #addTaskDesc){display:none}
+#addTaskModal .modal-submit{margin-top:8px;padding:17px;border-radius:16px;background:#0798df;font-size:16px;letter-spacing:.4px;box-shadow:0 5px 15px rgba(0,152,223,.25)}
+#addTaskModal .modal-close{margin-top:10px;border-color:rgba(201,146,5,.35);color:#aaa;text-transform:uppercase;font-size:12px}
+#addTaskModal .task-channel-warning{display:none;padding:10px;border:1px solid #d09a08;border-radius:12px;color:#eab52b;font-size:11px;font-weight:600;line-height:1.35;margin:-2px 0 14px;background:rgba(201,146,5,.08)}
+
 .empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-size:14px}
 
 /* ===== FORCE-SUB (Mandatory Subscription) GATE ===== */
@@ -398,6 +423,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .how-title{padding:0 20px 10px;color:var(--text2);font-size:13px;font-weight:800;letter-spacing:1px}
 .how-card{margin:0 16px 16px;padding:15px;border-radius:16px;background:rgba(31,37,58,.72);border:1px solid rgba(255,255,255,.07)}
 .how-row{display:flex;align-items:center;gap:12px;padding:5px 0}.how-num{width:28px;height:28px;border-radius:50%;background:rgba(35,183,243,.16);color:#55caff;display:flex;align-items:center;justify-content:center;font-weight:800}.how-row b{font-size:14px}.how-row span{font-size:12px;color:var(--text2);display:block;margin-top:2px}
+.ad-summary{margin:0 16px 12px;padding:14px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center}.ad-summary b{color:#55caff;font-size:17px}.ad-summary span{font-size:12px;color:var(--text2)}
+.maintenance{font-size:11px;color:#fbbf24;background:rgba(251,191,36,.12);padding:4px 8px;border-radius:8px;margin-top:3px;display:inline-block}
 </style>
 </head>
 <body>
@@ -490,45 +517,19 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
     <!-- TASKS -->
     <div class="page" id="page-tasks">
-      <div class="tasks-header"><div class="page-title">Tasks</div></div>
-
-      <div class="combo-section">
-        <div class="combo-card">
-          <div class="combo-top">
-            <div class="combo-title">Daily Combo</div>
-            <div class="combo-timer"><span>⏱</span><span class="timer-val" id="comboTimer">23:59:59</span></div>
-          </div>
-          <div class="combo-desc" id="comboDesc">Find the correct combination and claim your <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> reward</div>
-          <div class="combo-slots">
-            <div class="combo-slot" id="slot-0"><span class="combo-slot-num">1</span><span class="combo-slot-icon" id="si-0">?</span></div>
-            <div class="combo-slot" id="slot-1"><span class="combo-slot-num">2</span><span class="combo-slot-icon" id="si-1">?</span></div>
-            <div class="combo-slot" id="slot-2"><span class="combo-slot-num">3</span><span class="combo-slot-icon" id="si-2">?</span></div>
-            <div class="combo-slot" id="slot-3"><span class="combo-slot-num">4</span><span class="combo-slot-icon" id="si-3">?</span></div>
-          </div>
-          <div class="combo-items">
-            <div class="combo-item" onclick="selectCombo(this,'🦴')">🦴</div>
-            <div class="combo-item" onclick="selectCombo(this,'🏠')">🏠</div>
-            <div class="combo-item" onclick="selectCombo(this,'🎾')">🎾</div>
-            <div class="combo-item" onclick="selectCombo(this,'🍖')">🍖</div>
-          </div>
-          <button class="combo-check-btn" id="comboCheckBtn" onclick="checkCombo()">Check Combo</button>
-        </div>
-      </div>
-
-      <div class="tabs-section">
-        <div class="tabs">
-          <div class="tab active" onclick="switchTab(this,'channels')">Channels</div>
-          <div class="tab" onclick="switchTab(this,'bots')">Bots</div>
-          <div class="tab" onclick="switchTab(this,'invite')">Invite</div>
-        </div>
-      </div>
+      <div class="tasks-header"><div class="page-title">Earn</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Complete tasks and collect PMT rewards</div></div>
+      <div class="tabs-section"><div class="tabs">
+        <div class="tab" onclick="switchTab(this,'partner')">✈️ Partner</div>
+        <div class="tab active" onclick="switchTab(this,'ads')">▣ Ads</div>
+        <div class="tab" onclick="switchTab(this,'channels')">🔗 User Tasks</div>
+      </div></div>
       <div class="tasks-list">
-        <div class="tasks-group-label" id="tasksGroupLabel">Join Channels</div>
+        <div class="tasks-group-label" id="tasksGroupLabel">Advertisements</div>
         <div id="tasksContent"></div>
       </div>
       <div class="add-task-section">
         <button class="add-task-btn" onclick="openAddTaskModal()"><span style="font-size:20px">+</span><span>Add Task</span></button>
-        <div class="add-task-sub">Submit your channel / bot to get reward</div>
+         <div class="add-task-sub">Pay with TON to promote your channel or bot</div>
       </div>
     </div>
 
@@ -671,20 +672,28 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <div class="modal-handle"></div>
 
     <div id="addTaskFormView">
-      <div class="modal-title">📢 Promote Your Channel</div>
-      <div class="modal-desc">Add your channel as a task — our users will join it and earn <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">, helping you get real, active members fast.</div>
+       <div class="modal-title">📢 Add Task</div>
+       <div class="modal-desc">Promote your Telegram channel or bot. Bot tasks are approved instantly; channel tasks are verified through real Telegram membership checks.</div>
 
+       <div class="modal-field-label">Task Name</div>
+       <input class="modal-input" id="addTaskName" placeholder="e.g. Join my channel or start my bot">
       <div class="modal-field-label">Channel Link</div>
       <input class="modal-input" id="addTaskLink" placeholder="https://t.me/yourchannel">
 
+       <div class="modal-field-label">Category</div>
+       <div class="qty-chips" id="taskCategoryChips">
+         <div class="qty-chip active" data-category="channels" onclick="selectTaskCategory('channels',this)">Channel / Group</div>
+         <div class="qty-chip" data-category="bots" onclick="selectTaskCategory('bots',this)">Website / Bot</div>
+       </div>
+       <div class="task-channel-warning" id="taskChannelWarning">⚠ Action required: You must add the bot as an admin in your channel/group for tracking to work.</div>
       <div class="modal-field-label">Members You Need</div>
       <div class="qty-chips" id="qtyChips">
-        <div class="qty-chip" onclick="selectQty(100,this)">100</div>
-        <div class="qty-chip" onclick="selectQty(500,this)">500</div>
-        <div class="qty-chip" onclick="selectQty(1000,this)">1,000</div>
-        <div class="qty-chip" onclick="selectQty(2000,this)">2,000</div>
-        <div class="qty-chip" onclick="selectQty(5000,this)">5,000</div>
-        <div class="qty-chip" onclick="selectQty(10000,this)">10,000</div>
+         <div class="qty-chip" data-ton="0.1500 TON" onclick="selectQty(100,this)">100</div>
+         <div class="qty-chip" data-ton="0.7500 TON" onclick="selectQty(500,this)">500</div>
+         <div class="qty-chip" data-ton="1.5000 TON" onclick="selectQty(1000,this)">1,000</div>
+         <div class="qty-chip" data-ton="3.0000 TON" onclick="selectQty(2000,this)">2,000</div>
+         <div class="qty-chip" data-ton="7.5000 TON" onclick="selectQty(5000,this)">5,000</div>
+         <div class="qty-chip" data-ton="15.0000 TON" onclick="selectQty(10000,this)">10,000</div>
       </div>
       <input class="modal-input" id="addTaskMembers" type="number" inputmode="numeric" min="100" step="100" placeholder="Or enter a custom amount (multiples of 100)" oninput="updateTaskPrice()">
 
@@ -695,7 +704,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
         </div>
         <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
       </div>
-      <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing: every 100 members = 200,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> (≈ $1). Our team will contact you with payment details before your task goes live.</div>
+       <div class="modal-desc" style="font-size:11px;margin-bottom:14px">Pricing is charged in TON: every 100 completions = 0.1500 TON. Bot tasks go live instantly; channel tasks go live after payment and setup verification.</div>
 
       <div class="modal-field-label">Additional Notes (Optional)</div>
       <textarea class="modal-textarea" id="addTaskDesc" placeholder="Anything you'd like us to know..."></textarea>
@@ -717,7 +726,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <div id="addTaskSuccessView" class="modal-success" style="display:none">
       <div class="modal-success-icon">✅</div>
       <div class="modal-success-title">Request Submitted</div>
-      <div class="modal-success-desc">Your request has been received. Our team will review it and contact you with payment details to activate:</div>
+       <div class="modal-success-desc">Your task request has been received in TON. Bot tasks are accepted instantly; channel tasks are activated after the Telegram membership check is configured:</div>
       <ul class="modal-success-list">
         <li>☑️ Channel: <span id="successChannelLink"></span></li>
         <li>☑️ Members requested: <span id="successMembers"></span></li>
@@ -754,6 +763,8 @@ var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v17
 // مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
 var PRICE_PER_100_SHIBA = 200000;
 var PRICE_PER_100_USD   = 1;
+var PRICE_PER_100_TON   = 0.15;
+var selectedTaskCategory = 'channels';
 
 // إعدادات افتراضية لعجلة الحظ (تُستخدم فقط لو السيرفر لم يرسلها بعد)
 var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
@@ -763,7 +774,7 @@ var wheelSpinning = false;
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
 
-var currentTab = 'channels';
+var currentTab = 'ads';
 
 // ── Loading progress bar (eases toward ~92% while waiting, then completes) ──
 var _ldProgress = 0, _ldTimer = null;
@@ -852,16 +863,11 @@ function showMockData(){
   S.data = {
     referrals:[], balanceLogs:[], withdrawals:[],
     tasks:[
+      {id:'p1',category:'partner',partner:true,title:'Official Telegram Channel',link:'https://t.me/yourchannel',reward:200,status:'active'},
       {id:'c1',category:'channels',title:'Join Main Channel',link:'https://t.me/yourchannel',reward:500,status:'active'},
-      {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'},
-      {id:'invite_1',category:'invite',title:'دعوة 1 مستخدم',reward:1000,requiredReferrals:1,status:'active'},
-      {id:'invite_10',category:'invite',title:'دعوة 10 مستخدمين',reward:10000,requiredReferrals:10,status:'active'},
-      {id:'invite_25',category:'invite',title:'دعوة 25 مستخدم',reward:25000,requiredReferrals:25,status:'active'},
-      {id:'invite_50',category:'invite',title:'دعوة 50 مستخدم',reward:50000,requiredReferrals:50,status:'active'},
-      {id:'invite_100',category:'invite',title:'دعوة 100 مستخدم',reward:100000,requiredReferrals:100,status:'active'}
+       {id:'b1',category:'bots',title:'Play & Earn Bot',link:'https://t.me/yourplaybot',reward:500,status:'active'}
     ],
     completedTasks:[],
-    combo:{ solvedToday:false, reward:5000 },
     wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
     config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true },
     daily:{ reward:500, claimed:false },
@@ -981,8 +987,6 @@ function render(){
   // Wallet (Balance & History)
   document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
   renderWalletHistory(d.balanceLogs||[]);
-  // Combo
-  renderComboState();
   // Tasks
   renderTasks(currentTab);
   // Lucky Wheel
@@ -1149,35 +1153,27 @@ function submitWithdrawal(){
 
 // ── Tasks ─────────────────────────────────────────────────────────────
 function renderTasks(tab){
-  var labels = { channels:'Join Channels', bots:'Join Bots', invite:'Invite Tasks' };
+  var labels = { partner:'Partner Channels', ads:'Advertisements', channels:'User Channels & Bots' };
   document.getElementById('tasksGroupLabel').textContent = labels[tab];
+  var addSection = document.querySelector('.add-task-section');
+  if (addSection) addSection.style.display = tab === 'channels' ? 'block' : 'none';
   var completed = (S.data && S.data.completedTasks) || [];
   var allTasks = (S.data && S.data.tasks) || [];
 
-  if (tab === 'invite'){
-    var refCount = S.refs.length;
-    var list = allTasks.filter(function(t){ return t.category==='invite'; });
-    if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No invite tasks right now</div>'; return; }
-    document.getElementById('tasksContent').innerHTML = list.map(function(t){
-      var required = t.requiredReferrals || t.requiredCount || 0;
-      var done = completed.indexOf(t.id) > -1;
-      var eligible = refCount >= required;
-      var btnClass = done ? 'done' : (eligible ? 'join' : 'verify');
-      var btnText  = done ? '✓ Done' : (eligible ? 'Claim' : refCount+'/'+required);
-      var onclick  = done ? '' : (eligible ? 'doClaimInvite(\''+t.id+'\')' : '');
-      return '<div class="task-item">'+
-        '<div class="task-logo">👥</div>'+
-        '<div class="task-info">'+
-          '<div class="task-name">'+esc(t.title||t.name||('Invite '+required+' Friends'))+'</div>'+
-          '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
-        '</div>'+
-        '<button class="task-btn '+btnClass+'" onclick="'+onclick+'" '+(eligible||done?'':'disabled')+'>'+btnText+'</button>'+
-      '</div>';
-    }).join('');
+  if (tab === 'ads'){
+    var stats = (S.data && S.data.stats) || {};
+    var limit = (S.data && S.data.config && S.data.config.adDailyLimit) || 14;
+    var reward = (S.data && S.data.config && S.data.config.adReward) || 200;
+    document.getElementById('tasksContent').innerHTML =
+      '<div class="ad-summary"><span><b>Today’s ads</b><br>'+stats.adsWatchedToday+' of '+limit+' watched today · resets daily</span><b>'+stats.adsWatchedToday+'/'+limit+'</b></div>'+
+      adTask('📺','Monetag','+'+fmtShiba(reward)+' PMT','Watch', 'watchMonetag()')+
+      adTask('🎟️','Adsgram','Maintenance','Unavailable', '', true);
     return;
   }
 
-  var list = allTasks.filter(function(t){ return t.category===tab; });
+  var list = tab === 'partner'
+    ? allTasks.filter(function(t){ return t.category==='partner' || t.partner === true; })
+    : allTasks.filter(function(t){ return t.category==='channels' || t.category==='bots'; });
   if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
   document.getElementById('tasksContent').innerHTML = list.map(function(t){
     var done = completed.indexOf(t.id) > -1;
@@ -1186,7 +1182,7 @@ function renderTasks(tab){
     var btnText  = st==='join'?'Join':st==='verify'?'Verify':'✓ Done';
     var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
     return '<div class="task-item">'+
-      '<div class="task-logo">'+(t.icon||(tab==='channels'?'✈️':'🤖'))+'</div>'+
+       '<div class="task-logo">'+(t.icon||(t.category==='channels'?'✈️':'🤖'))+'</div>'+
       '<div class="task-info">'+
         '<div class="task-name">'+esc(t.title||t.name)+'</div>'+
         '<div class="task-reward">+'+fmtShiba(t.reward)+' '+SHIBA_ICON+'</div>'+
@@ -1194,6 +1190,29 @@ function renderTasks(tab){
       '<button class="task-btn '+btnClass+'" onclick="'+onclick+'">'+btnText+'</button>'+
     '</div>';
   }).join('');
+}
+
+function adTask(icon, name, reward, button, action, disabled){
+  return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
+    '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+'</div></div>'+
+    '<button class="task-btn '+(disabled?'verify':'join')+'" '+(disabled?'disabled':'onclick="'+action+'"')+'>'+button+'</button></div>';
+}
+
+function watchMonetag(){
+  var fn = window.show_11638380;
+  if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); return; }
+  fn().then(function(){
+    api('claimAdReward', {}).then(function(res){
+      if (!res.success){ showToast(res.error||'Ad reward unavailable','error'); return; }
+      S.user.balance = res.data.shibaBalance;
+      S.data.stats = S.data.stats || {};
+      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
+      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      renderTasks('ads');
+      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+    });
+  }).catch(function(){ showToast('The ad could not be completed','error'); });
 }
 
 function switchTab(el, tab){
@@ -1468,6 +1487,10 @@ function copyRefLink(){
 // ── Page switching ────────────────────────────────────────────────────
 var currentPage = 'home';
 function switchPage(name){
+  if (name === 'tasks') {
+    currentTab = 'ads';
+    setTimeout(function(){ renderTasks('ads'); }, 0);
+  }
   if (currentPage===name) return;
   var prev = document.getElementById('page-'+currentPage);
   var next = document.getElementById('page-'+name);
@@ -1483,14 +1506,27 @@ function switchPage(name){
 // ── Modals ─────────────────────────────────────────────────────────────
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function openAddTaskModal(){
+  selectedTaskCategory = 'channels';
+  document.querySelectorAll('#taskCategoryChips .qty-chip').forEach(function(c){ c.classList.toggle('active', c.getAttribute('data-category') === 'channels'); });
+  document.getElementById('taskChannelWarning').style.display = 'block';
+  document.getElementById('addTaskName').value = '';
   document.getElementById('addTaskFormView').style.display = 'block';
   document.getElementById('addTaskSuccessView').style.display = 'none';
   document.getElementById('addTaskLink').value = '';
   document.getElementById('addTaskMembers').value = '';
   document.getElementById('addTaskDesc').value = '';
   document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
+  var defaultQty = document.querySelector('#qtyChips .qty-chip');
+  if (defaultQty) selectQty(100, defaultQty);
   updateTaskPrice();
   document.getElementById('addTaskModal').classList.add('open');
+}
+function selectTaskCategory(category, el){
+  selectedTaskCategory = category;
+  document.querySelectorAll('#taskCategoryChips .qty-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  var warning = document.getElementById('taskChannelWarning');
+  if (warning) warning.style.display = category === 'channels' ? 'block' : 'none';
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id){ if (e.target.id===id) closeModal(id); }
@@ -1509,7 +1545,9 @@ function updateTaskPrice(){
   var priceShiba = members > 0 ? units * PRICE_PER_100_SHIBA : 0;
   var priceUsd = members > 0 ? units * PRICE_PER_100_USD : 0;
   document.getElementById('addTaskPriceShiba').innerHTML = fmtNum(priceShiba) + ' ' + SHIBA_ICON;
-  document.getElementById('addTaskPriceUsd').textContent = '≈ $' + priceUsd.toLocaleString('en-US');
+  document.getElementById('addTaskPriceUsd').textContent = '≈ ' + (members > 0 ? (units * PRICE_PER_100_TON).toFixed(4) : '0.0000') + ' TON';
+  var payBtn = document.getElementById('addTaskSubmitBtn');
+  if (payBtn) payBtn.textContent = '♢ PAY ' + (members > 0 ? (units * PRICE_PER_100_TON).toFixed(4) : '0.0000') + ' TON';
   document.querySelectorAll('#qtyChips .qty-chip').forEach(function(c){
     var chipVal = parseInt(c.textContent.replace(/,/g,'')) || 0;
     c.classList.toggle('active', chipVal===members);
@@ -1517,22 +1555,25 @@ function updateTaskPrice(){
 }
 
 function submitAddTask(){
+  var name = document.getElementById('addTaskName').value.trim();
   var link = document.getElementById('addTaskLink').value.trim();
   var members = parseInt(document.getElementById('addTaskMembers').value);
   var desc = document.getElementById('addTaskDesc').value.trim();
-  if (!link){ showToast('Please enter your channel link!','error'); return; }
+   if (!name){ showToast('Please enter a task name!','error'); return; }
+   if (!link){ showToast('Please enter your Telegram link!','error'); return; }
   if (!members || members < 100){ showToast('Please select or enter at least 100 members!','error'); return; }
   var units = Math.ceil(members/100);
   var priceShiba = units * PRICE_PER_100_SHIBA;
   var priceUsd = units * PRICE_PER_100_USD;
+   var priceTon = units * PRICE_PER_100_TON;
   var btn = document.getElementById('addTaskSubmitBtn');
   btn.disabled = true; btn.textContent = 'Submitting...';
-  api('submitTaskSuggestion', { link:link, membersNeeded:members, desc:desc }).then(function(res){
+   api('submitTaskSuggestion', { name:name, link:link, category:selectedTaskCategory, membersNeeded:members, desc:desc, priceTon:priceTon }).then(function(res){
     btn.disabled = false; btn.textContent = '📤 Submit Request';
     if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
     document.getElementById('successChannelLink').textContent = link;
     document.getElementById('successMembers').textContent = fmtNum(members);
-    document.getElementById('successPrice').innerHTML = fmtNum(priceShiba)+' '+SHIBA_ICON+' (≈ $'+priceUsd.toLocaleString('en-US')+')';
+     document.getElementById('successPrice').innerHTML = (res.data.priceTon || priceTon).toFixed(4)+' TON';
     document.getElementById('addTaskFormView').style.display = 'none';
     document.getElementById('addTaskSuccessView').style.display = 'block';
   }).catch(function(){
