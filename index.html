@@ -587,7 +587,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
     <!-- GAME PLAY -->
     <div class="page" id="page-game-play">
-      <div class="game-play-header"><button class="back-btn" onclick="closeGame()">×</button><div class="game-play-title" id="gamePlayTitle">Gem Rush</div><div class="game-timer" id="gameTimer">30s</div></div>
+      <div class="game-play-header"><div class="game-play-title" id="gamePlayTitle">Gem Rush</div></div>
       <div class="game-board" id="gameBoard"></div>
       <div class="game-result" id="gameResult"></div>
     </div>
@@ -1491,7 +1491,7 @@ function adTask(icon, name, reward, button, action, disabled){
   var isMonetag = name === 'Monetag';
   var cooldownSeconds = Math.max(0, Math.ceil((adCooldownUntil - Date.now()) / 1000));
   var isLocked = isMonetag && (adWatchBusy || cooldownSeconds > 0);
-  var displayButton = isMonetag && adWatchBusy ? 'Watching... 10s' :
+  var displayButton = isMonetag && adWatchBusy ? 'Watching...' :
     isMonetag && cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
   return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
     '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+'</div></div>'+
@@ -1506,9 +1506,16 @@ function watchMonetag(){
   adWatchStartedAt = Date.now();
   renderTasks('ads');
   startAdButtonTimer();
-  var minimumWatch = new Promise(function(resolve){ setTimeout(resolve, 10000); });
-  var adFinished = Promise.resolve().then(function(){ return fn(); });
-  Promise.all([minimumWatch, adFinished]).then(function(){
+  Promise.resolve().then(function(){ return fn(); }).then(function(){
+    var watchedFor = Date.now() - adWatchStartedAt;
+    if (watchedFor < 10000){
+      adWatchBusy = false;
+      adCooldownUntil = Date.now() + 5000;
+      startAdButtonTimer();
+      renderTasks('ads');
+      showToast('لازم تشاهد الإعلان لمدة 10 ثواني عشان تاخذ المكافأة','error');
+      return;
+    }
     api('claimAdReward', {}).then(function(res){
       if (!res.success){
         adWatchBusy = false;
@@ -1541,8 +1548,7 @@ function startAdButtonTimer(){
   adTimerId = setInterval(function(){
     var btn = document.getElementById('monetagWatchBtn');
     if (adWatchBusy){
-      var remaining = Math.max(0, Math.ceil((10000 - (Date.now() - (adWatchStartedAt || Date.now()))) / 1000));
-      if (btn){ btn.disabled = true; btn.textContent = 'Watching... '+remaining+'s'; }
+      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
       return;
     }
     var cooldown = Math.max(0, Math.ceil((adCooldownUntil - Date.now()) / 1000));
@@ -1845,9 +1851,7 @@ function startGame(key){
   });
 }
 function renderGameBoard(key){
-  var board=document.getElementById('gameBoard'); board.className='game-board '+(key==='gem'?'gem':''); clearInterval(gameTimerId);
-  var seconds=key==='gem'?45:30; document.getElementById('gameTimer').textContent=seconds+'s';
-  gameTimerId=setInterval(function(){seconds--;document.getElementById('gameTimer').textContent=Math.max(0,seconds)+'s';if(seconds<=0)finishGame();},1000);
+  var board=document.getElementById('gameBoard'); board.className='game-board '+(key==='gem'?'gem':''); clearInterval(gameTimerId); gameTimerId=null;
   if(key==='gem')renderGemRush(board);else if(key==='wheel')renderNumberClash(board);else if(key==='xo')renderXO(board);else renderFruitSlots(board);
 }
 var gemState={bombs:[],found:0,rewards:[50,150,300,400,600,700]};
@@ -1873,19 +1877,21 @@ function finishGame(){
   if(gameFinished || !activeGame) return;
   gameFinished=true; clearInterval(gameTimerId);
   var key=activeGame, score=Math.min(key==='gem'?700:600,Math.max(0,gameScore));
-  showGameAd().then(function(){
-    api('playGame',{game:key,score:score}).then(function(res){
-      if(!res.success){ showToast(res.error||'Game unavailable','error'); return; }
-      S.user.balance=res.data.shibaBalance;
-      S.data.gamePlays=res.data.gamePlays||S.data.gamePlays||{};
-      document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
-      document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
-      document.getElementById('gameResult').innerHTML=(key==='gem' && score===0)
-        ? '<b>💣 Game Over</b>لقد اخترت قنبلة، خسرت مكافأة الجولة ولم تحصل على أي عملات.'
-        : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b> Reward added to your balance';
-      renderGames();
-    }).catch(function(){ showToast('Network error','error'); });
-  });
+  api('playGame',{game:key,score:score}).then(function(res){
+    if(!res.success){ showToast(res.error||'Game unavailable','error'); closeGame(); return; }
+    S.user.balance=res.data.shibaBalance;
+    S.data.gamePlays=res.data.gamePlays||S.data.gamePlays||{};
+    document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
+    document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
+    document.getElementById('gameResult').innerHTML=(key==='gem' && score===0)
+      ? '<b>💣 Game Over</b>لقد اخترت قنبلة، خسرت مكافأة الجولة ولم تحصل على أي عملات.'
+      : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b> Reward added to your balance';
+    renderGames();
+    // اعرض النتيجة أولًا، ثم افتح إعلان نهاية اللعبة بعد ثانيتين
+    setTimeout(function(){
+      showGameAd().then(function(){ closeGame(); });
+    },2000);
+  }).catch(function(){ showToast('Network error','error'); closeGame(); });
 }
 function closeGame(){
   clearInterval(gameTimerId); activeGame=null; gameFinished=true; switchPage('games'); renderGames();
