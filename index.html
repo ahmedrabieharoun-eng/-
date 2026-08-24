@@ -510,7 +510,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
             <span class="balance-num" id="homeTon">0</span>
              <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
           </div>
-          <div class="balance-sub" id="homeTonBalance">0 TON</div>
+           <div class="balance-sub" id="homePmtTonValue">≈ 0 <img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
            <div class="balance-logo">💠</div>
            <div class="home-actions">
@@ -646,8 +646,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
         <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> Balance</div>
          <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
           <div class="wbal-sub" id="walletCoinsInfo">Available from tasks &amp; referrals</div>
-          <div class="wbal-label" style="margin-top:16px;color:#58d68d"><img class="shiba-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> Balance</div>
-           <div class="wbal-amount" id="walletTonBalance">0 <img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
+           <div class="wbal-sub" id="walletPmtTonValue">≈ 0 <img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
       </div>
 
       <div class="wallet-actions">
@@ -876,6 +875,15 @@ function buildRefLink(code){
 // أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
 var TON_ICON = '<img src="https://cdn.simpleicons.org/ton/0098EA" class="ton-icon-inline" alt="TON">';
+function updatePmtTonValueDisplays(){
+  var balance = Number((S.user && S.user.balance) || 0);
+  var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
+  var value = '≈ ' + (balance / rate).toFixed(4) + ' ' + TON_ICON;
+  var homeEl = document.getElementById('homePmtTonValue');
+  var walletEl = document.getElementById('walletPmtTonValue');
+  if (homeEl) homeEl.innerHTML = value;
+  if (walletEl) walletEl.innerHTML = value;
+}
 
 // مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
 var PRICE_PER_100_SHIBA = 200000;
@@ -1116,8 +1124,9 @@ function render(){
   document.getElementById('homeName').textContent = u.firstName || 'Player';
   // Balance
   document.getElementById('homeTon').textContent = fmtShiba(u.balance);
-  var homeTonBalanceEl = document.getElementById('homeTonBalance');
-   if (homeTonBalanceEl) homeTonBalanceEl.innerHTML = Number(u.tonBalance || d.tonBalance || 0).toFixed(4) + ' ' + TON_ICON;
+   var pmtTonValue = Number(u.balance || 0) / (Number(cfg.tonConversionRate) || 10000);
+   var homePmtTonValueEl = document.getElementById('homePmtTonValue');
+   if (homePmtTonValueEl) homePmtTonValueEl.innerHTML = '≈ ' + pmtTonValue.toFixed(4) + ' ' + TON_ICON;
   // Stats — "Active" = passed mandatory subscription (real, verified referral)
   var totalRefs = S.refs.length;
    var activeRefsList = S.refs.filter(function(r){ return r.status === 'active' || r.status === 'completed'; });
@@ -1155,8 +1164,8 @@ function render(){
   renderRefs(0);
   // Wallet (Balance & History)
    document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
-  var tonBalanceEl = document.getElementById('walletTonBalance');
-   if (tonBalanceEl) tonBalanceEl.innerHTML = Number(u.tonBalance || d.tonBalance || 0).toFixed(4) + ' ' + TON_ICON;
+  var walletPmtTonValueEl = document.getElementById('walletPmtTonValue');
+   if (walletPmtTonValueEl) walletPmtTonValueEl.innerHTML = '≈ ' + pmtTonValue.toFixed(4) + ' ' + TON_ICON;
   renderWalletHistory(d.balanceLogs||[]);
   // Tasks
   renderTasks(currentTab);
@@ -1183,6 +1192,7 @@ function claimDailyBonus(){
   api('claimDailyBonus', {}).then(function(res){
     if (!res.success){ btn.disabled=false; btn.textContent='Claim'; showToast(res.error||'Could not claim bonus','error'); return; }
     S.user.balance = res.data.shibaBalance;
+    updatePmtTonValueDisplays();
     S.data.daily = S.data.daily || {};
     S.data.daily.claimed = true;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
@@ -1201,6 +1211,7 @@ function redeemCode(){
     btn.disabled=false; btn.textContent='Redeem Reward';
     if (!res.success){ showToast(res.error||'Invalid code','error'); return; }
     S.user.balance = res.data.shibaBalance;
+    updatePmtTonValueDisplays();
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     input.value='';
     closeModal('redeemModal');
@@ -1368,8 +1379,6 @@ function submitWithdrawal(){
     if (!res.success){ showToast(res.error||'Withdrawal failed','error'); return; }
     S.user.tonBalance = res.data.tonBalance;
     S.user.tonWallet = wallet;
-    document.getElementById('homeTonBalance').innerHTML = Number(res.data.tonBalance||0).toFixed(4)+' '+TON_ICON;
-    document.getElementById('walletTonBalance').innerHTML = Number(res.data.tonBalance||0).toFixed(4)+' '+TON_ICON;
     S.data.withdrawals = S.data.withdrawals || [];
     S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, currency:'TON', status:'pending', ts:Date.now() });
     renderWalletHistory(S.data.balanceLogs||[]);
@@ -1436,11 +1445,11 @@ function submitConvert(){
   api('convertPmtToTon',{pmtAmount:amount}).then(function(res){
     btn.disabled=false; btn.textContent='Convert to TON';
     if(!res.success){showToast(res.error||'Conversion failed','error');return;}
-    S.user.balance=res.data.shibaBalance; S.user.tonBalance=res.data.tonBalance;
+    S.user.balance=res.data.shibaBalance; S.user.tonBalance=res.data.tonBalance; updatePmtTonValueDisplays();
     document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
-    document.getElementById('homeTonBalance').innerHTML=Number(S.user.tonBalance||0).toFixed(4)+' '+TON_ICON;
+    document.getElementById('homePmtTonValue').innerHTML='≈ '+(Number(S.user.balance||0)/(Number((S.data.config||{}).tonConversionRate)||10000)).toFixed(4)+' '+TON_ICON;
     document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
-    document.getElementById('walletTonBalance').innerHTML=Number(S.user.tonBalance||0).toFixed(4)+' '+TON_ICON;
+    document.getElementById('walletPmtTonValue').innerHTML='≈ '+(Number(S.user.balance||0)/(Number((S.data.config||{}).tonConversionRate)||10000)).toFixed(4)+' '+TON_ICON;
     document.getElementById('convertPmtBalance').textContent=fmtShiba(S.user.balance)+' PMT';
     document.getElementById('convertTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
     document.getElementById('convertAmount').value='';
@@ -1525,6 +1534,7 @@ function watchMonetag(){
         return;
       }
       S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
       S.data.stats = S.data.stats || {};
       S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
@@ -1593,6 +1603,7 @@ function doVerifyTask(id){
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
     S.user.balance = res.data.shibaBalance;
+    updatePmtTonValueDisplays();
     delete S.taskJoined[id];
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
@@ -1607,6 +1618,7 @@ function doClaimInvite(id){
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
     S.user.balance = res.data.shibaBalance;
+    updatePmtTonValueDisplays();
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
     document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
     renderTasks(currentTab);
@@ -1763,6 +1775,7 @@ function spinWheel(){
     setTimeout(function(){
       wheelSpinning = false;
       S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
       S.data.wheel = S.data.wheel || {};
       S.data.wheel.spinsAvailable = res.data.spinsAvailable;
       S.data.wheel.spinsUsed = res.data.spinsUsed;
@@ -1880,7 +1893,7 @@ function finishGame(){
   var key=activeGame, score=Math.min(key==='gem'?700:600,Math.max(0,gameScore));
   api('playGame',{game:key,score:score}).then(function(res){
     if(!res.success){ showToast(res.error||'Game unavailable','error'); closeGame(); return; }
-    S.user.balance=res.data.shibaBalance;
+    S.user.balance=res.data.shibaBalance; updatePmtTonValueDisplays();
     S.data.gamePlays=res.data.gamePlays||S.data.gamePlays||{};
     document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
     document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
