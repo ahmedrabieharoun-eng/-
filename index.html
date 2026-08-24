@@ -1508,12 +1508,12 @@ function watchMonetag(){
   startAdButtonTimer();
   Promise.resolve().then(function(){ return fn(); }).then(function(){
     var watchedFor = Date.now() - adWatchStartedAt;
-    if (watchedFor < 10000){
+    if (watchedFor < 15000){
       adWatchBusy = false;
       adCooldownUntil = Date.now() + 5000;
       startAdButtonTimer();
       renderTasks('ads');
-      showToast('لازم تشاهد الإعلان لمدة 10 ثواني عشان تاخذ المكافأة','error');
+      showToast('لازم تشاهد الإعلان لمدة 15 ثانية عشان تاخذ المكافأة','error');
       return;
     }
     api('claimAdReward', {}).then(function(res){
@@ -1556,7 +1556,8 @@ function startAdButtonTimer(){
       if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
     } else {
       stopAdButtonTimer();
-      if (btn){ btn.disabled = false; btn.textContent = 'Watch'; }
+      adCooldownUntil = 0;
+      renderTasks('ads');
     }
   }, 250);
 }
