@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -272,8 +273,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 /* ===== WALLET PAGE ===== */
 .wallet-header{padding:20px 20px 16px;text-align:center}
-.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(145deg,#1c1400,#0f0f0f);border:1px solid rgba(147,92,246,0.25);position:relative;overflow:hidden}
-.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(147,92,246,0.1) 0%,transparent 70%);pointer-events:none}
+.wallet-bal-card{margin:0 16px 16px;padding:24px 20px;border-radius:20px;background:linear-gradient(135deg,#13a8df 0%,#198ee0 48%,#5969ef 100%);border:0;box-shadow:0 14px 34px rgba(18,154,230,.22);position:relative;overflow:hidden}
+.wallet-bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 68%);pointer-events:none}
 .wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
 .wbal-sub{font-size:13px;color:var(--text3)}
@@ -288,12 +289,24 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 .wallet-form-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border)}
 .wallet-form-help{font-size:12px;color:var(--text2);line-height:1.6;margin:-4px 0 14px}
+.withdraw-requirements{display:flex;flex-direction:column;gap:7px;margin:0 0 16px;padding:12px 14px;border-radius:13px;background:rgba(5,12,28,.28);border:1px solid rgba(255,255,255,.2)}
+.withdraw-requirement{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:900;letter-spacing:.5px;line-height:1.2}
+.withdraw-requirement.min{color:#ffe066}.withdraw-requirement.ads{color:#72e6ff}.withdraw-requirement.left{color:#ff9d9d}
 .wallet-form-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
 .wallet-input:focus{border-color:rgba(147,92,246,0.5)}
 .wallet-input::placeholder{color:var(--text3)}
 .wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
 .wallet-submit:disabled{opacity:0.5;cursor:default}
+.convert-box{padding:18px;border-radius:22px;background:linear-gradient(145deg,rgba(9,17,23,.98),rgba(10,25,38,.96));border:1px solid rgba(64,174,235,.28);box-shadow:0 8px 26px rgba(0,0,0,.28)}
+.convert-box-label{font-size:14px;font-weight:900;letter-spacing:1px;color:#a9b5c2;margin-bottom:14px}
+.convert-currency{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.convert-currency img{width:42px;height:42px;object-fit:contain;border-radius:50%}
+.convert-currency-name{font-size:20px;font-weight:900;color:#fff}
+.convert-amount{margin-left:auto;width:128px;padding:8px 10px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.16);color:#fff;text-align:right;font-size:25px;font-weight:900;outline:none}
+.convert-balance{font-size:13px;font-weight:700;color:#8b9aa8}
+.convert-arrow{width:52px;height:52px;margin:12px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#159ddd,#536df1);color:#fff;font-size:28px;font-weight:900;box-shadow:0 0 22px rgba(40,165,239,.42)}
+.convert-rate{margin:14px 0;padding:13px;border-radius:13px;text-align:center;background:rgba(24,156,221,.12);border:1px solid rgba(82,201,255,.3);color:#9fe7ff;font-size:14px;font-weight:900}
 
 .tx-section{padding:0 16px 16px}
 .tx-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
@@ -650,9 +663,13 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
       <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
          <div class="wallet-form-title"><span>💸</span><span>Withdraw TON</span></div>
+         <div class="withdraw-requirements" aria-label="Withdrawal requirements">
+           <div class="withdraw-requirement min"><span>MIN</span><span id="withdrawMinValue">0.1 TON</span></div>
+           <div class="withdraw-requirement ads"><span>ADS</span><span id="withdrawAdsValue">0/15</span></div>
+           <div class="withdraw-requirement left"><span id="withdrawLeftValue">15 LEFT</span><span>REQUIRED</span></div>
+         </div>
          <input class="wallet-input" id="withdrawWallet" placeholder="TON Wallet Address (UQ...)">
          <input class="wallet-input" id="withdrawAmount" type="number" step="0.01" inputmode="decimal" placeholder="TON amount">
-         <div id="withdrawMinNote" style="font-size:11px;color:var(--text3);margin:-4px 0 12px">Minimum: 0.1 TON · Watch 15 ads</div>
          <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit TON Withdrawal</button>
         <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
       </div>
@@ -668,10 +685,25 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
        <div class="wallet-form-card" id="convertFormCard" style="display:none">
          <div class="wallet-form-title"><span>🔄</span><span>Convert PMT to TON</span></div>
-         <div class="wallet-form-help">Conversion rate: 10,000 PMT = 1 TON.</div>
-         <input class="wallet-input" id="convertAmount" type="number" step="1" min="10000" placeholder="PMT amount">
-         <div id="convertPreview" style="font-size:12px;color:#58d68d;margin:-4px 0 12px">You receive: 0 TON</div>
-         <button class="wallet-submit" id="convertSubmitBtn" onclick="submitConvert()">Convert to TON</button>
+         <div class="convert-box">
+           <div class="convert-box-label">FROM</div>
+           <div class="convert-currency">
+             <img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
+             <span class="convert-currency-name">PMT</span>
+             <input class="convert-amount" id="convertAmount" type="number" step="1" min="10000" placeholder="0">
+           </div>
+           <div class="convert-balance">Balance: <span id="convertPmtBalance">0 PMT</span></div>
+           <div class="convert-arrow">↓</div>
+           <div class="convert-box-label">TO</div>
+           <div class="convert-currency">
+             <img src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">
+             <span class="convert-currency-name">TON</span>
+             <span class="convert-amount" id="convertTonOutput">0</span>
+           </div>
+           <div class="convert-balance">Balance: <span id="convertTonBalance">0 TON</span></div>
+         </div>
+         <div class="convert-rate">📊 10,000 PMT = 1 TON</div>
+         <button class="wallet-submit" id="convertSubmitBtn" onclick="submitConvert()">⚡ Exchange Now</button>
          <button class="modal-close" style="margin-top:8px" onclick="closeWalletForm('convertFormCard')">Cancel</button>
        </div>
 
@@ -1298,7 +1330,9 @@ function openWithdrawForm(){
   var watched = Number((S.user && S.user.totalAdsWatched) || 0);
   var count = ((S.data && S.data.withdrawals) || []).length;
   var rule = [{min:0.1,ads:15},{min:0.2,ads:20},{min:0.3,ads:25}][Math.min(count,2)];
-  document.getElementById('withdrawMinNote').textContent = 'Minimum: '+rule.min+' TON · Watch '+rule.ads+' ads (you watched '+watched+')';
+  document.getElementById('withdrawMinValue').textContent = rule.min.toFixed(1)+' TON';
+  document.getElementById('withdrawAdsValue').textContent = Math.min(watched, rule.ads)+'/'+rule.ads;
+  document.getElementById('withdrawLeftValue').textContent = Math.max(0, rule.ads-watched)+' LEFT';
   document.getElementById('withdrawWallet').value = (S.user && S.user.tonWallet) || '';
   document.getElementById('withdrawAmount').value = '';
   document.getElementById('withdrawFormCard').style.display = 'block';
@@ -1368,8 +1402,11 @@ async function submitDeposit(){
 function openConvertForm(){
   closeWalletForm('depositFormCard'); closeWithdrawForm();
   document.getElementById('convertFormCard').style.display='block';
+  document.getElementById('convertPmtBalance').textContent=fmtShiba((S.user&&S.user.balance)||0)+' PMT';
+  document.getElementById('convertTonBalance').textContent=Number((S.user&&S.user.tonBalance)||0).toFixed(4)+' TON';
+  document.getElementById('convertTonOutput').textContent='0';
   document.getElementById('convertAmount').oninput=function(){
-    document.getElementById('convertPreview').textContent='You receive: '+(Number(this.value||0)/10000).toFixed(4)+' TON';
+    document.getElementById('convertTonOutput').textContent=(Number(this.value||0)/10000).toFixed(4);
   };
 }
 function submitConvert(){
@@ -1384,6 +1421,8 @@ function submitConvert(){
     document.getElementById('homeTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
     document.getElementById('walletTon').textContent=fmtShiba(S.user.balance)+' PMT';
     document.getElementById('walletTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
+    document.getElementById('convertPmtBalance').textContent=fmtShiba(S.user.balance)+' PMT';
+    document.getElementById('convertTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
     document.getElementById('convertAmount').value='';
     closeWalletForm('convertFormCard'); showToast('Conversion completed ✅');
   }).catch(function(){btn.disabled=false;btn.textContent='Convert to TON';showToast('Network error','error');});
