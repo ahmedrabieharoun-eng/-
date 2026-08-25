@@ -6,6 +6,7 @@
 <title>Pmt Gram</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="11638380" data-sdk="show_11638380"></script>
 <script src="anti-fraud-frontend.js"></script>
 <style>
@@ -888,7 +889,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
   var BOT_USER = 'jygjhvjbot'; // Pmt Gram username without @
-  var BOT_DEPOSIT_WALLET = 'UQBnwSS4Kox3ZZmF69KxWLfvfCc2-dLV8sT5nJe-aV7HfCyG';
+  // نفس عنوان محفظة الإيداع الموجود في نظام الإيداع العامل.
+  var BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
   var tonConnectUI = null;
 // اسم الـ Mini App المسجّل في BotFather (Short Name) — لازم يتحط هنا لأن
 // البوت ده "بوت أزرار" وميني آبه مش الـ Main App الافتراضي، فرابط
@@ -1462,9 +1464,13 @@ function renderWalletHistory(logs){
   var entries = [];
   (logs||[]).forEach(function(l){
     if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
-    var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel' };
+     var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel', deposit:'Deposit' };
     var label = labels[l.type] || (l.type||'Reward');
-    entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' '+SHIBA_ICON, cls:'ok', txt:'Done' });
+     if (l.type === 'deposit' || l.currency === 'TON') {
+       entries.push({ ts:l.ts||0, label:label+' +'+Number(l.amount||0).toFixed(4)+' TON', cls:'ok', txt:'Done' });
+     } else {
+       entries.push({ ts:l.ts||0, label:label+' +'+fmtShiba(l.amount)+' '+SHIBA_ICON, cls:'ok', txt:'Done' });
+     }
   });
   withdrawals.forEach(function(w){
     var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
@@ -1545,31 +1551,62 @@ function openDepositForm(){
   setWalletActionActive('walletActionDeposit');
   closeWalletForm('convertFormCard'); closeWithdrawForm();
   document.getElementById('depositFormCard').style.display='block';
+  // العنوان مصدره نظام الإيداع العامل، ولا نعتمد على قيمة قديمة محفوظة في Firebase.
+  BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
   if (!tonConnectUI && window.TON_CONNECT_UI) {
     tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: window.location.origin + '/tonconnect-manifest.json',
+      manifestUrl: API_URL.replace(/\/$/,'') + '/tonconnect-manifest.json',
       buttonRootId: 'tonConnectButton'
     });
+    tonConnectUI.onStatusChange(function(wallet){
+      var btn = document.getElementById('depositSubmitBtn');
+      if (btn) btn.disabled = !wallet;
+    });
   }
-}
-function encodeTonComment(text){
-  var bytes = new TextEncoder().encode(text), data = new Uint8Array(4 + bytes.length);
-  new DataView(data.buffer).setUint32(0, 0, false); data.set(bytes, 4);
-  var binary=''; for(var i=0;i<data.length;i++) binary+=String.fromCharCode(data[i]);
-  return btoa(binary);
 }
 async function submitDeposit(){
   var amount = Number(document.getElementById('depositAmount').value);
   if (!Number.isFinite(amount) || amount <= 0){ showToast('Enter a valid TON amount','error'); return; }
   if (!tonConnectUI){ showToast('Connect your TON wallet first','error'); return; }
+  var btn = document.getElementById('depositSubmitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Waiting for wallet...'; }
   try {
-    await tonConnectUI.sendTransaction({
+    // نفس تكوين المعاملة المستخدم في النظام العامل: تعليق TON قابل للقراءة
+    // يحتوي معرّف مستخدم PMT، ثم تسجيل BOC وبدء التحقق من البلوكتشين.
+    var cell = new TonWeb.boc.Cell();
+    cell.bits.writeUint(0, 32);
+    cell.bits.writeString(String((S.user && S.user.telegramId) || 'unknown'));
+    var payload = TonWeb.utils.bytesToBase64(await cell.toBoc(false));
+    var result = await tonConnectUI.sendTransaction({
       validUntil: Math.floor(Date.now()/1000)+600,
-      messages: [{ address: BOT_DEPOSIT_WALLET, amount: String(Math.floor(amount*1000000000)), payload: encodeTonComment('Pmt Gram User ID: '+((S.user&&S.user.telegramId)||'unknown')) }]
+      messages: [{ address: BOT_DEPOSIT_WALLET, amount: String(Math.floor(amount*1000000000)), payload: payload }]
     });
-    showToast('Deposit transaction sent ✅');
+    if (btn) btn.textContent = 'Registering deposit...';
+    var reg = await api('createDeposit', { amount: amount, txHash: result.boc });
+    if (!reg || !reg.success) throw new Error((reg && reg.error) || 'Deposit registration failed');
+    showToast('Deposit transaction sent. Verifying... ✅');
     closeWalletForm('depositFormCard');
-  } catch(e){ showToast('Deposit cancelled','error'); }
+    var depositId = reg.data.depositId;
+    var attempts = 0;
+    var poll = setInterval(function(){
+      attempts++;
+      api('verifyDeposit', { depositId: depositId }).then(function(res){
+        if (res && res.success && res.data && res.data.status === 'completed'){
+          clearInterval(poll);
+          S.user.tonBalance = res.data.tonBalance;
+          updateWalletTonBalance();
+          showToast('Deposit confirmed ✅');
+        } else if (attempts >= 18) {
+          clearInterval(poll);
+          showToast('Deposit is still pending. Refresh later.','error');
+        }
+      }).catch(function(){ if (attempts >= 18) clearInterval(poll); });
+    }, 10000);
+  } catch(e){
+    showToast(e && e.message ? e.message : 'Deposit cancelled','error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Deposit'; }
+  }
 }
 function openConvertForm(){
   setWalletActionActive('walletActionConvert');
