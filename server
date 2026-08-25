@@ -39,7 +39,7 @@
 //   أي قيمة موجودة بالفعل في Firebase تم تعديلها يدويًا)
 // ──────────────────────────────────────────────────────────────────────
 const DEFAULT_CONFIG = {
-  botUsername: 'jygjhvjbot',
+  botUsername: 'Pmt_Gram_Bot',
   referralReward: 4000,        // Daily referral reward after watching 10 ads
   comboReward: 5000,           // مكافأة الكومبو اليومي (SHIBA)
   taskDefaultReward: 500,      // مكافأة افتراضية لمهام القنوات/البوتات
@@ -2034,7 +2034,7 @@ export default {
     }
 
     const botToken = config.botToken || env.BOT_TOKEN || '';
-    const botUsername = config.botUsername || env.BOT_USERNAME || 'jygjhvjbot';
+    const botUsername = config.botUsername || env.BOT_USERNAME || 'Pmt_Gram_Bot';
 
     if (!botToken) {
       return fail('لم يتم ضبط BOT_TOKEN (لا في Firebase config/botToken ولا في متغيرات البيئة)', 500);
