@@ -278,6 +278,11 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
 .wbal-sub{font-size:13px;color:var(--text3)}
 .wallet-ton-icon{width:46px;height:46px;vertical-align:-10px;margin-left:4px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.22))}
+.wallet-balances{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+.wallet-balance-item{min-width:0;padding:12px 8px;border-radius:15px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);text-align:center}
+.wallet-balance-item .wbal-label{display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.5px}
+.wallet-balance-item .wbal-amount{font-size:25px;letter-spacing:-.5px;white-space:nowrap}
+.wallet-pmt-icon{width:32px;height:32px;vertical-align:-8px;margin-left:2px;border-radius:50%;object-fit:contain;filter:drop-shadow(0 3px 7px rgba(0,0,0,.22))}
 
 .wallet-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
 .wallet-action-btn{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s}
@@ -654,9 +659,17 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
        <div class="wallet-bal-card">
-        <div class="wbal-label"><img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> TON Balance</div>
-         <div class="wbal-amount" id="walletTon">0.0000 <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
-          <div class="wbal-sub" id="walletCoinsInfo">Your available TON balance</div>
+        <div class="wallet-balances">
+          <div class="wallet-balance-item">
+            <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> PMT</div>
+            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+          </div>
+          <div class="wallet-balance-item">
+            <div class="wbal-label"><img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> TON</div>
+            <div class="wbal-amount" id="walletTon">0.0000 <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
+          </div>
+        </div>
+        <div class="wbal-sub" id="walletCoinsInfo">Your available PMT and TON balances</div>
       </div>
 
       <div class="wallet-actions">
@@ -890,11 +903,11 @@ function updatePmtTonValueDisplays(){
   var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
   var value = '≈ ' + (balance / rate).toFixed(4) + ' ' + TON_ICON;
   var homeEl = document.getElementById('homePmtTonValue');
-  var walletEl = document.getElementById('walletPmtTonValue');
   if (homeEl) homeEl.innerHTML = value;
-  if (walletEl) walletEl.innerHTML = value;
 }
 function updateWalletTonBalance(){
+  var pmtEl = document.getElementById('walletPmtBalance');
+  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">';
   var el = document.getElementById('walletTon');
   if (el) el.innerHTML = Number((S.user && S.user.tonBalance) || 0).toFixed(4) + ' <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">';
 }
