@@ -194,6 +194,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .task-info{flex:1;min-width:0}
 .task-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-reward{font-size:12px;color:var(--orange);font-weight:700;margin-top:2px}
+.task-limit{font-size:11px;color:var(--text2);font-weight:700;margin-left:8px;white-space:nowrap}
 .task-btn{padding:8px 18px;border-radius:20px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;flex-shrink:0}
 .task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
 .task-btn.verify{background:rgba(147,92,246,0.15);color:var(--orange);border:1px solid rgba(147,92,246,0.3)}
@@ -301,6 +302,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .wallet-input{width:100%;padding:12px 16px;border-radius:12px;background:var(--bg3);border:1px solid rgba(255,255,255,0.08);font-size:14px;color:var(--text);outline:none;margin-bottom:10px;font-family:inherit;transition:border-color 0.2s}
 .wallet-input:focus{border-color:rgba(147,92,246,0.5)}
 .wallet-input::placeholder{color:var(--text3)}
+.withdraw-fee-card{margin:-2px 0 10px;padding:11px 13px;border-radius:12px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);font-size:12px;color:var(--text2);line-height:1.7}
+.withdraw-fee-card b{color:#ffd166}.withdraw-net{display:flex;justify-content:space-between;align-items:center;margin-top:3px;color:var(--text)}.withdraw-net strong{color:#62e69a;font-size:16px}
 .wallet-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.2s}
 .wallet-submit:disabled{opacity:0.5;cursor:default}
 .convert-box{padding:18px;border-radius:22px;background:var(--glass);border:1px solid var(--glass-border)}
@@ -470,11 +473,11 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .how-title{padding:0 20px 10px;color:var(--text2);font-size:13px;font-weight:800;letter-spacing:1px}
 .how-card{margin:0 16px 16px;padding:15px;border-radius:16px;background:rgba(31,37,58,.72);border:1px solid rgba(255,255,255,.07)}
 .how-row{display:flex;align-items:center;gap:12px;padding:5px 0}.how-num{width:28px;height:28px;border-radius:50%;background:rgba(35,183,243,.16);color:#55caff;display:flex;align-items:center;justify-content:center;font-weight:800}.how-row b{font-size:14px}.how-row span{font-size:12px;color:var(--text2);display:block;margin-top:2px}
-.mining-card{margin:0 16px 16px;padding:18px;border-radius:20px;background:linear-gradient(145deg,rgba(104,25,34,.96),rgba(64,25,42,.96));border:1px solid rgba(255,96,105,.42);box-shadow:0 12px 28px rgba(0,0,0,.16);transition:background .3s,border-color .3s}
-.mining-card.mining-on{background:linear-gradient(145deg,rgba(20,103,67,.96),rgba(20,70,61,.96));border-color:rgba(83,225,137,.5)}
+ .mining-card{margin:0 16px 16px;padding:18px;border-radius:16px;background:rgba(31,37,58,.9);border:1px solid rgba(255,255,255,.08);box-shadow:none}
+ .mining-card.mining-on{background:rgba(31,37,58,.9);border-color:rgba(255,255,255,.08)}
 .mining-card-head{display:flex;align-items:center;gap:12px}.mining-icon{width:46px;height:46px;border-radius:15px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center}.mining-icon img{width:35px;height:35px;border-radius:50%;object-fit:contain}.mining-title{font-size:17px;font-weight:800}.mining-sub{font-size:12px;color:var(--text2);margin-top:3px}
 .mining-amount-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;color:var(--text2);font-size:12px}.mining-amount{color:#fff;font-size:25px;font-weight:800}.mining-amount-icon{width:29px;height:29px;border-radius:50%;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.25))}
-.mining-progress{height:10px;border-radius:10px;background:rgba(0,0,0,.28);overflow:hidden;margin:8px 0 9px}.mining-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#ff6672,#ffb35c);border-radius:inherit;transition:width .4s}.mining-on .mining-progress-fill{background:linear-gradient(90deg,#47e28b,#a8f06b)}
+ .mining-progress{height:10px;border-radius:10px;background:rgba(0,0,0,.28);overflow:hidden;margin:8px 0 9px}.mining-progress-fill{height:100%;width:0;background:linear-gradient(135deg,#f7ad16,#ffdf65);border-radius:inherit;transition:width .4s}.mining-on .mining-progress-fill{background:linear-gradient(135deg,#f7ad16,#ffdf65)}
 .mining-btn{width:100%;margin-top:15px;padding:13px;border:0;border-radius:13px;background:rgba(255,255,255,.18);color:#fff;font-size:14px;font-weight:800;cursor:pointer}.mining-card.mining-on .mining-btn{background:rgba(255,255,255,.2)}.mining-btn:disabled{opacity:.48;cursor:not-allowed}
 .ad-summary{margin:0 16px 12px;padding:14px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center}.ad-summary b{color:#55caff;font-size:17px}.ad-summary span{font-size:12px;color:var(--text2)}
 .maintenance{font-size:11px;color:#fbbf24;background:rgba(251,191,36,.12);padding:4px 8px;border-radius:8px;margin-top:3px;display:inline-block}
@@ -539,6 +542,15 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
          <div class="feature-copy"><div class="feature-title">Daily Bonus</div><div class="feature-sub" id="dailyBonusSub">Come back every day · +500 PMT</div></div>
          <button class="feature-btn" id="dailyBonusBtn" onclick="claimDailyBonus()">Claim</button>
        </div>
+       <div class="mining-card">
+         <div class="mining-card-head">
+           <div class="mining-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+           <div><div class="mining-title">Mining</div><div class="mining-sub">Watch an ad to start mining for one hour</div></div>
+         </div>
+         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+         <div class="mining-progress"><div class="mining-progress-fill" id="miningProgressFill"></div></div>
+         <button class="mining-btn" id="miningBtn" onclick="watchMiningAd()">📺 Watch Ad &amp; Start Mining</button>
+       </div>
        <div class="redeem-card">
          <div class="feature-icon purple">🎟️</div>
          <div class="feature-copy"><div class="feature-title">Redeem Code</div><div class="feature-sub">Have a promo code? Claim your reward</div></div>
@@ -561,16 +573,6 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           </div>
         </div>
       </div>
-       <div class="mining-card" dir="rtl">
-         <div class="mining-card-head">
-           <div class="mining-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
-           <div><div class="mining-title">تعدين</div><div class="mining-sub">شاهد إعلانًا لتشغيل التعدين لمدة ساعة</div></div>
-         </div>
-         <div class="mining-amount-row"><span>رصيد التعدين</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
-         <div class="mining-progress"><div class="mining-progress-fill" id="miningProgressFill"></div></div>
-         <button class="mining-btn" id="miningBtn" onclick="watchMiningAd()">📺 مشاهدة إعلان وتشغيل التعدين</button>
-       </div>
-
     </div>
 
     <!-- TASKS -->
@@ -694,6 +696,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
          </div>
          <input class="wallet-input" id="withdrawWallet" placeholder="TON Wallet Address (UQ...)">
          <input class="wallet-input" id="withdrawAmount" type="number" step="0.01" inputmode="decimal" placeholder="TON amount">
+          <div class="withdraw-fee-card">Withdrawal fee: <b>5%</b><div class="withdraw-net"><span>Amount you will receive after the fee</span><strong id="withdrawNetAmount">0.0000 TON</strong></div></div>
          <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit TON Withdrawal</button>
         <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
       </div>
@@ -802,7 +805,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
     <div id="addTaskFormView">
        <div class="modal-title">📢 Add Task</div>
-       <div class="modal-desc">Promote your Telegram channel or bot. Bot tasks are approved instantly; channel tasks are verified through real Telegram membership checks.</div>
+        <div class="modal-desc">Promote your Telegram channel or bot. Bot tasks are approved instantly. Channel tasks are checked immediately to confirm that the bot is an administrator.</div>
 
        <div class="modal-field-label">Task Name</div>
        <input class="modal-input" id="addTaskName" placeholder="e.g. Join my channel or start my bot">
@@ -814,7 +817,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
          <div class="qty-chip active" data-category="channels" onclick="selectTaskCategory('channels',this)">Channel / Group</div>
          <div class="qty-chip" data-category="bots" onclick="selectTaskCategory('bots',this)">Website / Bot</div>
        </div>
-       <div class="task-channel-warning" id="taskChannelWarning">⚠ Action required: You must add the bot as an admin in your channel/group for tracking to work.</div>
+       <div class="task-channel-warning" id="taskChannelWarning">⚠ Add the bot as an administrator in your channel/group before submitting. The check is performed immediately.</div>
       <div class="modal-field-label">Members You Need</div>
       <div class="qty-chips" id="qtyChips">
          <div class="qty-chip" data-ton="0.1500 TON" onclick="selectQty(100,this)">100</div>
@@ -854,10 +857,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
     <div id="addTaskSuccessView" class="modal-success" style="display:none">
       <div class="modal-success-icon">✅</div>
-      <div class="modal-success-title">Request Submitted</div>
-       <div class="modal-success-desc">Your task request has been received in TON. Bot tasks are accepted instantly; channel tasks are activated after the Telegram membership check is configured:</div>
+        <div class="modal-success-title">Task Added Successfully</div>
+        <div class="modal-success-desc">Your TON payment was deducted and the task is now live. The bot administrator permission was verified automatically:</div>
       <ul class="modal-success-list">
-        <li>☑️ Channel: <span id="successChannelLink"></span></li>
+           <li>☑️ Channel / Bot: <span id="successChannelLink"></span></li>
         <li>☑️ Members requested: <span id="successMembers"></span></li>
         <li>☑️ Total cost: <span id="successPrice"></span></li>
       </ul>
@@ -1020,7 +1023,7 @@ async function api(action, data){
 function loadState(){
   api('getState', { _initData: S.initData, _startParam: S.startParam }).then(function(res){
     if (!res || !res.success){
-      if (S.inTelegram) showLoadError((res && res.error) || 'تعذر تحميل حساب تيليجرام');
+       if (S.inTelegram) showLoadError((res && res.error) || 'Unable to load your Telegram account');
       else showMockData();
       return;
     }
@@ -1030,7 +1033,7 @@ function loadState(){
     showApp();
     render();
   }).catch(function(err){
-    if (S.inTelegram) showLoadError('تعذر الاتصال بالسيرفر. حاول فتح التطبيق من زر البوت داخل تيليجرام.');
+     if (S.inTelegram) showLoadError('Unable to connect to the server. Open the app from the bot button inside Telegram.');
     else showMockData();
   });
 }
@@ -1043,13 +1046,13 @@ function showLoadError(message){
   panel.innerHTML = '';
   var title = document.createElement('div');
   title.className = 'loading-label';
-  title.textContent = 'تعذر تحميل الحساب';
+   title.textContent = 'Unable to load account';
   var detail = document.createElement('div');
-  detail.style.cssText = 'margin-top:14px;color:var(--text2);font-size:12px;line-height:1.7;max-width:280px;text-align:center;direction:rtl';
+   detail.style.cssText = 'margin-top:14px;color:var(--text2);font-size:12px;line-height:1.7;max-width:280px;text-align:center;direction:ltr';
   detail.textContent = message;
   var hint = document.createElement('div');
-  hint.style.cssText = 'margin-top:10px;color:var(--text3);font-size:11px;text-align:center;direction:rtl';
-  hint.textContent = 'افتح الـ Mini App من زر البوت داخل تيليجرام، وليس من رابط معاينة عادي.';
+   hint.style.cssText = 'margin-top:10px;color:var(--text3);font-size:11px;text-align:center;direction:ltr';
+   hint.textContent = 'Open the Mini App from the bot button inside Telegram, not from a preview link.';
   panel.appendChild(title);
   panel.appendChild(detail);
   panel.appendChild(hint);
@@ -1222,11 +1225,11 @@ function renderMining(){
   fill.style.width = ((amount / 50) * 100) + '%';
   amountEl.textContent = amount.toFixed(2);
   if (!started){
-    btn.disabled = false; btn.textContent = '📺 مشاهدة إعلان وتشغيل التعدين'; btn.onclick = watchMiningAd;
+    btn.disabled = false; btn.textContent = '📺 Watch Ad & Start Mining'; btn.onclick = watchMiningAd;
   } else if (ready){
-    btn.disabled = false; btn.textContent = '🎁 استلام 50 PMT'; btn.onclick = claimMining;
+    btn.disabled = false; btn.textContent = '🎁 Claim 50 PMT'; btn.onclick = claimMining;
   } else {
-    btn.disabled = true; btn.textContent = '⛏️ التعدين يعمل...'; btn.onclick = null;
+    btn.disabled = true; btn.textContent = '⛏️ Mining in progress...'; btn.onclick = null;
   }
   clearTimeout(miningTimerId);
   if (started && !ready) miningTimerId = setTimeout(renderMining, 1000);
@@ -1241,11 +1244,11 @@ function watchMiningAd(){
   miningAdBusy = true; btn.disabled = true;
   var startedAt = Date.now();
   Promise.resolve().then(function(){ return fn(); }).then(function(){
-    if (Date.now() - startedAt < 15000) throw new Error('لازم تشاهد الإعلان لمدة 15 ثانية');
+     if (Date.now() - startedAt < 15000) throw new Error('You must watch the ad for 15 seconds');
     return api('startMining', {});
   }).then(function(res){
-    if (!res.success) throw new Error(res.error || 'تعذر تشغيل التعدين');
-    S.data.mining = res.data; renderMining(); showToast('بدأ التعدين لمدة ساعة ⛏️', null, true);
+     if (!res.success) throw new Error(res.error || 'Unable to start mining');
+    S.data.mining = res.data; renderMining(); showToast('Mining started for one hour ⛏️', null, true);
   }).catch(function(err){ showToast(err.message || 'Mining unavailable','error'); renderMining(); })
     .then(function(){ miningAdBusy = false; });
 }
@@ -1255,11 +1258,11 @@ function claimMining(){
   if (!btn || btn.disabled) return;
   btn.disabled = true;
   api('claimMining', {}).then(function(res){
-    if (!res.success){ showToast(res.error || 'لم يكتمل التعدين بعد','error'); return; }
+     if (!res.success){ showToast(res.error || 'Mining is not complete yet','error'); return; }
     S.user.balance = res.data.shibaBalance;
     S.data.mining.startedAt = null;
-    render(); showToast('+50 PMT تمت إضافتها إلى رصيدك 🎉', null, true);
-  }).catch(function(){ showToast('تعذر استلام المكافأة','error'); })
+     render(); showToast('+50 PMT added to your balance 🎉', null, true);
+  }).catch(function(){ showToast('Unable to claim mining reward','error'); })
     .then(function(){ renderMining(); });
 }
 
@@ -1383,7 +1386,7 @@ function renderRefs(page){
          daysHtml+
          earnedTotal+
          '<div class="ref-user-details">'+
-           (r.fraudMultipleAccounts ? '⚠️ تم تصنيفه كتعدد حسابات ببصمة الجهاز' :
+            (r.fraudMultipleAccounts ? '⚠️ Flagged as multiple accounts from the same device' :
             completedDays >= 3 ? '✅ All 3 daily bonuses have been earned' :
               '📺 Watches 10 ads per day for 3 days · Daily reward: <b>'+fmtShiba(r.reward||0)+' PMT</b>')+
         '</div>'+
@@ -1441,7 +1444,18 @@ function openWithdrawForm(){
   document.getElementById('withdrawAdsValue').textContent = Math.min(watched, rule.ads)+'/'+rule.ads;
   document.getElementById('withdrawWallet').value = (S.user && S.user.tonWallet) || '';
   document.getElementById('withdrawAmount').value = '';
+  updateWithdrawalNetAmount();
   document.getElementById('withdrawFormCard').style.display = 'block';
+  document.getElementById('withdrawAmount').oninput = updateWithdrawalNetAmount;
+}
+
+function updateWithdrawalNetAmount(){
+  var input = document.getElementById('withdrawAmount');
+  var output = document.getElementById('withdrawNetAmount');
+  if (!input || !output) return;
+  var amount = Number(input.value || 0);
+  var net = Number.isFinite(amount) && amount > 0 ? amount * 0.95 : 0;
+  output.textContent = net.toFixed(4) + ' TON';
 }
 
 function closeWithdrawForm(){
@@ -1468,8 +1482,9 @@ function submitWithdrawal(){
     if (!res.success){ showToast(res.error||'Withdrawal failed','error'); return; }
     S.user.tonBalance = res.data.tonBalance;
     S.user.tonWallet = wallet;
+    updateWalletTonBalance();
     S.data.withdrawals = S.data.withdrawals || [];
-    S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:amount, currency:'TON', status:'pending', ts:Date.now() });
+    S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:res.data.netAmount, requestedAmount:amount, fee:res.data.fee, currency:'TON', status:'pending', ts:Date.now() });
     renderWalletHistory(S.data.balanceLogs||[]);
     closeWithdrawForm();
     showToast('Withdrawal request submitted ✅');
@@ -1556,12 +1571,15 @@ function renderTasks(tab){
 
   if (tab === 'ads'){
     var stats = (S.data && S.data.stats) || {};
-    var limit = (S.data && S.data.config && S.data.config.adDailyLimit) || 14;
+     var limit = (stats.adCompanyDailyLimit || (S.data && S.data.config && S.data.config.adCompanyDailyLimit) || 10);
+     var totalLimit = stats.adDailyTotalLimit || (limit * 2);
+     var watchedTotal = Number(stats.adsWatchedToday || 0);
+     var adsByCompany = stats.adsWatchedByCompany || {};
     var reward = (S.data && S.data.config && S.data.config.adReward) || 200;
     document.getElementById('tasksContent').innerHTML =
-      '<div class="ad-summary"><span><b>Today’s ads</b><br>'+stats.adsWatchedToday+' of '+limit+' watched today · resets daily</span><b>'+stats.adsWatchedToday+'/'+limit+'</b></div>'+
-      adTask('📺','Monetag','+'+fmtShiba(reward)+' PMT','Watch', 'watchMonetag()')+
-      adTask('🎟️','Adsgram','Maintenance','Unavailable', '', true);
+       '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
+       adTask('📺','Monetag','+'+fmtShiba(reward)+' PMT','Watch', 'watchMonetag()', false, Number(adsByCompany.monetag||0), limit)+
+       adTask('🎟️','Adsgram','Maintenance','Unavailable', '', true, Number(adsByCompany.adsgram||0), limit);
     return;
   }
 
@@ -1584,14 +1602,15 @@ function renderTasks(tab){
   }).join('');
 }
 
-function adTask(icon, name, reward, button, action, disabled){
+ function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isMonetag = name === 'Monetag';
   var cooldownSeconds = Math.max(0, Math.ceil((adCooldownUntil - Date.now()) / 1000));
   var isLocked = isMonetag && (adWatchBusy || cooldownSeconds > 0);
   var displayButton = isMonetag && adWatchBusy ? 'Watching...' :
     isMonetag && cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
-  return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
-    '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+'</div></div>'+
+   var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
+   return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
+     '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+counter+'</div></div>'+
     '<button '+(isMonetag?'id="monetagWatchBtn" ':'')+'class="task-btn '+(disabled?'verify':'join')+'" '+((disabled||isLocked)?'disabled':'onclick="'+action+'"')+'>'+displayButton+'</button></div>';
 }
 
@@ -1610,10 +1629,10 @@ function watchMonetag(){
       adCooldownUntil = Date.now() + 5000;
       startAdButtonTimer();
       renderTasks('ads');
-      showToast('لازم تشاهد الإعلان لمدة 15 ثانية عشان تاخذ المكافأة','error');
+       showToast('You must watch the ad for 15 seconds to receive the reward','error');
       return;
     }
-    api('claimAdReward', {}).then(function(res){
+     api('claimAdReward', {company:'monetag'}).then(function(res){
       if (!res.success){
         adWatchBusy = false;
         stopAdButtonTimer();
@@ -1625,6 +1644,9 @@ function watchMonetag(){
       updatePmtTonValueDisplays();
       S.data.stats = S.data.stats || {};
       S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
+       S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
+       S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
+       S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
       adWatchBusy = false;
@@ -1675,14 +1697,18 @@ S.taskJoined = {};
 function doJoinTask(id){
   var list = (S.data && S.data.tasks) || [];
   var task = list.find(function(t){ return t.id===id; });
-  S.taskJoined[id] = true;
-  renderTasks(currentTab);
-  showToast('Joined! Click Verify to claim your reward ✓');
-  if (task && task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
-    try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
-  } else if (task && task.link){
-    window.open(task.link, '_blank');
-  }
+  if (!task) return;
+  api('startTask', { taskId:id }).then(function(res){
+    if (!res.success){ showToast(res.error||'Unable to start task','error'); return; }
+    S.taskJoined[id] = true;
+    renderTasks(currentTab);
+    showToast(task.category === 'bots' ? 'Open the bot, wait 3 seconds, then click Verify ✓' : 'Join the channel, then click Verify ✓');
+    if (task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
+      try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
+    } else if (task.link){
+      window.open(task.link, '_blank');
+    }
+  }).catch(function(){ showToast('Network error','error'); });
 }
 
 function doVerifyTask(id){
@@ -1962,17 +1988,17 @@ function renderGemRush(board){
   gemState={bombs:cells.slice(0,3),found:0,rewards:[50,150,300,400,600,700]};
   board.innerHTML='<div class="game-help">Collect the gems and cash out your reward. Choosing a bomb ends the round.</div><div class="rush-status">Round balance: <span id="rushReward">0</span> PMT</div><div class="gem-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="gem-cell rush-cell" onclick="pickRush(this,'+i+')">?</button>';}).join('')+'</div><button id="rushCashout" class="game-action rush-cashout" onclick="cashoutRush()" disabled>Cash out 0 PMT</button>';
 }
-function pickRush(el,index){if(gameFinished||el.disabled)return;el.disabled=true;if(gemState.bombs.indexOf(index)>-1){el.textContent='💣';el.classList.add('bomb');gameScore=0;document.getElementById('rushReward').textContent='0';finishGame();return;}gemState.found++;gameScore=gemState.rewards[gemState.found-1];el.textContent='💎';el.classList.add('safe');document.getElementById('rushReward').textContent=gameScore;var cash=document.getElementById('rushCashout');cash.disabled=false;cash.textContent='اسحب '+gameScore+' PMT';if(gemState.found===6)finishGame();}
+ function pickRush(el,index){if(gameFinished||el.disabled)return;el.disabled=true;if(gemState.bombs.indexOf(index)>-1){el.textContent='💣';el.classList.add('bomb');gameScore=0;document.getElementById('rushReward').textContent='0';finishGame();return;}gemState.found++;gameScore=gemState.rewards[gemState.found-1];el.textContent='💎';el.classList.add('safe');document.getElementById('rushReward').textContent=gameScore;var cash=document.getElementById('rushCashout');cash.disabled=false;cash.textContent='Cash out '+gameScore+' PMT';if(gemState.found===6)finishGame();}
 function cashoutRush(){if(!gameFinished&&gemState.found>0)finishGame();}
-function renderNumberClash(board){board.innerHTML='<div class="game-help">شرح اللعبة: اضغط SPIN لتدوير الدائرتين. مكافأتك تساوي الرقم الكبير × الرقم الصغير.</div><div class="dial-wrap"><div id="dialLarge" class="number-dial">?</div><div class="dial-x">×</div><div id="dialSmall" class="number-dial">?</div></div><div id="dialResult" class="dial-result"></div><button id="dialSpin" class="game-action" onclick="spinNumberClash()">SPIN</button>';}
+ function renderNumberClash(board){board.innerHTML='<div class="game-help">Press SPIN to rotate both dials. Your reward equals the larger number × the smaller number.</div><div class="dial-wrap"><div id="dialLarge" class="number-dial">?</div><div class="dial-x">×</div><div id="dialSmall" class="number-dial">?</div></div><div id="dialResult" class="dial-result"></div><button id="dialSpin" class="game-action" onclick="spinNumberClash()">SPIN</button>';}
 function spinNumberClash(){if(gameFinished)return;var a=document.getElementById('dialLarge'),b=document.getElementById('dialSmall'),btn=document.getElementById('dialSpin');btn.disabled=true;a.classList.add('spinning');b.classList.add('spinning');setTimeout(function(){var x=1+Math.floor(Math.random()*9),y=1+Math.floor(Math.random()*9);a.textContent=x;b.textContent=y;gameScore=x*y;document.getElementById('dialResult').textContent=x+' × '+y+' = '+gameScore+' PMT';finishGame();},700);}
 var xoState=[];
-function renderXO(board){xoState=Array(9).fill('');board.innerHTML='<div class="game-help">شرح اللعبة: أنت X. اختر 3 خانات متتالية أفقيًا أو رأسيًا أو مائلًا قبل الكمبيوتر للفوز.</div><div id="xoStatus" class="xo-status">دورك الآن</div><div class="xo-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="xo-cell" onclick="playXO('+i+')"></button>';}).join('')+'</div>';}
+ function renderXO(board){xoState=Array(9).fill('');board.innerHTML='<div class="game-help">You are X. Choose 3 consecutive squares horizontally, vertically, or diagonally before the computer to win.</div><div id="xoStatus" class="xo-status">Your turn</div><div class="xo-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="xo-cell" onclick="playXO('+i+')"></button>';}).join('')+'</div>';}
 function xoWinner(){var lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(var i=0;i<lines.length;i++){var l=lines[i];if(xoState[l[0]]&&xoState[l[0]]===xoState[l[1]]&&xoState[l[1]]===xoState[l[2]])return xoState[l[0]];}return xoState.indexOf('')<0?'draw':null;}
 function paintXO(){document.querySelectorAll('.xo-cell').forEach(function(c,i){c.textContent=xoState[i];c.className='xo-cell '+(xoState[i]||'').toLowerCase();});}
-function playXO(i){if(gameFinished||xoState[i])return;xoState[i]='X';paintXO();var result=xoWinner();if(result){gameScore=result==='X'?150:0;finishGame();return;}document.getElementById('xoStatus').textContent='الكمبيوتر يفكر...';setTimeout(function(){if(gameFinished)return;var open=xoState.map(function(v,n){return v?null:n;}).filter(function(v){return v!==null;});var pick=open[Math.floor(Math.random()*open.length)];xoState[pick]='O';paintXO();var r=xoWinner();if(r){gameScore=r==='draw'?40:r==='X'?150:0;finishGame();}else document.getElementById('xoStatus').textContent='دورك الآن';},350);}
+ function playXO(i){if(gameFinished||xoState[i])return;xoState[i]='X';paintXO();var result=xoWinner();if(result){gameScore=result==='X'?150:0;finishGame();return;}document.getElementById('xoStatus').textContent='Computer is thinking...';setTimeout(function(){if(gameFinished)return;var open=xoState.map(function(v,n){return v?null:n;}).filter(function(v){return v!==null;});var pick=open[Math.floor(Math.random()*open.length)];xoState[pick]='O';paintXO();var r=xoWinner();if(r){gameScore=r==='draw'?40:r==='X'?150:0;finishGame();}else document.getElementById('xoStatus').textContent='Your turn';},350);}
 var fruitSymbols=['🍒','🍉','❤️','💎'],fruitValues={'🍒':80,'🍉':140,'❤️':20,'💎':600};
-function renderFruitSlots(board){board.innerHTML='<div class="game-help">شرح اللعبة: اضغط SPIN. تحتاج إلى 3 رموز متشابهة بجانب بعض أو فوق بعض أو في خط مائل للفوز.</div><div class="fruit-machine"><div id="fruitGrid" class="fruit-grid"></div><button id="fruitSpin" class="game-action fruit-spin" onclick="spinFruitSlots()">SPIN</button></div><div class="fruit-paytable">❤️ 20 · 🍒 80 · 🍉 140 · 💎 600 PMT</div>';drawFruitGrid(Array(9).fill('❔'));}
+ function renderFruitSlots(board){board.innerHTML='<div class="game-help">Press SPIN. Match 3 identical symbols horizontally, vertically, or diagonally to win.</div><div class="fruit-machine"><div id="fruitGrid" class="fruit-grid"></div><button id="fruitSpin" class="game-action fruit-spin" onclick="spinFruitSlots()">SPIN</button></div><div class="fruit-paytable">❤️ 20 · 🍒 80 · 🍉 140 · 💎 600 PMT</div>';drawFruitGrid(Array(9).fill('❔'));}
 function drawFruitGrid(grid){document.getElementById('fruitGrid').innerHTML=grid.map(function(s){return '<div class="fruit-cell">'+s+'</div>';}).join('');}
 function spinFruitSlots(){if(gameFinished)return;var btn=document.getElementById('fruitSpin');btn.disabled=true;var grid=Array(9).fill(0).map(function(){return fruitSymbols[Math.floor(Math.random()*fruitSymbols.length)];});drawFruitGrid(grid);setTimeout(function(){var lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],win=null;for(var i=0;i<lines.length;i++){var l=lines[i];if(grid[l[0]]===grid[l[1]]&&grid[l[1]]===grid[l[2]]){win=l;break;}}if(win){var sym=grid[win[0]];gameScore=fruitValues[sym]||20;win.forEach(function(n){document.querySelectorAll('.fruit-cell')[n].classList.add('win');});}else gameScore=0;finishGame();},500);}
 function finishGame(){
@@ -1986,7 +2012,7 @@ function finishGame(){
     document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
     updateWalletTonBalance();
     document.getElementById('gameResult').innerHTML=(key==='gem' && score===0)
-      ? '<b>💣 Game Over</b>لقد اخترت قنبلة، خسرت مكافأة الجولة ولم تحصل على أي عملات.'
+       ? '<b>💣 Game Over</b>You chose a bomb, lost the round reward, and received no coins.'
       : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b> Reward added to your balance';
     renderGames();
     // اعرض النتيجة أولًا، ثم افتح إعلان نهاية اللعبة بعد ثانيتين
@@ -2003,8 +2029,12 @@ function closeGame(){
 var currentPage = 'home';
 function switchPage(name){
   if (name === 'tasks') {
-    currentTab = 'ads';
-    setTimeout(function(){ renderTasks('ads'); }, 0);
+    setTimeout(function(){
+      document.querySelectorAll('#page-tasks .tab').forEach(function(tabEl){
+        tabEl.classList.toggle('active', tabEl.getAttribute('onclick').indexOf("'"+currentTab+"'") !== -1);
+      });
+      renderTasks(currentTab);
+    }, 0);
   }
   if (name === 'games') renderGames();
   if (currentPage===name) return;
@@ -2093,6 +2123,11 @@ function submitAddTask(){
    api('submitTaskSuggestion', { name:name, link:link, category:selectedTaskCategory, membersNeeded:members, desc:desc, priceTon:priceTon }).then(function(res){
     btn.disabled = false; btn.textContent = '📤 Submit Request';
     if (!res.success){ showToast(res.error||'Failed to submit','error'); return; }
+     if (typeof res.data.tonBalance === 'number') {
+       S.user.tonBalance = res.data.tonBalance;
+       updateWalletTonBalance();
+       document.getElementById('convertTonBalance').textContent = res.data.tonBalance.toFixed(4)+' TON';
+     }
     document.getElementById('successChannelLink').textContent = link;
     document.getElementById('successMembers').textContent = fmtNum(members);
      document.getElementById('successPrice').innerHTML = (res.data.priceTon || priceTon).toFixed(4)+' TON';
