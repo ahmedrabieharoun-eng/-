@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -199,6 +197,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .task-btn.join{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
 .task-btn.verify{background:rgba(147,92,246,0.15);color:var(--orange);border:1px solid rgba(147,92,246,0.3)}
 .task-btn.done{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+.task-btn:active{transform:scale(0.94)}
+.task-btn:disabled{opacity:0.7;cursor:default;transform:none}
 
 .add-task-section{padding:0 16px 16px}
 .add-task-btn{width:100%;padding:16px;border-radius:14px;background:var(--glass);border:1.5px dashed rgba(147,92,246,0.3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:14px;font-weight:600}
@@ -582,13 +582,13 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
         <div class="tab active" onclick="switchTab(this,'ads')">▣ Ads</div>
         <div class="tab" onclick="switchTab(this,'channels')">🔗 User Tasks</div>
       </div></div>
-      <div class="tasks-list">
-        <div class="tasks-group-label" id="tasksGroupLabel">Advertisements</div>
-        <div id="tasksContent"></div>
-      </div>
       <div class="add-task-section">
         <button class="add-task-btn" onclick="openAddTaskModal()"><span style="font-size:20px">+</span><span>Add Task</span></button>
          <div class="add-task-sub">Pay with TON to promote your channel or bot</div>
+      </div>
+      <div class="tasks-list">
+        <div class="tasks-group-label" id="tasksGroupLabel">Advertisements</div>
+        <div id="tasksContent"></div>
       </div>
     </div>
 
@@ -1585,12 +1585,15 @@ function renderTasks(tab){
 
   var list = allTasks.filter(function(t){ return t.category==='channels' || t.category==='bots'; });
   if (!list.length){ document.getElementById('tasksContent').innerHTML = '<div class="empty-state">No tasks right now</div>'; return; }
+  list = list.map(function(t, idx){ return { t:t, idx:idx, done: completed.indexOf(t.id) > -1 }; })
+    .sort(function(a, b){ return (a.done === b.done) ? (a.idx - b.idx) : (a.done ? 1 : -1); })
+    .map(function(x){ return x.t; });
   document.getElementById('tasksContent').innerHTML = list.map(function(t){
     var done = completed.indexOf(t.id) > -1;
     var st = done ? 'done' : (S.taskJoined && S.taskJoined[t.id] ? 'verify' : 'join');
     var btnClass = st==='join'?'join':st==='verify'?'verify':'done';
     var btnText  = st==='join'?'Join':st==='verify'?'Verify':'✓ Done';
-    var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\')'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\')' : '';
+    var onclick  = st==='join' ? 'doJoinTask(\''+t.id+'\',this)'  : st==='verify' ? 'doVerifyTask(\''+t.id+'\',this)' : '';
     return '<div class="task-item">'+
        '<div class="task-logo">'+(t.icon||(t.category==='channels'?'✈️':'🤖'))+'</div>'+
       '<div class="task-info">'+
@@ -1694,12 +1697,17 @@ function switchTab(el, tab){
 }
 
 S.taskJoined = {};
-function doJoinTask(id){
+function doJoinTask(id, btn){
   var list = (S.data && S.data.tasks) || [];
   var task = list.find(function(t){ return t.id===id; });
   if (!task) return;
+  if (btn){ if (btn.disabled) return; btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = '...'; }
   api('startTask', { taskId:id }).then(function(res){
-    if (!res.success){ showToast(res.error||'Unable to start task','error'); return; }
+    if (!res.success){
+      showToast(res.error||'Unable to start task','error');
+      if (btn){ btn.disabled = false; btn.textContent = btn.dataset.label || 'Join'; }
+      return;
+    }
     S.taskJoined[id] = true;
     renderTasks(currentTab);
     showToast(task.category === 'bots' ? 'Open the bot, wait 3 seconds, then click Verify ✓' : 'Join the channel, then click Verify ✓');
@@ -1708,12 +1716,20 @@ function doJoinTask(id){
     } else if (task.link){
       window.open(task.link, '_blank');
     }
-  }).catch(function(){ showToast('Network error','error'); });
+  }).catch(function(){
+    showToast('Network error','error');
+    if (btn){ btn.disabled = false; btn.textContent = btn.dataset.label || 'Join'; }
+  });
 }
 
-function doVerifyTask(id){
+function doVerifyTask(id, btn){
+  if (btn){ if (btn.disabled) return; btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = 'Checking...'; }
   api('verifyTask', { taskId:id }).then(function(res){
-    if (!res.success){ showToast(res.error||'Verification failed','error'); return; }
+    if (!res.success){
+      showToast(res.error||'Verification failed','error');
+      if (btn){ btn.disabled = false; btn.textContent = btn.dataset.label || 'Verify'; }
+      return;
+    }
     S.data.completedTasks = S.data.completedTasks || [];
     S.data.completedTasks.push(id);
     S.user.balance = res.data.shibaBalance;
@@ -1723,7 +1739,10 @@ function doVerifyTask(id){
     updateWalletTonBalance();
     renderTasks(currentTab);
     showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
-  }).catch(function(){ showToast('Network error','error'); });
+  }).catch(function(){
+    showToast('Network error','error');
+    if (btn){ btn.disabled = false; btn.textContent = btn.dataset.label || 'Verify'; }
+  });
 }
 
 function doClaimInvite(id){
