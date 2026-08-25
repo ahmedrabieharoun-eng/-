@@ -220,7 +220,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .game-card-title{font-size:15px;font-weight:800}.game-card-type{font-size:11px;color:var(--text3);margin:4px 0 9px}.game-card-limit{display:inline-block;padding:4px 8px;border-radius:10px;background:rgba(34,197,94,.13);color:var(--green);font-size:10px;font-weight:700}.game-card-plays{display:block;margin-top:6px;color:var(--text3);font-size:10px}
 .game-play-page{background:#17192d}.game-play-header{display:flex;align-items:center;gap:12px;padding:14px 16px}.game-play-title{font-size:18px;font-weight:800;flex:1}.game-timer{padding:8px 12px;border-radius:18px;background:var(--glass);color:var(--text2);font-size:12px}
 .game-board{margin:0 16px;height:calc(100vh - 230px);min-height:440px;border-radius:20px;background:linear-gradient(160deg,#082f4c,#111c35);border:1px solid rgba(35,183,243,.25);position:relative;overflow:hidden;padding:18px}
-.game-board.gem{background:linear-gradient(160deg,#321044,#181532)}.game-board.merge{background:linear-gradient(160deg,#242456,#102f59)}
+.game-board.gem{background:linear-gradient(160deg,#321044,#181532);height:auto;min-height:0;overflow:visible;padding-bottom:26px}.game-board.merge{background:linear-gradient(160deg,#242456,#102f59)}
 .game-help{text-align:center;color:var(--text2);font-size:13px;margin:12px 0}.game-action{display:block;margin:14px auto;padding:14px 28px;border:0;border-radius:16px;background:linear-gradient(135deg,#0798df,#5978f5);color:#fff;font-size:15px;font-weight:800;cursor:pointer}.game-action:disabled{opacity:.5}
 .coin-target{position:absolute;width:48px;height:48px;border:0;border-radius:50%;background:#0798df;box-shadow:0 0 18px rgba(35,183,243,.7);font-size:25px;cursor:pointer}.gem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:45px}.gem-cell{aspect-ratio:1;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:29px;cursor:pointer}.gem-cell.bomb{background:rgba(239,68,68,.2)}.merge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:90px auto 20px;max-width:340px;padding:12px;border-radius:18px;background:rgba(255,255,255,.08)}.merge-cell{aspect-ratio:1;border-radius:11px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}.flappy-coin{position:absolute;width:42px;height:42px;border-radius:50%;background:#0798df;box-shadow:0 0 18px #0798df;display:flex;align-items:center;justify-content:center;font-size:22px;left:48px;top:50%}.flappy-pipe{position:absolute;width:62px;background:linear-gradient(90deg,#0877a5,#1fc9ed,#0877a5);border-radius:8px;right:35px}.game-result{text-align:center;padding:20px;font-size:16px;color:var(--text2)}.game-result b{display:block;color:#fff;font-size:30px;margin:6px}
 .rush-status{text-align:center;color:#fff;font-size:18px;font-weight:800;margin:8px 0}.rush-status span{color:#f7c948}.rush-cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#fff;cursor:pointer;transition:transform .15s,background .2s}.rush-cell:active{transform:scale(.95)}.rush-cell.safe{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.55)}.rush-cell.bomb{background:rgba(239,68,68,.28);border-color:#ef4444}.rush-cashout{background:linear-gradient(135deg,#f5a524,#f97316);margin-top:16px}.dial-wrap{display:flex;align-items:center;justify-content:center;gap:12px;margin:54px auto 28px}.number-dial{width:126px;height:126px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#50f5dc;border:5px solid #22e6d0;background:radial-gradient(circle,#123d48,#07161f 65%);box-shadow:0 0 22px rgba(34,230,208,.5),inset 0 0 20px rgba(34,230,208,.2)}.number-dial.spinning{animation:dialSpin .65s ease-in-out}.dial-x{font-size:26px;color:#fff;font-weight:900}.dial-result{text-align:center;color:#9ffbed;font-size:15px;min-height:24px}.xo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:330px;margin:36px auto 16px}.xo-cell{aspect-ratio:1;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.07);color:#fff;font-size:42px;font-weight:900;cursor:pointer}.xo-cell.x{color:#4dd9ff}.xo-cell.o{color:#ff70bd}.xo-status{text-align:center;color:var(--text2);font-size:14px;min-height:22px}@keyframes dialSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(.86)}100%{transform:rotate(360deg) scale(1)}}.fruit-machine{max-width:360px;margin:28px auto 0;padding:15px;border-radius:24px;background:linear-gradient(145deg,#292a35,#11121b);border:2px solid #5ee35b;box-shadow:0 0 24px rgba(94,227,91,.22)}.fruit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.fruit-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#252631;border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:42px}.fruit-cell.win{outline:3px solid #f7c948;box-shadow:0 0 18px #f7c948}.fruit-spin{background:linear-gradient(135deg,#36c95f,#159447);margin:18px auto 0}.fruit-paytable{text-align:center;color:var(--text2);font-size:12px;margin-top:14px}
@@ -1016,7 +1016,10 @@ async function api(action, data){
     method: 'POST',
     headers: { 'Content-Type':'application/json', 'Authorization':'tma '+S.initData },
     body: JSON.stringify(payload)
-  }).then(function(r){ return r.json(); });
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res && typeof res.serverTime === 'number') S.clockOffsetMs = res.serverTime - Date.now();
+    return res;
+  });
 }
 
 // ── Load state ───────────────────────────────────────────────────────
@@ -1212,7 +1215,7 @@ function renderMining(){
   var box = (S.data && S.data.mining) || {};
   var started = Number(box.startedAt || (S.user && S.user.miningStartedAt) || 0);
   var duration = Number(box.durationMs || 3600000);
-  var now = Date.now();
+  var now = Date.now() + (S.clockOffsetMs || 0);
   var elapsed = started ? Math.max(0, Math.min(duration, now - started)) : 0;
   var amount = started ? Math.min(50, 50 * elapsed / duration) : 0;
   var ready = started && elapsed >= duration;
@@ -1253,17 +1256,53 @@ function watchMiningAd(){
     .then(function(){ miningAdBusy = false; });
 }
 
+// ── Shared: require a completed Monetag ad view before running an action ──
+function watchAdThen(onSuccess, onFail){
+  var fn = window.show_11638380;
+  if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); if (onFail) onFail(); return; }
+  var startedAt = Date.now();
+  Promise.resolve().then(function(){ return fn(); }).then(function(){
+    if (Date.now() - startedAt < 15000) throw new Error('You must watch the ad for 15 seconds');
+    onSuccess();
+  }).catch(function(err){
+    showToast((err && err.message) || 'Ad was not completed','error');
+    if (onFail) onFail();
+  });
+}
+
 function claimMining(){
   var btn = document.getElementById('miningBtn');
   if (!btn || btn.disabled) return;
-  btn.disabled = true;
-  api('claimMining', {}).then(function(res){
-     if (!res.success){ showToast(res.error || 'Mining is not complete yet','error'); return; }
-    S.user.balance = res.data.shibaBalance;
-    S.data.mining.startedAt = null;
-     render(); showToast('+50 PMT added to your balance 🎉', null, true);
-  }).catch(function(){ showToast('Unable to claim mining reward','error'); })
-    .then(function(){ renderMining(); });
+  if (miningAdBusy) return;
+  var box = (S.data && S.data.mining) || {};
+  var started = Number(box.startedAt || (S.user && S.user.miningStartedAt) || 0);
+  var duration = Number(box.durationMs || 3600000);
+  var now = Date.now() + (S.clockOffsetMs || 0);
+  if (!started || (now - started) < duration){ showToast('Mining is not complete yet','error'); return; }
+  miningAdBusy = true;
+  btn.disabled = true; btn.textContent = '📺 Watch Ad to Collect';
+  watchAdThen(function(){
+    btn.textContent = 'Checking...';
+    api('claimMining', {}).then(function(res){
+      if (!res.success){ showToast(res.error || 'Mining is not complete yet','error'); return; }
+      S.user.balance = res.data.shibaBalance;
+      if (!S.data.mining) S.data.mining = { reward:50, durationMs:3600000 };
+      S.data.mining.startedAt = null;
+      showToast('+50 PMT added to your balance 🎉', null, true);
+      render();
+    }).catch(function(){ showToast('Unable to claim mining reward','error'); })
+      .then(function(){
+        miningAdBusy = false;
+        try { renderMining(); } catch(_){}
+        var b = document.getElementById('miningBtn');
+        if (b && !(S.data.mining && S.data.mining.startedAt)){
+          b.disabled = false; b.textContent = '📺 Watch Ad & Start Mining'; b.onclick = watchMiningAd;
+        }
+      });
+  }, function(){
+    miningAdBusy = false;
+    try { renderMining(); } catch(_){}
+  });
 }
 
 function renderGames(){
@@ -1280,17 +1319,20 @@ function renderGames(){
 function claimDailyBonus(){
   var btn = document.getElementById('dailyBonusBtn');
   if (!btn || btn.disabled) return;
-  btn.disabled = true; btn.textContent = '...';
-  api('claimDailyBonus', {}).then(function(res){
-    if (!res.success){ btn.disabled=false; btn.textContent='Claim'; showToast(res.error||'Could not claim bonus','error'); return; }
-    S.user.balance = res.data.shibaBalance;
-    updatePmtTonValueDisplays();
-    S.data.daily = S.data.daily || {};
-    S.data.daily.claimed = true;
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    btn.textContent = 'Claimed';
-     showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
-  }).catch(function(){ btn.disabled=false; btn.textContent='Claim'; showToast('Network error','error'); });
+  btn.disabled = true; btn.textContent = '📺 Watch Ad...';
+  watchAdThen(function(){
+    btn.textContent = '...';
+    api('claimDailyBonus', {}).then(function(res){
+      if (!res.success){ btn.disabled=false; btn.textContent='Claim'; showToast(res.error||'Could not claim bonus','error'); return; }
+      S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
+      S.data.daily = S.data.daily || {};
+      S.data.daily.claimed = true;
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      btn.textContent = 'Claimed';
+       showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
+    }).catch(function(){ btn.disabled=false; btn.textContent='Claim'; showToast('Network error','error'); });
+  }, function(){ btn.disabled=false; btn.textContent='Claim'; });
 }
 
 function redeemCode(){
@@ -1298,17 +1340,21 @@ function redeemCode(){
   var btn = document.getElementById('redeemSubmitBtn');
   var code = (input.value||'').trim();
   if (!code){ showToast('Enter a redeem code','error'); return; }
-  btn.disabled=true; btn.textContent='Checking...';
-  api('redeemCode', {code:code}).then(function(res){
-    btn.disabled=false; btn.textContent='Redeem Reward';
-    if (!res.success){ showToast(res.error||'Invalid code','error'); return; }
-    S.user.balance = res.data.shibaBalance;
-    updatePmtTonValueDisplays();
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    input.value='';
-    closeModal('redeemModal');
-     showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
-  }).catch(function(){ btn.disabled=false; btn.textContent='Redeem Reward'; showToast('Network error','error'); });
+  if (btn.disabled) return;
+  btn.disabled=true; btn.textContent='📺 Watch Ad...';
+  watchAdThen(function(){
+    btn.textContent='Checking...';
+    api('redeemCode', {code:code}).then(function(res){
+      btn.disabled=false; btn.textContent='Redeem Reward';
+      if (!res.success){ showToast(res.error||'Invalid code','error'); return; }
+      S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      input.value='';
+      closeModal('redeemModal');
+       showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
+    }).catch(function(){ btn.disabled=false; btn.textContent='Redeem Reward'; showToast('Network error','error'); });
+  }, function(){ btn.disabled=false; btn.textContent='Redeem Reward'; });
 }
 
 function renderActivity(log){
@@ -1545,19 +1591,24 @@ function setMaxConvertAmount(){
 function submitConvert(){
   var amount = Math.floor(Number(document.getElementById('convertAmount').value));
   if (!amount || amount < 10000){ showToast('Minimum conversion is 10,000 PMT','error'); return; }
-  var btn=document.getElementById('convertSubmitBtn'); btn.disabled=true; btn.textContent='Converting...';
-  api('convertPmtToTon',{pmtAmount:amount}).then(function(res){
-    btn.disabled=false; btn.textContent='Convert to TON';
-    if(!res.success){showToast(res.error||'Conversion failed','error');return;}
-    S.user.balance=res.data.shibaBalance; S.user.tonBalance=res.data.tonBalance; updatePmtTonValueDisplays();
-    document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
-    document.getElementById('homePmtTonValue').innerHTML='≈ '+(Number(S.user.balance||0)/(Number((S.data.config||{}).tonConversionRate)||10000)).toFixed(4)+' '+TON_ICON;
-    updateWalletTonBalance();
-    document.getElementById('convertPmtBalance').textContent=fmtShiba(S.user.balance)+' PMT';
-    document.getElementById('convertTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
-    document.getElementById('convertAmount').value='';
-    closeWalletForm('convertFormCard'); showToast('Conversion completed ✅');
-  }).catch(function(){btn.disabled=false;btn.textContent='Convert to TON';showToast('Network error','error');});
+  var btn=document.getElementById('convertSubmitBtn');
+  if (btn.disabled) return;
+  btn.disabled=true; btn.textContent='📺 Watch Ad...';
+  watchAdThen(function(){
+    btn.textContent='Converting...';
+    api('convertPmtToTon',{pmtAmount:amount}).then(function(res){
+      btn.disabled=false; btn.textContent='Convert to TON';
+      if(!res.success){showToast(res.error||'Conversion failed','error');return;}
+      S.user.balance=res.data.shibaBalance; S.user.tonBalance=res.data.tonBalance; updatePmtTonValueDisplays();
+      document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
+      document.getElementById('homePmtTonValue').innerHTML='≈ '+(Number(S.user.balance||0)/(Number((S.data.config||{}).tonConversionRate)||10000)).toFixed(4)+' '+TON_ICON;
+      updateWalletTonBalance();
+      document.getElementById('convertPmtBalance').textContent=fmtShiba(S.user.balance)+' PMT';
+      document.getElementById('convertTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
+      document.getElementById('convertAmount').value='';
+      closeWalletForm('convertFormCard'); showToast('Conversion completed ✅');
+    }).catch(function(){btn.disabled=false;btn.textContent='Convert to TON';showToast('Network error','error');});
+  }, function(){ btn.disabled=false; btn.textContent='Convert to TON'; });
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────
