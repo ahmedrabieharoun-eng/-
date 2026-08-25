@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -275,7 +277,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .wbal-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .wbal-amount{font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;margin-bottom:4px}
 .wbal-sub{font-size:13px;color:var(--text3)}
-.wbal-ton-amount{font-size:36px;font-weight:800;color:var(--orange);letter-spacing:-1px;margin-bottom:4px;word-break:break-all}
+.wallet-ton-icon{width:46px;height:46px;vertical-align:-10px;margin-left:4px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.22))}
 
 .wallet-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
 .wallet-action-btn{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s}
@@ -463,6 +465,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .how-title{padding:0 20px 10px;color:var(--text2);font-size:13px;font-weight:800;letter-spacing:1px}
 .how-card{margin:0 16px 16px;padding:15px;border-radius:16px;background:rgba(31,37,58,.72);border:1px solid rgba(255,255,255,.07)}
 .how-row{display:flex;align-items:center;gap:12px;padding:5px 0}.how-num{width:28px;height:28px;border-radius:50%;background:rgba(35,183,243,.16);color:#55caff;display:flex;align-items:center;justify-content:center;font-weight:800}.how-row b{font-size:14px}.how-row span{font-size:12px;color:var(--text2);display:block;margin-top:2px}
+.mining-card{margin:0 16px 16px;padding:18px;border-radius:20px;background:linear-gradient(145deg,rgba(17,53,78,.95),rgba(34,38,78,.95));border:1px solid rgba(85,202,255,.28);box-shadow:0 12px 28px rgba(0,0,0,.16)}
+.mining-card-head{display:flex;align-items:center;gap:12px}.mining-icon{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#19b7ef,#6178ff);display:flex;align-items:center;justify-content:center;font-size:25px}.mining-title{font-size:17px;font-weight:800}.mining-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.mining-progress{height:10px;border-radius:10px;background:rgba(0,0,0,.28);overflow:hidden;margin:18px 0 9px}.mining-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#35d4ff,#8d7bff);border-radius:inherit;transition:width .4s}
+.mining-meta{display:flex;justify-content:space-between;color:var(--text2);font-size:12px}.mining-amount{color:#fff;font-size:22px;font-weight:800}.mining-btn{width:100%;margin-top:15px;padding:13px;border:0;border-radius:13px;background:linear-gradient(135deg,#19b7ef,#6178ff);color:#fff;font-size:14px;font-weight:800;cursor:pointer}.mining-btn:disabled{opacity:.48;cursor:not-allowed}
 .ad-summary{margin:0 16px 12px;padding:14px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center}.ad-summary b{color:#55caff;font-size:17px}.ad-summary span{font-size:12px;color:var(--text2)}
 .maintenance{font-size:11px;color:#fbbf24;background:rgba(251,191,36,.12);padding:4px 8px;border-radius:8px;margin-top:3px;display:inline-block}
 </style>
@@ -548,10 +554,14 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           </div>
         </div>
       </div>
-       <div class="how-title">— HOW IT WORKS</div>
-       <div class="how-card">
-         <div class="how-row"><div class="how-num">1</div><div><b>Watch ads</b><span>Every ad adds PMT to your balance instantly</span></div></div>
-         <div class="how-row"><div class="how-num">2</div><div><b>Invite friends</b><span>Earn more PMT when your friends join</span></div></div>
+       <div class="mining-card" dir="rtl">
+         <div class="mining-card-head">
+           <div class="mining-icon">⛏️</div>
+           <div><div class="mining-title">تعدين PMT</div><div class="mining-sub">شاهد إعلانًا لتشغيل التعدين لمدة ساعة</div></div>
+         </div>
+         <div class="mining-progress"><div class="mining-progress-fill" id="miningProgressFill"></div></div>
+         <div class="mining-meta"><span id="miningTimeLabel">جاهز للتعدين</span><span><b class="mining-amount" id="miningAmount">0</b> / 50 PMT</span></div>
+         <button class="mining-btn" id="miningBtn" onclick="watchMiningAd()">📺 مشاهدة إعلان وتشغيل التعدين</button>
        </div>
 
     </div>
@@ -644,10 +654,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="wallet-header"><div class="page-title">Wallet</div></div>
 
        <div class="wallet-bal-card">
-        <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> Balance</div>
-         <div class="wbal-amount" id="walletTon">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
-          <div class="wbal-sub" id="walletCoinsInfo">Available from tasks &amp; referrals</div>
-           <div class="wbal-ton-amount" id="walletPmtTonValue">0 <img class="ton-icon-inline" src="https://s2.coinmarketcap.com/static/img/coins/64x64/11419.png" alt="TON"></div>
+        <div class="wbal-label"><img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> TON Balance</div>
+         <div class="wbal-amount" id="walletTon">0.0000 <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
+          <div class="wbal-sub" id="walletCoinsInfo">Your available TON balance</div>
       </div>
 
       <div class="wallet-actions">
@@ -876,15 +885,18 @@ function buildRefLink(code){
 // أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
 var TON_ICON = '<img src="https://cdn.simpleicons.org/ton/0098EA" class="ton-icon-inline" alt="TON">';
-var TON_COIN_ICON = '<img src="https://s2.coinmarketcap.com/static/img/coins/64x64/11419.png" class="ton-icon-inline" alt="TON">';
 function updatePmtTonValueDisplays(){
   var balance = Number((S.user && S.user.balance) || 0);
   var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
-  var tonValue = balance / rate;
+  var value = '≈ ' + (balance / rate).toFixed(4) + ' ' + TON_ICON;
   var homeEl = document.getElementById('homePmtTonValue');
-  if (homeEl) homeEl.innerHTML = '≈ ' + tonValue.toFixed(4) + ' ' + TON_ICON;
   var walletEl = document.getElementById('walletPmtTonValue');
-  if (walletEl) walletEl.innerHTML = tonValue + ' ' + TON_COIN_ICON;
+  if (homeEl) homeEl.innerHTML = value;
+  if (walletEl) walletEl.innerHTML = value;
+}
+function updateWalletTonBalance(){
+  var el = document.getElementById('walletTon');
+  if (el) el.innerHTML = Number((S.user && S.user.tonBalance) || 0).toFixed(4) + ' <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">';
 }
 
 // مهمة "Promote Your Channel": كل 100 عضو = 200,000 شيبا (≈ 1 دولار)
@@ -907,6 +919,8 @@ var adWatchBusy = false;
 var adCooldownUntil = 0;
 var adTimerId = null;
 var adWatchStartedAt = 0;
+var miningTimerId = null;
+var miningAdBusy = false;
 
 function getTelegramStartParam(){
   var unsafe = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};
@@ -1042,7 +1056,8 @@ function showMockData(){
     daily:{ reward:500, claimed:false },
     stats:{ adsWatchedToday:0, friendsInvited:0, earnedToday:0 },
     gamePlays:{coin:0,merge:0,flappy:0,gem:0},
-    forceSub:{ required:false, passed:true, channels:[] }
+    forceSub:{ required:false, passed:true, channels:[] },
+    mining:{ startedAt:null, reward:50, durationMs:3600000 }
   };
   S.refs = [];
   showApp();
@@ -1139,6 +1154,7 @@ function render(){
    document.getElementById('statEarnedToday').textContent = fmtShiba(stats.earnedToday || 0);
    document.getElementById('statAdsToday').textContent = stats.adsWatchedToday || 0;
    document.getElementById('statFriendsInvited').textContent = stats.friendsInvited ?? totalRefs;
+   renderMining();
    var dailyBtn = document.getElementById('dailyBonusBtn');
    if (dailyBtn) {
      dailyBtn.disabled = !!(d.daily && d.daily.claimed);
@@ -1165,15 +1181,74 @@ function render(){
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
   renderRefs(0);
   // Wallet (Balance & History)
-   document.getElementById('walletTon').innerHTML = fmtShiba(u.balance) + ' ' + SHIBA_ICON;
-  var walletPmtTonValueEl = document.getElementById('walletPmtTonValue');
-   if (walletPmtTonValueEl) walletPmtTonValueEl.innerHTML = pmtTonValue + ' ' + TON_COIN_ICON;
+   updateWalletTonBalance();
   renderWalletHistory(d.balanceLogs||[]);
   // Tasks
   renderTasks(currentTab);
   // Lucky Wheel
    renderWheelInfo();
    renderGames();
+}
+
+function renderMining(){
+  var box = (S.data && S.data.mining) || {};
+  var started = Number(box.startedAt || (S.user && S.user.miningStartedAt) || 0);
+  var duration = Number(box.durationMs || 3600000);
+  var now = Date.now();
+  var elapsed = started ? Math.max(0, Math.min(duration, now - started)) : 0;
+  var amount = started ? Math.min(50, 50 * elapsed / duration) : 0;
+  var ready = started && elapsed >= duration;
+  var fill = document.getElementById('miningProgressFill');
+  var amountEl = document.getElementById('miningAmount');
+  var label = document.getElementById('miningTimeLabel');
+  var btn = document.getElementById('miningBtn');
+  if (!fill || !amountEl || !label || !btn) return;
+  fill.style.width = ((amount / 50) * 100) + '%';
+  amountEl.textContent = amount.toFixed(2);
+  if (!started){
+    label.textContent = 'جاهز للتعدين';
+    btn.disabled = false; btn.textContent = '📺 مشاهدة إعلان وتشغيل التعدين'; btn.onclick = watchMiningAd;
+  } else if (ready){
+    label.textContent = 'اكتمل التعدين — استلم مكافأتك';
+    btn.disabled = false; btn.textContent = '🎁 استلام 50 PMT'; btn.onclick = claimMining;
+  } else {
+    var left = Math.ceil((duration - elapsed) / 60000);
+    label.textContent = 'التعدين يعمل · متبقي تقريبًا ' + left + ' دقيقة';
+    btn.disabled = true; btn.textContent = '⛏️ التعدين يعمل...'; btn.onclick = null;
+  }
+  clearTimeout(miningTimerId);
+  if (started && !ready) miningTimerId = setTimeout(renderMining, 1000);
+}
+
+function watchMiningAd(){
+  var btn = document.getElementById('miningBtn');
+  if (miningAdBusy || !btn) return;
+  if (Number((S.data && S.data.mining && S.data.mining.startedAt) || 0)) return;
+  var fn = window.show_11638380;
+  if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); return; }
+  miningAdBusy = true; btn.disabled = true;
+  var startedAt = Date.now();
+  Promise.resolve().then(function(){ return fn(); }).then(function(){
+    if (Date.now() - startedAt < 15000) throw new Error('لازم تشاهد الإعلان لمدة 15 ثانية');
+    return api('startMining', {});
+  }).then(function(res){
+    if (!res.success) throw new Error(res.error || 'تعذر تشغيل التعدين');
+    S.data.mining = res.data; renderMining(); showToast('بدأ التعدين لمدة ساعة ⛏️', null, true);
+  }).catch(function(err){ showToast(err.message || 'Mining unavailable','error'); renderMining(); })
+    .then(function(){ miningAdBusy = false; });
+}
+
+function claimMining(){
+  var btn = document.getElementById('miningBtn');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  api('claimMining', {}).then(function(res){
+    if (!res.success){ showToast(res.error || 'لم يكتمل التعدين بعد','error'); return; }
+    S.user.balance = res.data.shibaBalance;
+    S.data.mining.startedAt = null;
+    render(); showToast('+50 PMT تمت إضافتها إلى رصيدك 🎉', null, true);
+  }).catch(function(){ showToast('تعذر استلام المكافأة','error'); })
+    .then(function(){ renderMining(); });
 }
 
 function renderGames(){
@@ -1450,8 +1525,7 @@ function submitConvert(){
     S.user.balance=res.data.shibaBalance; S.user.tonBalance=res.data.tonBalance; updatePmtTonValueDisplays();
     document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
     document.getElementById('homePmtTonValue').innerHTML='≈ '+(Number(S.user.balance||0)/(Number((S.data.config||{}).tonConversionRate)||10000)).toFixed(4)+' '+TON_ICON;
-    document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
-    document.getElementById('walletPmtTonValue').innerHTML=(Number(S.user.balance||0)/(Number((S.data.config||{}).tonConversionRate)||10000))+' '+TON_COIN_ICON;
+    updateWalletTonBalance();
     document.getElementById('convertPmtBalance').textContent=fmtShiba(S.user.balance)+' PMT';
     document.getElementById('convertTonBalance').textContent=Number(S.user.tonBalance||0).toFixed(4)+' TON';
     document.getElementById('convertAmount').value='';
@@ -1608,7 +1682,7 @@ function doVerifyTask(id){
     updatePmtTonValueDisplays();
     delete S.taskJoined[id];
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+    updateWalletTonBalance();
     renderTasks(currentTab);
     showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
   }).catch(function(){ showToast('Network error','error'); });
@@ -1622,7 +1696,7 @@ function doClaimInvite(id){
     S.user.balance = res.data.shibaBalance;
     updatePmtTonValueDisplays();
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+    updateWalletTonBalance();
     renderTasks(currentTab);
     showToast('+'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+' added! 🎉',null,true);
   }).catch(function(){ showToast('Network error','error'); });
@@ -1678,7 +1752,7 @@ function checkCombo(){
     S.user.balance = res.data.shibaBalance;
     S.data.combo.solvedToday = true;
     document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+    updateWalletTonBalance();
     showToast('🎉 Correct! +'+fmtShiba(res.data.shibaAdded)+' '+SHIBA_ICON+'!',null,true);
     renderComboState();
     resetCombo();
@@ -1782,7 +1856,7 @@ function spinWheel(){
       S.data.wheel.spinsAvailable = res.data.spinsAvailable;
       S.data.wheel.spinsUsed = res.data.spinsUsed;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      document.getElementById('walletTon').innerHTML = fmtShiba(S.user.balance) + ' ' + SHIBA_ICON;
+      updateWalletTonBalance();
       renderWheelInfo();
       if (res.data.reward > 0){
         showToast('🎉 You won '+fmtShiba(res.data.reward)+' '+SHIBA_ICON+'!',null,true);
@@ -1898,7 +1972,7 @@ function finishGame(){
     S.user.balance=res.data.shibaBalance; updatePmtTonValueDisplays();
     S.data.gamePlays=res.data.gamePlays||S.data.gamePlays||{};
     document.getElementById('homeTon').textContent=fmtShiba(S.user.balance);
-    document.getElementById('walletTon').innerHTML=fmtShiba(S.user.balance)+' '+SHIBA_ICON;
+    updateWalletTonBalance();
     document.getElementById('gameResult').innerHTML=(key==='gem' && score===0)
       ? '<b>💣 Game Over</b>لقد اخترت قنبلة، خسرت مكافأة الجولة ولم تحصل على أي عملات.'
       : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b> Reward added to your balance';
