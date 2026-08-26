@@ -2,1477 +2,1253 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SHIB Rewards — لوحة التحكم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>PMT Gram — لوحة التحكم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
-  --orange:#f7931a;--orange2:#ff6b00;
-  --orange-dim:rgba(247,147,26,0.15);--orange-dim2:rgba(247,147,26,0.08);
-  --glass:rgba(255,255,255,0.04);--glass-b:rgba(255,255,255,0.08);
-  --text:#fff;--text2:#aaa;--text3:#555;
-  --green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7;
-  --r:14px;
+  --bg:#0a0d16;
+  --bg-2:#0d111c;
+  --panel:#11162476;
+  --panel-solid:#121729;
+  --panel-2:#161c31;
+  --border:#212840;
+  --border-soft:#1a2036;
+  --gold:#f2b84b;
+  --gold-2:#d99c2e;
+  --gold-dim:#7a622c;
+  --cyan:#33d6c0;
+  --ton:#0098ea;
+  --danger:#ff5470;
+  --danger-dim:#5c1f2c;
+  --text:#eceef7;
+  --muted:#8890a6;
+  --muted-2:#5d6480;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Tajawal',sans-serif;
+  --radius:16px;
 }
-html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,'Segoe UI',sans-serif;font-size:14px}
-a{color:inherit;text-decoration:none}
-input,select,textarea,button{font-family:inherit;font-size:inherit}
-
-/* ─── LAYOUT ─── */
-.shell{display:flex;min-height:100vh}
-.sidebar{width:240px;background:var(--bg2);border-left:1px solid var(--glass-b);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;right:0;z-index:100;transition:transform .3s}
-.sidebar.collapsed{transform:translateX(240px)}
-.main{flex:1;margin-right:240px;transition:margin .3s;min-width:0}
-.main.full{margin-right:0}
-@media(max-width:768px){
-  .sidebar{transform:translateX(240px)}.sidebar.open{transform:none}
-  .main{margin-right:0}
-  .overlay{display:block!important}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans);
+  background:
+    radial-gradient(1100px 600px at 85% -10%, rgba(242,184,75,.09), transparent 60%),
+    radial-gradient(900px 500px at 0% 100%, rgba(51,214,192,.06), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
 }
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
-
-/* ─── TOPBAR ─── */
-.topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--glass-b);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
-.topbar-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800}
-.topbar-logo span{color:var(--orange)}
-.topbar-actions{display:flex;align-items:center;gap:10px}
-.btn-icon{width:36px;height:36px;border-radius:10px;border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
-.btn-icon:hover{background:var(--orange-dim);border-color:var(--orange)}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;margin-left:4px}
-
-/* ─── SIDEBAR ─── */
-.sb-logo{padding:20px 16px;border-bottom:1px solid var(--glass-b);display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800}
-.sb-logo .emoji{font-size:28px}
-.sb-section{padding:8px 0}
-.sb-label{font-size:10px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:8px 16px 4px}
-.sb-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-radius:0;transition:all .2s;color:var(--text2);position:relative}
-.sb-item:hover{color:var(--text);background:var(--glass)}
-.sb-item.active{color:var(--orange);background:var(--orange-dim)}
-.sb-item.active::before{content:'';position:absolute;right:0;top:4px;bottom:4px;width:3px;background:var(--orange);border-radius:2px 0 0 2px}
-.sb-icon{font-size:17px;width:20px;text-align:center}
-.sb-badge{margin-right:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
-
-/* ─── CONTENT ─── */
-.content{padding:24px;max-width:1400px}
-.page-section{display:none}.page-section.active{display:block}
-
-/* ─── CARDS ─── */
-.card{background:var(--bg2);border:1px solid var(--glass-b);border-radius:var(--r);padding:20px;margin-bottom:16px}
-.card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.card-title .icon{font-size:18px}
-
-/* ─── STATS GRID ─── */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
-.stat-box{background:var(--bg2);border:1px solid var(--glass-b);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
-.stat-box::after{content:attr(data-icon);position:absolute;right:14px;top:14px;font-size:28px;opacity:.15}
-.stat-val{font-size:26px;font-weight:800;line-height:1}
-.stat-val.orange{color:var(--orange)}
-.stat-val.green{color:var(--green)}
-.stat-val.blue{color:var(--blue)}
-.stat-val.purple{color:var(--purple)}
-.stat-val.red{color:var(--red)}
-.stat-lbl{font-size:11px;color:var(--text3);font-weight:500}
-.stat-trend{font-size:11px;margin-top:2px}
-.stat-trend.up{color:var(--green)}.stat-trend.down{color:var(--red)}
-
-/* ─── TABLES ─── */
-.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--glass-b)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead{background:var(--bg3)}
-th{padding:12px 14px;text-align:right;color:var(--text3);font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--glass-b)}
-td{padding:11px 14px;border-bottom:1px solid var(--glass-b);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.02)}
-.td-center{text-align:center}
-
-/* ─── BADGES ─── */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.badge.green{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
-.badge.orange{background:rgba(247,147,26,.15);color:var(--orange);border:1px solid rgba(247,147,26,.3)}
-.badge.red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
-.badge.blue{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
-.badge.purple{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
-.badge.gray{background:rgba(255,255,255,.08);color:var(--text2);border:1px solid var(--glass-b)}
-
-/* ─── FORMS ─── */
-.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
-.form-group{display:flex;flex-direction:column;gap:6px}
-.form-label{font-size:11px;color:var(--text2);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
-.form-input,.form-select,.form-textarea{width:100%;padding:10px 14px;border-radius:10px;background:var(--bg3);border:1px solid var(--glass-b);color:var(--text);outline:none;transition:border-color .2s}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(247,147,26,.5)}
-.form-input::placeholder{color:var(--text3)}
-.form-select option{background:var(--bg3)}
-.form-textarea{resize:vertical;min-height:80px}
-
-/* ─── BUTTONS ─── */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:none;font-weight:700;cursor:pointer;transition:all .2s;font-size:13px}
-.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
-.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
-.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
-.btn-danger:hover{background:rgba(239,68,68,.25)}
-.btn-success{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
-.btn-success:hover{background:rgba(34,197,94,.25)}
-.btn-ghost{background:var(--glass);border:1px solid var(--glass-b);color:var(--text2)}
-.btn-ghost:hover{background:rgba(255,255,255,.08);color:var(--text)}
-.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
-.btn-xs{padding:4px 10px;font-size:11px;border-radius:6px}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-
-/* ─── COMBO DISPLAY ─── */
-.combo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
-.combo-slot-admin{aspect-ratio:1;border-radius:12px;background:var(--bg3);border:1.5px solid var(--glass-b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:32px;cursor:pointer;transition:all .2s}
-.combo-slot-admin.active{border-color:var(--orange);background:var(--orange-dim)}
-.combo-slot-admin .slot-num{font-size:11px;color:var(--text3)}
-
-/* ─── AVATAR ─── */
-.avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--orange),#ff4500);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
-.avatar img{width:100%;height:100%;object-fit:cover}
-
-/* ─── SECTION HEADER ─── */
-.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:gap}
-.section-hdr h2{font-size:20px;font-weight:800}
-.section-hdr .actions{display:flex;gap:8px}
-
-/* ─── TABS ─── */
-.tab-bar{display:flex;gap:4px;background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;padding:4px;margin-bottom:16px;flex-wrap:wrap}
-.tab-btn{flex:1;min-width:80px;padding:8px 14px;border-radius:8px;border:none;background:transparent;color:var(--text2);font-weight:600;cursor:pointer;transition:all .2s;font-size:12px;white-space:nowrap}
-.tab-btn.active{background:var(--orange);color:#fff}
-.tab-content{display:none}.tab-content.active{display:block}
-
-/* ─── LOADER ─── */
-.loader{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text3);gap:10px;font-size:13px}
-.spinner{width:22px;height:22px;border:2px solid var(--glass-b);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ─── TOAST ─── */
-.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center}
-.toast{padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideDown .3s cubic-bezier(.34,1.56,.64,1)}
-.toast.success{background:rgba(34,197,94,.95)}
-.toast.error{background:rgba(239,68,68,.95)}
-.toast.info{background:rgba(247,147,26,.95)}
-@keyframes slideDown{from{transform:translateY(-20px);opacity:0}to{transform:none;opacity:1}}
-
-/* ─── MODAL ─── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal-box{background:#141414;border:1px solid var(--glass-b);border-radius:18px;padding:28px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;transform:scale(.95);transition:transform .2s}
-.modal-overlay.open .modal-box{transform:none}
-.modal-title{font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.modal-close-btn{margin-right:auto;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px}
-.modal-close-btn:hover{color:var(--text)}
-
-/* ─── CHARTS ─── */
-.mini-chart{display:flex;align-items:flex-end;gap:3px;height:40px;margin-top:8px}
-.mini-bar{flex:1;background:var(--orange-dim);border-radius:3px 3px 0 0;min-height:4px;transition:height .5s}
-
-/* ─── EMPTY STATE ─── */
-.empty{text-align:center;padding:40px 20px;color:var(--text3)}
-.empty .emoji{font-size:40px;margin-bottom:10px}
-
-/* ─── SEARCH ─── */
-.search-wrap{position:relative;margin-bottom:16px}
-.search-input{width:100%;padding:10px 14px 10px 36px;border-radius:10px;background:var(--bg3);border:1px solid var(--glass-b);color:var(--text);outline:none}
-.search-input:focus{border-color:rgba(247,147,26,.5)}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
-
-/* ─── DIVIDER ─── */
-.divider{height:1px;background:var(--glass-b);margin:16px 0}
-
-/* ─── HIGHLIGHT ─── */
-.highlight{background:var(--orange-dim);border-radius:4px;padding:1px 4px}
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar{width:9px;height:9px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+::-webkit-scrollbar-thumb{background:#232a44;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#2c3453}
 
-/* ─── RESPONSIVE ─── */
-@media(max-width:600px){
-  .content{padding:14px}
-  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
-  .form-row{grid-template-columns:1fr}
+/* ===== layout ===== */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:264px;flex:none;position:sticky;top:0;height:100vh;
+  background:linear-gradient(180deg,#0d1220,#0a0d16 60%);
+  border-left:1px solid var(--border-soft);
+  display:flex;flex-direction:column;padding:22px 16px;gap:6px;
+  z-index:20;
 }
+.brand{display:flex;align-items:center;gap:12px;padding:6px 8px 22px 8px}
+.brand-coin{
+  width:42px;height:42px;border-radius:50%;object-fit:cover;
+  box-shadow:0 0 0 2px rgba(242,184,75,.35), 0 6px 18px rgba(242,184,75,.25);
+  animation:spin-slow 9s linear infinite;
+}
+@keyframes spin-slow{from{transform:rotateY(0)}to{transform:rotateY(360deg)}}
+.brand-txt b{display:block;font-weight:800;font-size:16.5px;letter-spacing:.2px}
+.brand-txt span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+
+.nav{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;
+  color:var(--muted);cursor:pointer;font-size:14.5px;font-weight:500;
+  border:1px solid transparent;transition:all .15s ease;position:relative;
+}
+.nav-item svg{width:18px;height:18px;flex:none;opacity:.85}
+.nav-item:hover{background:#141a2c;color:var(--text)}
+.nav-item.active{
+  background:linear-gradient(90deg, rgba(242,184,75,.14), rgba(242,184,75,.02));
+  color:var(--gold);border-color:rgba(242,184,75,.22);
+}
+.nav-item.active svg{opacity:1}
+.nav-badge{
+  margin-right:auto;font-family:var(--mono);font-size:10.5px;background:var(--danger-dim);
+  color:#ffb6c4;padding:1px 7px;border-radius:20px;font-weight:700;
+}
+.nav-sep{height:1px;background:var(--border-soft);margin:12px 6px}
+.sidebar-foot{margin-top:auto;padding:12px 10px 4px;font-size:11.5px;color:var(--muted-2);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted-2);flex:none}
+.dot.on{background:var(--cyan);box-shadow:0 0 0 3px rgba(51,214,192,.18);animation:pulse 2s infinite}
+.dot.off{background:var(--danger)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(51,214,192,.18)}50%{box-shadow:0 0 0 5px rgba(51,214,192,.05)}}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:14px;
+  padding:16px 26px;background:rgba(10,13,22,.72);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border-soft);
+}
+.topbar h1{font-size:19px;font-weight:800}
+.topbar .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.topbar-actions{margin-right:auto;display:flex;align-items:center;gap:10px}
+.search-box{
+  display:flex;align-items:center;gap:8px;background:var(--panel-2);
+  border:1px solid var(--border);border-radius:11px;padding:8px 13px;min-width:230px;
+}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13.5px;width:100%}
+.search-box svg{width:15px;height:15px;color:var(--muted);flex:none}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;
+  font-family:var(--sans);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid transparent;
+  transition:.15s;white-space:nowrap;
+}
+.btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-2));color:#241a05;box-shadow:0 4px 14px rgba(242,184,75,.22)}
+.btn-gold:hover{filter:brightness(1.07)}
+.btn-ghost{background:var(--panel-2);color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:#1c2338}
+.btn-danger{background:rgba(255,84,112,.12);color:#ff92a6;border-color:rgba(255,84,112,.3)}
+.btn-danger:hover{background:rgba(255,84,112,.2)}
+.btn-sm{padding:6px 11px;font-size:12.5px;border-radius:9px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.content{padding:24px 26px 60px;max-width:1440px;width:100%;margin:0 auto}
+.view{display:none;animation:fadein .25s ease}
+.view.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===== cards / stats ===== */
+.grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+@media(max-width:1100px){.grid-stats{grid-template-columns:repeat(2,1fr)}}
+.stat-card{
+  background:var(--panel-solid);border:1px solid var(--border);border-radius:var(--radius);
+  padding:19px 20px;position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:'';position:absolute;inset:auto -30px -30px auto;width:110px;height:110px;border-radius:50%;
+  background:radial-gradient(circle, var(--sc,rgba(242,184,75,.16)), transparent 70%);
+}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.stat-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(242,184,75,.12);color:var(--gold)}
+.stat-icon svg{width:19px;height:19px}
+.stat-label{font-size:12.5px;color:var(--muted);font-weight:500}
+.stat-value{font-family:var(--mono);font-size:27px;font-weight:700;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.stat-value img{width:20px;height:20px;border-radius:50%}
+.stat-foot{font-size:11.5px;color:var(--muted-2);margin-top:8px}
+.live-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--cyan);font-weight:700}
+.live-chip .dot{width:6px;height:6px}
+
+.panel{
+  background:var(--panel-solid);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 22px;margin-bottom:20px;
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.panel-head h2{font-size:16px;font-weight:800}
+.panel-head .hint{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ===== tables ===== */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border-soft)}
+table{width:100%;border-collapse:collapse;font-size:13.3px;min-width:640px}
+thead th{
+  text-align:right;padding:11px 14px;background:#0e1220;color:var(--muted);
+  font-weight:700;font-size:12px;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border-soft);vertical-align:middle}
+tbody tr:hover{background:#131829}
+tbody tr:last-child td{border-bottom:none}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+.u-cell{display:flex;align-items:center;gap:10px}
+.u-cell img{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#222;flex:none}
+.u-name{font-weight:700;font-size:13px}
+.u-sub{font-size:11.5px;color:var(--muted)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.b-green{background:rgba(51,214,192,.12);color:var(--cyan)}
+.b-gray{background:#1c2338;color:var(--muted)}
+.b-gold{background:rgba(242,184,75,.14);color:var(--gold)}
+.b-red{background:rgba(255,84,112,.14);color:#ff92a6}
+
+.iconbtn{
+  width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--panel-2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.15s;
+}
+.iconbtn:hover{color:var(--text);border-color:var(--gold-dim)}
+.iconbtn svg{width:14px;height:14px}
+.row-actions{display:flex;gap:6px;justify-content:flex-start}
+
+.empty{padding:40px 20px;text-align:center;color:var(--muted-2)}
+.empty svg{width:34px;height:34px;margin-bottom:10px;opacity:.5}
+
+/* ===== forms / config ===== */
+.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1000px){.field-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.field-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px}
+.field label .tip{color:var(--muted-2);font-weight:400;font-size:10.5px}
+.field input,.field select,.field textarea{
+  background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+  color:var(--text);font-family:var(--mono);font-size:13.5px;outline:none;transition:.15s;width:100%;
+}
+.field input[type=text].sans,.field textarea{font-family:var(--sans)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold-dim);background:#181f36}
+.switch-row{display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+.switch-row .lbl b{font-size:13.5px;display:block}
+.switch-row .lbl span{font-size:11.5px;color:var(--muted)}
+.switch{position:relative;width:44px;height:25px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#2a3150;border-radius:20px;cursor:pointer;transition:.2s}
+.slider::before{content:'';position:absolute;width:19px;height:19px;left:3px;top:3px;background:#c7cbe0;border-radius:50%;transition:.2s}
+input:checked + .slider{background:var(--cyan)}
+input:checked + .slider::before{transform:translateX(-19px);background:#fff}
+
+.section-title{font-size:12.5px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin:22px 0 12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border-soft)}
+.section-title:first-child{margin-top:0}
+
+/* ===== ad companies / channels / tasks cards ===== */
+.mini-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.mini-card{background:var(--panel-2);border:1px solid var(--border);border-radius:13px;padding:15px}
+.mini-card h4{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.mini-row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:4px 0}
+.mini-row b{color:var(--text);font-family:var(--mono)}
+.add-card{
+  border:1.5px dashed var(--border);border-radius:13px;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;font-size:13px;font-weight:700;gap:8px;min-height:110px;transition:.15s;
+}
+.add-card:hover{border-color:var(--gold-dim);color:var(--gold)}
+
+/* ===== modal ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(5,7,12,.66);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+}
+.overlay.show{display:flex}
+.modal{
+  background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;
+  width:100%;max-width:460px;max-height:88vh;overflow-y:auto;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);
+}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:15.5px;font-weight:800}
+.modal-close{cursor:pointer;color:var(--muted);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.modal-close:hover{background:#1c2338;color:var(--text)}
+.modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:13px}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--border-soft);display:flex;gap:10px;justify-content:flex-end}
+
+.toast-wrap{position:fixed;bottom:22px;left:22px;z-index:200;display:flex;flex-direction:column;gap:10px}
+.toast{
+  background:#141a2c;border:1px solid var(--border);border-right:3px solid var(--cyan);
+  padding:12px 16px;border-radius:11px;font-size:13px;min-width:240px;box-shadow:0 10px 30px rgba(0,0,0,.35);
+  animation:toastin .2s ease;
+}
+.toast.err{border-right-color:var(--danger)}
+@keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.loader{display:flex;align-items:center;justify-content:center;padding:50px;color:var(--muted)}
+.spin{width:22px;height:22px;border:3px solid #232a44;border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.tab-pills{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.pill{padding:8px 15px;border-radius:20px;background:var(--panel-2);border:1px solid var(--border);font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s}
+.pill.active{background:rgba(242,184,75,.14);color:var(--gold);border-color:rgba(242,184,75,.3)}
+
+@media(max-width:900px){
+  .sidebar{position:fixed;right:0;transform:translateX(100%);transition:.25s;box-shadow:-10px 0 40px rgba(0,0,0,.4)}
+  .sidebar.open{transform:translateX(0)}
+  .menu-btn{display:flex!important}
+  .content{padding:18px}
+  .field-grid{grid-template-columns:1fr 1fr}
+}
+.menu-btn{display:none;width:36px;height:36px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);align-items:center;justify-content:center;cursor:pointer}
 </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-<div class="toast-container" id="toastContainer"></div>
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img class="brand-coin" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
+      <div class="brand-txt"><b>PMT Gram</b><span>لوحة تحكم الإدارة</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        الرئيسية
+      </div>
+      <div class="nav-item" data-view="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="8" r="2.6"/><path d="M15.5 14.2c2.6.3 4.5 2.5 4.5 5.8"/></svg>
+        المستخدمين
+      </div>
+      <div class="nav-item" data-view="withdrawals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="6" width="19" height="13" rx="2.2"/><path d="M2.5 10.5h19"/><path d="M6 15h4"/></svg>
+        طلبات السحب
+        <span class="nav-badge" id="wdBadge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" data-view="tasks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4 4 10-10"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+        المهام
+      </div>
+      <div class="nav-item" data-view="channels">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4L3 11.5l6.5 2.2M21 4l-4 17-7.3-9.3M21 4L9.5 13.7"/></svg>
+        الاشتراك الإجباري
+      </div>
+      <div class="nav-item" data-view="ads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="4.5" width="19" height="14" rx="2.5"/><path d="M2.5 9h19"/><circle cx="7" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
+        شركات الإعلانات
+      </div>
+      <div class="nav-item" data-view="blocked">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></svg>
+        الحسابات المحظورة
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-item" data-view="config">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 000-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 00-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 000 3l-2 1.6 2 3.4 2.3-1a7.6 7.6 0 002.6 1.6l.5 2.4h4l.5-2.4a7.6 7.6 0 002.6-1.6l2.3 1 2-3.4z"/></svg>
+        الإعدادات العامة
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="dot off" id="connDot"></span>
+      <span id="connTxt">جارِ الاتصال بقاعدة البيانات...</span>
+    </div>
+  </aside>
 
-<!-- ═══ MODAL ═══ -->
-<div class="modal-overlay" id="globalModal" onclick="closeModalOutside(event)">
-  <div class="modal-box" id="modalBox">
-    <div class="modal-title" id="modalTitle">Modal</div>
-    <div id="modalBody"></div>
-  </div>
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <div class="menu-btn" id="menuBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </div>
+      <div>
+        <h1 id="pageTitle">الرئيسية</h1>
+        <div class="sub" id="pageSub">نظرة عامة سريعة على أداء البوت الآن</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-box" id="globalSearchBox" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input id="globalSearch" placeholder="ابحث بالاسم، اليوزر، أو الآيدي...">
+        </div>
+        <button class="btn btn-ghost btn-sm" id="refreshBtn" title="تحديث">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 10-3 6.7"/><path d="M21 4v6h-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ================= DASHBOARD ================= -->
+      <section class="view active" id="view-dashboard">
+        <div class="grid-stats">
+          <div class="stat-card" style="--sc:rgba(242,184,75,.18)">
+            <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="8" r="2.6"/><path d="M15.5 14.2c2.6.3 4.5 2.5 4.5 5.8"/></svg></div><span class="stat-label">إجمالي المستخدمين</span></div>
+            <div class="stat-value" id="statTotalUsers">—</div>
+            <div class="stat-foot">كل الحسابات المسجّلة في البوت</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(51,214,192,.18)">
+            <div class="stat-top"><div class="stat-icon" style="background:rgba(51,214,192,.14);color:var(--cyan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg></div><span class="live-chip"><span class="dot on"></span>مباشر</span></div>
+            <div class="stat-label" style="margin-bottom:8px">أونلاين الآن (آخر 5 دقائق)</div>
+            <div class="stat-value" id="statOnline">—</div>
+            <div class="stat-foot">يُحسب من آخر ظهور لكل مستخدم</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(242,184,75,.18)">
+            <div class="stat-top"><div class="stat-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" style="width:22px;height:22px;border-radius:50%"></div><span class="stat-label">إجمالي أرصدة PMT</span></div>
+            <div class="stat-value" id="statTotalPmt">—</div>
+            <div class="stat-foot" id="statAvgPmt">متوسط الرصيد لكل مستخدم: —</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(0,152,234,.18)">
+            <div class="stat-top"><div class="stat-icon" style="background:rgba(0,152,234,.14);color:var(--ton)"><img src="https://cdn.simpleicons.org/ton/0098EA" style="width:18px;height:18px"></div><span class="stat-label">إجمالي أرصدة TON</span></div>
+            <div class="stat-value" id="statTotalTon">—</div>
+            <div class="stat-foot" id="statPendingWd">طلبات سحب معلّقة: —</div>
+          </div>
+        </div>
+
+        <div class="grid-stats" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card" style="--sc:rgba(242,184,75,.14)">
+            <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="4.5" width="19" height="14" rx="2.5"/><path d="M2.5 9h19"/><circle cx="7" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg></div><span class="stat-label">إعلانات مشاهدة اليوم</span></div>
+            <div class="stat-value" id="statAdsToday">—</div>
+            <div class="stat-foot">جميع شركات الإعلانات مجتمعة</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(255,84,112,.14)">
+            <div class="stat-top"><div class="stat-icon" style="background:rgba(255,84,112,.13);color:#ff92a6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></svg></div><span class="stat-label">حسابات محظورة</span></div>
+            <div class="stat-value" id="statBlocked">—</div>
+            <div class="stat-foot">نظام مكافحة الاحتيال</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(51,214,192,.14)">
+            <div class="stat-top"><div class="stat-icon" style="background:rgba(51,214,192,.14);color:var(--cyan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4 4 10-10"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg></div><span class="stat-label">المهام النشطة</span></div>
+            <div class="stat-value" id="statActiveTasks">—</div>
+            <div class="stat-foot">مهام قنوات وبوتات ودعوات</div>
+          </div>
+        </div>
+
+        <div class="grid-stats" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card" style="--sc:rgba(242,184,75,.14)">
+            <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M18 8v5M15.5 10.5h5"/></svg></div><span class="stat-label">مستخدمون جدد اليوم</span></div>
+            <div class="stat-value" id="statNewToday">—</div>
+            <div class="stat-foot">حسب توقيت القاهرة</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(242,184,75,.14)">
+            <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="4.5" width="19" height="14" rx="2.5"/><path d="M2.5 9h19"/><circle cx="7" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg></div><span class="stat-label">إجمالي الإعلانات (كل الوقت)</span></div>
+            <div class="stat-value" id="statAdsAllTime">—</div>
+            <div class="stat-foot">مجموع كل المشاهدات منذ البداية</div>
+          </div>
+          <div class="stat-card" style="--sc:rgba(51,214,192,.14)">
+            <div class="stat-top"><div class="stat-icon" style="background:rgba(51,214,192,.14);color:var(--cyan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4L3 11.5l6.5 2.2M21 4l-4 17-7.3-9.3M21 4L9.5 13.7"/></svg></div><span class="stat-label">قنوات إجبارية مفعّلة</span></div>
+            <div class="stat-value" id="statActiveChannels">—</div>
+            <div class="stat-foot">من إجمالي القنوات المضافة</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>أحدث المستخدمين</h2><div class="hint">آخر 8 حسابات انضمت للبوت</div></div>
+            <div class="pill active" onclick="switchView('users')" style="cursor:pointer">عرض الكل ←</div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>المستخدم</th><th>آيدي تيليجرام</th><th>رصيد PMT</th><th>رصيد TON</th><th>تاريخ الانضمام</th><th>الحالة</th></tr></thead>
+            <tbody id="latestUsersBody"><tr><td colspan="6" class="loader"><span class="spin"></span></td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ================= USERS ================= -->
+      <section class="view" id="view-users">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>إدارة المستخدمين</h2><div class="hint" id="usersCount">جارِ التحميل...</div></div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>المستخدم</th><th>آيدي تيليجرام</th><th>رصيد PMT</th><th>رصيد TON</th><th>إعلانات اليوم</th><th>إجمالي الإحالات</th><th>آخر ظهور</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <tbody id="usersBody"><tr><td colspan="9" class="loader"><span class="spin"></span></td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ================= WITHDRAWALS ================= -->
+      <section class="view" id="view-withdrawals">
+        <div class="tab-pills" id="wdFilterPills">
+          <div class="pill active" data-f="pending">معلّقة</div>
+          <div class="pill" data-f="completed">مكتملة</div>
+          <div class="pill" data-f="rejected">مرفوضة</div>
+          <div class="pill" data-f="all">الكل</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>طلبات السحب</h2><div class="hint">التحقق والموافقة أو الرفض يدويًا</div></div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>المستخدم</th><th>المبلغ المطلوب</th><th>الرسوم</th><th>الصافي</th><th>محفظة TON</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <tbody id="wdBody"><tr><td colspan="8" class="loader"><span class="spin"></span></td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ================= TASKS ================= -->
+      <section class="view" id="view-tasks">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>مهام القنوات والبوتات</h2><div class="hint">إدارة المهام المتاحة للمستخدمين</div></div>
+            <button class="btn btn-gold btn-sm" onclick="openTaskModal()">+ مهمة جديدة</button>
+          </div>
+          <div class="mini-cards" id="tasksCards"><div class="loader"><span class="spin"></span></div></div>
+        </div>
+      </section>
+
+      <!-- ================= CHANNELS ================= -->
+      <section class="view" id="view-channels">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>قنوات الاشتراك الإجباري</h2><div class="hint">القنوات التي يجب على المستخدم الاشتراك بها لاستخدام البوت</div></div>
+            <button class="btn btn-gold btn-sm" onclick="openChannelModal()">+ قناة جديدة</button>
+          </div>
+          <div class="mini-cards" id="channelsCards"><div class="loader"><span class="spin"></span></div></div>
+        </div>
+      </section>
+
+      <!-- ================= ADS ================= -->
+      <section class="view" id="view-ads">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>الحد اليومي الإجمالي للإعلانات</h2><div class="hint">أقصى عدد إعلانات يمكن لأي مستخدم مشاهدتها يوميًا من جميع الشركات مجتمعة</div></div>
+            <button class="btn btn-gold btn-sm" id="saveAdDailyLimitBtn">حفظ</button>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>الحد اليومي الإجمالي للإعلانات <span class="tip">adDailyLimit</span></label><input type="number" id="cfg_adDailyLimit_ads"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>شركات الإعلانات</h2><div class="hint">مكافأة كل إعلان والحد اليومي المسموح لكل شركة على حدة</div></div>
+            <button class="btn btn-gold btn-sm" onclick="openAdCompanyModal()">+ شركة جديدة</button>
+          </div>
+          <div class="mini-cards" id="adsCards"><div class="loader"><span class="spin"></span></div></div>
+        </div>
+      </section>
+
+      <!-- ================= BLOCKED ================= -->
+      <section class="view" id="view-blocked">
+        <div class="panel">
+          <div class="panel-head"><div><h2>الحسابات المحظورة تلقائيًا</h2><div class="hint">حسابات أوقفها نظام مكافحة الاحتيال (10 طبقات حماية)</div></div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>آيدي تيليجرام</th><th>السبب</th><th>درجة الخطورة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+            <tbody id="blockedBody"><tr><td colspan="5" class="loader"><span class="spin"></span></td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ================= CONFIG ================= -->
+      <section class="view" id="view-config">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>الإعدادات العامة</h2><div class="hint">أي تغيير هنا يُطبَّق فورًا على كل المستخدمين — يُحفظ مباشرة في Firebase</div></div>
+            <button class="btn btn-gold" id="saveConfigBtn">حفظ كل التغييرات</button>
+          </div>
+
+          <div class="section-title">التبديلات الرئيسية</div>
+          <div class="field-grid" style="grid-template-columns:repeat(2,1fr)">
+            <div class="switch-row">
+              <div class="lbl"><b>الاشتراك الإجباري</b><span>إجبار المستخدم على الاشتراك بالقنوات قبل الاستخدام</span></div>
+              <label class="switch"><input type="checkbox" id="cfg_mandatorySubEnabled"><span class="slider"></span></label>
+            </div>
+            <div class="switch-row">
+              <div class="lbl"><b>نظام السحب</b><span>تشغيل أو إيقاف السحب بالكامل لكل المستخدمين</span></div>
+              <label class="switch"><input type="checkbox" id="cfg_withdrawalEnabled"><span class="slider"></span></label>
+            </div>
+          </div>
+
+          <div class="section-title">المكافآت الأساسية (PMT)</div>
+          <div class="field-grid">
+            <div class="field"><label>مكافأة اليوم الواحد <span class="tip">dailyBonusReward</span></label><input type="number" id="cfg_dailyBonusReward"></div>
+            <div class="field"><label>مكافأة الإحالة اليومية <span class="tip">referralReward</span></label><input type="number" id="cfg_referralReward"></div>
+            <div class="field"><label>مكافأة التعدين <span class="tip">miningReward</span></label><input type="number" id="cfg_miningReward"></div>
+            <div class="field"><label>مدة التعدين (دقائق) <span class="tip">miningDurationMs</span></label><input type="number" id="cfg_miningDurationMin"></div>
+            <div class="field"><label>الحد اليومي للألعاب <span class="tip">gameDailyLimit</span></label><input type="number" id="cfg_gameDailyLimit"></div>
+          </div>
+
+          <div class="section-title">السحب والتحويل</div>
+          <div class="field-grid">
+            <div class="field"><label>سعر التحويل PMT ➜ TON <span class="tip">tonConversionRate</span></label><input type="number" id="cfg_tonConversionRate"></div>
+          </div>
+
+          <div class="section-title">ترويج القناة (السعر لكل 100 عضو)</div>
+          <div class="field-grid">
+            <div class="field"><label>بعملة TON <span class="tip">pricePer100MembersTon</span></label><input type="number" step="0.01" id="cfg_pricePer100MembersTon"></div>
+          </div>
+
+          <div class="section-title">إعدادات البوت</div>
+          <div class="field-grid">
+            <div class="field"><label>يوزر البوت <span class="tip">botUsername</span></label><input type="text" class="sans" id="cfg_botUsername"></div>
+            <div class="field" style="grid-column:span 2"><label>توكن البوت <span class="tip">botToken — حساس، لا تشاركه</span></label><input type="password" class="sans" id="cfg_botToken"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
 </div>
 
-<!-- ═══ SIDEBAR ═══ -->
-<div class="sidebar" id="sidebar">
-  <div class="sb-logo"><span class="emoji">🐕</span><span>SHIB <span style="color:var(--orange)">Admin</span></span></div>
+<div class="toast-wrap" id="toastWrap"></div>
 
-  <div style="overflow-y:auto;flex:1">
-    <div class="sb-section">
-      <div class="sb-label">الرئيسية</div>
-      <div class="sb-item active" onclick="nav('overview')" id="nav-overview"><span class="sb-icon">📊</span> نظرة عامة</div>
-      <div class="sb-item" onclick="nav('stats')" id="nav-stats"><span class="sb-icon">📈</span> إحصائيات</div>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">المستخدمون</div>
-      <div class="sb-item" onclick="nav('users')" id="nav-users"><span class="sb-icon">👥</span> المستخدمون</div>
-      <div class="sb-item" onclick="nav('withdrawals')" id="nav-withdrawals"><span class="sb-icon">💸</span> طلبات السحب <span class="sb-badge" id="pendingBadge">0</span></div>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">المحتوى</div>
-      <div class="sb-item" onclick="nav('tasks')" id="nav-tasks"><span class="sb-icon">📋</span> المهام</div>
-      <div class="sb-item" onclick="nav('combo')" id="nav-combo"><span class="sb-icon">🎮</span> الكومبو اليومي</div>
-      <div class="sb-item" onclick="nav('suggestions')" id="nav-suggestions"><span class="sb-icon">💡</span> مقترحات المهام</div>
-    </div>
-    <div class="sb-section">
-      <div class="sb-label">الإعدادات</div>
-      <div class="sb-item" onclick="nav('config')" id="nav-config"><span class="sb-icon">⚙️</span> إعدادات التطبيق</div>
-      <div class="sb-item" onclick="nav('forcejoin')" id="nav-forcejoin"><span class="sb-icon">🔗</span> قنوات الاشتراك الإجباري</div>
-    </div>
-  </div>
-
-  <div style="padding:12px 16px;border-top:1px solid var(--glass-b)">
-    <div style="font-size:11px;color:var(--text3)">قاعدة البيانات</div>
-    <div style="font-size:11px;color:var(--green);margin-top:3px;display:flex;align-items:center;gap:5px"><span class="live-dot"></span> متصل</div>
-    <div style="font-size:10px;color:var(--text3);margin-top:4px;word-break:break-all">pkdjpsd-default-rtdb</div>
+<!-- ===== generic modal ===== -->
+<div class="overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-head"><h3 id="modalTitle">—</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
   </div>
 </div>
-
-<!-- ═══ MAIN ═══ -->
-<div class="main" id="main">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="btn-icon" onclick="toggleSidebar()">☰</div>
-      <div class="topbar-logo">🐕 <span>SHIB</span> Admin</div>
-    </div>
-    <div class="topbar-actions">
-      <div class="btn-icon" onclick="refreshAll()" title="تحديث البيانات">🔄</div>
-      <div style="font-size:12px;color:var(--text3)" id="lastUpdate">--</div>
-    </div>
-  </div>
-
-  <div class="content">
-
-    <!-- ══════════ OVERVIEW ══════════ -->
-    <div class="page-section active" id="section-overview">
-      <div class="section-hdr">
-        <h2>📊 نظرة عامة</h2>
-        <div class="actions">
-          <button class="btn btn-primary btn-sm" onclick="refreshAll()">🔄 تحديث</button>
-        </div>
-      </div>
-
-      <div class="stats-grid" id="overviewStats">
-        <div class="stat-box" data-icon="👥"><div class="stat-val blue" id="st-users">-</div><div class="stat-lbl">إجمالي المستخدمين</div></div>
-        <div class="stat-box" data-icon="✅"><div class="stat-val green" id="st-verified">-</div><div class="stat-lbl">مستخدمين مُفعَّلين</div></div>
-        <div class="stat-box" data-icon="💰"><div class="stat-val orange" id="st-balance">-</div><div class="stat-lbl">إجمالي الأرصدة (SHIBA)</div></div>
-        <div class="stat-box" data-icon="💸"><div class="stat-val red" id="st-pending-w">-</div><div class="stat-lbl">طلبات سحب معلقة</div></div>
-        <div class="stat-box" data-icon="📋"><div class="stat-val purple" id="st-tasks">-</div><div class="stat-lbl">مهام نشطة</div></div>
-        <div class="stat-box" data-icon="🎮"><div class="stat-val orange" id="st-combo-today">-</div><div class="stat-lbl">حلّوا الكومبو اليوم</div></div>
-        <div class="stat-box" data-icon="💡"><div class="stat-val blue" id="st-suggestions">-</div><div class="stat-lbl">مقترحات مهام</div></div>
-        <div class="stat-box" data-icon="🤝"><div class="stat-val green" id="st-refs">-</div><div class="stat-lbl">إجمالي الإحالات</div></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div class="card">
-          <div class="card-title"><span class="icon">🕐</span>آخر المستخدمين المسجلين</div>
-          <div id="recentUsers"><div class="loader"><div class="spinner"></div>جارٍ التحميل...</div></div>
-        </div>
-        <div class="card">
-          <div class="card-title"><span class="icon">💸</span>آخر طلبات السحب</div>
-          <div id="recentWithdrawals"><div class="loader"><div class="spinner"></div>جارٍ التحميل...</div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span class="icon">🎮</span>الكومبو اليومي — اليوم</div>
-        <div id="overviewCombo"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ STATS ══════════ -->
-    <div class="page-section" id="section-stats">
-      <div class="section-hdr"><h2>📈 إحصائيات تفصيلية</h2></div>
-
-      <div class="stats-grid" id="detailedStats">
-        <div class="stat-box" data-icon="💰"><div class="stat-val orange" id="dst-total-balance">-</div><div class="stat-lbl">إجمالي SHIBA في التداول</div></div>
-        <div class="stat-box" data-icon="💸"><div class="stat-val red" id="dst-withdrawn">-</div><div class="stat-lbl">SHIBA المسحوبة (معتمد)</div></div>
-        <div class="stat-box" data-icon="🤝"><div class="stat-val green" id="dst-ref-rewards">-</div><div class="stat-lbl">مكافآت الإحالات الموزَّعة</div></div>
-        <div class="stat-box" data-icon="🎮"><div class="stat-val purple" id="dst-combo-rewards">-</div><div class="stat-lbl">مكافآت الكومبو الموزَّعة</div></div>
-        <div class="stat-box" data-icon="📋"><div class="stat-val blue" id="dst-task-rewards">-</div><div class="stat-lbl">مكافآت المهام الموزَّعة</div></div>
-        <div class="stat-box" data-icon="📅"><div class="stat-val green" id="dst-today-users">-</div><div class="stat-lbl">مستخدمون انضموا اليوم</div></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span class="icon">🏆</span>أعلى المستخدمين رصيداً (Top 20)</div>
-        <div id="topUsersTable"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ USERS ══════════ -->
-    <div class="page-section" id="section-users">
-      <div class="section-hdr">
-        <h2>👥 المستخدمون</h2>
-        <div class="actions">
-          <button class="btn btn-ghost btn-sm" onclick="loadUsers()">🔄 تحديث</button>
-        </div>
-      </div>
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input class="search-input" id="userSearch" placeholder="ابحث باسم المستخدم أو ID تيليجرام..." oninput="filterUsers()">
-      </div>
-      <div class="card" style="padding:0">
-        <div id="usersTable"><div class="loader"><div class="spinner"></div>جارٍ تحميل المستخدمين...</div></div>
-      </div>
-      <div style="display:flex;justify-content:center;gap:8px;margin-top:12px" id="userPagination"></div>
-    </div>
-
-    <!-- ══════════ WITHDRAWALS ══════════ -->
-    <div class="page-section" id="section-withdrawals">
-      <div class="section-hdr">
-        <h2>💸 طلبات السحب</h2>
-        <div class="actions">
-          <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals()">🔄 تحديث</button>
-        </div>
-      </div>
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchWTab('pending')">⏳ معلقة</button>
-        <button class="tab-btn" onclick="switchWTab('completed')">✅ مكتملة</button>
-        <button class="tab-btn" onclick="switchWTab('rejected')">❌ مرفوضة</button>
-        <button class="tab-btn" onclick="switchWTab('all')">📋 الكل</button>
-      </div>
-      <div class="card" style="padding:0">
-        <div id="withdrawalsTable"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ TASKS ══════════ -->
-    <div class="page-section" id="section-tasks">
-      <div class="section-hdr">
-        <h2>📋 إدارة المهام</h2>
-        <div class="actions">
-          <button class="btn btn-primary btn-sm" onclick="openAddTask()">+ إضافة مهمة</button>
-        </div>
-      </div>
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTaskTab('active')">✅ نشطة</button>
-        <button class="tab-btn" onclick="switchTaskTab('inactive')">⛔ معطلة</button>
-        <button class="tab-btn" onclick="switchTaskTab('all')">📋 الكل</button>
-      </div>
-      <div class="card" style="padding:0">
-        <div id="tasksTable"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ COMBO ══════════ -->
-    <div class="page-section" id="section-combo">
-      <div class="section-hdr"><h2>🎮 إدارة الكومبو اليومي</h2></div>
-
-      <div class="card">
-        <div class="card-title"><span class="icon">📅</span>كومبو اليوم</div>
-        <div id="todayComboDisplay"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span class="icon">✏️</span>تعيين كومبو ليوم محدد</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">التاريخ (UTC)</label>
-            <input type="date" class="form-input" id="comboDate">
-          </div>
-          <div class="form-group">
-            <label class="form-label">مكافأة الكومبو (SHIBA)</label>
-            <input type="number" class="form-input" id="comboRewardInput" placeholder="5000">
-          </div>
-        </div>
-        <div class="form-label" style="margin-bottom:10px">اختر الترتيب الصحيح (1 → 2 → 3 → 4)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-          <div class="btn btn-ghost" onclick="addToComboSeq('🦴')" style="font-size:20px">🦴</div>
-          <div class="btn btn-ghost" onclick="addToComboSeq('🏠')" style="font-size:20px">🏠</div>
-          <div class="btn btn-ghost" onclick="addToComboSeq('🎾')" style="font-size:20px">🎾</div>
-          <div class="btn btn-ghost" onclick="addToComboSeq('🍖')" style="font-size:20px">🍖</div>
-          <div class="btn btn-danger btn-sm" onclick="clearComboSeq()">مسح</div>
-        </div>
-        <div style="margin-bottom:16px">
-          <div class="form-label" style="margin-bottom:8px">الترتيب المحدد:</div>
-          <div style="display:flex;gap:10px" id="comboSeqDisplay">
-            <div style="width:52px;height:52px;border-radius:12px;background:var(--bg3);border:1.5px dashed var(--glass-b);display:flex;align-items:center;justify-content:center;font-size:24px">?</div>
-            <div style="width:52px;height:52px;border-radius:12px;background:var(--bg3);border:1.5px dashed var(--glass-b);display:flex;align-items:center;justify-content:center;font-size:24px">?</div>
-            <div style="width:52px;height:52px;border-radius:12px;background:var(--bg3);border:1.5px dashed var(--glass-b);display:flex;align-items:center;justify-content:center;font-size:24px">?</div>
-            <div style="width:52px;height:52px;border-radius:12px;background:var(--bg3);border:1.5px dashed var(--glass-b);display:flex;align-items:center;justify-content:center;font-size:24px">?</div>
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="saveCombo()">💾 حفظ الكومبو</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span class="icon">📅</span>سجل الكومبو السابق</div>
-        <div id="comboHistory"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ SUGGESTIONS ══════════ -->
-    <div class="page-section" id="section-suggestions">
-      <div class="section-hdr"><h2>💡 مقترحات المهام من المستخدمين</h2></div>
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchSugTab('pending')">⏳ معلقة</button>
-        <button class="tab-btn" onclick="switchSugTab('approved')">✅ معتمدة</button>
-        <button class="tab-btn" onclick="switchSugTab('rejected')">❌ مرفوضة</button>
-      </div>
-      <div class="card" style="padding:0">
-        <div id="suggestionsTable"><div class="loader"><div class="spinner"></div></div></div>
-      </div>
-    </div>
-
-    <!-- ══════════ CONFIG ══════════ -->
-    <div class="page-section" id="section-config">
-      <div class="section-hdr"><h2>⚙️ إعدادات التطبيق</h2></div>
-      <div id="configLoader"><div class="loader"><div class="spinner"></div>جارٍ تحميل الإعدادات...</div></div>
-      <div id="configForm" style="display:none">
-
-        <div class="card">
-          <div class="card-title"><span class="icon">💰</span>مكافآت الكومبو والإحالة</div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">مكافأة الإحالة (SHIBA)</label><input type="number" class="form-input" id="cfg-referralReward"></div>
-            <div class="form-group"><label class="form-label">مكافأة الكومبو</label><input type="number" class="form-input" id="cfg-comboReward"></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title"><span class="icon">💸</span>إعدادات السحب</div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">الحد الأدنى للسحب</label><input type="number" class="form-input" id="cfg-withdrawMin"></div>
-            <div class="form-group"><label class="form-label">رسوم السحب</label><input type="number" class="form-input" id="cfg-withdrawFee"></div>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="saveConfig()">💾 حفظ جميع الإعدادات</button>
-          <button class="btn btn-ghost" onclick="loadConfig()">↩️ إعادة تحميل</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════ FORCE JOIN ══════════ -->
-    <div class="page-section" id="section-forcejoin">
-      <div class="section-hdr">
-        <h2>🔗 قنوات الاشتراك الإجباري</h2>
-        <div class="actions">
-          <button class="btn btn-primary btn-sm" onclick="openAddChannel()">+ إضافة قناة</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">ℹ️</span>تعليمات</div>
-        <p style="font-size:12px;color:var(--text2);line-height:1.7">القنوات هنا سيُجبَر المستخدمون على الانضمام إليها قبل استخدام التطبيق. يُمنع تعديل حالة المستخدم (forceJoinCompleted) إلا بعد التحقق الفعلي من الاشتراك.</p>
-      </div>
-      <div id="forceJoinChannels"><div class="loader"><div class="spinner"></div></div></div>
-    </div>
-
-  </div><!-- /content -->
-</div><!-- /main -->
 
 <script>
-// ════════════════════════════════════════
-//  Firebase Config — مباشر
-// ════════════════════════════════════════
-const FB = {
-        apiKey: "AIzaSyDgDDykbRrhbdfWUpm1BUgj4ga7d_-wy_g",
-        authDomain: "game-preview-51c2a.firebaseapp.com",
-        projectId: "game-preview-51c2a",
-        storageBucket: "game-preview-51c2a.appspot.com",
-        messagingSenderId: "54312317442",
-        appId: "1:54312317442:web:585f62354db53c142bed1b",
-        measurementId: "G-1E3Y19Q6PM"
+/* =========================================================
+   PMT Gram — Admin Control Panel
+   Direct Firebase Realtime Database binding
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCXgtAAstlELkQoLv_WVyKE-Zk5j1Ml05k",
+  authDomain: "ehefrkjhaj.firebaseapp.com",
+  databaseURL: "https://ehefrkjhaj-default-rtdb.firebaseio.com",
+  projectId: "ehefrkjhaj",
+  storageBucket: "ehefrkjhaj.firebasestorage.app",
+  messagingSenderId: "412850011575",
+  appId: "1:412850011575:web:9488cda1ac4fc8822d3c32",
+  measurementId: "G-FH5NRJ7E14"
 };
-const DB = FB.databaseURL.replace(/\/$/, '');
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// ═══ Firebase REST Helpers ═══
-async function fbGet(path) {
-  const r = await fetch(`${DB}/${path}.json`);
-  if (!r.ok) throw new Error(`GET ${path} failed: ${r.status}`);
-  return await r.json();
-}
-async function fbSet(path, val) {
-  const r = await fetch(`${DB}/${path}.json`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(val) });
-  if (!r.ok) throw new Error(`SET ${path} failed: ${r.status}`);
-  return await r.json();
-}
-async function fbUpdate(path, val) {
-  const r = await fetch(`${DB}/${path}.json`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(val) });
-  if (!r.ok) throw new Error(`UPDATE ${path} failed: ${r.status}`);
-  return await r.json();
-}
-async function fbDelete(path) {
-  const r = await fetch(`${DB}/${path}.json`, { method:'DELETE' });
-  if (!r.ok) throw new Error(`DELETE ${path} failed: ${r.status}`);
-  return true;
-}
+const AVATAR_FALLBACK = 'https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498356/ChatGPT_Image_Aug_23_2026_06_19_48_PM.png';
+const TON_ICON = 'https://cdn.simpleicons.org/ton/0098EA';
+const COIN_ICON = 'https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png';
+const ONLINE_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
-// ═══ State ═══
-let ALL_USERS = [];
-let ALL_WITHDRAWALS = [];
-let ALL_TASKS = [];
-let ALL_SUGGESTIONS = [];
-let COMBO_SEQ = [];
-let WDRAW_TAB = 'pending';
-let TASK_TAB = 'active';
-let SUG_TAB = 'pending';
-let USER_PAGE = 0;
-const PER_PAGE = 50;
-let USER_FILTER = '';
+/* ---------- state ---------- */
+let usersCache = {};
+let withdrawalsCache = {};
+let tasksCache = {};
+let channelsCache = {};
+let blockedCache = {};
+let configCache = {};
+let currentView = 'dashboard';
+let wdFilter = 'pending';
 
-// ═══ Toast ═══
-function toast(msg, type='info') {
-  const c = document.getElementById('toastContainer');
+/* ---------- helpers ---------- */
+function fmt(n){
+  n = Number(n)||0;
+  return n.toLocaleString('en-US', {maximumFractionDigits:0});
+}
+function fmtTon(n){
+  n = Number(n)||0;
+  return n.toLocaleString('en-US', {minimumFractionDigits:4, maximumFractionDigits:4});
+}
+function fmtDate(ts){
+  if(!ts) return '—';
+  const d = new Date(Number(ts));
+  return d.toLocaleDateString('ar-EG',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' — ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+function timeAgo(ts){
+  if(!ts) return 'لم يسجّل دخول بعد';
+  const diff = Date.now() - Number(ts);
+  if(diff < 60000) return 'الآن';
+  if(diff < 3600000) return Math.floor(diff/60000) + ' د';
+  if(diff < 86400000) return Math.floor(diff/3600000) + ' س';
+  return Math.floor(diff/86400000) + ' يوم';
+}
+function isOnline(ts){ return ts && (Date.now() - Number(ts) < ONLINE_WINDOW_MS); }
+function todayKeyCairo(){
+  return new Intl.DateTimeFormat('en-CA', {timeZone:'Africa/Cairo', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+}
+function displayName(u){
+  const n = [u.firstName, u.lastName].filter(Boolean).join(' ').trim();
+  return n || (u.username ? '@'+u.username : 'مستخدم بدون اسم');
+}
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toast(msg, isErr){
+  const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
-  el.className = `toast ${type}`;
+  el.className = 'toast' + (isErr?' err':'');
   el.textContent = msg;
-  c.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }, 3200);
 }
 
-// ═══ Navigation ═══
-function nav(section) {
-  document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('section-'+section).classList.add('active');
-  const navEl = document.getElementById('nav-'+section);
-  if (navEl) navEl.classList.add('active');
-  // lazy load
-  if (section === 'users') loadUsers();
-  if (section === 'withdrawals') loadWithdrawals();
-  if (section === 'tasks') loadTasks();
-  if (section === 'combo') loadCombo();
-  if (section === 'suggestions') loadSuggestions();
-  if (section === 'config') loadConfig();
-  if (section === 'forcejoin') loadForceJoin();
-  if (section === 'stats') loadStats();
-  // close sidebar on mobile
-  if (window.innerWidth <= 768) closeSidebar();
-}
-
-function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('overlay');
-  if (window.innerWidth <= 768) {
-    sb.classList.toggle('open');
-    ov.style.display = sb.classList.contains('open') ? 'block' : 'none';
+/* ---------- connection status ---------- */
+db.ref('.info/connected').on('value', snap=>{
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connTxt');
+  if(snap.val() === true){
+    dot.className = 'dot on'; txt.textContent = 'متصل بقاعدة البيانات';
   } else {
-    sb.classList.toggle('collapsed');
-    document.getElementById('main').classList.toggle('full');
+    dot.className = 'dot off'; txt.textContent = 'غير متصل...';
   }
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').style.display = 'none';
-}
+});
 
-// ═══ Modal ═══
-function openModal(title, body) {
-  document.getElementById('modalTitle').innerHTML = title;
-  document.getElementById('modalBody').innerHTML = body;
-  document.getElementById('globalModal').classList.add('open');
-}
-function closeModal() { document.getElementById('globalModal').classList.remove('open'); }
-function closeModalOutside(e) { if (e.target.id === 'globalModal') closeModal(); }
-
-// ═══ Utils ═══
-function fmt(n) { return (parseInt(n)||0).toLocaleString('en-US'); }
-function timeAgo(ts) {
-  if (!ts) return '—';
-  const d = (Date.now()-ts)/1000;
-  if (d<60) return 'الآن';
-  if (d<3600) return Math.floor(d/60)+'د';
-  if (d<86400) return Math.floor(d/3600)+'س';
-  return Math.floor(d/86400)+'ي';
-}
-function dateStr(ts) {
-  if (!ts) return '—';
-  return new Date(ts).toLocaleString('ar-EG',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-}
-function todayKey() {
-  const d = new Date();
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
-}
-function esc(s) { return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-
-// يبحث في ALL_USERS عن المستخدم بالـ telegramId ويرجع اسمه أو يوزره
-// للعرض بدل الـ ID الخام. يرجع الـ ID فقط لو المستخدم غير موجود بالكاش.
-function userLabel(tid) {
-  const u = ALL_USERS.find(x => String(x.telegramId) === String(tid));
-  if (!u) return String(tid || '—');
-  const name = [u.firstName, u.lastName].filter(Boolean).join(' ').trim();
-  if (name && u.username) return `${name} (@${u.username})`;
-  if (name) return name;
-  if (u.username) return '@' + u.username;
-  return String(tid || '—');
-}
-
-// ═══════════════════════════════════════
-//  OVERVIEW
-// ═══════════════════════════════════════
-async function loadOverview() {
-  try {
-    const [usersRaw, withdrawRaw, tasksRaw, suggestionsRaw, comboRaw] = await Promise.all([
-      fbGet('users'),
-      fbGet('withdrawals'),
-      fbGet('tasks'),
-      fbGet('taskSuggestions'),
-      fbGet(`combo/${todayKey()}`)
-    ]);
-
-    const users = usersRaw ? Object.entries(usersRaw).map(([id,u])=>({id,...u})) : [];
-    ALL_USERS = users;
-    let withdrawals = [];
-    if (withdrawRaw) { Object.entries(withdrawRaw).forEach(([uid,uw])=>{ if(uw&&typeof uw==='object') Object.entries(uw).forEach(([wid,w])=>withdrawals.push({id:wid,telegramId:uid,...w})); }); }
-    const tasks = tasksRaw ? Object.entries(tasksRaw).map(([id,t])=>({id,...t})) : [];
-    const suggestions = suggestionsRaw ? Object.entries(suggestionsRaw).map(([id,s])=>({id,...s})) : [];
-
-    // Stats
-    const totalBalance = users.reduce((a,u)=>a+(u.balance||0),0);
-    const verified = users.filter(u=>u.forceJoinCompleted).length;
-    const pendingW = withdrawals.filter(w=>w.status==='pending').length;
-    const activeTasks = tasks.filter(t=>t.status==='active').length;
-    const todayStr = todayKey();
-    const comboToday = users.filter(u=>u.comboClaimDate===todayStr).length;
-    const totalRefs = withdrawals.length; // we'll count refs separately
-
-    document.getElementById('st-users').textContent = fmt(users.length);
-    document.getElementById('st-verified').textContent = fmt(verified);
-    document.getElementById('st-balance').textContent = fmt(totalBalance);
-    document.getElementById('st-pending-w').textContent = fmt(pendingW);
-    document.getElementById('st-tasks').textContent = fmt(activeTasks);
-    document.getElementById('st-combo-today').textContent = fmt(comboToday);
-    document.getElementById('st-suggestions').textContent = fmt(suggestions.filter(s=>s.status==='pending').length);
-
-    // Badge
-    document.getElementById('pendingBadge').textContent = pendingW;
-
-    // Recent users
-    const recentU = [...users].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
-    document.getElementById('recentUsers').innerHTML = recentU.length ? recentU.map(u=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-b)">
-        <div class="avatar">${u.photoUrl ? `<img src="${esc(u.photoUrl)}">` : (esc(u.firstName||'?')[0]||'?')}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${esc(u.firstName||'')} ${esc(u.lastName||'')}</div>
-          <div style="font-size:11px;color:var(--text3)">${u.username ? '@'+esc(u.username) : esc(u.telegramId)}</div>
-        </div>
-        <div style="text-align:left">
-          <div style="font-size:12px;color:var(--orange);font-weight:700">${fmt(u.balance)} SHIB</div>
-          <div style="font-size:10px;color:var(--text3)">${timeAgo(u.createdAt)}</div>
-        </div>
-      </div>`).join('') : '<div class="empty">لا يوجد مستخدمون</div>';
-
-    // Recent withdrawals
-    const recentW = withdrawals.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,5);
-    document.getElementById('recentWithdrawals').innerHTML = recentW.length ? recentW.map(w=>`
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--glass-b)">
-        <div>
-          <div style="font-size:13px;font-weight:600">${esc(userLabel(w.telegramId))}</div>
-          <div style="font-size:11px;color:var(--text3)">${timeAgo(w.ts)}</div>
-        </div>
-        <div style="text-align:left">
-          <div style="font-size:13px;font-weight:700;color:var(--red)">${fmt(w.amount)} SHIB</div>
-          <span class="badge ${w.status==='completed'?'green':w.status==='rejected'?'red':'orange'}">${w.status==='pending'?'⏳ معلق':w.status==='completed'?'✅ مكتمل':'❌ مرفوض'}</span>
-        </div>
-      </div>`).join('') : '<div class="empty">لا توجد طلبات</div>';
-
-    // Combo today
-    if (comboRaw) {
-      document.getElementById('overviewCombo').innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <div style="font-size:12px;color:var(--text2)">الترتيب الصحيح اليوم:</div>
-          <div style="display:flex;gap:10px">${comboRaw.items.map((e,i)=>`<div style="width:48px;height:48px;border-radius:12px;background:var(--orange-dim);border:1.5px solid var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><span style="font-size:9px;color:var(--text3)">${i+1}</span><span style="font-size:24px">${e}</span></div>`).join('')}</div>
-          <div class="badge orange">مكافأة: ${fmt(comboRaw.reward)} SHIB</div>
-          <div class="badge green">حلّوا اليوم: ${fmt(comboToday)} مستخدم</div>
-        </div>`;
-    } else {
-      document.getElementById('overviewCombo').innerHTML = '<div class="empty">لم يُحدَّد كومبو اليوم بعد</div>';
-    }
-
-    // Count refs
-    const refsRaw = await fbGet('referrals');
-    let totalRefCount = 0;
-    if (refsRaw) {
-      Object.values(refsRaw).forEach(r => { totalRefCount += Object.keys(r||{}).length; });
-    }
-    document.getElementById('st-refs').textContent = fmt(totalRefCount);
-
-    document.getElementById('lastUpdate').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG');
-  } catch(e) {
-    toast('خطأ في تحميل البيانات: '+e.message, 'error');
-  }
-}
-
-// ═══════════════════════════════════════
-//  STATS
-// ═══════════════════════════════════════
-async function loadStats() {
-  try {
-    const [usersRaw, withdrawRaw, balanceLogsRaw] = await Promise.all([
-      fbGet('users'),
-      fbGet('withdrawals'),
-      fbGet('balanceLogs')
-    ]);
-    const users = usersRaw ? Object.entries(usersRaw).map(([id,u])=>({id,...u})) : [];
-    let withdrawals = [];
-    if (withdrawRaw) { Object.entries(withdrawRaw).forEach(([uid,uw])=>{ if(uw&&typeof uw==='object') Object.entries(uw).forEach(([wid,w])=>withdrawals.push({id:wid,telegramId:uid,...w})); }); }
-
-    let totalBalance=0, withdrawnTotal=0, refRewards=0, comboRewards=0, taskRewards=0;
-    users.forEach(u=>totalBalance+=(u.balance||0));
-    withdrawals.filter(w=>w.status==='completed').forEach(w=>withdrawnTotal+=(w.amount||0));
-
-    if (balanceLogsRaw) {
-      Object.values(balanceLogsRaw).forEach(userLogs => {
-        if (!userLogs) return;
-        Object.values(userLogs).forEach(log => {
-          if (log.type === 'referral_reward') refRewards += (log.amount||0);
-          if (log.type === 'combo_claim') comboRewards += (log.amount||0);
-          if (log.type === 'task_reward' || log.type === 'claim_task') taskRewards += (log.amount||0);
-        });
-      });
-    }
-
-    const todayStr = todayKey();
-    const todayTs = new Date(todayStr+'T00:00:00Z').getTime();
-    const todayUsers = users.filter(u=>(u.createdAt||0)>=todayTs).length;
-
-    document.getElementById('dst-total-balance').textContent = fmt(totalBalance);
-    document.getElementById('dst-withdrawn').textContent = fmt(withdrawnTotal);
-    document.getElementById('dst-ref-rewards').textContent = fmt(refRewards);
-    document.getElementById('dst-combo-rewards').textContent = fmt(comboRewards);
-    document.getElementById('dst-task-rewards').textContent = fmt(taskRewards);
-    document.getElementById('dst-today-users').textContent = fmt(todayUsers);
-
-    // Top users
-    const top20 = [...users].sort((a,b)=>(b.balance||0)-(a.balance||0)).slice(0,20);
-    document.getElementById('topUsersTable').innerHTML = `
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>#</th><th>المستخدم</th><th>الرصيد</th><th>إجراء</th></tr></thead>
-        <tbody>${top20.map((u,i)=>`
-          <tr>
-            <td style="color:var(--orange);font-weight:700">${i+1}</td>
-            <td><div style="display:flex;align-items:center;gap:8px">
-              <div class="avatar" style="width:28px;height:28px;font-size:11px">${u.photoUrl?`<img src="${esc(u.photoUrl)}">`:(esc(u.firstName||'?')[0]||'?')}</div>
-              <div><div style="font-weight:600">${esc(u.firstName||'')} ${esc(u.lastName||'')}</div>${u.username?`<div style="font-size:11px;color:var(--text3)">@${esc(u.username)}</div>`:''}</div>
-            </div></td>
-            <td style="color:var(--orange);font-weight:700">${fmt(u.balance)}</td>
-            <td><button class="btn btn-ghost btn-xs" onclick="viewUser('${esc(u.telegramId)}')">عرض</button></td>
-          </tr>`).join('')}
-        </tbody>
-      </table></div>`;
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-// ═══════════════════════════════════════
-//  USERS
-// ═══════════════════════════════════════
-async function loadUsers() {
-  document.getElementById('usersTable').innerHTML = '<div class="loader"><div class="spinner"></div>جارٍ تحميل المستخدمين...</div>';
-  try {
-    const raw = await fbGet('users');
-    ALL_USERS = raw ? Object.entries(raw).map(([id,u])=>({id,...u})) : [];
-    ALL_USERS.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    USER_PAGE = 0;
-    renderUsers();
-  } catch(e) { document.getElementById('usersTable').innerHTML = `<div class="empty">خطأ: ${esc(e.message)}</div>`; }
-}
-
-function filterUsers() {
-  USER_FILTER = document.getElementById('userSearch').value.toLowerCase();
-  USER_PAGE = 0;
-  renderUsers();
-}
-
-function renderUsers() {
-  const filtered = ALL_USERS.filter(u => {
-    if (!USER_FILTER) return true;
-    return (u.firstName||'').toLowerCase().includes(USER_FILTER) ||
-           (u.lastName||'').toLowerCase().includes(USER_FILTER) ||
-           (u.username||'').toLowerCase().includes(USER_FILTER) ||
-           String(u.telegramId||'').includes(USER_FILTER);
-  });
-  const total = filtered.length;
-  const pages = Math.ceil(total/PER_PAGE);
-  const slice = filtered.slice(USER_PAGE*PER_PAGE, (USER_PAGE+1)*PER_PAGE);
-
-  document.getElementById('usersTable').innerHTML = slice.length ? `
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>المستخدم</th><th>الرصيد</th><th>مُفعَّل</th><th>المحيل</th><th>تاريخ التسجيل</th><th>إجراءات</th></tr></thead>
-      <tbody>${slice.map(u=>`
-        <tr>
-          <td><div style="display:flex;align-items:center;gap:8px">
-            <div class="avatar" style="width:32px;height:32px;font-size:12px">${u.photoUrl?`<img src="${esc(u.photoUrl)}">`:(esc(u.firstName||'?')[0]||'?')}</div>
-            <div><div style="font-weight:600">${esc(u.firstName||'')} ${esc(u.lastName||'')}</div>${u.username?`<div style="font-size:11px;color:var(--text3)">@${esc(u.username)}</div>`:''}</div>
-          </div></td>
-          <td style="color:var(--orange);font-weight:700">${fmt(u.balance)}</td>
-          <td><span class="badge ${u.forceJoinCompleted?'green':'gray'}">${u.forceJoinCompleted?'✅':'⏳'}</span></td>
-          <td style="color:var(--text3)">${u.referredBy ? esc(userLabel(u.referredBy)) : '—'}</td>
-          <td style="color:var(--text3);font-size:11px">${dateStr(u.createdAt)}</td>
-          <td>
-            <div style="display:flex;gap:4px">
-              <button class="btn btn-ghost btn-xs" onclick="viewUser('${esc(u.telegramId)}')">👁</button>
-              <button class="btn btn-success btn-xs" onclick="editUserBalance('${esc(u.telegramId)}','${esc(u.firstName||'')}',${u.balance||0})">💰</button>
-              <button class="btn btn-danger btn-xs" onclick="resetUser('${esc(u.telegramId)}')">🗑</button>
-            </div>
-          </td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>
-    <div style="padding:12px 16px;font-size:12px;color:var(--text3)">إجمالي: ${fmt(total)} مستخدم</div>
-  ` : '<div class="empty"><div class="emoji">😕</div>لا يوجد مستخدمون مطابقون</div>';
-
-  // Pagination
-  let pHtml = '';
-  for (let i=0;i<pages;i++) {
-    pHtml += `<button class="btn btn-sm ${i===USER_PAGE?'btn-primary':'btn-ghost'}" onclick="USER_PAGE=${i};renderUsers()">${i+1}</button>`;
-  }
-  document.getElementById('userPagination').innerHTML = pHtml;
-}
-
-async function viewUser(tid) {
-  try {
-    const [user, refs, logs, completed] = await Promise.all([
-      fbGet(`users/${tid}`),
-      fbGet(`referrals/${tid}`),
-      fbGet(`balanceLogs/${tid}`),
-      fbGet(`completedTasks/${tid}`)
-    ]);
-    const refList = refs ? Object.entries(refs).map(([id,r])=>({id,...r})) : [];
-    const logList = logs ? Object.entries(logs).map(([id,l])=>({id,...l})).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,15) : [];
-    const completedList = completed ? Object.keys(completed) : [];
-
-    openModal(`👤 ${esc(user.firstName||'')} ${esc(user.lastName||'')}`, `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-        <div><div class="form-label">ID</div><div style="margin-top:4px;color:var(--text2)">${esc(user.telegramId)}</div></div>
-        <div><div class="form-label">يوزر</div><div style="margin-top:4px;color:var(--text2)">${user.username?'@'+esc(user.username):'—'}</div></div>
-        <div><div class="form-label">الرصيد</div><div style="margin-top:4px;color:var(--orange);font-weight:800;font-size:18px">${fmt(user.balance)} SHIBA</div></div>
-        <div><div class="form-label">حالة التفعيل</div><div style="margin-top:4px"><span class="badge ${user.forceJoinCompleted?'green':'orange'}">${user.forceJoinCompleted?'مُفعَّل':'غير مُفعَّل'}</span></div></div>
-        <div><div class="form-label">الإحالات</div><div style="margin-top:4px;color:var(--text2)">${refList.length} (${refList.filter(r=>r.active).length} نشط)</div></div>
-        <div><div class="form-label">كود الإحالة</div><div style="margin-top:4px;color:var(--text2)">${esc(user.referralCode||'—')}</div></div>
-        <div><div class="form-label">المحيل</div><div style="margin-top:4px;color:var(--text2)">${user.referredBy?esc(userLabel(user.referredBy)):'—'}</div></div>
-        <div><div class="form-label">آخر دخول</div><div style="margin-top:4px;color:var(--text2)">${dateStr(user.lastLogin)}</div></div>
-        <div><div class="form-label">تاريخ التسجيل</div><div style="margin-top:4px;color:var(--text2)">${dateStr(user.createdAt)}</div></div>
-        <div><div class="form-label">المهام المكتملة</div><div style="margin-top:4px;color:var(--text2)">${completedList.length}</div></div>
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px">📜 آخر العمليات</div>
-      ${logList.length ? logList.map(l=>`
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--glass-b);font-size:12px">
-          <div><span class="badge ${l.amount>0?'green':'red'}">${l.type}</span></div>
-          <div style="color:${l.amount>0?'var(--green)':'var(--red)'};font-weight:700">${l.amount>0?'+':''}${fmt(l.amount)}</div>
-          <div style="color:var(--text3)">${timeAgo(l.ts)}</div>
-        </div>`).join('') : '<div class="empty" style="padding:16px">لا توجد عمليات</div>'}
-      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-        <button class="btn btn-success btn-sm" onclick="closeModal();setTimeout(()=>editUserBalance('${esc(user.telegramId)}','${esc(user.firstName||'')}',${user.balance||0}),200)">💰 تعديل الرصيد</button>
-        <button class="btn btn-ghost btn-sm" onclick="closeModal()">إغلاق</button>
-      </div>`);
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-function editUserBalance(tid, name, currentBal) {
-  openModal(`💰 تعديل رصيد ${esc(name)}`, `
-    <div class="form-group" style="margin-bottom:14px">
-      <label class="form-label">الرصيد الحالي</label>
-      <div style="font-size:24px;font-weight:800;color:var(--orange)">${fmt(currentBal)} SHIBA</div>
-    </div>
-    <div class="form-group" style="margin-bottom:14px">
-      <label class="form-label">الرصيد الجديد</label>
-      <input type="number" class="form-input" id="newBalInput" value="${currentBal}" min="0">
-    </div>
-    <div class="form-group" style="margin-bottom:16px">
-      <label class="form-label">سبب التعديل (اختياري)</label>
-      <input class="form-input" id="balReason" placeholder="مثال: تصحيح يدوي">
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="applyUserBalance('${esc(tid)}',${currentBal})">حفظ</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`);
-}
-
-async function applyUserBalance(tid, oldBal) {
-  const newBal = parseInt(document.getElementById('newBalInput').value);
-  if (isNaN(newBal) || newBal < 0) { toast('رقم غير صالح', 'error'); return; }
-  try {
-    await fbUpdate(`users/${tid}`, { balance: newBal });
-    const diff = newBal - oldBal;
-    if (diff !== 0) {
-      const reason = document.getElementById('balReason').value || 'admin_adjustment';
-      await fetch(`${DB}/balanceLogs/${tid}.json`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ type:'admin_adjustment', amount:diff, reason, ts:Date.now() })
-      });
-    }
-    closeModal();
-    toast('✅ تم تحديث الرصيد', 'success');
-    loadUsers();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-async function resetUser(tid) {
-  if (!confirm('هل تريد حذف هذا المستخدم؟ لا يمكن التراجع!')) return;
-  try {
-    await fbDelete(`users/${tid}`);
-    toast('تم حذف المستخدم', 'success');
-    loadUsers();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-// ═══════════════════════════════════════
-//  WITHDRAWALS
-// ═══════════════════════════════════════
-async function loadWithdrawals() {
-  document.getElementById('withdrawalsTable').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  try {
-    if (!ALL_USERS.length) {
-      const usersRaw = await fbGet('users');
-      ALL_USERS = usersRaw ? Object.entries(usersRaw).map(([id,u])=>({id,...u})) : [];
-    }
-    const rawAll = await fbGet('withdrawals');
-    ALL_WITHDRAWALS = [];
-    if (rawAll) {
-      Object.entries(rawAll).forEach(([uid, userW]) => {
-        if (userW && typeof userW === 'object') {
-          Object.entries(userW).forEach(([wid, w]) => {
-            ALL_WITHDRAWALS.push({ id: wid, telegramId: uid, ...w });
-          });
-        }
-      });
-    }
-    ALL_WITHDRAWALS.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    renderWithdrawals();
-  } catch(e) { document.getElementById('withdrawalsTable').innerHTML = `<div class="empty">خطأ: ${esc(e.message)}</div>`; }
-}
-
-function switchWTab(tab) {
-  WDRAW_TAB = tab;
-  document.querySelectorAll('#section-withdrawals .tab-btn').forEach((b,i)=>b.classList.toggle('active',['pending','completed','rejected','all'][i]===tab));
-  renderWithdrawals();
-}
-
-function renderWithdrawals() {
-  const filtered = WDRAW_TAB === 'all' ? ALL_WITHDRAWALS : ALL_WITHDRAWALS.filter(w=>w.status===WDRAW_TAB);
-  document.getElementById('withdrawalsTable').innerHTML = filtered.length ? `
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>المستخدم</th><th>المبلغ</th><th>عنوان المحفظة</th><th>TxHash</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
-      <tbody>${filtered.map(w=>`
-        <tr>
-          <td><div style="font-size:12px;color:var(--text2);font-weight:600">${esc(userLabel(w.telegramId))}</div></td>
-          <td style="color:var(--red);font-weight:800">${fmt(w.amount)} SHIB</td>
-          <td><div style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--text3)" title="${esc(w.walletAddress)}">${esc(w.walletAddress||'—')}</div></td>
-          <td><div style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text3)" title="${esc(w.txHash||'')}">${w.txHash?esc(w.txHash.slice(0,12))+'...':'—'}</div></td>
-          <td><span class="badge ${w.status==='completed'?'green':w.status==='rejected'?'red':'orange'}">${w.status==='pending'?'⏳ معلق':w.status==='completed'?'✅ مكتمل':'❌ مرفوض'}</span></td>
-          <td style="font-size:11px;color:var(--text3)">${dateStr(w.ts)}</td>
-          <td><div style="display:flex;gap:4px">
-            ${w.status==='pending'?`
-              <button class="btn btn-success btn-xs" onclick="approveWithdraw('${esc(w.id)}','${esc(w.telegramId)}',${w.amount})">✅ اعتماد</button>
-              <button class="btn btn-danger btn-xs" onclick="rejectWithdraw('${esc(w.id)}','${esc(w.telegramId)}',${w.amount})">❌ رفض</button>`:''}
-            <button class="btn btn-ghost btn-xs" onclick="viewWithdrawDetail('${esc(w.id)}')">👁</button>
-          </div></td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>
-    <div style="padding:12px 16px;font-size:12px;color:var(--text3)">إجمالي: ${fmt(filtered.length)}</div>
-  ` : `<div class="empty"><div class="emoji">✅</div>لا توجد طلبات ${WDRAW_TAB==='pending'?'معلقة':''}</div>`;
-}
-
-async function approveWithdraw(id, tid, amount) {
-  if (!confirm(`اعتماد سحب ${fmt(amount)} SHIBA للمستخدم ${userLabel(tid)}?`)) return;
-  try {
-    const wItem = ALL_WITHDRAWALS.find(x=>x.id===id); await fbUpdate(`withdrawals/${wItem?wItem.telegramId:tid}/${id}`, { status:'completed', completedAt:Date.now() });
-    // خصم الرصيد
-    const user = await fbGet(`users/${tid}`);
-    if (user) {
-      const newBal = Math.max(0, (user.balance||0) - amount);
-      await fbUpdate(`users/${tid}`, { balance: newBal });
-      await fetch(`${DB}/balanceLogs/${tid}.json`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ type:'withdraw_approved', amount:-amount, requestId:id, ts:Date.now() })
-      });
-    }
-    toast('✅ تم اعتماد السحب وخصم الرصيد', 'success');
-    loadWithdrawals();
-    loadOverview();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-async function rejectWithdraw(id, tid, amount) {
-  const reason = prompt('سبب الرفض (اختياري):') || 'rejected by admin';
-  try {
-    const wItem2 = ALL_WITHDRAWALS.find(x=>x.id===id); await fbUpdate(`withdrawals/${wItem2?wItem2.telegramId:tid}/${id}`, { status:'rejected', rejectedAt:Date.now(), rejectReason:reason });
-    await fetch(`${DB}/balanceLogs/${tid}.json`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ type:'withdraw_rejected', amount:0, requestId:id, reason, ts:Date.now() })
-    });
-    toast('❌ تم رفض طلب السحب', 'info');
-    loadWithdrawals();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-function viewWithdrawDetail(id) {
-  const w = ALL_WITHDRAWALS.find(x=>x.id===id);
-  if (!w) return;
-  openModal(`💸 تفاصيل طلب السحب`, `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div><div class="form-label">المستخدم</div><div style="margin-top:4px;color:var(--text2)">${esc(userLabel(w.telegramId))}</div></div>
-      <div><div class="form-label">المبلغ</div><div style="margin-top:4px;color:var(--red);font-weight:800;font-size:18px">${fmt(w.amount)} SHIB</div></div>
-      <div style="grid-column:1/-1"><div class="form-label">عنوان المحفظة</div><div style="margin-top:4px;font-size:12px;color:var(--text2);word-break:break-all;background:var(--bg3);padding:10px;border-radius:8px">${esc(w.walletAddress||'—')}</div></div>
-      ${w.txHash?`<div style="grid-column:1/-1"><div class="form-label">TxHash</div><div style="margin-top:4px;font-size:11px;color:var(--blue);word-break:break-all;background:var(--bg3);padding:10px;border-radius:8px">${esc(w.txHash)}</div></div>`:''}
-      <div><div class="form-label">الحالة</div><div style="margin-top:4px"><span class="badge ${w.status==='completed'?'green':w.status==='rejected'?'red':'orange'}">${w.status==='pending'?'⏳ معلق':w.status==='completed'?'✅ مكتمل':'❌ مرفوض'}</span></div></div>
-      <div><div class="form-label">تاريخ الطلب</div><div style="margin-top:4px;font-size:12px;color:var(--text3)">${dateStr(w.ts)}</div></div>
-      ${w.completedAt?`<div><div class="form-label">تاريخ الإتمام</div><div style="margin-top:4px;font-size:12px;color:var(--text3)">${dateStr(w.completedAt)}</div></div>`:''}
-    </div>
-    ${w.status==='pending'?`<div style="display:flex;gap:8px">
-      <button class="btn btn-success btn-sm" onclick="approveWithdraw('${esc(w.id)}','${esc(w.telegramId)}',${w.amount});closeModal()">✅ اعتماد</button>
-      <button class="btn btn-danger btn-sm" onclick="rejectWithdraw('${esc(w.id)}','${esc(w.telegramId)}',${w.amount});closeModal()">❌ رفض</button>
-    </div>`:''}
-    <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="closeModal()">إغلاق</button>`);
-}
-
-// ═══════════════════════════════════════
-//  TASKS
-// ═══════════════════════════════════════
-async function loadTasks() {
-  document.getElementById('tasksTable').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  try {
-    const raw = await fbGet('tasks');
-    ALL_TASKS = raw ? Object.entries(raw).map(([id,t])=>({id,...t})) : [];
-    renderTasks();
-  } catch(e) { document.getElementById('tasksTable').innerHTML = `<div class="empty">خطأ: ${esc(e.message)}</div>`; }
-}
-
-function switchTaskTab(tab) {
-  TASK_TAB = tab;
-  document.querySelectorAll('#section-tasks .tab-btn').forEach((b,i)=>b.classList.toggle('active',['active','inactive','all'][i]===tab));
-  renderTasks();
-}
-
-function renderTasks() {
-  const filtered = TASK_TAB === 'all' ? ALL_TASKS :
-    TASK_TAB === 'active' ? ALL_TASKS.filter(t=>t.status==='active') :
-    ALL_TASKS.filter(t=>t.status!=='active');
-
-  document.getElementById('tasksTable').innerHTML = filtered.length ? `
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>اسم المهمة</th><th>النوع</th><th>الرابط</th><th>المكافأة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-      <tbody>${filtered.map(t=>`
-        <tr>
-          <td style="font-weight:600">${esc(t.title||t.id)}</td>
-          <td><span class="badge ${t.category==='channels'?'blue':t.category==='bots'?'purple':t.category==='invite'?'green':'gray'}">${esc(t.category||'—')}</span></td>
-          <td><a href="${esc(t.link||'#')}" target="_blank" style="color:var(--blue);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;display:inline-block">${esc(t.link||'—')}</a></td>
-          <td style="color:var(--orange);font-weight:700">${fmt(t.reward)} SHIB</td>
-          <td><span class="badge ${t.status==='active'?'green':'gray'}">${t.status==='active'?'نشطة':'معطلة'}</span></td>
-          <td><div style="display:flex;gap:4px">
-            <button class="btn btn-ghost btn-xs" onclick="editTask('${esc(t.id)}')">✏️</button>
-            <button class="btn btn-${t.status==='active'?'danger':'success'} btn-xs" onclick="toggleTask('${esc(t.id)}','${t.status}')">${t.status==='active'?'⛔':'✅'}</button>
-            ${t.category!=='invite'?`<button class="btn btn-danger btn-xs" onclick="deleteTask('${esc(t.id)}')">🗑</button>`:''}
-          </div></td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>
-  ` : '<div class="empty"><div class="emoji">📋</div>لا توجد مهام</div>';
-}
-
-function openAddTask() {
-  openModal('➕ إضافة مهمة جديدة', `
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">اسم المهمة</label><input class="form-input" id="nt-title" placeholder="مثال: انضم لقناتنا"></div>
-      <div class="form-group"><label class="form-label">النوع</label>
-        <select class="form-select" id="nt-cat">
-          <option value="channels">قناة (channels)</option>
-          <option value="bots">بوت (bots)</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">الرابط</label><input class="form-input" id="nt-link" placeholder="https://t.me/..."></div>
-    <div class="form-group" style="margin-bottom:16px"><label class="form-label">المكافأة (SHIBA)</label><input type="number" class="form-input" id="nt-reward" value="500"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="submitAddTask()">حفظ</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`);
-}
-
-async function submitAddTask() {
-  const title = document.getElementById('nt-title').value.trim();
-  const link = document.getElementById('nt-link').value.trim();
-  const cat = document.getElementById('nt-cat').value;
-  const reward = parseInt(document.getElementById('nt-reward').value);
-  if (!title || !link) { toast('يرجى ملء الحقول المطلوبة','error'); return; }
-  try {
-    const id = 'task_' + Date.now();
-    await fbSet(`tasks/${id}`, { id, title, link, category:cat, reward:reward||500, status:'active', createdAt:Date.now() });
-    closeModal();
-    toast('✅ تمت إضافة المهمة', 'success');
-    loadTasks();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-function editTask(id) {
-  const t = ALL_TASKS.find(x=>x.id===id);
-  if (!t) return;
-  openModal('✏️ تعديل المهمة', `
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">اسم المهمة</label><input class="form-input" id="et-title" value="${esc(t.title||'')}"></div>
-      <div class="form-group"><label class="form-label">النوع</label>
-        <select class="form-select" id="et-cat">
-          <option value="channels" ${t.category==='channels'?'selected':''}>channels</option>
-          <option value="bots" ${t.category==='bots'?'selected':''}>bots</option>
-          <option value="invite" ${t.category==='invite'?'selected':''}>invite</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">الرابط</label><input class="form-input" id="et-link" value="${esc(t.link||'')}"></div>
-    <div class="form-group" style="margin-bottom:16px"><label class="form-label">المكافأة</label><input type="number" class="form-input" id="et-reward" value="${t.reward||0}"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="submitEditTask('${esc(id)}')">حفظ</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`);
-}
-
-async function submitEditTask(id) {
-  const updates = {
-    title: document.getElementById('et-title').value.trim(),
-    link: document.getElementById('et-link').value.trim(),
-    category: document.getElementById('et-cat').value,
-    reward: parseInt(document.getElementById('et-reward').value) || 0
+/* ---------- navigation ---------- */
+function switchView(view){
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(el=> el.classList.toggle('active', el.dataset.view===view));
+  document.querySelectorAll('.view').forEach(el=> el.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  const titles = {
+    dashboard:['الرئيسية','نظرة عامة سريعة على أداء البوت الآن'],
+    users:['المستخدمين','إدارة كاملة لأرصدة وبيانات كل مستخدم'],
+    withdrawals:['طلبات السحب','مراجعة والموافقة أو رفض طلبات سحب TON'],
+    tasks:['المهام','إدارة مهام القنوات والبوتات والمكافآت'],
+    channels:['الاشتراك الإجباري','قنوات يجب الاشتراك بها لاستخدام البوت'],
+    ads:['شركات الإعلانات','مكافأة وحد كل شركة إعلانات على حدة'],
+    blocked:['الحسابات المحظورة','حسابات أوقفها نظام مكافحة الاحتيال'],
+    config:['الإعدادات العامة','كل قيم البوت قابلة للتعديل من هنا مباشرة'],
   };
-  try {
-    await fbUpdate(`tasks/${id}`, updates);
-    closeModal();
-    toast('✅ تم تحديث المهمة','success');
-    loadTasks();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
+  document.getElementById('pageTitle').textContent = titles[view][0];
+  document.getElementById('pageSub').textContent = titles[view][1];
+  document.getElementById('globalSearchBox').style.display = (view==='users') ? 'flex' : 'none';
+  if(window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
 }
+document.getElementById('nav').addEventListener('click', e=>{
+  const item = e.target.closest('.nav-item');
+  if(item) switchView(item.dataset.view);
+});
+document.getElementById('menuBtn').addEventListener('click', ()=> document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('refreshBtn').addEventListener('click', ()=>{ toast('البيانات محدثة تلقائيًا في الوقت الحقيقي ✓'); });
 
-async function toggleTask(id, currentStatus) {
-  const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-  try {
-    await fbUpdate(`tasks/${id}`, { status: newStatus });
-    toast(`${newStatus==='active'?'✅ تم تفعيل':'⛔ تم تعطيل'} المهمة`, 'success');
-    loadTasks();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
+/* =========================================================
+   DASHBOARD + USERS  (single users listener drives both)
+   ========================================================= */
+db.ref('users').on('value', snap=>{
+  usersCache = snap.val() || {};
+  renderDashboardStats();
+  renderLatestUsers();
+  if(currentView==='users' || true) renderUsersTable();
+});
 
-async function deleteTask(id) {
-  if (!confirm('حذف هذه المهمة؟')) return;
-  try {
-    await fbDelete(`tasks/${id}`);
-    toast('🗑 تم حذف المهمة','info');
-    loadTasks();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
+function renderDashboardStats(){
+  const list = Object.entries(usersCache);
+  const total = list.length;
+  const today = todayKeyCairo();
+  let online=0, totalPmt=0, totalTon=0, adsToday=0, adsAll=0, newToday=0;
+  const todayStartCairo = new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Cairo'}));
+  todayStartCairo.setHours(0,0,0,0);
 
-// ═══════════════════════════════════════
-//  COMBO
-// ═══════════════════════════════════════
-async function loadCombo() {
-  // Set default date to today
-  const todayInput = document.getElementById('comboDate');
-  if (!todayInput.value) todayInput.value = todayKey();
-
-  try {
-    const today = todayKey();
-    const combo = await fbGet(`combo/${today}`);
-    if (combo) {
-      document.getElementById('todayComboDisplay').innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-          <span class="badge green">التاريخ: ${today}</span>
-          <span class="badge orange">المكافأة: ${fmt(combo.reward)} SHIB</span>
-          <span style="font-size:12px;color:var(--text3)">تم الإنشاء: ${dateStr(combo.createdAt)}</span>
-        </div>
-        <div style="display:flex;gap:12px">
-          ${combo.items.map((e,i)=>`<div style="width:60px;height:60px;border-radius:14px;background:var(--orange-dim);border:2px solid var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><span style="font-size:11px;color:var(--text3)">${i+1}</span><span style="font-size:30px">${e}</span></div>`).join('')}
-        </div>
-        <div style="margin-top:12px">
-          <button class="btn btn-danger btn-sm" onclick="deleteCombo('${today}')">🗑 حذف كومبو اليوم (سيُعاد توليده تلقائياً)</button>
-        </div>`;
-    } else {
-      document.getElementById('todayComboDisplay').innerHTML = '<div class="empty"><div class="emoji">🎮</div>لا يوجد كومبو لليوم — سيُولَّد تلقائياً عند أول طلب</div>';
+  list.forEach(([id,u])=>{
+    if(isOnline(u.lastLogin)) online++;
+    totalPmt += Number(u.balance||0);
+    totalTon += Number(u.tonBalance||0);
+    adsAll += Number(u.totalAdsWatched||0);
+    if(u.adWatchDate === today){
+      if(u.adsWatchedByCompany){
+        adsToday += Object.values(u.adsWatchedByCompany).reduce((s,c)=>s+Number(c||0),0);
+      } else {
+        adsToday += Number(u.adsWatchedToday||0);
+      }
     }
-
-    // History
-    const all = await fbGet('combo');
-    if (all) {
-      const entries = Object.entries(all).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,14);
-      document.getElementById('comboHistory').innerHTML = `
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>التاريخ</th><th>الترتيب الصحيح</th><th>المكافأة</th><th>إجراء</th></tr></thead>
-          <tbody>${entries.map(([date,c])=>`
-            <tr>
-              <td style="font-weight:600">${date} ${date===today?'<span class="badge green">اليوم</span>':''}</td>
-              <td>${(c.items||[]).map(e=>`<span style="font-size:22px">${e}</span>`).join(' ')}</td>
-              <td style="color:var(--orange);font-weight:700">${fmt(c.reward)} SHIB</td>
-              <td><button class="btn btn-danger btn-xs" onclick="deleteCombo('${date}')">🗑</button></td>
-            </tr>`).join('')}
-          </tbody>
-        </table></div>`;
-    } else {
-      document.getElementById('comboHistory').innerHTML = '<div class="empty">لا يوجد سجل</div>';
+    if(u.createdAt){
+      const cd = new Date(u.createdAt).toLocaleDateString('en-CA',{timeZone:'Africa/Cairo'});
+      if(cd === today) newToday++;
     }
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
+  });
+
+  document.getElementById('statTotalUsers').textContent = fmt(total);
+  document.getElementById('statNewToday').textContent = fmt(newToday);
+  document.getElementById('statOnline').textContent = fmt(online);
+  document.getElementById('statTotalPmt').innerHTML = fmt(totalPmt) + ' <img src="'+COIN_ICON+'">';
+  document.getElementById('statAvgPmt').textContent = 'متوسط الرصيد لكل مستخدم: ' + fmt(total? totalPmt/total:0);
+  document.getElementById('statTotalTon').innerHTML = fmtTon(totalTon) + ' <img src="'+TON_ICON+'" style="width:18px;height:18px">';
+  document.getElementById('statAdsToday').textContent = fmt(adsToday);
+  document.getElementById('statAdsAllTime').textContent = fmt(adsAll);
+
+  const blockedCount = Object.keys(blockedCache).length;
+  document.getElementById('statBlocked').textContent = fmt(blockedCount);
 }
 
-async function deleteCombo(date) {
-  if (!confirm(`حذف كومبو ${date}?`)) return;
-  try {
-    await fbDelete(`combo/${date}`);
-    toast('🗑 تم الحذف','info');
-    loadCombo();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
+function renderLatestUsers(){
+  const list = Object.entries(usersCache).sort((a,b)=> (b[1].createdAt||0)-(a[1].createdAt||0)).slice(0,8);
+  const body = document.getElementById('latestUsersBody');
+  if(!list.length){ body.innerHTML = emptyRow(6,'لا يوجد مستخدمون بعد'); return; }
+  body.innerHTML = list.map(([id,u])=>`
+    <tr>
+      <td><div class="u-cell"><img src="${u.photoUrl||AVATAR_FALLBACK}" onerror="this.src='${AVATAR_FALLBACK}'"><div><div class="u-name">${escapeHtml(displayName(u))}</div><div class="u-sub">${u.username?'@'+escapeHtml(u.username):'—'}</div></div></div></td>
+      <td class="mono muted">${id}</td>
+      <td class="mono">${fmt(u.balance)}</td>
+      <td class="mono">${fmtTon(u.tonBalance)}</td>
+      <td class="muted">${fmtDate(u.createdAt)}</td>
+      <td>${isOnline(u.lastLogin)?'<span class="badge b-green">أونلاين</span>':'<span class="badge b-gray">غير متصل</span>'}</td>
+    </tr>`).join('');
 }
 
-// combo sequence builder
-function addToComboSeq(emoji) {
-  if (COMBO_SEQ.length >= 4) { toast('اختر 4 عناصر فقط، امسح وابدأ من جديد','error'); return; }
-  // check not duplicate in seq
-  if (COMBO_SEQ.includes(emoji)) { toast('هذا الرمز مختار بالفعل','error'); return; }
-  COMBO_SEQ.push(emoji);
-  renderComboSeq();
+function emptyRow(cols, msg){
+  return `<tr><td colspan="${cols}"><div class="empty">${escapeHtml(msg)}</div></td></tr>`;
 }
-function clearComboSeq() { COMBO_SEQ = []; renderComboSeq(); }
-function renderComboSeq() {
-  const slots = document.getElementById('comboSeqDisplay').children;
-  for (let i=0;i<4;i++) {
-    slots[i].textContent = COMBO_SEQ[i] || '?';
-    slots[i].style.borderColor = COMBO_SEQ[i] ? 'var(--orange)' : 'var(--glass-b)';
-    slots[i].style.background = COMBO_SEQ[i] ? 'var(--orange-dim)' : 'var(--bg3)';
+
+let userSearchTerm = '';
+document.getElementById('globalSearch').addEventListener('input', e=>{
+  userSearchTerm = e.target.value.trim().toLowerCase();
+  renderUsersTable();
+});
+
+function renderUsersTable(){
+  let list = Object.entries(usersCache);
+  document.getElementById('usersCount').textContent = fmt(list.length) + ' مستخدم مسجّل';
+  if(userSearchTerm){
+    list = list.filter(([id,u])=>{
+      return id.includes(userSearchTerm) ||
+        (u.username||'').toLowerCase().includes(userSearchTerm) ||
+        (u.firstName||'').toLowerCase().includes(userSearchTerm) ||
+        (u.lastName||'').toLowerCase().includes(userSearchTerm);
+    });
+  }
+  list.sort((a,b)=> (b[1].lastLogin||0)-(a[1].lastLogin||0));
+  const body = document.getElementById('usersBody');
+  if(!list.length){ body.innerHTML = emptyRow(9,'لا توجد نتائج مطابقة'); return; }
+
+  const today = todayKeyCairo();
+  body.innerHTML = list.slice(0,300).map(([id,u])=>{
+    let adsToday = 0;
+    if(u.adWatchDate === today){
+      adsToday = u.adsWatchedByCompany ? Object.values(u.adsWatchedByCompany).reduce((s,c)=>s+Number(c||0),0) : Number(u.adsWatchedToday||0);
+    }
+    const blocked = !!blockedCache[id];
+    return `
+    <tr>
+      <td><div class="u-cell"><img src="${u.photoUrl||AVATAR_FALLBACK}" onerror="this.src='${AVATAR_FALLBACK}'"><div><div class="u-name">${escapeHtml(displayName(u))}</div><div class="u-sub">${u.username?'@'+escapeHtml(u.username):'—'}</div></div></div></td>
+      <td class="mono muted">${id}</td>
+      <td class="mono">${fmt(u.balance)}</td>
+      <td class="mono">${fmtTon(u.tonBalance)}</td>
+      <td class="mono">${fmt(adsToday)}</td>
+      <td class="mono">${fmt(u.totalAdsWatched)}</td>
+      <td class="muted">${timeAgo(u.lastLogin)}</td>
+      <td>${blocked?'<span class="badge b-red">محظور</span>':(isOnline(u.lastLogin)?'<span class="badge b-green">أونلاين</span>':'<span class="badge b-gray">غير متصل</span>')}</td>
+      <td><div class="row-actions">
+        <div class="iconbtn" title="تعديل الرصيد" onclick="openEditUser('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></div>
+        <div class="iconbtn" title="عرض التفاصيل" onclick="openViewUser('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openEditUser(id){
+  const u = usersCache[id] || {};
+  document.getElementById('modalTitle').textContent = 'تعديل رصيد: ' + displayName(u);
+  document.getElementById('modalBody').innerHTML = `
+    <div class="field"><label>رصيد PMT</label><input type="number" id="m_balance" value="${Number(u.balance||0)}"></div>
+    <div class="field"><label>رصيد TON</label><input type="number" step="0.0001" id="m_tonBalance" value="${Number(u.tonBalance||0)}"></div>
+    <div class="field"><label>محفظة TON المرتبطة</label><input type="text" class="sans" id="m_tonWallet" value="${escapeHtml(u.tonWallet||u.wallet||'')}"></div>
+    <div class="switch-row" style="margin-top:4px">
+      <div class="lbl"><b>حظر الحساب</b><span>منع الحساب فورًا من استخدام البوت ومكافآت الإحالة</span></div>
+      <label class="switch"><input type="checkbox" id="m_blocked" ${blockedCache[id]?'checked':''}><span class="slider"></span></label>
+    </div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    <button class="btn btn-gold" onclick="saveUserEdit('${id}')">حفظ التغييرات</button>
+  `;
+  showModal();
+}
+
+function saveUserEdit(id){
+  const balance = Number(document.getElementById('m_balance').value)||0;
+  const tonBalance = Number(document.getElementById('m_tonBalance').value)||0;
+  const tonWallet = document.getElementById('m_tonWallet').value.trim();
+  const blockedNow = document.getElementById('m_blocked').checked;
+
+  const updates = { balance, tonBalance, tonWallet };
+  db.ref('users/'+id).update(updates)
+    .then(()=>{
+      const wasBlocked = !!blockedCache[id];
+      if(blockedNow && !wasBlocked){
+        return db.ref('blocked_accounts/'+id).set({reason:'حظر يدوي من لوحة التحكم', score:100, ts:Date.now()});
+      } else if(!blockedNow && wasBlocked){
+        return db.ref('blocked_accounts/'+id).remove();
+      }
+    })
+    .then(()=>{ toast('تم حفظ بيانات المستخدم ✓'); closeModal(); })
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+
+function openViewUser(id){
+  const u = usersCache[id] || {};
+  const today = todayKeyCairo();
+  const adsToday = u.adWatchDate===today ? (u.adsWatchedByCompany?Object.values(u.adsWatchedByCompany).reduce((s,c)=>s+Number(c||0),0):Number(u.adsWatchedToday||0)) : 0;
+  document.getElementById('modalTitle').textContent = 'تفاصيل المستخدم';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="u-cell" style="margin-bottom:8px"><img src="${u.photoUrl||AVATAR_FALLBACK}" style="width:46px;height:46px" onerror="this.src='${AVATAR_FALLBACK}'"><div><div class="u-name" style="font-size:15px">${escapeHtml(displayName(u))}</div><div class="u-sub">${u.username?'@'+escapeHtml(u.username):'بدون يوزر'}</div></div></div>
+    <div class="mini-row"><span>آيدي تيليجرام</span><b>${id}</b></div>
+    <div class="mini-row"><span>رصيد PMT</span><b>${fmt(u.balance)}</b></div>
+    <div class="mini-row"><span>رصيد TON</span><b>${fmtTon(u.tonBalance)}</b></div>
+    <div class="mini-row"><span>كود الإحالة</span><b>${escapeHtml(u.referralCode||'—')}</b></div>
+    <div class="mini-row"><span>تمت إحالته بواسطة</span><b>${escapeHtml(u.referredBy||'—')}</b></div>
+    <div class="mini-row"><span>إعلانات اليوم</span><b>${fmt(adsToday)}</b></div>
+    <div class="mini-row"><span>إجمالي الإعلانات</span><b>${fmt(u.totalAdsWatched)}</b></div>
+    <div class="mini-row"><span>اجتاز الاشتراك الإجباري</span><b>${u.forceSubPassed?'نعم':'لا'}</b></div>
+    <div class="mini-row"><span>محفظة TON</span><b style="font-size:11px">${escapeHtml(u.tonWallet||u.wallet||'—')}</b></div>
+    <div class="mini-row"><span>تاريخ الانضمام</span><b>${fmtDate(u.createdAt)}</b></div>
+    <div class="mini-row"><span>آخر ظهور</span><b>${timeAgo(u.lastLogin)}</b></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-gold" onclick="closeModal();openEditUser('${id}')">تعديل الرصيد</button>`;
+  showModal();
+}
+
+/* =========================================================
+   WITHDRAWALS
+   ========================================================= */
+db.ref('withdrawals').on('value', snap=>{
+  withdrawalsCache = snap.val() || {};
+  renderWithdrawals();
+});
+// نظام دفع آلي منفصل (مش موجود في هذا الملف) بيعالج طلبات السحب ويكتب
+// نتيجة كل عملية تحت withdrawQueue/{wdId} بحقل status:"paid" (أو "failed")،
+// لكنه لا يُحدّث status الأصلي تحت withdrawals/{uid}/{wid} — فكانت الطلبات
+// المدفوعة فعليًا تظل تظهر "معلّقة" في اللوحة. نربط الاثنين هنا عبر wdId.
+let withdrawQueueCache = {};
+db.ref('withdrawQueue').on('value', snap=>{
+  withdrawQueueCache = snap.val() || {};
+  renderWithdrawals();
+});
+document.getElementById('wdFilterPills').addEventListener('click', e=>{
+  const p = e.target.closest('.pill'); if(!p) return;
+  document.querySelectorAll('#wdFilterPills .pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');
+  wdFilter = p.dataset.f;
+  renderWithdrawals();
+});
+
+function flattenWithdrawals(){
+  const out = [];
+  Object.entries(withdrawalsCache).forEach(([uid, items])=>{
+    Object.entries(items||{}).forEach(([wid, w])=> out.push({uid, wid, ...w}));
+  });
+  return out.sort((a,b)=>(b.ts||0)-(a.ts||0));
+}
+
+// يبحث عن قيد في withdrawQueue يطابق طلب السحب ده (بواسطة wdId أو مفتاح
+// العقدة نفسه) ويرجّع الحالة الفعلية بعد الدفع الآلي، لو موجودة.
+function findQueueEntry(w){
+  for(const [qid, q] of Object.entries(withdrawQueueCache)){
+    if(!q) continue;
+    if((q.wdId && q.wdId===w.wid) || qid===w.wid){
+      if(q.userId===undefined || String(q.userId)===String(w.uid)) return q;
+    }
+  }
+  return null;
+}
+
+function resolveWithdrawalStatus(w, q){
+  if(q){
+    if(q.status==='paid' || q.status==='sent' || q.status==='completed') return 'completed';
+    if(q.status==='failed' || q.status==='rejected') return 'rejected';
+  }
+  return w.status || 'pending';
+}
+
+function renderWithdrawals(){
+  let list = flattenWithdrawals().map(w=>{
+    const q = findQueueEntry(w);
+    return { ...w, _queue: q, _resolvedStatus: resolveWithdrawalStatus(w, q) };
+  });
+  const pendingCount = list.filter(w=>w._resolvedStatus==='pending').length;
+  const badge = document.getElementById('wdBadge');
+  if(pendingCount>0){ badge.style.display='inline-flex'; badge.textContent = pendingCount; } else { badge.style.display='none'; }
+  document.getElementById('statPendingWd').textContent = 'طلبات سحب معلّقة: ' + fmt(pendingCount);
+
+  if(wdFilter!=='all') list = list.filter(w=>w._resolvedStatus===wdFilter);
+  const body = document.getElementById('wdBody');
+  if(!list.length){ body.innerHTML = emptyRow(8,'لا توجد طلبات سحب في هذا التصنيف'); return; }
+
+  body.innerHTML = list.map(w=>{
+    const u = usersCache[w.uid] || {};
+    const q = w._queue;
+    const statusBadge = w._resolvedStatus==='completed' ? '<span class="badge b-green">مكتمل</span>'
+      : w._resolvedStatus==='rejected' ? '<span class="badge b-red">مرفوض</span>'
+      : '<span class="badge b-gold">معلّق</span>';
+    const paidTitle = (w._resolvedStatus==='completed' && q) ? ` title="دُفع آليًا — TX: ${escapeHtml(q.txHash||'')}"` : '';
+    const actions = (w._resolvedStatus!=='completed' && w._resolvedStatus!=='rejected') ? `
+      <div class="row-actions">
+        <button class="btn btn-gold btn-sm" onclick="approveWithdrawal('${w.uid}','${w.wid}')">موافقة</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.uid}','${w.wid}', ${w.requestedAmount||w.amount||0})">رفض</button>
+      </div>` : (q ? '<span class="muted" title="تم الدفع تلقائيًا عبر نظام الدفع الآلي">آليًا ✓</span>' : '<span class="muted">—</span>');
+    return `<tr>
+      <td><div class="u-cell"><img src="${u.photoUrl||AVATAR_FALLBACK}" onerror="this.src='${AVATAR_FALLBACK}'"><div><div class="u-name">${escapeHtml(displayName(u))}</div><div class="u-sub mono">${w.uid}</div></div></div></td>
+      <td class="mono">${fmtTon(w.requestedAmount)}</td>
+      <td class="mono muted">${fmtTon(w.fee)}</td>
+      <td class="mono">${fmtTon(w.netAmount||w.amount)}</td>
+      <td class="mono" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(w.walletAddress||'')}">${escapeHtml(w.walletAddress||'—')}</td>
+      <td class="muted">${fmtDate(w.ts)}</td>
+      <td${paidTitle}>${statusBadge}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+function approveWithdrawal(uid, wid){
+  if(!confirm('تأكيد الموافقة على طلب السحب وتحويله لمكتمل؟')) return;
+  db.ref(`withdrawals/${uid}/${wid}`).update({status:'completed', completedAt:Date.now()})
+    .then(()=>toast('تمت الموافقة على طلب السحب ✓'))
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+
+function rejectWithdrawal(uid, wid, requestedAmount){
+  const refund = confirm('رفض الطلب — هل تريد إرجاع مبلغ ' + fmtTon(requestedAmount) + ' TON لرصيد المستخدم تلقائيًا؟\n(اضغط إلغاء لرفض الطلب بدون استرجاع الرصيد)');
+  const doReject = ()=>{
+    db.ref(`withdrawals/${uid}/${wid}`).update({status:'rejected', rejectedAt:Date.now()})
+      .then(()=>toast('تم رفض طلب السحب'))
+      .catch(err=>toast('خطأ: '+err.message, true));
+  };
+  if(refund){
+    const u = usersCache[uid] || {};
+    const newBal = Number(u.tonBalance||0) + Number(requestedAmount||0);
+    db.ref('users/'+uid).update({tonBalance:newBal}).then(doReject).catch(err=>toast('خطأ: '+err.message,true));
+  } else {
+    doReject();
   }
 }
 
-async function saveCombo() {
-  if (COMBO_SEQ.length !== 4) { toast('يجب اختيار 4 عناصر بالترتيب الصحيح','error'); return; }
-  const date = document.getElementById('comboDate').value;
-  const reward = parseInt(document.getElementById('comboRewardInput').value) || 5000;
-  if (!date) { toast('اختر تاريخاً','error'); return; }
-  try {
-    await fbSet(`combo/${date}`, { date, items:[...COMBO_SEQ], reward, createdAt:Date.now(), setByAdmin:true });
-    toast('✅ تم حفظ الكومبو','success');
-    COMBO_SEQ = [];
-    renderComboSeq();
-    loadCombo();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-// ═══════════════════════════════════════
-//  SUGGESTIONS
-// ═══════════════════════════════════════
-async function loadSuggestions() {
-  document.getElementById('suggestionsTable').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  try {
-    if (!ALL_USERS.length) {
-      const usersRaw = await fbGet('users');
-      ALL_USERS = usersRaw ? Object.entries(usersRaw).map(([id,u])=>({id,...u})) : [];
-    }
-    const raw = await fbGet('taskSuggestions');
-    ALL_SUGGESTIONS = raw ? Object.entries(raw).map(([id,s])=>({id,...s})) : [];
-    ALL_SUGGESTIONS.sort((a,b)=>(b.ts||0)-(a.ts||0));
-    renderSuggestions();
-  } catch(e) { document.getElementById('suggestionsTable').innerHTML = `<div class="empty">خطأ: ${esc(e.message)}</div>`; }
-}
-
-function switchSugTab(tab) {
-  SUG_TAB = tab;
-  document.querySelectorAll('#section-suggestions .tab-btn').forEach((b,i)=>b.classList.toggle('active',['pending','approved','rejected'][i]===tab));
-  renderSuggestions();
-}
-
-function renderSuggestions() {
-  const filtered = ALL_SUGGESTIONS.filter(s=>s.status===SUG_TAB);
-  document.getElementById('suggestionsTable').innerHTML = filtered.length ? `
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>المستخدم</th><th>الرابط</th><th>الوصف</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
-      <tbody>${filtered.map(s=>`
-        <tr>
-          <td><div style="font-weight:600">${esc(s.username?('@'+s.username):userLabel(s.telegramId))}</div></td>
-          <td><a href="${esc(s.link)}" target="_blank" style="color:var(--blue);font-size:12px">${esc(s.link)}</a></td>
-          <td style="color:var(--text2);font-size:12px;max-width:200px">${esc(s.desc||'—')}</td>
-          <td style="font-size:11px;color:var(--text3)">${timeAgo(s.ts)}</td>
-          <td><div style="display:flex;gap:4px">
-            ${s.status==='pending'?`
-              <button class="btn btn-success btn-xs" onclick="approveSuggestion('${esc(s.id)}','${esc(s.link)}','${esc(s.desc||'')}')">✅ قبول + مهمة</button>
-              <button class="btn btn-danger btn-xs" onclick="rejectSuggestion('${esc(s.id)}')">❌ رفض</button>`:''}
-            <button class="btn btn-danger btn-xs" onclick="deleteSuggestion('${esc(s.id)}')">🗑</button>
-          </div></td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>
-  ` : `<div class="empty"><div class="emoji">💡</div>لا توجد مقترحات ${SUG_TAB==='pending'?'معلقة':''}</div>`;
-}
-
-async function approveSuggestion(id, link, desc) {
-  openModal('✅ قبول المقترح وإنشاء مهمة', `
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">اسم المهمة</label><input class="form-input" id="sug-title" value="${esc(desc)||'مهمة جديدة'}"></div>
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">النوع</label>
-      <select class="form-select" id="sug-cat"><option value="channels">قناة</option><option value="bots">بوت</option></select>
-    </div>
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">الرابط</label><input class="form-input" id="sug-link" value="${esc(link)}"></div>
-    <div class="form-group" style="margin-bottom:16px"><label class="form-label">المكافأة</label><input type="number" class="form-input" id="sug-reward" value="500"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="submitApproveSug('${esc(id)}')">إنشاء وقبول</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`);
-}
-
-async function submitApproveSug(sugId) {
-  const title = document.getElementById('sug-title').value.trim();
-  const link = document.getElementById('sug-link').value.trim();
-  const cat = document.getElementById('sug-cat').value;
-  const reward = parseInt(document.getElementById('sug-reward').value)||500;
-  try {
-    const taskId = 'task_' + Date.now();
-    await fbSet(`tasks/${taskId}`, { id:taskId, title, link, category:cat, reward, status:'active', createdAt:Date.now() });
-    await fbUpdate(`taskSuggestions/${sugId}`, { status:'approved', approvedAt:Date.now() });
-    closeModal();
-    toast('✅ تم قبول المقترح وإنشاء المهمة','success');
-    loadSuggestions();
-    loadTasks();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-async function rejectSuggestion(id) {
-  try {
-    await fbUpdate(`taskSuggestions/${id}`, { status:'rejected', rejectedAt:Date.now() });
-    toast('❌ تم رفض المقترح','info');
-    loadSuggestions();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-async function deleteSuggestion(id) {
-  if (!confirm('حذف هذا المقترح؟')) return;
-  try {
-    await fbDelete(`taskSuggestions/${id}`);
-    toast('🗑 تم الحذف','info');
-    loadSuggestions();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-// ═══════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════
-async function loadConfig() {
-  document.getElementById('configLoader').style.display = 'flex';
-  document.getElementById('configForm').style.display = 'none';
-  try {
-    const cfg = await fbGet('config');
-    if (!cfg) { toast('لا توجد إعدادات بعد','error'); return; }
-    const fields = ['referralReward','comboReward','withdrawFee'];
-    fields.forEach(k => {
-      const el = document.getElementById('cfg-'+k);
-      if (el) el.value = cfg[k] !== undefined ? cfg[k] : '';
-    });
-    // minWithdrawal مفتاح Firebase الصحيح
-    const minEl = document.getElementById('cfg-withdrawMin');
-    if (minEl) minEl.value = cfg['minWithdrawal'] !== undefined ? cfg['minWithdrawal'] : '';
-    document.getElementById('configLoader').style.display = 'none';
-    document.getElementById('configForm').style.display = 'block';
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-async function saveConfig() {
-  const fields = ['referralReward','comboReward','withdrawFee'];
-  const updates = {};
-  fields.forEach(k => {
-    const el = document.getElementById('cfg-'+k);
-    if (!el) return;
-    updates[k] = parseInt(el.value)||0;
-  });
-  // الحد الأدنى للسحب: المفتاح الصحيح في Firebase هو minWithdrawal
-  const minEl = document.getElementById('cfg-withdrawMin');
-  if (minEl) updates['minWithdrawal'] = parseInt(minEl.value)||0;
-  try {
-    await fbUpdate('config', updates);
-    toast('✅ تم حفظ الإعدادات','success');
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
-}
-
-// ═══════════════════════════════════════
-//  FORCE JOIN CHANNELS
-// ═══════════════════════════════════════
-async function loadForceJoin() {
-  document.getElementById('forceJoinChannels').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
-  try {
-    const raw = await fbGet('mandatoryChannels');
-    const channels = raw ? Object.entries(raw).map(([id,c])=>({id,...c})).filter(c=>c.status!=='disabled'&&c.status!=='inactive') : [];
-    renderForceJoin(channels);
-  } catch(e) { document.getElementById('forceJoinChannels').innerHTML = `<div class="empty">خطأ: ${esc(e.message)}</div>`; }
-}
-
-function renderForceJoin(channels) {
-  const html = channels.length ? channels.map((ch,i)=>`
-    <div class="card" style="display:flex;align-items:center;gap:14px;padding:16px">
-      <div style="width:42px;height:42px;border-radius:50%;background:rgba(0,136,204,.15);border:1px solid rgba(0,136,204,.3);display:flex;align-items:center;justify-content:center;font-size:22px">📢</div>
-      <div style="flex:1">
-        <div style="font-weight:700">${esc(ch.title||ch.username)}</div>
-        <div style="font-size:12px;color:var(--text3)">@${esc(ch.username)} · <a href="${esc(ch.link||ch.url||'#')}" target="_blank" style="color:var(--blue)">${esc(ch.link||ch.url||'—')}</a></div>
+/* =========================================================
+   TASKS
+   ========================================================= */
+db.ref('tasks').on('value', snap=>{
+  tasksCache = snap.val() || {};
+  renderTasks();
+});
+function renderTasks(){
+  const entries = Object.entries(tasksCache);
+  document.getElementById('statActiveTasks').textContent = fmt(entries.filter(([id,t])=>t.status==='active').length);
+  const wrap = document.getElementById('tasksCards');
+  const cardsHtml = entries.map(([id,t])=>{
+    const completions = Number(t.completions||0);
+    const target = Number(t.membersNeeded||0);
+    const remaining = target ? Math.max(0, target - completions) : 0;
+    return `
+    <div class="mini-card">
+      <h4><span>${escapeHtml(t.title||id)}</span>${t.status==='active'?'<span class="badge b-green">مفعّلة</span>':'<span class="badge b-gray">موقوفة</span>'}</h4>
+      <div class="mini-row"><span>التصنيف</span><b>${escapeHtml(t.category||'—')}</b></div>
+      <div class="mini-row"><span>المكافأة</span><b>${fmt(t.reward)} PMT</b></div>
+      ${t.requiredReferrals?`<div class="mini-row"><span>إحالات مطلوبة</span><b>${fmt(t.requiredReferrals)}</b></div>`:''}
+      ${target?`<div class="mini-row"><span>الهدف (عدد الأعضاء)</span><b>${fmt(target)}</b></div>
+      <div class="mini-row"><span>عدد الإكمالات</span><b>${fmt(completions)}</b></div>
+      <div class="mini-row"><span>المتبقي</span><b>${fmt(remaining)}</b></div>`
+      :`<div class="mini-row"><span>عدد الإكمالات</span><b>${fmt(completions)}</b></div>`}
+      <div class="row-actions" style="margin-top:10px">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick='openTaskModal(${JSON.stringify(id)})'>تعديل</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTask('${id}')">حذف</button>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="removeForceChannel('${esc(ch.id)}')">🗑 حذف</button>
-    </div>`) : '<div class="empty"><div class="emoji">🔗</div>لا توجد قنوات إجبارية</div>';
-  document.getElementById('forceJoinChannels').innerHTML = html;
+    </div>`;
+  }).join('');
+  wrap.innerHTML = cardsHtml + `<div class="add-card" onclick="openTaskModal()">+ إضافة مهمة</div>`;
+  if(!entries.length) wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>لا توجد مهام بعد — أضف أول مهمة</div>` + wrap.innerHTML;
 }
 
-function openAddChannel() {
-  openModal('➕ إضافة قناة إجبارية', `
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">اسم القناة</label><input class="form-input" id="ch-title" placeholder="مثال: Panda Mining News"></div>
-    <div class="form-group" style="margin-bottom:14px"><label class="form-label">يوزر القناة (بدون @)</label><input class="form-input" id="ch-username" placeholder="مثال: PandaMiningNews"></div>
-    <div class="form-group" style="margin-bottom:16px"><label class="form-label">رابط القناة</label><input class="form-input" id="ch-url" placeholder="https://t.me/..."></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="submitAddChannel()">إضافة</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`);
+function openTaskModal(id){
+  const t = id ? (tasksCache[id]||{}) : {};
+  document.getElementById('modalTitle').textContent = id ? 'تعديل المهمة' : 'مهمة جديدة';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="field"><label>عنوان المهمة</label><input type="text" class="sans" id="t_title" value="${escapeHtml(t.title||'')}"></div>
+    <div class="field"><label>الرابط</label><input type="text" class="sans" id="t_link" value="${escapeHtml(t.link||'')}"></div>
+    <div class="field"><label>التصنيف</label>
+      <select id="t_category">
+        <option value="channels" ${t.category==='channels'?'selected':''}>قنوات</option>
+        <option value="bots" ${t.category==='bots'?'selected':''}>بوتات</option>
+        <option value="invite" ${t.category==='invite'?'selected':''}>دعوة (إحالة)</option>
+      </select>
+    </div>
+    <div class="field"><label>المكافأة (PMT)</label><input type="number" id="t_reward" value="${Number(t.reward)||500}"></div>
+    <div class="field" id="t_reqRefWrap" style="display:${t.category==='invite'?'flex':'none'}"><label>عدد الإحالات المطلوبة</label><input type="number" id="t_reqRef" value="${Number(t.requiredReferrals)||0}"></div>
+    <div class="field" id="t_targetWrap" style="display:${t.category==='invite'?'none':'flex'}"><label>عدد الأعضاء المستهدف (اختياري — تُحذف المهمة تلقائيًا عند الوصول له، اتركه فارغًا لعدم وجود هدف)</label><input type="number" id="t_target" value="${Number(t.membersNeeded)||''}"></div>
+    <div class="switch-row"><div class="lbl"><b>مفعّلة</b><span>إظهار المهمة للمستخدمين الآن</span></div><label class="switch"><input type="checkbox" id="t_status" ${t.status!=='disabled'?'checked':''}><span class="slider"></span></label></div>
+  `;
+  document.getElementById('t_category').addEventListener('change', e=>{
+    document.getElementById('t_reqRefWrap').style.display = e.target.value==='invite' ? 'flex':'none';
+    document.getElementById('t_targetWrap').style.display = e.target.value==='invite' ? 'none':'flex';
+  });
+  document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-gold" onclick='saveTask(${JSON.stringify(id||null)})'>حفظ</button>`;
+  showModal();
 }
 
-async function submitAddChannel() {
-  const title = document.getElementById('ch-title').value.trim();
-  const username = document.getElementById('ch-username').value.trim().replace('@','');
-  const url = document.getElementById('ch-url').value.trim();
-  if (!title || !username || !url) { toast('يرجى ملء جميع الحقول','error'); return; }
-  try {
-    const chId = 'ch_' + Date.now();
-    await fbSet(`mandatoryChannels/${chId}`, { title, username, link: url, status: 'active' });
-    closeModal();
-    toast('✅ تمت إضافة القناة','success');
-    loadForceJoin();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
+function saveTask(id){
+  const title = document.getElementById('t_title').value.trim();
+  const link = document.getElementById('t_link').value.trim();
+  const category = document.getElementById('t_category').value;
+  const reward = Number(document.getElementById('t_reward').value)||0;
+  const status = document.getElementById('t_status').checked ? 'active' : 'disabled';
+  if(!title){ toast('يرجى إدخال عنوان المهمة', true); return; }
+  const data = { title, link, category, reward, status };
+  if(category==='invite'){
+    data.requiredReferrals = Number(document.getElementById('t_reqRef').value)||0;
+  } else {
+    const targetVal = document.getElementById('t_target').value;
+    if(targetVal){ data.membersNeeded = Number(targetVal)||0; }
+  }
+  const taskId = id || ('task_' + Date.now().toString(36));
+  data.id = taskId;
+  db.ref('tasks/'+taskId).update(data)
+    .then(()=>{ toast('تم حفظ المهمة ✓'); closeModal(); })
+    .catch(err=>toast('خطأ: '+err.message, true));
 }
 
-async function removeForceChannel(chId) {
-  if (!confirm('حذف هذه القناة من الاشتراك الإجباري؟')) return;
-  try {
-    await fbDelete(`mandatoryChannels/${chId}`);
-    toast('🗑 تم الحذف','info');
-    loadForceJoin();
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
+function deleteTask(id){
+  if(!confirm('هل تريد حذف هذه المهمة نهائيًا؟')) return;
+  db.ref('tasks/'+id).remove().then(()=>toast('تم حذف المهمة')).catch(err=>toast('خطأ: '+err.message, true));
 }
 
-// ═══════════════════════════════════════
-//  REFRESH ALL
-// ═══════════════════════════════════════
-async function refreshAll() {
-  toast('🔄 جارٍ التحديث...','info');
-  await loadOverview();
+/* =========================================================
+   MANDATORY CHANNELS
+   ========================================================= */
+db.ref('mandatoryChannels').on('value', snap=>{
+  channelsCache = snap.val() || {};
+  renderChannels();
+});
+function renderChannels(){
+  const entries = Object.entries(channelsCache);
+  const activeCount = entries.filter(([id,c])=>c.status!=='disabled' && c.status!=='inactive').length;
+  const statActiveChannelsEl = document.getElementById('statActiveChannels');
+  if(statActiveChannelsEl) statActiveChannelsEl.textContent = fmt(activeCount);
+  const wrap = document.getElementById('channelsCards');
+  const html = entries.map(([id,c])=>`
+    <div class="mini-card">
+      <h4><span>${escapeHtml(c.title||id)}</span>${(c.status!=='disabled'&&c.status!=='inactive')?'<span class="badge b-green">مفعّلة</span>':'<span class="badge b-gray">موقوفة</span>'}</h4>
+      <div class="mini-row"><span>اليوزر</span><b>@${escapeHtml(c.username||'—')}</b></div>
+      <div class="mini-row"><span>الرابط</span><b style="font-size:11px">${escapeHtml((c.link||'').replace('https://t.me/',''))}</b></div>
+      <div class="row-actions" style="margin-top:10px">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick='openChannelModal(${JSON.stringify(id)})'>تعديل</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteChannel('${id}')">حذف</button>
+      </div>
+    </div>`).join('');
+  wrap.innerHTML = html + `<div class="add-card" onclick="openChannelModal()">+ إضافة قناة</div>`;
+  if(!entries.length) wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg>لا توجد قنوات اشتراك إجباري حاليًا</div>` + wrap.innerHTML;
 }
 
-// ═══════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════
-(async function init() {
-  await loadOverview();
-  // auto refresh every 60s
-  setInterval(loadOverview, 60000);
+function openChannelModal(id){
+  const c = id ? (channelsCache[id]||{}) : {};
+  document.getElementById('modalTitle').textContent = id ? 'تعديل القناة' : 'قناة جديدة';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="field"><label>اسم القناة</label><input type="text" class="sans" id="c_title" value="${escapeHtml(c.title||'')}"></div>
+    <div class="field"><label>يوزر القناة (بدون @)</label><input type="text" class="sans" id="c_username" value="${escapeHtml(c.username||'')}"></div>
+    <div class="field"><label>رابط القناة</label><input type="text" class="sans" id="c_link" value="${escapeHtml(c.link||'')}"></div>
+    <div class="switch-row"><div class="lbl"><b>مفعّلة</b><span>إجبار المستخدمين على الاشتراك بها</span></div><label class="switch"><input type="checkbox" id="c_status" ${c.status!=='disabled'&&c.status!=='inactive'?'checked':''}><span class="slider"></span></label></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-gold" onclick='saveChannel(${JSON.stringify(id||null)})'>حفظ</button>`;
+  showModal();
+}
 
-  // Update withdraw pending badge every 30s
-  setInterval(async () => {
-    try {
-      const rawB = await fbGet('withdrawals'); let pending=0; if(rawB){Object.values(rawB).forEach(uw=>{if(uw&&typeof uw==='object')Object.values(uw).forEach(w=>{if(w.status==='pending')pending++;});});}
-      document.getElementById('pendingBadge').textContent = pending;
-    } catch(_){}
-  }, 30000);
-})();
+function saveChannel(id){
+  const title = document.getElementById('c_title').value.trim();
+  const username = document.getElementById('c_username').value.trim().replace('@','');
+  const link = document.getElementById('c_link').value.trim() || ('https://t.me/'+username);
+  const status = document.getElementById('c_status').checked ? 'active' : 'disabled';
+  if(!title || !username){ toast('يرجى إدخال اسم واسم مستخدم القناة', true); return; }
+  const chId = id || username;
+  db.ref('mandatoryChannels/'+chId).set({title, username, link, status})
+    .then(()=>{ toast('تم حفظ القناة ✓'); closeModal(); })
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+function deleteChannel(id){
+  if(!confirm('هل تريد حذف هذه القناة من الاشتراك الإجباري؟')) return;
+  db.ref('mandatoryChannels/'+id).remove().then(()=>toast('تم حذف القناة')).catch(err=>toast('خطأ: '+err.message, true));
+}
+
+/* =========================================================
+   AD COMPANIES  (config/adCompanies)
+   ========================================================= */
+function renderAdCompanies(){
+  const companies = (configCache.adCompanies) || {};
+  const wrap = document.getElementById('adsCards');
+  const html = Object.entries(companies).map(([name,c])=>`
+    <div class="mini-card">
+      <h4><span style="text-transform:capitalize">${escapeHtml(name)}</span></h4>
+      <div class="mini-row"><span>مكافأة الإعلان</span><b>${fmt(c.reward)} PMT</b></div>
+      <div class="mini-row"><span>الحد اليومي</span><b>${fmt(c.dailyLimit)}</b></div>
+      <div class="row-actions" style="margin-top:10px">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick='openAdCompanyModal(${JSON.stringify(name)})'>تعديل</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAdCompany('${name}')">حذف</button>
+      </div>
+    </div>`).join('');
+  wrap.innerHTML = html + `<div class="add-card" onclick="openAdCompanyModal()">+ إضافة شركة</div>`;
+}
+
+function openAdCompanyModal(name){
+  const c = name ? ((configCache.adCompanies||{})[name]||{}) : {};
+  document.getElementById('modalTitle').textContent = name ? 'تعديل: '+name : 'شركة إعلانات جديدة';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="field"><label>اسم الشركة (بالإنجليزية، مطابق للكود)</label><input type="text" class="sans" id="a_name" value="${escapeHtml(name||'')}" ${name?'disabled':''}></div>
+    <div class="field"><label>مكافأة الإعلان الواحد (PMT)</label><input type="number" id="a_reward" value="${Number(c.reward)||200}"></div>
+    <div class="field"><label>الحد اليومي المسموح</label><input type="number" id="a_limit" value="${Number(c.dailyLimit)||10}"></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-gold" onclick='saveAdCompany(${JSON.stringify(name||null)})'>حفظ</button>`;
+  showModal();
+}
+
+function saveAdCompany(existingName){
+  const name = (existingName || document.getElementById('a_name').value.trim()).toLowerCase();
+  const reward = Number(document.getElementById('a_reward').value)||0;
+  const dailyLimit = Number(document.getElementById('a_limit').value)||0;
+  if(!name){ toast('يرجى إدخال اسم الشركة', true); return; }
+  db.ref('config/adCompanies/'+name).set({reward, dailyLimit})
+    .then(()=>{ toast('تم حفظ شركة الإعلانات ✓'); closeModal(); })
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+function deleteAdCompany(name){
+  if(!confirm('حذف شركة "'+name+'" من قائمة الإعلانات؟')) return;
+  db.ref('config/adCompanies/'+name).remove().then(()=>toast('تم الحذف')).catch(err=>toast('خطأ: '+err.message, true));
+}
+
+document.getElementById('saveAdDailyLimitBtn').addEventListener('click', ()=>{
+  const val = Number(document.getElementById('cfg_adDailyLimit_ads').value)||0;
+  db.ref('config').update({adDailyLimit: val})
+    .then(()=>toast('تم حفظ الحد اليومي الإجمالي للإعلانات ✓'))
+    .catch(err=>toast('خطأ: '+err.message, true));
+});
+
+/* =========================================================
+   BLOCKED ACCOUNTS
+   ========================================================= */
+db.ref('blocked_accounts').on('value', snap=>{
+  blockedCache = snap.val() || {};
+  renderBlocked();
+  renderDashboardStats();
+  renderUsersTable();
+});
+function renderBlocked(){
+  const entries = Object.entries(blockedCache).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+  const body = document.getElementById('blockedBody');
+  if(!entries.length){ body.innerHTML = emptyRow(5,'لا توجد حسابات محظورة حاليًا 🎉'); return; }
+  body.innerHTML = entries.map(([id,b])=>`
+    <tr>
+      <td class="mono">${id}</td>
+      <td>${escapeHtml(b.reason||'—')}</td>
+      <td><span class="badge ${Number(b.score)>=70?'b-red':'b-gold'}">${fmt(b.score)}</span></td>
+      <td class="muted">${fmtDate(b.ts)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="unblockUser('${id}')">فك الحظر</button></td>
+    </tr>`).join('');
+}
+function unblockUser(id){
+  if(!confirm('فك الحظر عن هذا المستخدم؟')) return;
+  db.ref('blocked_accounts/'+id).remove().then(()=>toast('تم فك الحظر ✓')).catch(err=>toast('خطأ: '+err.message, true));
+}
+
+/* =========================================================
+   CONFIG
+   ========================================================= */
+const CFG_NUM_FIELDS = ['dailyBonusReward','referralReward',
+  'miningReward','gameDailyLimit','tonConversionRate',
+  'pricePer100MembersTon'];
+
+db.ref('config').on('value', snap=>{
+  configCache = snap.val() || {};
+  fillConfigForm();
+  renderAdCompanies();
+});
+
+function fillConfigForm(){
+  const c = configCache;
+  CFG_NUM_FIELDS.forEach(key=>{
+    const el = document.getElementById('cfg_'+key);
+    if(el && c[key] !== undefined) el.value = c[key];
+  });
+  document.getElementById('cfg_miningDurationMin').value = c.miningDurationMs ? Math.round(c.miningDurationMs/60000) : 60;
+  document.getElementById('cfg_botUsername').value = c.botUsername || '';
+  document.getElementById('cfg_botToken').value = c.botToken || '';
+  document.getElementById('cfg_mandatorySubEnabled').checked = c.mandatorySubEnabled !== false;
+  document.getElementById('cfg_withdrawalEnabled').checked = c.withdrawalEnabled !== false;
+  const adDailyLimitEl = document.getElementById('cfg_adDailyLimit_ads');
+  if(adDailyLimitEl && c.adDailyLimit !== undefined) adDailyLimitEl.value = c.adDailyLimit;
+}
+
+document.getElementById('saveConfigBtn').addEventListener('click', ()=>{
+  const updates = {};
+  CFG_NUM_FIELDS.forEach(key=>{
+    const el = document.getElementById('cfg_'+key);
+    if(el) updates[key] = Number(el.value)||0;
+  });
+  updates.miningDurationMs = (Number(document.getElementById('cfg_miningDurationMin').value)||60) * 60000;
+  updates.botUsername = document.getElementById('cfg_botUsername').value.trim();
+  updates.botToken = document.getElementById('cfg_botToken').value.trim();
+  updates.mandatorySubEnabled = document.getElementById('cfg_mandatorySubEnabled').checked;
+  updates.withdrawalEnabled = document.getElementById('cfg_withdrawalEnabled').checked;
+
+  const btn = document.getElementById('saveConfigBtn');
+  btn.disabled = true; btn.textContent = 'جارِ الحفظ...';
+  db.ref('config').update(updates)
+    .then(()=>{ toast('تم حفظ الإعدادات وتطبيقها على البوت فورًا ✓'); })
+    .catch(err=>toast('خطأ أثناء الحفظ: '+err.message, true))
+    .finally(()=>{ btn.disabled=false; btn.textContent='حفظ كل التغييرات'; });
+});
+
+/* =========================================================
+   MODAL helpers
+   ========================================================= */
+function showModal(){ document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+/* init */
+switchView('dashboard');
 </script>
 </body>
 </html>
