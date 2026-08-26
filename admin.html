@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -358,6 +359,10 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4L3 11.5l6.5 2.2M21 4l-4 17-7.3-9.3M21 4L9.5 13.7"/></svg>
         الاشتراك الإجباري
       </div>
+      <div class="nav-item" data-view="promocodes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5V6.8A1.8 1.8 0 0 1 4.8 5h14.4A1.8 1.8 0 0 1 21 6.8v1.7a2.2 2.2 0 0 0 0 4.3v1.4a1.8 1.8 0 0 1-1.8 1.8H4.8A1.8 1.8 0 0 1 3 14.2v-1.4a2.2 2.2 0 0 0 0-4.3z"/><path d="M10 5v14" stroke-dasharray="2.2 2.2"/></svg>
+        أكواد البرومو
+      </div>
       <div class="nav-item" data-view="ads">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="4.5" width="19" height="14" rx="2.5"/><path d="M2.5 9h19"/><circle cx="7" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
         شركات الإعلانات
@@ -372,13 +377,15 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
         الإعدادات العامة
       </div>
     </nav>
-    <div class="sidebar-foot">
-      <span class="dot off" id="connDot"></span>
-      <span id="connTxt">جارِ الاتصال بقاعدة البيانات...</span>
-    </div>
-    <div class="nav-item" onclick="logout()" style="margin-top:8px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      تسجيل الخروج
+    <div class="sidebar-foot" style="flex-direction:column;align-items:stretch;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="dot off" id="connDot"></span>
+        <span id="connTxt">جارِ الاتصال بقاعدة البيانات...</span>
+      </div>
+      <div class="nav-item" onclick="logout()" style="color:#ff92a6">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        تسجيل الخروج
+      </div>
     </div>
   </aside>
 
@@ -528,6 +535,40 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
             <button class="btn btn-gold btn-sm" onclick="openChannelModal()">+ قناة جديدة</button>
           </div>
           <div class="mini-cards" id="channelsCards"><div class="loader"><span class="spin"></span></div></div>
+        </div>
+      </section>
+
+      <!-- ================= PROMO CODES ================= -->
+      <section class="view" id="view-promocodes">
+        <div class="grid-stats" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card">
+            <div class="stat-top"><span class="stat-label">إجمالي الأكواد</span>
+              <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5V6.8A1.8 1.8 0 0 1 4.8 5h14.4A1.8 1.8 0 0 1 21 6.8v1.7a2.2 2.2 0 0 0 0 4.3v1.4a1.8 1.8 0 0 1-1.8 1.8H4.8A1.8 1.8 0 0 1 3 14.2v-1.4a2.2 2.2 0 0 0 0-4.3z"/></svg></div>
+            </div>
+            <div class="stat-value" id="statPromoTotal">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><span class="stat-label">أكواد مفعّلة</span>
+              <div class="stat-icon" style="background:rgba(51,214,192,.12);color:var(--cyan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4 4 10-10"/></svg></div>
+            </div>
+            <div class="stat-value" id="statPromoActive">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><span class="stat-label">إجمالي مرات الاستخدام</span>
+              <div class="stat-icon" style="background:rgba(255,84,112,.1);color:#ff92a6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/></svg></div>
+            </div>
+            <div class="stat-value" id="statPromoUses">0</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>أكواد البرومو</h2><div class="hint">إنشاء وإدارة أكواد الخصم / المكافآت وحالتها</div></div>
+            <button class="btn btn-gold btn-sm" onclick="openPromoCodeModal()">+ كود جديد</button>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>الكود</th><th>المكافأة</th><th>الاستخدام</th><th>تاريخ الانتهاء</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <tbody id="promoCodesBody"><tr><td colspan="6" class="loader"><span class="spin"></span></td></tr></tbody>
+          </table></div>
         </div>
       </section>
 
@@ -693,6 +734,7 @@ let usersCache = {};
 let withdrawalsCache = {};
 let tasksCache = {};
 let channelsCache = {};
+let promoCodesCache = {};
 let blockedCache = {};
 let configCache = {};
 let currentView = 'dashboard';
@@ -763,6 +805,7 @@ function switchView(view){
     withdrawals:['طلبات السحب','مراجعة والموافقة أو رفض طلبات سحب TON'],
     tasks:['المهام','إدارة مهام القنوات والبوتات والمكافآت'],
     channels:['الاشتراك الإجباري','قنوات يجب الاشتراك بها لاستخدام البوت'],
+    promocodes:['أكواد البرومو','إنشاء ومتابعة أكواد الخصم والمكافآت'],
     ads:['شركات الإعلانات','مكافأة وحد كل شركة إعلانات على حدة'],
     blocked:['الحسابات المحظورة','حسابات أوقفها نظام مكافحة الاحتيال'],
     config:['الإعدادات العامة','كل قيم البوت قابلة للتعديل من هنا مباشرة'],
@@ -1210,6 +1253,114 @@ function saveChannel(id){
 function deleteChannel(id){
   if(!confirm('هل تريد حذف هذه القناة من الاشتراك الإجباري؟')) return;
   db.ref('mandatoryChannels/'+id).remove().then(()=>toast('تم حذف القناة')).catch(err=>toast('خطأ: '+err.message, true));
+}
+
+/* =========================================================
+   PROMO CODES  (promoCodes/{CODE})
+   ========================================================= */
+db.ref('promoCodes').on('value', snap=>{
+  promoCodesCache = snap.val() || {};
+  renderPromoCodes();
+});
+
+function renderPromoCodes(){
+  const entries = Object.entries(promoCodesCache).sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0));
+  const now = Date.now();
+  const totalUses = entries.reduce((s,[,c])=>s+Number(c.usedCount||0),0);
+  const activeCount = entries.filter(([,c])=>{
+    const expired = c.expiresAt && Number(c.expiresAt) < now;
+    const maxedOut = Number(c.maxUses||0) > 0 && Number(c.usedCount||0) >= Number(c.maxUses);
+    return c.status !== 'disabled' && !expired && !maxedOut;
+  }).length;
+  const elTotal = document.getElementById('statPromoTotal');
+  const elActive = document.getElementById('statPromoActive');
+  const elUses = document.getElementById('statPromoUses');
+  if(elTotal) elTotal.textContent = fmt(entries.length);
+  if(elActive) elActive.textContent = fmt(activeCount);
+  if(elUses) elUses.textContent = fmt(totalUses);
+
+  const body = document.getElementById('promoCodesBody');
+  if(!body) return;
+  if(!entries.length){ body.innerHTML = emptyRow(6,'لا توجد أكواد برومو حاليًا — أنشئ أول كود'); return; }
+  body.innerHTML = entries.map(([code,c])=>{
+    const expired = c.expiresAt && Number(c.expiresAt) < now;
+    const maxUses = Number(c.maxUses||0);
+    const used = Number(c.usedCount||0);
+    const maxedOut = maxUses > 0 && used >= maxUses;
+    let statusBadge;
+    if(c.status === 'disabled') statusBadge = '<span class="badge b-gray">موقوف</span>';
+    else if(expired) statusBadge = '<span class="badge b-red">منتهي</span>';
+    else if(maxedOut) statusBadge = '<span class="badge b-red">اكتمل الاستخدام</span>';
+    else statusBadge = '<span class="badge b-green">مفعّل</span>';
+    return `
+    <tr>
+      <td class="mono" style="font-weight:700;letter-spacing:.5px">
+        ${escapeHtml(code)}
+        <button class="btn btn-ghost btn-sm" style="padding:3px 8px;margin-right:6px" onclick="copyPromoCode('${code}')" title="نسخ">⧉</button>
+      </td>
+      <td>${fmt(c.reward)} PMT</td>
+      <td class="mono">${fmt(used)} ${maxUses ? ' / ' + fmt(maxUses) : '(غير محدود)'}</td>
+      <td class="muted">${c.expiresAt ? fmtDate(c.expiresAt) : 'بلا تاريخ انتهاء'}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-ghost btn-sm" onclick='openPromoCodeModal(${JSON.stringify(code)})'>تعديل</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePromoCode('${code}')">حذف</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function copyPromoCode(code){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(()=>toast('تم نسخ الكود ✓')).catch(()=>toast('تعذّر نسخ الكود', true));
+  } else {
+    toast('تعذّر نسخ الكود', true);
+  }
+}
+
+function openPromoCodeModal(code){
+  const c = code ? (promoCodesCache[code]||{}) : {};
+  document.getElementById('modalTitle').textContent = code ? 'تعديل الكود' : 'كود برومو جديد';
+  const expiresVal = c.expiresAt ? new Date(Number(c.expiresAt)).toISOString().slice(0,10) : '';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="field"><label>الكود</label><input type="text" class="mono" id="p_code" value="${escapeHtml(code||'')}" ${code?'disabled':''} style="text-transform:uppercase" placeholder="مثال: PMT2026"></div>
+    <div class="field"><label>المكافأة (PMT)</label><input type="number" id="p_reward" value="${Number(c.reward)||100}"></div>
+    <div class="field"><label>الحد الأقصى لعدد مرات الاستخدام (اتركه فارغًا لعدم التحديد)</label><input type="number" id="p_maxUses" value="${c.maxUses?Number(c.maxUses):''}" placeholder="غير محدود"></div>
+    <div class="field"><label>تاريخ الانتهاء (اختياري)</label><input type="date" id="p_expires" value="${expiresVal}"></div>
+    <div class="switch-row"><div class="lbl"><b>مفعّل</b><span>السماح باستخدام هذا الكود حاليًا</span></div><label class="switch"><input type="checkbox" id="p_status" ${c.status!=='disabled'?'checked':''}><span class="slider"></span></label></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-gold" onclick='savePromoCode(${JSON.stringify(code||null)})'>حفظ</button>`;
+  showModal();
+}
+
+function savePromoCode(existingCode){
+  const rawCode = existingCode || document.getElementById('p_code').value.trim();
+  const code = rawCode.toUpperCase().replace(/\s+/g,'');
+  const reward = Number(document.getElementById('p_reward').value)||0;
+  const maxUsesRaw = document.getElementById('p_maxUses').value.trim();
+  const maxUses = maxUsesRaw ? (Number(maxUsesRaw)||0) : 0;
+  const expiresRaw = document.getElementById('p_expires').value;
+  const expiresAt = expiresRaw ? new Date(expiresRaw+'T23:59:59').getTime() : null;
+  const status = document.getElementById('p_status').checked ? 'active' : 'disabled';
+  if(!code){ toast('يرجى إدخال الكود', true); return; }
+  if(reward <= 0){ toast('يرجى إدخال قيمة مكافأة صحيحة', true); return; }
+  const existing = existingCode ? (promoCodesCache[existingCode]||{}) : {};
+  const payload = {
+    reward, maxUses, status,
+    usedCount: existing.usedCount || 0,
+    createdAt: existing.createdAt || Date.now()
+  };
+  if(expiresAt) payload.expiresAt = expiresAt;
+  db.ref('promoCodes/'+code).set(payload)
+    .then(()=>{ toast('تم حفظ كود البرومو ✓'); closeModal(); })
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+
+function deletePromoCode(code){
+  if(!confirm('هل تريد حذف كود "'+code+'" نهائيًا؟')) return;
+  db.ref('promoCodes/'+code).remove().then(()=>toast('تم حذف الكود')).catch(err=>toast('خطأ: '+err.message, true));
 }
 
 /* =========================================================
