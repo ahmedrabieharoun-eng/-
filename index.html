@@ -1473,8 +1473,9 @@ function renderWalletHistory(logs){
      }
   });
   withdrawals.forEach(function(w){
-    var cls = w.status==='completed' ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
-    var txt = w.status==='completed' ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
+    var isDone = w.status==='completed' || w.status==='paid';
+    var cls = isDone ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
+    var txt = isDone ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
     entries.push({ ts:w.ts||0, label:'Withdraw -'+Number(w.amount||0).toFixed(4)+' TON', cls:cls, txt:txt });
   });
   entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
@@ -1489,7 +1490,7 @@ function openWithdrawForm(){
   setWalletActionActive('walletActionWithdraw');
   var cfg = (S.data && S.data.config) || {};
   if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
-  var watched = Number((S.user && S.user.totalAdsWatched) || 0);
+  var watched = Number((S.data && S.data.stats && S.data.stats.adsWatchedToday) || 0);
   var count = ((S.data && S.data.withdrawals) || []).length;
   var rule = [{min:0.1,ads:15},{min:0.2,ads:20},{min:0.3,ads:25}][Math.min(count,2)];
   document.getElementById('withdrawMinValue').textContent = rule.min.toFixed(1)+' TON';
