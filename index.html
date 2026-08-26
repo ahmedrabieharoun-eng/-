@@ -1475,7 +1475,7 @@ function renderWalletHistory(logs){
   withdrawals.forEach(function(w){
     var isDone = w.status==='completed' || w.status==='paid';
     var cls = isDone ? 'ok' : w.status==='rejected' ? 'err' : 'pend';
-    var txt = isDone ? 'Done' : w.status==='rejected' ? 'Rejected' : 'Pending';
+    var txt = isDone ? 'Paid' : w.status==='rejected' ? 'Rejected' : 'Pending';
     entries.push({ ts:w.ts||0, label:'Withdraw -'+Number(w.amount||0).toFixed(4)+' TON', cls:cls, txt:txt });
   });
   entries.sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
