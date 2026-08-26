@@ -599,10 +599,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
-        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 700 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 100 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
         <div class="game-card" onclick="startGame('wheel')"><div class="game-card-icon">🎡</div><div class="game-card-title">Number Clash</div><div class="game-card-type">Spin × spin</div><span class="game-card-limit">up to 81 PMT</span><span class="game-card-plays" id="plays-wheel">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 150 PMT</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
-        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 600 PMT</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('xo')"><div class="game-card-icon">❌⭕</div><div class="game-card-title">XO vs CPU</div><div class="game-card-type">Strategy</div><span class="game-card-limit">up to 20 PMT</span><span class="game-card-plays" id="plays-xo">3/3 left today</span></div>
+        <div class="game-card" onclick="startGame('fruit')"><div class="game-card-icon">🍒</div><div class="game-card-title">Fruit Slots</div><div class="game-card-type">Match 3</div><span class="game-card-limit">up to 100 PMT</span><span class="game-card-plays" id="plays-fruit">3/3 left today</span></div>
       </div>
     </div>
 
@@ -718,7 +718,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
            <div class="convert-currency">
              <img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
              <span class="convert-currency-name">PMT</span>
-             <input class="convert-amount" id="convertAmount" type="number" step="1" min="10000" placeholder="0">
+             <input class="convert-amount" id="convertAmount" type="number" step="1" min="1" placeholder="0">
              <button type="button" class="convert-max-btn" onclick="setMaxConvertAmount()">MAX</button>
            </div>
            <div class="convert-balance">Balance: <span id="convertPmtBalance">0 PMT</span></div>
@@ -1658,7 +1658,7 @@ function openConvertForm(){
   document.getElementById('convertPmtBalance').textContent=fmtShiba((S.user&&S.user.balance)||0)+' PMT';
   document.getElementById('convertTonBalance').textContent=Number((S.user&&S.user.tonBalance)||0).toFixed(4)+' TON';
   var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
-  document.getElementById('convertAmount').min = rate;
+  document.getElementById('convertAmount').min = 1;
   document.getElementById('convertRateLabel').textContent = '📊 ' + rate.toLocaleString('en-US') + ' PMT = 1 TON';
   document.getElementById('convertTonOutput').textContent='0';
   document.getElementById('convertAmount').oninput=function(){
@@ -1675,7 +1675,7 @@ function setMaxConvertAmount(){
 function submitConvert(){
   var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
   var amount = Math.floor(Number(document.getElementById('convertAmount').value));
-  if (!amount || amount < rate){ showToast('Minimum conversion is '+rate.toLocaleString('en-US')+' PMT','error'); return; }
+  if (!amount || amount <= 0){ showToast('من فضلك أدخل مبلغ صالح','error'); return; }
   var btn=document.getElementById('convertSubmitBtn');
   if (btn.disabled) return;
   btn.disabled=true; btn.textContent='📺 Watch Ad...';
@@ -2144,10 +2144,10 @@ function renderGameBoard(key){
   var board=document.getElementById('gameBoard'); board.className='game-board '+(key==='gem'?'gem':''); clearInterval(gameTimerId); gameTimerId=null;
   if(key==='gem')renderGemRush(board);else if(key==='wheel')renderNumberClash(board);else if(key==='xo')renderXO(board);else renderFruitSlots(board);
 }
-var gemState={bombs:[],found:0,rewards:[50,150,300,400,600,700]};
+var gemState={bombs:[],found:0,rewards:[10,20,30,50,80,100]};
 function renderGemRush(board){
   var cells=[0,1,2,3,4,5,6,7,8].sort(function(){return Math.random()-.5;});
-  gemState={bombs:cells.slice(0,3),found:0,rewards:[50,150,300,400,600,700]};
+  gemState={bombs:cells.slice(0,3),found:0,rewards:[10,20,30,50,80,100]};
   board.innerHTML='<div class="game-help">Collect the gems and cash out your reward. Choosing a bomb ends the round.</div><div class="rush-status">Round balance: <span id="rushReward">0</span> PMT</div><div class="gem-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="gem-cell rush-cell" onclick="pickRush(this,'+i+')">?</button>';}).join('')+'</div><button id="rushCashout" class="game-action rush-cashout" onclick="cashoutRush()" disabled>Cash out 0 PMT</button>';
 }
  function pickRush(el,index){if(gameFinished||el.disabled)return;el.disabled=true;if(gemState.bombs.indexOf(index)>-1){el.textContent='💣';el.classList.add('bomb');gameScore=0;document.getElementById('rushReward').textContent='0';finishGame();return;}gemState.found++;gameScore=gemState.rewards[gemState.found-1];el.textContent='💎';el.classList.add('safe');document.getElementById('rushReward').textContent=gameScore;var cash=document.getElementById('rushCashout');cash.disabled=false;cash.textContent='Cash out '+gameScore+' PMT';if(gemState.found===6)finishGame();}
@@ -2158,15 +2158,15 @@ var xoState=[];
  function renderXO(board){xoState=Array(9).fill('');board.innerHTML='<div class="game-help">You are X. Choose 3 consecutive squares horizontally, vertically, or diagonally before the computer to win.</div><div id="xoStatus" class="xo-status">Your turn</div><div class="xo-grid">'+Array(9).fill(0).map(function(_,i){return '<button class="xo-cell" onclick="playXO('+i+')"></button>';}).join('')+'</div>';}
 function xoWinner(){var lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(var i=0;i<lines.length;i++){var l=lines[i];if(xoState[l[0]]&&xoState[l[0]]===xoState[l[1]]&&xoState[l[1]]===xoState[l[2]])return xoState[l[0]];}return xoState.indexOf('')<0?'draw':null;}
 function paintXO(){document.querySelectorAll('.xo-cell').forEach(function(c,i){c.textContent=xoState[i];c.className='xo-cell '+(xoState[i]||'').toLowerCase();});}
- function playXO(i){if(gameFinished||xoState[i])return;xoState[i]='X';paintXO();var result=xoWinner();if(result){gameScore=result==='X'?150:0;finishGame();return;}document.getElementById('xoStatus').textContent='Computer is thinking...';setTimeout(function(){if(gameFinished)return;var open=xoState.map(function(v,n){return v?null:n;}).filter(function(v){return v!==null;});var pick=open[Math.floor(Math.random()*open.length)];xoState[pick]='O';paintXO();var r=xoWinner();if(r){gameScore=r==='draw'?40:r==='X'?150:0;finishGame();}else document.getElementById('xoStatus').textContent='Your turn';},350);}
-var fruitSymbols=['🍒','🍉','❤️','💎'],fruitValues={'🍒':80,'🍉':140,'❤️':20,'💎':600};
- function renderFruitSlots(board){board.innerHTML='<div class="game-help">Press SPIN. Match 3 identical symbols horizontally, vertically, or diagonally to win.</div><div class="fruit-machine"><div id="fruitGrid" class="fruit-grid"></div><button id="fruitSpin" class="game-action fruit-spin" onclick="spinFruitSlots()">SPIN</button></div><div class="fruit-paytable">❤️ 20 · 🍒 80 · 🍉 140 · 💎 600 PMT</div>';drawFruitGrid(Array(9).fill('❔'));}
+ function playXO(i){if(gameFinished||xoState[i])return;xoState[i]='X';paintXO();var result=xoWinner();if(result){gameScore=result==='X'?20:0;finishGame();return;}document.getElementById('xoStatus').textContent='Computer is thinking...';setTimeout(function(){if(gameFinished)return;var open=xoState.map(function(v,n){return v?null:n;}).filter(function(v){return v!==null;});var pick=open[Math.floor(Math.random()*open.length)];xoState[pick]='O';paintXO();var r=xoWinner();if(r){gameScore=r==='draw'?5:r==='X'?20:0;finishGame();}else document.getElementById('xoStatus').textContent='Your turn';},350);}
+var fruitSymbols=['🍒','🍉','❤️','💎'],fruitValues={'🍒':15,'🍉':25,'❤️':5,'💎':100};
+ function renderFruitSlots(board){board.innerHTML='<div class="game-help">Press SPIN. Match 3 identical symbols horizontally, vertically, or diagonally to win.</div><div class="fruit-machine"><div id="fruitGrid" class="fruit-grid"></div><button id="fruitSpin" class="game-action fruit-spin" onclick="spinFruitSlots()">SPIN</button></div><div class="fruit-paytable">❤️ 5 · 🍒 15 · 🍉 25 · 💎 100 PMT</div>';drawFruitGrid(Array(9).fill('❔'));}
 function drawFruitGrid(grid){document.getElementById('fruitGrid').innerHTML=grid.map(function(s){return '<div class="fruit-cell">'+s+'</div>';}).join('');}
 function spinFruitSlots(){if(gameFinished)return;var btn=document.getElementById('fruitSpin');btn.disabled=true;var grid=Array(9).fill(0).map(function(){return fruitSymbols[Math.floor(Math.random()*fruitSymbols.length)];});drawFruitGrid(grid);setTimeout(function(){var lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],win=null;for(var i=0;i<lines.length;i++){var l=lines[i];if(grid[l[0]]===grid[l[1]]&&grid[l[1]]===grid[l[2]]){win=l;break;}}if(win){var sym=grid[win[0]];gameScore=fruitValues[sym]||20;win.forEach(function(n){document.querySelectorAll('.fruit-cell')[n].classList.add('win');});}else gameScore=0;finishGame();},500);}
 function finishGame(){
   if(gameFinished || !activeGame) return;
   gameFinished=true; clearInterval(gameTimerId);
-  var key=activeGame, score=Math.min(key==='gem'?700:600,Math.max(0,gameScore));
+  var key=activeGame, score=Math.min(key==='xo'?20:100,Math.max(0,gameScore));
   api('playGame',{game:key,score:score}).then(function(res){
     if(!res.success){ showToast(res.error||'Game unavailable','error'); closeGame(); return; }
     S.user.balance=res.data.shibaBalance; updatePmtTonValueDisplays();
