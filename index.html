@@ -1024,6 +1024,15 @@ startLoadingProgress();
   }, 100);
 })();
 
+// ── Heartbeat (يُبقي المستخدم "أونلاين" في لوحة تحكم الأدمن) ──────────
+var _heartbeatTimer = null;
+function startHeartbeat(){
+  if (_heartbeatTimer) return;
+  _heartbeatTimer = setInterval(function(){
+    api('heartbeat', {}).catch(function(){});
+  }, 25000);
+}
+
 // ── API ──────────────────────────────────────────────────────────────
 // worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
 async function api(action, data){
@@ -1062,6 +1071,7 @@ function loadState(){
     showApp();
     render();
     try { refreshTaskPriceLabels(); } catch(_){}
+    startHeartbeat();
   }).catch(function(err){
      if (S.inTelegram) showLoadError('Unable to connect to the server. Open the app from the bot button inside Telegram.');
     else showMockData();
