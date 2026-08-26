@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1256,9 +1255,9 @@ function deleteChannel(id){
 }
 
 /* =========================================================
-   PROMO CODES  (promoCodes/{CODE})
+   PROMO CODES  (redeemCodes/{CODE}) — matches worker.js handleRedeemCode
    ========================================================= */
-db.ref('promoCodes').on('value', snap=>{
+db.ref('redeemCodes').on('value', snap=>{
   promoCodesCache = snap.val() || {};
   renderPromoCodes();
 });
@@ -1270,7 +1269,7 @@ function renderPromoCodes(){
   const activeCount = entries.filter(([,c])=>{
     const expired = c.expiresAt && Number(c.expiresAt) < now;
     const maxedOut = Number(c.maxUses||0) > 0 && Number(c.usedCount||0) >= Number(c.maxUses);
-    return c.status !== 'disabled' && !expired && !maxedOut;
+    return c.active !== false && !expired && !maxedOut;
   }).length;
   const elTotal = document.getElementById('statPromoTotal');
   const elActive = document.getElementById('statPromoActive');
@@ -1288,7 +1287,7 @@ function renderPromoCodes(){
     const used = Number(c.usedCount||0);
     const maxedOut = maxUses > 0 && used >= maxUses;
     let statusBadge;
-    if(c.status === 'disabled') statusBadge = '<span class="badge b-gray">موقوف</span>';
+    if(c.active === false) statusBadge = '<span class="badge b-gray">موقوف</span>';
     else if(expired) statusBadge = '<span class="badge b-red">منتهي</span>';
     else if(maxedOut) statusBadge = '<span class="badge b-red">اكتمل الاستخدام</span>';
     else statusBadge = '<span class="badge b-green">مفعّل</span>';
@@ -1325,11 +1324,11 @@ function openPromoCodeModal(code){
   document.getElementById('modalTitle').textContent = code ? 'تعديل الكود' : 'كود برومو جديد';
   const expiresVal = c.expiresAt ? new Date(Number(c.expiresAt)).toISOString().slice(0,10) : '';
   document.getElementById('modalBody').innerHTML = `
-    <div class="field"><label>الكود</label><input type="text" class="mono" id="p_code" value="${escapeHtml(code||'')}" ${code?'disabled':''} style="text-transform:uppercase" placeholder="مثال: PMT2026"></div>
+    <div class="field"><label>الكود (حروف إنجليزية وأرقام و _ - فقط)</label><input type="text" class="mono" id="p_code" value="${escapeHtml(code||'')}" ${code?'disabled':''} style="text-transform:uppercase" placeholder="مثال: PMT2026"></div>
     <div class="field"><label>المكافأة (PMT)</label><input type="number" id="p_reward" value="${Number(c.reward)||100}"></div>
     <div class="field"><label>الحد الأقصى لعدد مرات الاستخدام (اتركه فارغًا لعدم التحديد)</label><input type="number" id="p_maxUses" value="${c.maxUses?Number(c.maxUses):''}" placeholder="غير محدود"></div>
     <div class="field"><label>تاريخ الانتهاء (اختياري)</label><input type="date" id="p_expires" value="${expiresVal}"></div>
-    <div class="switch-row"><div class="lbl"><b>مفعّل</b><span>السماح باستخدام هذا الكود حاليًا</span></div><label class="switch"><input type="checkbox" id="p_status" ${c.status!=='disabled'?'checked':''}><span class="slider"></span></label></div>
+    <div class="switch-row"><div class="lbl"><b>مفعّل</b><span>السماح باستخدام هذا الكود حاليًا</span></div><label class="switch"><input type="checkbox" id="p_status" ${c.active!==false?'checked':''}><span class="slider"></span></label></div>
   `;
   document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إلغاء</button><button class="btn btn-gold" onclick='savePromoCode(${JSON.stringify(code||null)})'>حفظ</button>`;
   showModal();
@@ -1337,30 +1336,31 @@ function openPromoCodeModal(code){
 
 function savePromoCode(existingCode){
   const rawCode = existingCode || document.getElementById('p_code').value.trim();
-  const code = rawCode.toUpperCase().replace(/\s+/g,'');
-  const reward = Number(document.getElementById('p_reward').value)||0;
+  // نفس تعقيم الكود المستخدم في handleRedeemCode بالبوت بالضبط
+  const code = rawCode.toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,64);
+  const reward = Math.floor(Number(document.getElementById('p_reward').value))||0;
   const maxUsesRaw = document.getElementById('p_maxUses').value.trim();
   const maxUses = maxUsesRaw ? (Number(maxUsesRaw)||0) : 0;
   const expiresRaw = document.getElementById('p_expires').value;
   const expiresAt = expiresRaw ? new Date(expiresRaw+'T23:59:59').getTime() : null;
-  const status = document.getElementById('p_status').checked ? 'active' : 'disabled';
-  if(!code){ toast('يرجى إدخال الكود', true); return; }
+  const active = document.getElementById('p_status').checked;
+  if(!code){ toast('يرجى إدخال كود صحيح (حروف إنجليزية/أرقام فقط)', true); return; }
   if(reward <= 0){ toast('يرجى إدخال قيمة مكافأة صحيحة', true); return; }
   const existing = existingCode ? (promoCodesCache[existingCode]||{}) : {};
   const payload = {
-    reward, maxUses, status,
+    reward, maxUses, active,
     usedCount: existing.usedCount || 0,
     createdAt: existing.createdAt || Date.now()
   };
   if(expiresAt) payload.expiresAt = expiresAt;
-  db.ref('promoCodes/'+code).set(payload)
+  db.ref('redeemCodes/'+code).set(payload)
     .then(()=>{ toast('تم حفظ كود البرومو ✓'); closeModal(); })
     .catch(err=>toast('خطأ: '+err.message, true));
 }
 
 function deletePromoCode(code){
   if(!confirm('هل تريد حذف كود "'+code+'" نهائيًا؟')) return;
-  db.ref('promoCodes/'+code).remove().then(()=>toast('تم حذف الكود')).catch(err=>toast('خطأ: '+err.message, true));
+  db.ref('redeemCodes/'+code).remove().then(()=>toast('تم حذف الكود')).catch(err=>toast('خطأ: '+err.message, true));
 }
 
 /* =========================================================
