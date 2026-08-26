@@ -731,7 +731,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
            </div>
            <div class="convert-balance">Balance: <span id="convertTonBalance">0 TON</span></div>
          </div>
-         <div class="convert-rate">📊 10,000 PMT = 1 TON</div>
+         <div class="convert-rate" id="convertRateLabel">📊 10,000 PMT = 1 TON</div>
          <button class="wallet-submit" id="convertSubmitBtn" onclick="submitConvert()">⚡ Exchange Now</button>
          <button class="modal-close" style="margin-top:8px" onclick="closeWalletForm('convertFormCard')">Cancel</button>
        </div>
@@ -1522,7 +1522,7 @@ function openWithdrawForm(){
   setWalletActionActive('walletActionWithdraw');
   var cfg = (S.data && S.data.config) || {};
   if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
-  var watched = Number((S.user && S.user.totalAdsWatched) || 0);
+  var watched = Number((S.data && S.data.stats && S.data.stats.adsWatchedToday) || 0);
   var count = ((S.data && S.data.withdrawals) || []).length;
   var rule = [{min:0.1,ads:15},{min:0.2,ads:20},{min:0.3,ads:25}][Math.min(count,2)];
   document.getElementById('withdrawMinValue').textContent = rule.min.toFixed(1)+' TON';
@@ -1647,20 +1647,25 @@ function openConvertForm(){
   document.getElementById('convertFormCard').style.display='block';
   document.getElementById('convertPmtBalance').textContent=fmtShiba((S.user&&S.user.balance)||0)+' PMT';
   document.getElementById('convertTonBalance').textContent=Number((S.user&&S.user.tonBalance)||0).toFixed(4)+' TON';
+  var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
+  document.getElementById('convertAmount').min = rate;
+  document.getElementById('convertRateLabel').textContent = '📊 ' + rate.toLocaleString('en-US') + ' PMT = 1 TON';
   document.getElementById('convertTonOutput').textContent='0';
   document.getElementById('convertAmount').oninput=function(){
-    document.getElementById('convertTonOutput').textContent=(Number(this.value||0)/10000).toFixed(4);
+    document.getElementById('convertTonOutput').textContent=(Number(this.value||0)/rate).toFixed(4);
   };
 }
 function setMaxConvertAmount(){
+  var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
   var max = Math.floor((S.user&&S.user.balance)||0);
   var input = document.getElementById('convertAmount');
   input.value = max;
-  document.getElementById('convertTonOutput').textContent=(max/10000).toFixed(4);
+  document.getElementById('convertTonOutput').textContent=(max/rate).toFixed(4);
 }
 function submitConvert(){
+  var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
   var amount = Math.floor(Number(document.getElementById('convertAmount').value));
-  if (!amount || amount < 10000){ showToast('Minimum conversion is 10,000 PMT','error'); return; }
+  if (!amount || amount < rate){ showToast('Minimum conversion is '+rate.toLocaleString('en-US')+' PMT','error'); return; }
   var btn=document.getElementById('convertSubmitBtn');
   if (btn.disabled) return;
   btn.disabled=true; btn.textContent='📺 Watch Ad...';
