@@ -270,11 +270,66 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
   .field-grid{grid-template-columns:1fr 1fr}
 }
 .menu-btn{display:none;width:36px;height:36px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);align-items:center;justify-content:center;cursor:pointer}
+
+/* ===== login screen ===== */
+.login-screen{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(1100px 600px at 85% -10%, rgba(242,184,75,.10), transparent 60%),
+    radial-gradient(900px 500px at 0% 100%, rgba(51,214,192,.07), transparent 55%),
+    var(--bg);
+  padding:20px;
+}
+.login-box{
+  width:100%;max-width:380px;background:var(--panel-solid);border:1px solid var(--border);
+  border-radius:20px;padding:34px 30px;box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.login-box .brand{justify-content:center;padding:0 0 22px 0}
+.login-box .brand-txt{text-align:center}
+.login-title{text-align:center;font-size:15px;color:var(--muted);margin-bottom:26px}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:7px;font-weight:500}
+.login-field input{
+  width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:11px;
+  padding:12px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:.15s;
+}
+.login-field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,184,75,.12)}
+.login-error{
+  display:none;background:rgba(255,84,112,.1);border:1px solid rgba(255,84,112,.3);color:#ff92a6;
+  font-size:12.5px;padding:9px 12px;border-radius:9px;margin-bottom:16px;text-align:center;
+}
+.login-error.show{display:block}
+.login-btn{width:100%;justify-content:center;padding:12px;font-size:14.5px}
+.login-screen.hidden{display:none}
+.app{display:none}
+.app.show{display:flex}
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="brand">
+      <img class="brand-coin" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
+      <div class="brand-txt"><b>PMT Gram</b><span>لوحة تحكم الإدارة</span></div>
+    </div>
+    <div class="login-title">سجّل الدخول للمتابعة</div>
+    <div class="login-error" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    <form id="loginForm" autocomplete="off">
+      <div class="login-field">
+        <label>اسم المستخدم</label>
+        <input type="text" id="loginUser" autocomplete="username" autofocus>
+      </div>
+      <div class="login-field">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPass" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-gold login-btn">دخول</button>
+    </form>
+  </div>
+</div>
+
+<div class="app" id="appRoot">
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -320,6 +375,10 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
     <div class="sidebar-foot">
       <span class="dot off" id="connDot"></span>
       <span id="connTxt">جارِ الاتصال بقاعدة البيانات...</span>
+    </div>
+    <div class="nav-item" onclick="logout()" style="margin-top:8px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      تسجيل الخروج
     </div>
   </aside>
 
@@ -566,6 +625,47 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
 </div>
 
 <script>
+/* =========================================================
+   LOGIN GATE
+   ========================================================= */
+const ADMIN_USER = 'pmt gram';
+const ADMIN_PASS = 'pmt gram6633112121@#$';
+const SESSION_KEY = 'pmtGramAdminSession';
+
+function showApp(){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appRoot').classList.add('show');
+}
+function showLogin(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appRoot').classList.remove('show');
+}
+
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  showApp();
+}
+
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    errEl.classList.remove('show');
+    sessionStorage.setItem(SESSION_KEY, '1');
+    showApp();
+  } else {
+    errEl.classList.add('show');
+  }
+});
+
+function logout(){
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  showLogin();
+}
+
 /* =========================================================
    PMT Gram — Admin Control Panel
    Direct Firebase Realtime Database binding
