@@ -1604,9 +1604,21 @@ function renderRecord(){
           '</div>'+
           '<div class="record-amount">-'+amount+'</div>'+
         '</div>'+
-        '<button class="record-view-btn" onclick="openTxDetail('+i+')">View Transaction</button>'+
+        '<button class="record-view-btn" onclick="openRecordTx('+i+')">View Transaction</button>'+
       '</div>';
   }).join('');
+}
+
+function openRecordTx(i){
+  var w = (S.record||[])[i];
+  if (!w) return;
+  if (w.txHash){
+    // يفتح رابط المعاملة على Tonscan في تاب جديد على طول، من غير ما يفتح المودال
+    window.open('https://tonscan.org/tx/' + w.txHash, '_blank');
+  } else {
+    // لو مفيش txHash (مثلاً لسه بيتعالج)، نوريله تفاصيل السحب بدل ما نفتح رابط ناقص
+    openTxDetail(i);
+  }
 }
 
 function openTxDetail(i){
