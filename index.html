@@ -269,6 +269,21 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ref-user-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:2px}
 .ref-user-badge.active{background:rgba(34,197,94,0.15);color:var(--green)}
 .ref-user-badge.new{background:rgba(147,92,246,0.12);color:var(--orange)}
+.record-header{padding:16px 20px 8px}
+.record-list-section{padding:0 16px 16px}
+.record-item{border-radius:18px;background:linear-gradient(145deg,rgba(52,38,30,.72),rgba(24,21,20,.92));border:1px solid rgba(255,255,255,.13);margin-bottom:10px;padding:14px;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.record-item-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.record-user{display:flex;align-items:center;gap:10px;min-width:0}
+.record-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--orange);border:1.5px solid rgba(147,92,246,0.25)}
+.record-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.record-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.record-amount{font-size:14px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0}
+.record-view-btn{width:100%;margin-top:10px;padding:9px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer}
+.record-view-btn:active{background:rgba(255,255,255,.12)}
+.tx-detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:13px}
+.tx-detail-row:last-child{border-bottom:none}
+.tx-detail-label{color:var(--text3);flex-shrink:0}
+.tx-detail-value{color:var(--text);font-weight:700;text-align:right;direction:ltr;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .load-more{width:100%;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.2s;margin-top:4px}
 .load-more:active{background:rgba(255,255,255,0.08)}
 
@@ -742,6 +757,14 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
     </div>
 
+    <!-- RECORD -->
+    <div class="page" id="page-record">
+      <div class="record-header"><div class="page-title">Record</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Latest completed withdrawals from our users</div></div>
+      <div class="record-list-section">
+        <div id="recordList"><div class="empty-state">Loading...</div></div>
+      </div>
+    </div>
+
     <!-- LUCKY WHEEL -->
     <div class="page" id="page-wheel">
       <div class="wheel-page-header">
@@ -795,6 +818,9 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     </div>
     <div class="nav-item" onclick="switchPage('wallet')" id="nav-wallet">
       <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
+    </div>
+    <div class="nav-item" onclick="switchPage('record')" id="nav-record">
+      <div class="nav-icon">🏆</div><div class="nav-label">Record</div>
     </div>
   </div>
 </div>
@@ -882,6 +908,21 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
   </div>
 </div>
 
+<!-- Transaction Detail Modal (Record page) -->
+<div class="modal-overlay" id="txDetailModal" onclick="closeModalOutside(event,'txDetailModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💸 Transaction Details</div>
+    <div class="tx-detail-row"><span class="tx-detail-label">User</span><span class="tx-detail-value" id="txDetailUser">-</span></div>
+    <div class="tx-detail-row"><span class="tx-detail-label">Amount</span><span class="tx-detail-value" id="txDetailAmount">-</span></div>
+    <div class="tx-detail-row"><span class="tx-detail-label">Fee</span><span class="tx-detail-value" id="txDetailFee">-</span></div>
+    <div class="tx-detail-row"><span class="tx-detail-label">Wallet</span><span class="tx-detail-value" id="txDetailWallet">-</span></div>
+    <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span class="tx-detail-value" id="txDetailStatus">-</span></div>
+    <div class="tx-detail-row"><span class="tx-detail-label">Date</span><span class="tx-detail-value" id="txDetailDate">-</span></div>
+    <div class="tx-detail-row"><span class="tx-detail-label">Transaction ID</span><span class="tx-detail-value" id="txDetailId">-</span></div>
+    <button class="modal-close" style="margin-top:14px" onclick="closeModal('txDetailModal')">Close</button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -956,7 +997,7 @@ var wheelSpinning = false;
 var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gameFinished = false;
 
 // ── State ───────────────────────────────────────────────────────────
-var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[] };
+var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[], record:[], recordLoaded:false };
 
 var currentTab = 'ads';
 var adWatchBusy = false;
@@ -1527,6 +1568,63 @@ function renderWalletHistory(logs){
   }).join('');
 }
 
+// ── Record page (public feed of completed withdrawals) ────────────────
+function loadRecordPage(){
+  var el = document.getElementById('recordList');
+  if (!el) return;
+  if (!S.recordLoaded) el.innerHTML = '<div class="empty-state">Loading...</div>';
+  api('getWithdrawalsRecord', {}).then(function(res){
+    if (!res || !res.success){
+      if (!S.recordLoaded) el.innerHTML = '<div class="empty-state">Unable to load record</div>';
+      return;
+    }
+    S.record = res.data.withdrawals || [];
+    S.recordLoaded = true;
+    renderRecord();
+  }).catch(function(){
+    if (!S.recordLoaded) el.innerHTML = '<div class="empty-state">Unable to load record</div>';
+  });
+}
+
+function renderRecord(){
+  var el = document.getElementById('recordList');
+  if (!el) return;
+  var list = S.record || [];
+  if (!list.length){ el.innerHTML = '<div class="empty-state">No completed withdrawals yet</div>'; return; }
+  el.innerHTML = list.map(function(w, i){
+    var name = w.firstName || (w.username ? '@'+w.username : '') || 'User';
+    var av = w.photoUrl ? '<img src="'+w.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
+    var amount = Number(w.amount||0).toFixed(4)+' '+(w.currency||'TON');
+    return '<div class="record-item">'+
+        '<div class="record-item-top">'+
+          '<div class="record-user">'+
+            '<div class="record-avatar">'+av+'</div>'+
+            '<div class="record-name">'+esc(name)+'</div>'+
+          '</div>'+
+          '<div class="record-amount">-'+amount+'</div>'+
+        '</div>'+
+        '<button class="record-view-btn" onclick="openTxDetail('+i+')">View Transaction</button>'+
+      '</div>';
+  }).join('');
+}
+
+function openTxDetail(i){
+  var w = (S.record||[])[i];
+  if (!w) return;
+  var name = w.firstName || 'User';
+  var handle = w.username ? '@'+w.username : name;
+  document.getElementById('txDetailUser').textContent = handle;
+  document.getElementById('txDetailAmount').textContent = Number(w.amount||0).toFixed(4)+' '+(w.currency||'TON');
+  document.getElementById('txDetailFee').textContent = Number(w.fee||0).toFixed(4)+' '+(w.currency||'TON');
+  var wallet = w.walletAddress || '';
+  document.getElementById('txDetailWallet').textContent = wallet.length > 12 ? (wallet.slice(0,6)+'...'+wallet.slice(-4)) : (wallet || '-');
+  document.getElementById('txDetailStatus').textContent = 'Completed ✅';
+  var d = w.completedAt || w.ts || Date.now();
+  document.getElementById('txDetailDate').textContent = new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('txDetailId').textContent = w.id || '-';
+  openModal('txDetailModal');
+}
+
 // ── TON Wallet ───────────────────────────────────────────────────────────
 function openWithdrawForm(){
   setWalletActionActive('walletActionWithdraw');
@@ -1578,6 +1676,12 @@ function submitWithdrawal(){
     S.user.tonBalance = res.data.tonBalance;
     S.user.tonWallet = wallet;
     updateWalletTonBalance();
+    // العداد بيتصفر عند السيرفر بعد أي سحب ناجح (بالإضافة للتصفير اليومي)،
+    // فبنعكس القيمة صفر فورًا في الواجهة كمان.
+    if (S.data && S.data.stats) {
+      S.data.stats.adsWatchedToday = 0;
+      S.data.stats.adsWatchedByCompany = {};
+    }
     S.data.withdrawals = S.data.withdrawals || [];
     S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:res.data.netAmount, requestedAmount:amount, fee:res.data.fee, currency:'TON', status:'pending', ts:Date.now() });
     renderWalletHistory(S.data.balanceLogs||[]);
@@ -2199,6 +2303,7 @@ function switchPage(name){
     }, 0);
   }
   if (name === 'games') renderGames();
+  if (name === 'record') loadRecordPage();
   if (currentPage===name) return;
   var prev = document.getElementById('page-'+currentPage);
   var next = document.getElementById('page-'+name);
