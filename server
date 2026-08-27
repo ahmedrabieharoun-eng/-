@@ -41,12 +41,21 @@
 const DEFAULT_CONFIG = {
   botUsername: 'Pmt_Gram_Bot',
   referralReward: 4000,        // Daily referral reward after watching 10 ads
+  referralPayoutDays: 3,       // عدد الأيام اللي تُدفع فيها مكافأة الإحالة (بدل 3 ثابتة)
   comboReward: 5000,           // مكافأة الكومبو اليومي (SHIBA)
   taskDefaultReward: 500,      // مكافأة افتراضية لمهام القنوات/البوتات
   dailyBonusReward: 500,       // المكافأة اليومية
-  adReward: 200,
+  adReward: 200,               // قيمة احتياطية فقط (fallback) لو الشركة مش موجودة في adCompanies/
   adDailyLimit: 20,
-  adCompanyDailyLimit: 10,
+  adCompanyDailyLimit: 10,     // قيمة احتياطية فقط (fallback)
+  // إعدادات كل شركة إعلانات على حدة: المكافأة والحد اليومي المسموح لكل
+  // شركة بشكل مستقل. تُقرأ من Firebase تحت config/adCompanies/<company>/
+  // ولو الشركة غير موجودة، يتم استخدام adReward و adCompanyDailyLimit
+  // كقيمة احتياطية أعلاه.
+  adCompanies: {
+    monetag: { reward: 200, dailyLimit: 10 },
+    adsgram: { reward: 200, dailyLimit: 10 },
+  },
   minWithdrawal: 50000,        // أقل مبلغ يمكن سحبه (SHIBA)
   tonConversionRate: 10000,    // 10,000 PMT = 1 TON
   depositWallet: 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD',
@@ -54,6 +63,10 @@ const DEFAULT_CONFIG = {
   mandatorySubEnabled: true,   // تشغيل/إيقاف الاشتراك الإجباري بالكامل
   miningReward: 50,
   miningDurationMs: 60 * 60 * 1000,
+  gameDailyLimit: 3,           // عدد مرات لعب كل لعبة المسموح بها يوميًا لكل مستخدم
+  pricePer100MembersTon: 0.15, // سعر كل 100 عضو مطلوب في "ترويج القناة" بعملة TON
+  pricePer100MembersShiba: 200000,
+  pricePer100MembersUsd: 1,
 };
 
 // عنوان محفظة الإيداع مأخوذ من نظام الإيداع العامل (server 58).
@@ -703,6 +716,7 @@ async function registerReferralIfNeeded(env, user, startParam, config) {
     const existingRef = await dbGet(env, `referrals/${referrerId}/${telegramId}`);
     if (!existingRef) {
       const reward = config.referralReward ?? DEFAULT_CONFIG.referralReward;
+      const payoutDays = getReferralPayoutDays(config);
       // تُسجّل الإحالة pending وتتحول إلى active بعد استيفاء شروط التفعيل.
       await dbSet(env, `referrals/${referrerId}/${telegramId}`, {
         telegramId,
@@ -714,7 +728,7 @@ async function registerReferralIfNeeded(env, user, startParam, config) {
         status: 'pending',
       });
       await sendTelegramMessage(env, config.botToken || '', referrerId,
-        `👥 New referral joined!\n\n👤 ${user.firstName || user.username || 'A user'} opened Pmt Gram with your link.\n\n⏳ They need to watch 10 ads before you get paid.\n💎 Your reward: +${Number(reward).toLocaleString('en-US')} PMT each day for 3 days`);
+        `👥 New referral joined!\n\n👤 ${user.firstName || user.username || 'A user'} opened Pmt Gram with your link.\n\n⏳ They need to watch 10 ads before you get paid.\n💎 Your reward: +${Number(reward).toLocaleString('en-US')} PMT each day for ${payoutDays} day${payoutDays === 1 ? '' : 's'}`);
     }
 
     user.referredBy = referrerId;
@@ -751,6 +765,33 @@ async function findUserByReferralCode(env, code) {
   } catch (_) {
     return null;
   }
+}
+
+// ───────── إعدادات كل شركة إعلانات على حدة ─────────
+// تُقرأ من Firebase تحت config/adCompanies/<company>/{reward, dailyLimit}
+// ولو مش موجودة، بترجع للقيم الاحتياطية config/adReward و config/adCompanyDailyLimit.
+function getAdCompanyConfig(config, company) {
+  const perCompany = (config.adCompanies && config.adCompanies[company]) || {};
+  const reward = Number(
+    perCompany.reward ?? config.adReward ?? DEFAULT_CONFIG.adReward
+  );
+  const dailyLimit = Number(
+    perCompany.dailyLimit ?? config.adCompanyDailyLimit ?? DEFAULT_CONFIG.adCompanyDailyLimit
+  );
+  return { reward, dailyLimit };
+}
+
+// يرجّع إعدادات كل الشركات المعروفة (مفيد لعرضها في الواجهة/لوحة التحكم)
+function getAllAdCompaniesConfig(config) {
+  const known = new Set([
+    ...Object.keys(DEFAULT_CONFIG.adCompanies || {}),
+    ...Object.keys(config.adCompanies || {}),
+  ]);
+  const result = {};
+  for (const company of known) {
+    result[company] = getAdCompanyConfig(config, company);
+  }
+  return result;
 }
 
 async function incrementBalance(env, telegramId, amount) {
@@ -838,17 +879,26 @@ function cairoDayNumber(dateKey) {
   return Date.UTC(y, (m || 1) - 1, d || 1) / 86400000;
 }
 
-function referralDayIndex(joinedAt, today) {
-  const joined = todayKeyCairoFromTimestamp(joinedAt || Date.now());
-  return Math.min(3, Math.max(1, cairoDayNumber(today) - cairoDayNumber(joined) + 1));
+// عدد الأيام اللي بتتدفع فيها مكافأة الإحالة (افتراضيًا 3 أيام) - قابل
+// للتعديل بالكامل من Firebase تحت config/referralPayoutDays
+function getReferralPayoutDays(config) {
+  const n = Math.floor(Number(config?.referralPayoutDays ?? DEFAULT_CONFIG.referralPayoutDays));
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_CONFIG.referralPayoutDays;
 }
 
-function referralDays(refRecord, referredUser, today) {
+function referralDayIndex(joinedAt, today, payoutDays = 3) {
+  const joined = todayKeyCairoFromTimestamp(joinedAt || Date.now());
+  return Math.min(payoutDays, Math.max(1, cairoDayNumber(today) - cairoDayNumber(joined) + 1));
+}
+
+function referralDays(refRecord, referredUser, today, payoutDays = 3) {
   const saved = refRecord?.dailyRewards || {};
-  const currentDay = referralDayIndex(refRecord?.joinedAt, today);
+  const currentDay = referralDayIndex(refRecord?.joinedAt, today, payoutDays);
   const adsToday = referredUser?.adWatchDate === today
     ? Number(referredUser?.adsWatchedToday || 0) : 0;
-  return [1, 2, 3].map((day) => ({
+  const days = [];
+  for (let day = 1; day <= payoutDays; day++) days.push(day);
+  return days.map((day) => ({
     day,
     adsWatched: saved[`day${day}`]?.adsWatched || (day === currentDay ? adsToday : 0),
     adsRequired: 10,
@@ -881,7 +931,8 @@ async function activateReferralIfNeeded(env, telegramId, config, botToken) {
   }
 
   const today = todayKeyCairo();
-  const day = referralDayIndex(refRecord.joinedAt, today);
+  const payoutDays = getReferralPayoutDays(config);
+  const day = referralDayIndex(refRecord.joinedAt, today, payoutDays);
   const dailyRewards = { ...(refRecord.dailyRewards || {}) };
   // ترحيل الإحالات القديمة التي حصلت على المكافأة القديمة مرة واحدة:
   // نعتبر المكافأة القديمة هي Day 1 حتى لا تُدفع مرتين.
@@ -1166,7 +1217,7 @@ async function handleGetState(env, ctx) {
               .reduce((sum, day) => sum + Number(day.reward || r.reward || 0), 0)
           : (r.status === 'active' ? Number(r.reward || 0) : 0);
         const fraudMultipleAccounts = !!blocked;
-        const days = referralDays(r, referredUser, todayKeyCairo());
+        const days = referralDays(r, referredUser, todayKeyCairo(), getReferralPayoutDays(config));
         const completedDays = days.filter((d) => d.claimed).length;
         return {
           id,
@@ -1212,7 +1263,8 @@ async function handleGetState(env, ctx) {
   }
   const adsWatchedToday = Object.values(adsByCompany)
     .reduce((sum, count) => sum + Number(count || 0), 0);
-  const adCompanyDailyLimit = Number(config.adCompanyDailyLimit ?? 10);
+  const adCompaniesConfig = getAllAdCompaniesConfig(config);
+  const adCompanyDailyLimit = Number(config.adCompanyDailyLimit ?? DEFAULT_CONFIG.adCompanyDailyLimit);
   const earnedToday = todayLogs
     .filter((l) => (parseFloat(l.amount) || 0) > 0)
     .reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
@@ -1240,8 +1292,8 @@ async function handleGetState(env, ctx) {
     config: clientConfig,
     mining: {
       startedAt: Number(user.miningStartedAt || 0) || null,
-      reward: 50,
-      durationMs: 60 * 60 * 1000,
+      reward: Number(config.miningReward ?? DEFAULT_CONFIG.miningReward),
+      durationMs: Number(config.miningDurationMs ?? DEFAULT_CONFIG.miningDurationMs),
     },
     tonBalance: Number(user.tonBalance || 0),
     wheel: {
@@ -1257,8 +1309,9 @@ async function handleGetState(env, ctx) {
     stats: {
       adsWatchedToday,
       adsWatchedByCompany: adsByCompany,
+      adCompanies: adCompaniesConfig,   // { monetag: {reward, dailyLimit}, adsgram: {...}, ... } لكل شركة
       adCompanyDailyLimit,
-      adDailyTotalLimit: adCompanyDailyLimit * 2,
+      adDailyTotalLimit: Number(config.adDailyLimit ?? DEFAULT_CONFIG.adDailyLimit),
       friendsInvited: referrals.length,
       earnedToday,
     },
@@ -1349,7 +1402,8 @@ async function handleClaimAdReward(env, ctx) {
   const today = todayKeyCairo();
   const freshUser = await dbGet(env, `users/${user.telegramId}`);
   const company = body.company === 'adsgram' ? 'adsgram' : 'monetag';
-  const limit = Number(config.adCompanyDailyLimit ?? 10);
+  const companyConfig = getAdCompanyConfig(config, company);
+  const limit = companyConfig.dailyLimit;
   const byCompany = freshUser?.adWatchDate === today
     ? { ...(freshUser.adsWatchedByCompany || {}) }
     : {};
@@ -1357,8 +1411,13 @@ async function handleClaimAdReward(env, ctx) {
     byCompany.monetag = Number(freshUser.adsWatchedToday || 0);
   }
   const watched = Number(byCompany[company] || 0);
-  if (watched >= limit) return fail('You have reached the daily ad limit');
-  const reward = Math.floor(Number(config.adReward ?? DEFAULT_CONFIG.adReward));
+  if (watched >= limit) return fail('You have reached the daily ad limit for this company');
+  const totalWatchedToday = Object.values(byCompany).reduce((sum, count) => sum + Number(count || 0), 0);
+  const overallDailyLimit = Number(config.adDailyLimit ?? DEFAULT_CONFIG.adDailyLimit);
+  if (overallDailyLimit > 0 && totalWatchedToday >= overallDailyLimit) {
+    return fail('You have reached your overall daily ad limit');
+  }
+  const reward = Math.floor(companyConfig.reward);
   if (!Number.isFinite(reward) || reward <= 0) return fail('Invalid ad reward');
   const newBalance = await incrementBalance(env, user.telegramId, reward);
   byCompany[company] = watched + 1;
@@ -1379,7 +1438,7 @@ async function handleClaimAdReward(env, ctx) {
     adsWatchedToday: Object.values(byCompany).reduce((sum, count) => sum + Number(count || 0), 0),
     adsWatchedByCompany: byCompany,
     adCompanyDailyLimit: limit,
-    adDailyTotalLimit: limit * 2,
+    adDailyTotalLimit: Number(config.adDailyLimit ?? DEFAULT_CONFIG.adDailyLimit),
   });
 }
 
@@ -1387,48 +1446,52 @@ async function handleClaimAdReward(env, ctx) {
 // مشاهدة إعلان Monetag تفتح جلسة تعدين واحدة. الرصيد لا يُحتسب من
 // الواجهة: السيرفر يحسبه من وقت البداية، ولا يسمح بالمطالبة قبل ساعة.
 async function handleStartMining(env, ctx) {
-  const { user } = ctx;
+  const { user, config } = ctx;
   const path = `users/${user.telegramId}`;
   const freshUser = await dbGet(env, path);
   if (freshUser?.miningStartedAt) return fail('Mining is already in progress');
   const startedAt = Date.now();
+  const miningReward = Number(config.miningReward ?? DEFAULT_CONFIG.miningReward);
+  const miningDurationMs = Number(config.miningDurationMs ?? DEFAULT_CONFIG.miningDurationMs);
   await dbUpdate(env, path, { miningStartedAt: startedAt });
   return ok({
     startedAt,
     miningStartedAt: startedAt,
-    miningReward: 50,
-    miningDurationMs: 60 * 60 * 1000,
+    miningReward,
+    miningDurationMs,
   });
 }
 
 async function handleClaimMining(env, ctx) {
-  const { user } = ctx;
+  const { user, config } = ctx;
   const path = `users/${user.telegramId}`;
   const freshUser = await dbGet(env, path);
   const startedAt = Number(freshUser?.miningStartedAt || 0);
   if (!startedAt) return fail('No mining session found. Watch the ad first');
-  const durationMs = 60 * 60 * 1000;
+  const durationMs = Number(config.miningDurationMs ?? DEFAULT_CONFIG.miningDurationMs);
   if (Date.now() - startedAt < durationMs) return fail('Mining is not complete yet');
-  const newBalance = await incrementBalance(env, user.telegramId, 50);
+  const miningReward = Number(config.miningReward ?? DEFAULT_CONFIG.miningReward);
+  const newBalance = await incrementBalance(env, user.telegramId, miningReward);
   await dbUpdate(env, path, { miningStartedAt: null, miningLastClaimedAt: Date.now() });
-  await addBalanceLog(env, user.telegramId, { type: 'mining_reward', amount: 50, ts: Date.now() });
-  return ok({ shibaBalance: newBalance, shibaAdded: 50, miningStartedAt: null });
+  await addBalanceLog(env, user.telegramId, { type: 'mining_reward', amount: miningReward, ts: Date.now() });
+  return ok({ shibaBalance: newBalance, shibaAdded: miningReward, miningStartedAt: null });
 }
 
 // ───────────────────────── POST /playGame ─────────────────────────────
 // لكل لعبة 3 محاولات يوميًا، مع فرض حدود المكافآت من السيرفر.
 async function handlePlayGame(env, ctx) {
-  const { user, body } = ctx;
+  const { user, body, config } = ctx;
   const telegramId = user.telegramId;
   const game = String(body.game || '');
-  const maxRewards = { gem: 700, wheel: 81, xo: 150, fruit: 600 };
+  const maxRewards = { gem: 100, wheel: 81, xo: 20, fruit: 100 };
   const allowed = Object.keys(maxRewards);
   if (!allowed.includes(game)) return fail('اللعبة غير صالحة');
 
+  const dailyLimit = Number(config.gameDailyLimit ?? DEFAULT_CONFIG.gameDailyLimit);
   const dateKey = todayKeyCairo();
   const path = `gamePlays/${telegramId}/${dateKey}/${game}`;
   const used = Number(await dbGet(env, path) || 0);
-  if (used >= 3) return fail('لقد استخدمت المحاولات الثلاث لهذه اللعبة اليوم');
+  if (used >= dailyLimit) return fail(`لقد استخدمت المحاولات المتاحة (${dailyLimit}) لهذه اللعبة اليوم`);
 
   const submittedScore = Math.floor(Number(body.score || 0));
   const score = Math.max(0, Math.min(maxRewards[game], Number.isFinite(submittedScore) ? submittedScore : 0));
@@ -1549,6 +1612,20 @@ async function handleVerifyTask(env, ctx) {
     ts: Date.now(),
   });
 
+  // ── عدّاد إكمالات المهمة + الحذف التلقائي عند الوصول للهدف ───────
+  // مهام ترويج القناة (channels/bots) بتُنشأ بعدد أعضاء مستهدف
+  // (membersNeeded). كل مرة مستخدم يكمّل المهمة نزوّد العداد، ولو
+  // العداد وصل للهدف تتحذف المهمة تلقائيًا من قائمة المهام النشطة.
+  try {
+    const newCompletions = (Number(task.completions) || 0) + 1;
+    const target = Number(task.membersNeeded) || 0;
+    if (target > 0 && newCompletions >= target) {
+      await dbDelete(env, `tasks/${taskId}`);
+    } else {
+      await dbUpdate(env, `tasks/${taskId}`, { completions: newCompletions });
+    }
+  } catch (_) {}
+
   return ok({ shibaBalance: newBalance, shibaAdded: reward, taskId });
 }
 
@@ -1625,9 +1702,12 @@ async function handleSubmitTaskSuggestion(env, ctx) {
   }
 
   const units = Math.ceil(membersNeeded / 100);
-  const priceShiba = units * PRICE_PER_100_MEMBERS_SHIBA;
-  const priceUsd = units * PRICE_PER_100_MEMBERS_USD;
-  const priceTon = Number((units * 0.15).toFixed(4));
+  const pricePer100Ton = Number(config.pricePer100MembersTon ?? DEFAULT_CONFIG.pricePer100MembersTon);
+  const pricePer100Shiba = Number(config.pricePer100MembersShiba ?? DEFAULT_CONFIG.pricePer100MembersShiba);
+  const pricePer100Usd = Number(config.pricePer100MembersUsd ?? DEFAULT_CONFIG.pricePer100MembersUsd);
+  const priceShiba = units * pricePer100Shiba;
+  const priceUsd = units * pricePer100Usd;
+  const priceTon = Number((units * pricePer100Ton).toFixed(4));
   if (category === 'channels') {
     const botCheck = await checkBotAdminInChat(link, config.botToken);
     if (!botCheck.ok) return fail(botCheck.error);
@@ -1795,7 +1875,14 @@ async function handleRequestWithdrawal(env, ctx) {
   // قراءة رصيد لحظي (مش الرصيد المخزّن في initData القديم) لمنع التلاعب
   const freshUser = await dbGet(env, `users/${telegramId}`);
   const balance = Number(freshUser?.tonBalance || 0);
-  const watchedAds = Number(freshUser?.totalAdsWatched || 0);
+  const today = todayKeyCairo();
+  const adsByCompanyToday = freshUser?.adWatchDate === today
+    ? { ...(freshUser.adsWatchedByCompany || {}) }
+    : {};
+  if (freshUser?.adWatchDate === today && !Object.keys(adsByCompanyToday).length && freshUser.adsWatchedToday) {
+    adsByCompanyToday.monetag = Number(freshUser.adsWatchedToday || 0);
+  }
+  const watchedAds = Object.values(adsByCompanyToday).reduce((sum, count) => sum + Number(count || 0), 0);
   const previousWithdrawals = await dbGet(env, `withdrawals/${telegramId}`);
   const withdrawalCount = previousWithdrawals ? Object.keys(previousWithdrawals).length : 0;
   const withdrawalRules = [
@@ -1918,8 +2005,8 @@ async function handleConvertPmtToTon(env, ctx) {
   const { user, body, config } = ctx;
   const pmtAmount = Math.floor(Number(body.pmtAmount));
   const rate = Number(config.tonConversionRate || DEFAULT_CONFIG.tonConversionRate || 10000);
-  if (!Number.isFinite(pmtAmount) || pmtAmount < rate) {
-    return fail(`Enter at least ${rate.toLocaleString('en-US')} PMT.`);
+  if (!Number.isFinite(pmtAmount) || pmtAmount <= 0) {
+    return fail('المبلغ غير صالح');
   }
   const freshUser = await dbGet(env, `users/${user.telegramId}`);
   const pmtBalance = Number(freshUser?.balance || 0);
@@ -2054,6 +2141,17 @@ export default {
         ? String(rawStartParam)
         : null;
       const user = await getOrCreateUser(env, verification.user, startParam, config, botToken);
+
+      // ── حظر الحساب من لوحة التحكم أو نظام مكافحة الاحتيال ──────────
+      // أي حساب موجود تحت blocked_accounts/{telegramId} يُمنع فورًا من
+      // استخدام أي إندبوينت في الـ API، مش بس مكافآت الإحالة.
+      try {
+        const accountBlocked = await dbGet(env, `blocked_accounts/${user.telegramId}`);
+        if (accountBlocked) {
+          return fail(accountBlocked.reason || 'هذا الحساب محظور من استخدام البوت', 403);
+        }
+      } catch (_) {}
+      // ─────────────────────────────────────────────────────────────
 
       // ── طبقة الحماية ضد الاحتيال ─────────────────────────────────
       const fraudResult = await checkAntiFraud(env, request, user.telegramId, body);
