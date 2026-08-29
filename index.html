@@ -929,22 +929,22 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────
-var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← رابط الـ Worker
+var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← Worker URL
   var BOT_USER = 'Pmt_Gram_Bot'; // Pmt Gram username without @
-  // نفس عنوان محفظة الإيداع الموجود في نظام الإيداع العامل.
+  // Same deposit wallet address used in the active deposit system.
   var BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
   var tonConnectUI = null;
-// اسم الـ Mini App المسجّل في BotFather (Short Name) — لازم يتحط هنا لأن
-// البوت ده "بوت أزرار" وميني آبه مش الـ Main App الافتراضي، فرابط
-// t.me/BOT?startapp=CODE لوحده مش هيفتح الميني آب، لازم يبقى
-// t.me/BOT/APP_SHORT_NAME?startapp=CODE (تأكد إن القيمة دي مطابقة
-// تمامًا لاسم الـ short name اللي عملته بـ /newapp في BotFather)
+// The Mini App name registered in BotFather (Short Name) — must be set here because
+// this bot is a "button bot" and its Mini App is not the default Main App, so the link
+// t.me/BOT?startapp=CODE alone won't open the Mini App, it must be
+// t.me/BOT/APP_SHORT_NAME?startapp=CODE (make sure this value matches
+// exactly the short name you created with /newapp in BotFather)
 var BOT_APP_SHORT_NAME = 'app';
 function buildRefLink(code){
   return 'https://t.me/'+BOT_USER+'/'+BOT_APP_SHORT_NAME+'?startapp='+code;
 }
 
-// أيقونة عملة PMT — تُستخدم بدل كتابة اسم العملة في النصوص الديناميكية
+// PMT coin icon — used instead of writing the currency name in dynamic text
 var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
 var TON_ICON = '<img src="https://cdn.simpleicons.org/ton/0098EA" class="ton-icon-inline" alt="TON">';
 function updatePmtTonValueDisplays(){
@@ -961,11 +961,11 @@ function updateWalletTonBalance(){
   if (el) el.innerHTML = Number((S.user && S.user.tonBalance) || 0).toFixed(4) + ' <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">';
 }
 
-// مهمة "Promote Your Channel": القيم دي مجرد قيمة احتياطية (fallback) لحد ما
-// نستلم القيم الحقيقية من السيرفر (S.data.config.pricePer100Members*) بعد
-// loadState — الأسعار الفعلية اللي بيتم الخصم عليها بتتحدد من فايربيز
-// (config/pricePer100MembersTon و config/pricePer100MembersShiba و
-// config/pricePer100MembersUsd)، مش من الأرقام دي.
+// "Promote Your Channel" task: these values are just a fallback until
+// we receive the real values from the server (S.data.config.pricePer100Members*) after
+// loadState — the actual prices used for the deduction are determined by Firebase
+// (config/pricePer100MembersTon, config/pricePer100MembersShiba, and
+// config/pricePer100MembersUsd), not from these numbers.
 var PRICE_PER_100_SHIBA = 200000;
 var PRICE_PER_100_USD   = 1;
 var PRICE_PER_100_TON   = 0.15;
@@ -977,8 +977,8 @@ function getPricePer100(){
     usd:   Number(cfg.pricePer100MembersUsd   ?? PRICE_PER_100_USD),
   };
 }
-// يحدّث تسمية كل chip (100/500/1000...) وسطر شرح السعر تحت الفورم بحسب
-// السعر الحالي الجاي من فايربيز، بدل ما تفضل أرقام ثابتة في الـ HTML.
+// Updates the label of each chip (100/500/1000...) and the price explanation line below the form based on
+// the current price coming from Firebase, instead of leaving static numbers in the HTML.
 function refreshTaskPriceLabels(){
   var price = getPricePer100();
   document.querySelectorAll('#qtyChips .qty-chip').forEach(function(chip){
@@ -991,7 +991,7 @@ function refreshTaskPriceLabels(){
 }
 var selectedTaskCategory = 'channels';
 
-// إعدادات افتراضية لعجلة الحظ (تُستخدم فقط لو السيرفر لم يرسلها بعد)
+// Default settings for the lucky wheel (used only if the server hasn't sent them yet)
 var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
 var wheelRotation = 0;
 var wheelSpinning = false;
@@ -1066,7 +1066,7 @@ startLoadingProgress();
   }, 100);
 })();
 
-// ── Heartbeat (يُبقي المستخدم "أونلاين" في لوحة تحكم الأدمن) ──────────
+// ── Heartbeat (keeps the user "online" in the admin dashboard) ──────────
 var _heartbeatTimer = null;
 function startHeartbeat(){
   if (_heartbeatTimer) return;
@@ -1076,10 +1076,10 @@ function startHeartbeat(){
 }
 
 // ── API ──────────────────────────────────────────────────────────────
-// worker.js الجديد بيوجّه الطلبات بالمسار: POST /getState ، POST /verifyTask ...
+// The new worker.js routes requests via the path: POST /getState, POST /verifyTask ...
 async function api(action, data){
   var payload = data || {};
-  // ── إضافة بصمة الجهاز تلقائياً لكل طلب (Anti-Fraud) ──────────
+  // ── Automatically add a device fingerprint to every request (Anti-Fraud) ──────
   try {
     if (window.AntiFraud) {
       var fraud = await window.AntiFraud.collect();
@@ -1217,7 +1217,7 @@ function verifyForceSub(){
       showToast('Verified! Welcome aboard 🎉');
       document.getElementById('forceSubScreen').classList.remove('show');
       document.getElementById('mainApp').style.display = 'flex';
-      // إعادة تحميل الحالة بالكامل لضمان ظهور أي تحديثات (تفعيل مكافأة الداعي إن وُجد)
+      // Fully reload the state to ensure any updates appear (activating the referrer's reward if any)
       loadState();
     } else {
       S.data.forceSub = S.data.forceSub || {};
@@ -1273,9 +1273,9 @@ function render(){
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
    document.getElementById('refInactive').textContent = refStats.inactive ?? Math.max(0,totalRefs-activeRefs);
-    // لا يوجد كارت مستقل لعدد الحسابات المتعددة في واجهة الإحالات الحالية.
-    // كان الوصول إلى عنصر غير موجود هنا يوقف render() بالكامل، وبالتالي لا
-    // يتم رسم قائمة الإحالات ولا يتم تحديث رصيد/سجل المحفظة.
+    // There is no separate card for the multi-account count in the current referrals UI.
+    // Accessing a nonexistent element here used to stop render() entirely, so
+    // the referrals list wasn't rendered and the balance/wallet history wasn't updated.
     var fraudEl = document.getElementById('refFraud');
     if (fraudEl) fraudEl.textContent = refStats.multipleAccounts || 0;
   document.getElementById('refTotalEarned').textContent = fmtShiba(totalRefEarned);
@@ -1524,9 +1524,9 @@ function renderRefs(page){
         '</div>'+
       '</div>');
     } catch (err) {
-      // منسجّلش الخطأ يكسر القايمة كلها — بس نطبعه في الـ console عشان
-      // نقدر نشخّص أي حقل ناقص في بيانات الإحالة من غير ما المستخدم
-      // يشوف صفحة فاضية.
+      // Don't let the error break the whole list — just log it to the console so
+      // we can diagnose any missing field in the referral data without the user
+      // seeing a blank page.
       console.error('renderRefs: failed to render one referral entry', err, r);
       htmlParts.push('<div class="ref-user-item"><div class="ref-user-info"><div class="ref-user-name">'+esc((r && (r.firstName||r.username)) || 'Unknown')+'</div></div></div>');
     }
@@ -1547,7 +1547,7 @@ function renderWalletHistory(logs){
   var withdrawals = (S.data && S.data.withdrawals) || [];
   var entries = [];
   (logs||[]).forEach(function(l){
-    if (l.type === 'withdrawal') return; // تُعرض من withdrawals/ مباشرة بحالتها الحقيقية بدل ما تفضل "Pending" للأبد
+    if (l.type === 'withdrawal') return; // It's shown directly from withdrawals/ with its real status instead of staying "Pending" forever
      var labels = { task_reward:'Task Reward', claim_task:'Invite Reward', combo_claim:'Daily Combo', referral_reward:'Referral Bonus', wheel_spin:'Lucky Wheel', deposit:'Deposit' };
     var label = labels[l.type] || (l.type||'Reward');
      if (l.type === 'deposit' || l.currency === 'TON') {
@@ -1613,10 +1613,10 @@ function openRecordTx(i){
   var w = (S.record||[])[i];
   if (!w) return;
   if (w.txHash){
-    // يفتح رابط المعاملة على Tonscan في تاب جديد على طول، من غير ما يفتح المودال
+    // Opens the transaction link on Tonscan in a new tab directly, without opening the modal
     window.open('https://tonscan.org/tx/' + w.txHash, '_blank');
   } else {
-    // لو مفيش txHash (مثلاً لسه بيتعالج)، نوريله تفاصيل السحب بدل ما نفتح رابط ناقص
+    // If there's no txHash (e.g. still processing), show the withdrawal details instead of opening a broken link
     openTxDetail(i);
   }
 }
@@ -1696,8 +1696,8 @@ function submitWithdrawal(){
     S.user.tonBalance = res.data.tonBalance;
     S.user.tonWallet = wallet;
     updateWalletTonBalance();
-    // العداد بيتصفر عند السيرفر بعد أي سحب ناجح (بالإضافة للتصفير اليومي)،
-    // فبنعكس القيمة صفر فورًا في الواجهة كمان.
+    // The counter resets on the server after any successful withdrawal (in addition to the daily reset),
+    // so we reflect the zero value immediately in the UI as well.
     if (S.data && S.data.stats) {
       S.data.stats.adsWatchedToday = 0;
       S.data.stats.adsWatchedByCompany = {};
@@ -1718,7 +1718,7 @@ function openDepositForm(){
   setWalletActionActive('walletActionDeposit');
   closeWalletForm('convertFormCard'); closeWithdrawForm();
   document.getElementById('depositFormCard').style.display='block';
-  // العنوان مصدره نظام الإيداع العامل، ولا نعتمد على قيمة قديمة محفوظة في Firebase.
+  // The address comes from the active deposit system; we don't rely on an old value stored in Firebase.
   BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
   if (!tonConnectUI && window.TON_CONNECT_UI) {
     tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -1738,8 +1738,8 @@ async function submitDeposit(){
   var btn = document.getElementById('depositSubmitBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Waiting for wallet...'; }
   try {
-    // نفس تكوين المعاملة المستخدم في النظام العامل: تعليق TON قابل للقراءة
-    // يحتوي معرّف مستخدم PMT، ثم تسجيل BOC وبدء التحقق من البلوكتشين.
+    // Same transaction structure used in the active system: a human-readable TON comment
+    // containing the PMT user identifier, then logging the BOC and starting blockchain verification.
     var cell = new TonWeb.boc.Cell();
     cell.bits.writeUint(0, 32);
     cell.bits.writeString(String((S.user && S.user.telegramId) || 'unknown'));
@@ -1799,7 +1799,7 @@ function setMaxConvertAmount(){
 function submitConvert(){
   var rate = Number((S.data && S.data.config && S.data.config.tonConversionRate) || 10000);
   var amount = Math.floor(Number(document.getElementById('convertAmount').value));
-  if (!amount || amount <= 0){ showToast('من فضلك أدخل مبلغ صالح','error'); return; }
+  if (!amount || amount <= 0){ showToast('Please enter a valid amount','error'); return; }
   var btn=document.getElementById('convertSubmitBtn');
   if (btn.disabled) return;
   btn.disabled=true; btn.textContent='📺 Watch Ad...';
@@ -1832,8 +1832,8 @@ function renderTasks(tab){
   if (tab === 'ads'){
     var stats = (S.data && S.data.stats) || {};
     var cfg = (S.data && S.data.config) || {};
-    // إعدادات كل شركة إعلانات على حدة (مكافأة + حد يومي) جاية من فايربيز
-    // عبر stats.adCompanies، ولو مش موجودة بترجع لقيمة احتياطية عامة.
+    // Each ad network's settings (reward + daily limit) individually come from Firebase
+    // via stats.adCompanies; if not present, it falls back to a general default value.
     var companies = stats.adCompanies || {};
     var fallbackLimit = stats.adCompanyDailyLimit || cfg.adCompanyDailyLimit || 10;
     var fallbackReward = cfg.adReward || 200;
@@ -2195,14 +2195,14 @@ function spinWheel(){
 }
 
 // ── Wallet actions ─────────────────────────────────────────────────────
-// (لا يوجد نظام إيداع/سحب في هذا الإصدار — الرصيد يُكتسب فقط من المهام والإحالات والكومبو)
+// (There is no deposit/withdrawal system in this version — balance is earned only from tasks, referrals, and the combo)
 
 // ── Invite / copy ─────────────────────────────────────────────────────
-// مهم جدًا: نستخدم ?startapp= وليس ?start= لأن هذا تطبيق Mini App (ويب)
-// وليس بوت أوامر تقليدي. رابط ?start= يفتح شات البوت فقط ويرسل أمر /start
-// كرسالة عادية، وهذا لا يضع الكود داخل initData بالمرة فلا يتم تتبع
-// الإحالة أبدًا. رابط ?startapp= هو الصيغة الرسمية لفتح الـ Mini App
-// مباشرة مع تمرير الكود في initData.start_param (راجع توثيق تيليجرام:
+// Very important: we use ?startapp= and not ?start= because this is a Mini App (web)
+// not a traditional command bot. The ?start= link only opens the bot chat and sends the /start command
+// as a regular message, which never puts the code inside initData, so the referral is
+// never tracked. The ?startapp= link is the official format for opening the Mini App
+// directly while passing the code in initData.start_param (see Telegram's docs:
 // Direct Link / Main Mini App — https://core.telegram.org/bots/webapps)
 function shareInvite(){
   if (!S.user) return;
@@ -2216,8 +2216,8 @@ function shareInvite(){
   showToast('Invite link copied! 🎉');
 }
 
-// نسخ نص إلى الكليبورد فعليًا (مع Fallback للمتصفحات/الإصدارات القديمة
-// التي لا تدعم navigator.clipboard داخل WebView تيليجرام)
+// Actually copies text to the clipboard (with a fallback for older browsers/versions
+// that don't support navigator.clipboard inside Telegram's WebView)
 function copyToClipboard(text){
   if (navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
@@ -2301,7 +2301,7 @@ function finishGame(){
        ? '<b>💣 Game Over</b>You chose a bomb, lost the round reward, and received no coins.'
       : '<b>+'+fmtShiba(res.data.shibaAdded)+' PMT</b> Reward added to your balance';
     renderGames();
-    // اعرض النتيجة أولًا، ثم افتح إعلان نهاية اللعبة بعد ثانيتين
+    // Show the result first, then open the end-of-game ad after two seconds
     setTimeout(function(){
       showGameAd().then(function(){ closeGame(); });
     },2000);
