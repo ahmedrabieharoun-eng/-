@@ -1905,7 +1905,17 @@ async function handleRequestWithdrawal(env, ctx) {
   const fee = Number((amount * feeRate).toFixed(4));
   const netAmount = Number((amount - fee).toFixed(4));
   const newBalance = balance - amount;
-  await dbUpdate(env, `users/${telegramId}`, { tonBalance: newBalance, tonWallet: walletAddress });
+  // تصفير عداد الإعلانات المستخدم في شرط السحب: العداد أصلاً بيتصفر يوميًا
+  // (لأنه مربوط بـ adWatchDate)، وبعد التعديل ده بيتصفر كمان فورًا بعد أي
+  // عملية سحب ناجحة، عشان المستخدم يحتاج يشاهد إعلانات جديدة قبل السحب التالي
+  // حتى لو لسه في نفس اليوم.
+  await dbUpdate(env, `users/${telegramId}`, {
+    tonBalance: newBalance,
+    tonWallet: walletAddress,
+    adWatchDate: today,
+    adsWatchedByCompany: {},
+    adsWatchedToday: 0,
+  });
 
   const withdrawalId = await dbPush(env, `withdrawals/${telegramId}`, {
     walletAddress,
@@ -1919,6 +1929,12 @@ async function handleRequestWithdrawal(env, ctx) {
     adsRequired: rule.ads,
     status: 'pending',
     ts: Date.now(),
+    // نخزّن لقطة من بيانات المستخدم وقت طلب السحب (اسم/يوزر/صورة) عشان
+    // تُستخدم لاحقًا في صفحة "Record" العامة اللي بتعرض كل السحوبات
+    // المكتملة، من غير ما نحتاج نقرأ users/ لكل مستخدم في كل مرة.
+    firstName: user.firstName || '',
+    username: user.username || '',
+    photoUrl: user.photoUrl || '',
   });
 
   await addBalanceLog(env, telegramId, {
@@ -1930,7 +1946,15 @@ async function handleRequestWithdrawal(env, ctx) {
     ts: Date.now(),
   });
 
-  return ok({ tonBalance: newBalance, withdrawalId, requestedAmount: amount, fee, netAmount });
+  return ok({
+    tonBalance: newBalance,
+    withdrawalId,
+    requestedAmount: amount,
+    fee,
+    netAmount,
+    adsWatchedToday: 0,
+    adsWatchedByCompany: {},
+  });
 }
 
 // ───────────────────────── POST /createDeposit ───────────────────────
@@ -2027,6 +2051,54 @@ async function handleConvertPmtToTon(env, ctx) {
   return ok({ shibaBalance: pmtBalance - pmtAmount, tonBalance, pmtAmount, tonAdded });
 }
 
+// ───────────────────────── POST /getWithdrawalsRecord ─────────────────────────
+// يعرض قائمة عامة (لكل المستخدمين) بآخر عمليات السحب المكتملة فقط،
+// لصفحة "Record" في الواجهة: صورة + اسم المستخدم + المبلغ + زر لعرض
+// تفاصيل المعاملة. يعتمد على اللقطة (firstName/username/photoUrl)
+// المخزّنة داخل withdrawals/{telegramId}/{id} وقت إنشاء الطلب، فمفيش
+// حاجة إننا نقرأ users/ لكل مستخدم على حدة.
+async function handleGetWithdrawalsRecord(env, ctx) {
+  // بنجيب users/ كمان عشان لو أي بوت/سكريبت خارجي مسؤول عن الدفع الفعلي
+  // عمل overwrite (PUT) على withdrawals/{telegramId}/{id} ومسح اللقطة
+  // الأصلية (firstName/username/photoUrl)، نقدر نرجّع الاسم والصورة من
+  // بيانات المستخدم الحالية بدل ما نعرض "User" وأفاتار فاضي.
+  const [allWithdrawals, allUsers] = await Promise.all([
+    dbGet(env, 'withdrawals'),
+    dbGet(env, 'users'),
+  ]);
+  const list = [];
+  if (allWithdrawals) {
+    for (const [telegramId, userWithdrawals] of Object.entries(allWithdrawals)) {
+      if (!userWithdrawals || typeof userWithdrawals !== 'object') continue;
+      const u = (allUsers && allUsers[telegramId]) || {};
+      for (const [id, w] of Object.entries(userWithdrawals)) {
+        if (!w || (w.status !== 'completed' && w.status !== 'paid')) continue;
+        list.push({
+          id,
+          telegramId,
+          firstName: w.firstName || u.firstName || '',
+          username: w.username || u.username || '',
+          photoUrl: w.photoUrl || u.photoUrl || '',
+          // بعض السجلات (اللي بيكتبها البوت الخارجي المسؤول عن الدفع)
+          // بتستخدم أسماء حقول مختلفة (ton / sentAmount / address) بدل
+          // (amount / netAmount / walletAddress)، فبنغطي الحالتين.
+          amount: w.netAmount != null ? w.netAmount : (w.amount != null ? w.amount : (w.sentAmount != null ? w.sentAmount : (w.ton != null ? w.ton : 0))),
+          requestedAmount: w.requestedAmount != null ? w.requestedAmount : w.amount,
+          fee: w.fee || 0,
+          currency: w.currency || 'TON',
+          walletAddress: w.walletAddress || w.address || '',
+          txHash: w.txHash || '',
+          ts: w.ts || 0,
+          completedAt: w.completedAt || w.ts || 0,
+        });
+      }
+    }
+  }
+  list.sort((a, b) => (b.completedAt || b.ts || 0) - (a.completedAt || a.ts || 0));
+  const limit = Math.min(Math.max(Number(ctx.body.limit) || 50, 1), 100);
+  return ok({ withdrawals: list.slice(0, limit) });
+}
+
 // ════════════════════════════════════════════════════════════════════
 //  جدول التوجيه (Routing Table)
 // ════════════════════════════════════════════════════════════════════
@@ -2047,6 +2119,7 @@ const ROUTES = {
   '/getReferrals': handleGetReferrals,
   '/checkForceSub': handleCheckForceSub,
   '/requestWithdrawal': handleRequestWithdrawal,
+  '/getWithdrawalsRecord': handleGetWithdrawalsRecord,
   '/createDeposit': handleCreateDeposit,
   '/verifyDeposit': handleVerifyDeposit,
   '/convertPmtToTon': handleConvertPmtToTon,
