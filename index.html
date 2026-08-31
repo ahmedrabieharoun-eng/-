@@ -8,6 +8,7 @@
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="11638380" data-sdk="show_11638380"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script src="anti-fraud-frontend.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -1005,6 +1006,13 @@ var adWatchBusy = false;
 var adCooldownUntil = 0;
 var adTimerId = null;
 var adWatchStartedAt = 0;
+
+// ── AdsGram ─────────────────────────────────────────────────────────
+var ADSGRAM_BLOCK_ID = 'int-45343';
+var adsgramController = null;
+var adsgramWatchBusy = false;
+var adsgramCooldownUntil = 0;
+var adsgramTimerId = null;
 var miningTimerId = null;
 var miningAdBusy = false;
 
@@ -1845,7 +1853,7 @@ function renderTasks(tab){
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('📺','Monetag','+'+fmtShiba(monetagCfg.reward)+' PMT','Watch', 'watchMonetag()', false, Number(adsByCompany.monetag||0), monetagCfg.dailyLimit)+
-       adTask('🎟️','Adsgram','Maintenance','Unavailable', '', true, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit);
+       adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit);
     return;
   }
 
@@ -1873,14 +1881,18 @@ function renderTasks(tab){
 
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isMonetag = name === 'Monetag';
-  var cooldownSeconds = Math.max(0, Math.ceil((adCooldownUntil - Date.now()) / 1000));
-  var isLocked = isMonetag && (adWatchBusy || cooldownSeconds > 0);
-  var displayButton = isMonetag && adWatchBusy ? 'Watching...' :
-    isMonetag && cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
+  var isAdsgram = name === 'Adsgram';
+  var busy = isMonetag ? adWatchBusy : isAdsgram ? adsgramWatchBusy : false;
+  var cooldownUntilVal = isMonetag ? adCooldownUntil : isAdsgram ? adsgramCooldownUntil : 0;
+  var btnId = isMonetag ? 'monetagWatchBtn' : isAdsgram ? 'adsgramWatchBtn' : '';
+  var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
+  var isLocked = (isMonetag || isAdsgram) && (busy || cooldownSeconds > 0);
+  var displayButton = busy ? 'Watching...' :
+    cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
    return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
      '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+counter+'</div></div>'+
-    '<button '+(isMonetag?'id="monetagWatchBtn" ':'')+'class="task-btn '+(disabled?'verify':'join')+'" '+((disabled||isLocked)?'disabled':'onclick="'+action+'"')+'>'+displayButton+'</button></div>';
+    '<button '+(btnId?'id="'+btnId+'" ':'')+'class="task-btn '+(disabled?'verify':'join')+'" '+((disabled||isLocked)?'disabled':'onclick="'+action+'"')+'>'+displayButton+'</button></div>';
 }
 
 function watchMonetag(){
@@ -1953,6 +1965,76 @@ function startAdButtonTimer(){
 
 function stopAdButtonTimer(){
   if (adTimerId){ clearInterval(adTimerId); adTimerId = null; }
+}
+
+// ── AdsGram (rewarded format) ────────────────────────────────────────
+function ensureAdsgramInit(){
+  if (adsgramController) return adsgramController;
+  if (!window.Adsgram || typeof window.Adsgram.init !== 'function') return null;
+  adsgramController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+  return adsgramController;
+}
+
+function watchAdsgram(){
+  if (adsgramWatchBusy || Date.now() < adsgramCooldownUntil) return;
+  var controller = ensureAdsgramInit();
+  if (!controller){ showToast('Ad service is loading, try again','error'); return; }
+  adsgramWatchBusy = true;
+  renderTasks('ads');
+  startAdsgramButtonTimer();
+  controller.show().then(function(result){
+    api('claimAdReward', {company:'adsgram'}).then(function(res){
+      if (!res.success){
+        adsgramWatchBusy = false;
+        stopAdsgramButtonTimer();
+        renderTasks('ads');
+        showToast(res.error||'Ad reward unavailable','error');
+        return;
+      }
+      S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
+      S.data.stats = S.data.stats || {};
+      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
+      S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
+      S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
+      S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
+      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      adsgramWatchBusy = false;
+      adsgramCooldownUntil = Date.now() + 5000;
+      startAdsgramButtonTimer();
+      renderTasks('ads');
+      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+    });
+  }).catch(function(){
+    adsgramWatchBusy = false;
+    stopAdsgramButtonTimer();
+    renderTasks('ads');
+    showToast('The ad could not be completed','error');
+  });
+}
+
+function startAdsgramButtonTimer(){
+  stopAdsgramButtonTimer();
+  adsgramTimerId = setInterval(function(){
+    var btn = document.getElementById('adsgramWatchBtn');
+    if (adsgramWatchBusy){
+      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
+      return;
+    }
+    var cooldown = Math.max(0, Math.ceil((adsgramCooldownUntil - Date.now()) / 1000));
+    if (cooldown > 0){
+      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
+    } else {
+      stopAdsgramButtonTimer();
+      adsgramCooldownUntil = 0;
+      renderTasks('ads');
+    }
+  }, 250);
+}
+
+function stopAdsgramButtonTimer(){
+  if (adsgramTimerId){ clearInterval(adsgramTimerId); adsgramTimerId = null; }
 }
 
 function switchTab(el, tab){
