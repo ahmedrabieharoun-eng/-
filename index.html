@@ -1331,12 +1331,10 @@ function watchMiningAd(){
   var btn = document.getElementById('miningBtn');
   if (miningAdBusy || !btn) return;
   if (Number((S.data && S.data.mining && S.data.mining.startedAt) || 0)) return;
-  var fn = window.show_11638380;
-  if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); return; }
+  var controller = ensureAdsgramInit();
+  if (!controller){ showToast('Ad service is loading, try again','error'); return; }
   miningAdBusy = true; btn.disabled = true;
-  var startedAt = Date.now();
-  Promise.resolve().then(function(){ return fn(); }).then(function(){
-     if (Date.now() - startedAt < 15000) throw new Error('You must watch the ad for 15 seconds');
+  controller.show().then(function(){
     return api('startMining', {});
   }).then(function(res){
      if (!res.success) throw new Error(res.error || 'Unable to start mining');
@@ -1344,20 +1342,18 @@ function watchMiningAd(){
     var durH = (Number(res.data.miningDurationMs || 3600000) / 3600000);
     var durTxt = durH === 1 ? 'one hour' : (durH + ' hours');
     showToast('Mining started for ' + durTxt + ' ⛏️', null, true);
-  }).catch(function(err){ showToast(err.message || 'Mining unavailable','error'); renderMining(); })
+  }).catch(function(err){ showToast((err && err.message) || 'Mining unavailable','error'); renderMining(); })
     .then(function(){ miningAdBusy = false; });
 }
 
-// ── Shared: require a completed Monetag ad view before running an action ──
+// ── Shared: require a completed AdsGram ad view before running an action ──
 function watchAdThen(onSuccess, onFail){
-  var fn = window.show_11638380;
-  if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); if (onFail) onFail(); return; }
-  var startedAt = Date.now();
-  Promise.resolve().then(function(){ return fn(); }).then(function(){
-    if (Date.now() - startedAt < 15000) throw new Error('You must watch the ad for 15 seconds');
+  var controller = ensureAdsgramInit();
+  if (!controller){ showToast('Ad service is loading, try again','error'); if (onFail) onFail(); return; }
+  controller.show().then(function(){
     onSuccess();
   }).catch(function(err){
-    showToast((err && err.message) || 'Ad was not completed','error');
+    showToast((err && err.description) || 'Ad was not completed','error');
     if (onFail) onFail();
   });
 }
@@ -2329,9 +2325,9 @@ function copyRefLink(){
 
 // ── Mini games ─────────────────────────────────────────────────────────
 function showGameAd(){
-  var fn = window.show_11638380;
-  if (typeof fn !== 'function') return Promise.resolve();
-  try { return Promise.resolve(fn()).catch(function(){}); } catch(_){ return Promise.resolve(); }
+  var controller = ensureAdsgramInit();
+  if (!controller) return Promise.resolve();
+  try { return controller.show().catch(function(){}); } catch(_){ return Promise.resolve(); }
 }
 function startGame(key){
   var names = {gem:'Gem Rush',wheel:'Number Clash',xo:'XO vs CPU',fruit:'Fruit Slots'};
