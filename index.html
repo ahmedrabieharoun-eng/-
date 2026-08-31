@@ -408,10 +408,6 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .modal-submit:active{transform:scale(0.97)}
 .modal-close{width:100%;padding:12px;border-radius:14px;background:transparent;border:1px solid var(--glass-border);font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;margin-top:8px}
 .modal-close:active{background:var(--glass)}
-.turnstile-modal .modal{padding-bottom:28px}
-.turnstile-box{min-height:70px;display:flex;align-items:center;justify-content:center;margin:18px 0 12px}
-.turnstile-status{text-align:center;min-height:20px;font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px}
-.turnstile-submit:disabled{opacity:.45;cursor:not-allowed}
 
 .modal-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px}
 .modal-req-list{list-style:none;padding:0;margin:8px 0 18px;display:flex;flex-direction:column;gap:6px}
@@ -931,16 +927,14 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
   </div>
 </div>
 
-<!-- Cloudflare Turnstile verification Modal -->
-<div class="modal-overlay turnstile-modal" id="turnstileModal" onclick="closeTurnstileOutside(event)">
+<!-- Security Captcha Modal (Cloudflare Turnstile) -->
+<div class="modal-overlay" id="captchaModal" onclick="if(event.target.id==='captchaModal')cancelCaptcha()">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">🛡️ Quick security check</div>
-    <div class="modal-desc" id="turnstileReason">Please complete the security check to continue.</div>
-    <div class="turnstile-box"><div id="turnstileWidget"></div></div>
-    <div class="turnstile-status" id="turnstileStatus">Complete the check above.</div>
-    <button class="modal-submit turnstile-submit" id="turnstileContinueBtn" onclick="completeTurnstile()" disabled>Continue</button>
-    <button class="modal-close" onclick="cancelTurnstile()">Cancel</button>
+    <div class="modal-title">🔒 Security Check</div>
+    <div class="modal-desc">Please complete the quick verification below to continue and receive your reward.</div>
+    <div id="captchaWidgetBox" style="display:flex;justify-content:center;min-height:65px;margin:16px 0;"></div>
+    <button class="modal-close" onclick="cancelCaptcha()">Cancel</button>
   </div>
 </div>
 
@@ -949,7 +943,6 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 <script>
 // ── Config ──────────────────────────────────────────────────────────
 var API_URL  = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // ← Worker URL
-var TURNSTILE_SITE_KEY = '0x4AAAAAACOf6mYyukJx5XVy';
   var BOT_USER = 'Pmt_Gram_Bot'; // Pmt Gram username without @
   // Same deposit wallet address used in the active deposit system.
   var BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
@@ -1016,8 +1009,6 @@ var WHEEL_DEFAULT_SEGMENTS = [100,500,0,1000,250,2000,5000,10000];
 var wheelRotation = 0;
 var wheelSpinning = false;
 var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gameFinished = false;
-var turnstileWidgetId = null;
-var turnstilePending = null;
 
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[], record:[], recordLoaded:false };
@@ -1106,6 +1097,85 @@ function startHeartbeat(){
 
 // ── API ──────────────────────────────────────────────────────────────
 // The new worker.js routes requests via the path: POST /getState, POST /verifyTask ...
+// ── Cloudflare Turnstile (Captcha) ─────────────────────────────────────
+// The server decides when a captcha is required (every 3 ads / every game
+// reward) and replies with {success:false, requiresCaptcha:true}. When that
+// happens we show this modal, solve the challenge, then silently retry the
+// same API call with the resulting token attached.
+var TURNSTILE_SITE_KEY = '0x4AAAAAACOf6mYyukJx5XVy';
+var captchaWidgetId = null;
+var captchaResolve = null;
+var captchaReject = null;
+
+function openCaptchaModal(){
+  return new Promise(function(resolve, reject){
+    captchaResolve = resolve;
+    captchaReject = reject;
+    openModal('captchaModal');
+    renderCaptchaWidget();
+  });
+}
+
+function renderCaptchaWidget(){
+  var box = document.getElementById('captchaWidgetBox');
+  if (!box) return;
+  if (typeof turnstile === 'undefined' || !turnstile.render){
+    // Turnstile's script may still be loading (it's included with defer).
+    setTimeout(renderCaptchaWidget, 300);
+    return;
+  }
+  if (captchaWidgetId !== null){
+    try { turnstile.remove(captchaWidgetId); } catch(_){}
+    captchaWidgetId = null;
+  }
+  box.innerHTML = '';
+  captchaWidgetId = turnstile.render(box, {
+    sitekey: TURNSTILE_SITE_KEY,
+    theme: 'dark',
+    callback: function(token){
+      var resolve = captchaResolve;
+      captchaResolve = null; captchaReject = null;
+      closeModal('captchaModal');
+      if (resolve) resolve(token);
+    },
+    'error-callback': function(){
+      showToast('Verification failed, please try again','error');
+    },
+    'expired-callback': function(){
+      if (captchaWidgetId !== null) turnstile.reset(captchaWidgetId);
+    }
+  });
+}
+
+function cancelCaptcha(){
+  closeModal('captchaModal');
+  if (captchaWidgetId !== null && typeof turnstile !== 'undefined'){
+    try { turnstile.remove(captchaWidgetId); } catch(_){}
+  }
+  captchaWidgetId = null;
+  var reject = captchaReject;
+  captchaResolve = null; captchaReject = null;
+  if (reject) reject(new Error('captcha_cancelled'));
+}
+
+// Wraps api() so any endpoint that may require a Turnstile captcha (ad
+// rewards every 3 ads, every game reward) transparently prompts the user
+// and retries once solved, without every caller needing its own logic.
+function apiCaptcha(action, data){
+  var payload = data || {};
+  return api(action, payload).then(function(res){
+    if (res && res.requiresCaptcha){
+      return openCaptchaModal().then(function(token){
+        var retryPayload = Object.assign({}, payload, { turnstileToken: token });
+        return api(action, retryPayload);
+      }).catch(function(){
+        return { success:false, error: res.error || 'Verification was cancelled' };
+      });
+    }
+    return res;
+  });
+}
+
 async function api(action, data){
   var payload = data || {};
   // ── Automatically add a device fingerprint to every request (Anti-Fraud) ──────
@@ -1126,126 +1196,6 @@ async function api(action, data){
     if (res && typeof res.serverTime === 'number') S.clockOffsetMs = res.serverTime - Date.now();
     return res;
   });
-}
-
-// ── Cloudflare Turnstile ──────────────────────────────────────────────
-// The widget only creates a short-lived client token. The Worker verifies
-// it with TURNSTILE_SECRET_KEY before granting an ad/game reward.
-function adTurnstileRequired(){
-  var stats = (S.data && S.data.stats) || {};
-  var interval = Number(stats.turnstileAdInterval || 3);
-  return Number(stats.adsSinceTurnstile || 0) >= interval;
-}
-
-function requestTurnstile(reason){
-  return new Promise(function(resolve, reject){
-    if (turnstilePending) {
-      turnstilePending.reject(new Error('Another security check is already open'));
-    }
-    turnstilePending = { resolve:resolve, reject:reject, token:null };
-    var reasonEl = document.getElementById('turnstileReason');
-    var statusEl = document.getElementById('turnstileStatus');
-    var continueBtn = document.getElementById('turnstileContinueBtn');
-    var widgetEl = document.getElementById('turnstileWidget');
-    if (reasonEl) reasonEl.textContent = reason === 'game'
-      ? 'Complete the security check before receiving your game reward.'
-      : 'Complete the security check before watching more rewarded ads.';
-    if (statusEl) statusEl.textContent = 'Complete the check above.';
-    if (continueBtn) { continueBtn.disabled = true; continueBtn.textContent = 'Continue'; }
-    if (widgetEl) widgetEl.innerHTML = '';
-    openModal('turnstileModal');
-
-    var mount = function(){
-      if (!turnstilePending) return;
-      if (!window.turnstile || typeof window.turnstile.render !== 'function'){
-        if (statusEl) statusEl.textContent = 'Security check is still loading. Please try again.';
-        turnstilePending.reject(new Error('Turnstile is unavailable'));
-        turnstilePending = null;
-        closeModal('turnstileModal');
-        return;
-      }
-      try {
-        turnstileWidgetId = window.turnstile.render('#turnstileWidget', {
-          sitekey: TURNSTILE_SITE_KEY,
-          theme: 'dark',
-          size: 'flexible',
-          callback: onTurnstileSolved,
-          'expired-callback': onTurnstileExpired,
-          'error-callback': onTurnstileError
-        });
-      } catch (err) {
-        turnstilePending.reject(err);
-        turnstilePending = null;
-        closeModal('turnstileModal');
-      }
-    };
-    if (window.turnstile && typeof window.turnstile.ready === 'function') {
-      window.turnstile.ready(mount);
-    } else {
-      setTimeout(mount, 800);
-    }
-  });
-}
-
-function onTurnstileSolved(token){
-  if (!turnstilePending) return;
-  turnstilePending.token = token;
-  var statusEl = document.getElementById('turnstileStatus');
-  var btn = document.getElementById('turnstileContinueBtn');
-  if (statusEl) statusEl.textContent = 'Verification complete. Continue to proceed.';
-  if (btn) btn.disabled = false;
-}
-
-function onTurnstileExpired(){
-  if (!turnstilePending) return;
-  turnstilePending.token = null;
-  var statusEl = document.getElementById('turnstileStatus');
-  var btn = document.getElementById('turnstileContinueBtn');
-  if (statusEl) statusEl.textContent = 'The check expired. Please complete it again.';
-  if (btn) btn.disabled = true;
-}
-
-function onTurnstileError(){
-  if (!turnstilePending) return;
-  var statusEl = document.getElementById('turnstileStatus');
-  if (statusEl) statusEl.textContent = 'Unable to verify right now. Please try again.';
-}
-
-function clearTurnstileWidget(){
-  try {
-    if (turnstileWidgetId !== null && window.turnstile && window.turnstile.remove) {
-      window.turnstile.remove(turnstileWidgetId);
-    }
-  } catch(_){}
-  turnstileWidgetId = null;
-  var widgetEl = document.getElementById('turnstileWidget');
-  if (widgetEl) widgetEl.innerHTML = '';
-}
-
-function completeTurnstile(){
-  if (!turnstilePending || !turnstilePending.token) return;
-  var pending = turnstilePending;
-  turnstilePending = null;
-  clearTurnstileWidget();
-  closeModal('turnstileModal');
-  pending.resolve(pending.token);
-}
-
-function cancelTurnstile(){
-  if (!turnstilePending) { closeModal('turnstileModal'); return; }
-  var pending = turnstilePending;
-  turnstilePending = null;
-  clearTurnstileWidget();
-  closeModal('turnstileModal');
-  pending.reject(new Error('Turnstile cancelled'));
-}
-
-function closeTurnstileOutside(e){
-  if (e.target.id === 'turnstileModal') cancelTurnstile();
-}
-
-function requestAdTurnstileIfNeeded(){
-  return adTurnstileRequired() ? requestTurnstile('ad') : Promise.resolve('');
 }
 
 // ── Load state ───────────────────────────────────────────────────────
@@ -2024,9 +1974,8 @@ function renderTasks(tab){
   var btnId = isMonetag ? 'monetagWatchBtn' : isAdsgram ? 'adsgramWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
   var isLocked = (isMonetag || isAdsgram) && (busy || cooldownSeconds > 0);
-   var needsTurnstile = !disabled && adTurnstileRequired();
   var displayButton = busy ? 'Watching...' :
-     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : needsTurnstile ? 'Verify & Watch' : button;
+    cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
    return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
      '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+counter+'</div></div>'+
@@ -2037,12 +1986,6 @@ function watchMonetag(){
   if (adWatchBusy || Date.now() < adCooldownUntil) return;
   var fn = window.show_11638380;
   if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); return; }
-  requestAdTurnstileIfNeeded().then(function(turnstileToken){
-    beginMonetagWatch(fn, turnstileToken);
-  }).catch(function(){});
-}
-
-function beginMonetagWatch(fn, turnstileToken){
   adWatchBusy = true;
   adWatchStartedAt = Date.now();
   renderTasks('ads');
@@ -2057,7 +2000,7 @@ function beginMonetagWatch(fn, turnstileToken){
        showToast('You must watch the ad for 15 seconds to receive the reward','error');
       return;
     }
-     api('claimAdReward', {company:'monetag', turnstileToken:turnstileToken || undefined}).then(function(res){
+     apiCaptcha('claimAdReward', {company:'monetag'}).then(function(res){
       if (!res.success){
         adWatchBusy = false;
         stopAdButtonTimer();
@@ -2070,8 +2013,6 @@ function beginMonetagWatch(fn, turnstileToken){
       S.data.stats = S.data.stats || {};
       S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
        S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-        S.data.stats.adsSinceTurnstile = res.data.adsSinceTurnstile || 0;
-        S.data.stats.turnstileAdInterval = res.data.turnstileAdInterval || S.data.stats.turnstileAdInterval || 3;
        S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
        S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
@@ -2125,17 +2066,11 @@ function watchAdsgram(){
   if (adsgramWatchBusy || Date.now() < adsgramCooldownUntil) return;
   var controller = ensureAdsgramInit();
   if (!controller){ showToast('Ad service is loading, try again','error'); return; }
-   requestAdTurnstileIfNeeded().then(function(turnstileToken){
-     beginAdsgramWatch(controller, turnstileToken);
-   }).catch(function(){});
-}
-
-function beginAdsgramWatch(controller, turnstileToken){
   adsgramWatchBusy = true;
   renderTasks('ads');
   startAdsgramButtonTimer();
   controller.show().then(function(result){
-     api('claimAdReward', {company:'adsgram', turnstileToken:turnstileToken || undefined}).then(function(res){
+    apiCaptcha('claimAdReward', {company:'adsgram'}).then(function(res){
       if (!res.success){
         adsgramWatchBusy = false;
         stopAdsgramButtonTimer();
@@ -2148,8 +2083,6 @@ function beginAdsgramWatch(controller, turnstileToken){
       S.data.stats = S.data.stats || {};
       S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
       S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-       S.data.stats.adsSinceTurnstile = res.data.adsSinceTurnstile || 0;
-       S.data.stats.turnstileAdInterval = res.data.turnstileAdInterval || S.data.stats.turnstileAdInterval || 3;
       S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
       S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
@@ -2527,9 +2460,7 @@ function finishGame(){
   if(gameFinished || !activeGame) return;
   gameFinished=true; clearInterval(gameTimerId);
   var key=activeGame, score=Math.min(key==='xo'?20:100,Math.max(0,gameScore));
-  requestTurnstile('game').then(function(turnstileToken){
-    return api('playGame',{game:key,score:score,turnstileToken:turnstileToken});
-  }).then(function(res){
+  apiCaptcha('playGame',{game:key,score:score}).then(function(res){
     if(!res.success){ showToast(res.error||'Game unavailable','error'); closeGame(); return; }
     S.user.balance=res.data.shibaBalance; updatePmtTonValueDisplays();
     S.data.gamePlays=res.data.gamePlays||S.data.gamePlays||{};
@@ -2543,14 +2474,7 @@ function finishGame(){
     setTimeout(function(){
       showGameAd().then(function(){ closeGame(); });
     },2000);
-  }).catch(function(err){
-    if (err && err.message === 'Turnstile cancelled') {
-      showToast('Complete the security check to receive the game reward','error');
-    } else {
-      showToast('Network error','error');
-    }
-    closeGame();
-  });
+  }).catch(function(){ showToast('Network error','error'); closeGame(); });
 }
 function closeGame(){
   clearInterval(gameTimerId); activeGame=null; gameFinished=true; switchPage('games'); renderGames();
