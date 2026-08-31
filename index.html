@@ -1848,8 +1848,8 @@ function renderTasks(tab){
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
-       adTask('📺','Monetag','+'+fmtShiba(monetagCfg.reward)+' PMT','Watch', 'watchMonetag()', false, Number(adsByCompany.monetag||0), monetagCfg.dailyLimit)+
-       adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit);
+       adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
+       adTask('📺','Monetag','+'+fmtShiba(monetagCfg.reward)+' PMT','Watch', 'watchMonetag()', false, Number(adsByCompany.monetag||0), monetagCfg.dailyLimit);
     return;
   }
 
