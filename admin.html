@@ -492,7 +492,7 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
             <div><h2>إدارة المستخدمين</h2><div class="hint" id="usersCount">جارِ التحميل...</div></div>
           </div>
           <div class="table-wrap"><table>
-            <thead><tr><th>المستخدم</th><th>آيدي تيليجرام</th><th>رصيد PMT</th><th>رصيد TON</th><th>إعلانات اليوم</th><th>إجمالي الإحالات</th><th>آخر ظهور</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+            <thead><tr><th>المستخدم</th><th>آيدي تيليجرام</th><th>رصيد PMT</th><th>رصيد TON</th><th>إعلانات اليوم</th><th>إجمالي الإعلانات</th><th>آخر ظهور</th><th>الحالة</th><th>إجراءات</th></tr></thead>
             <tbody id="usersBody"><tr><td colspan="9" class="loader"><span class="spin"></span></td></tr></tbody>
           </table></div>
         </div>
@@ -739,6 +739,19 @@ let configCache = {};
 let currentView = 'dashboard';
 let wdFilter = 'pending';
 
+// بيجمّع أي تحديثات متتالية سريعة (Firebase بيبعت event لكل تغيير بسيط، ولو
+// عندك مستخدمين كتير بيفتحوا البوت باستمرار الـ users/ node بتتغيّر مرات
+// كتير جدًا في الثانية) وينفّذ الدالة مرة واحدة بس بعد فترة هدوء قصيرة، بدل
+// ما يعيد بناء الجدول بالكامل (مع كل الصور) في كل مرة — وده كان السبب
+// الرئيسي في بطء وتقيل لوحة التحكم.
+function debounce(fn, wait){
+  let t = null;
+  return function(...args){
+    clearTimeout(t);
+    t = setTimeout(()=> fn.apply(this, args), wait);
+  };
+}
+
 /* ---------- helpers ---------- */
 function fmt(n){
   n = Number(n)||0;
@@ -813,6 +826,11 @@ function switchView(view){
   document.getElementById('pageSub').textContent = titles[view][1];
   document.getElementById('globalSearchBox').style.display = (view==='users') ? 'flex' : 'none';
   if(window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+  // الجداول التقيلة (المستخدمين وطلبات السحب) اتأجّل رسمها لحد ما المستخدم
+  // يدخل التبويب بتاعها فعليًا (شوف debounce التحديثات تحت) — فلازم نرسمها
+  // فورًا هنا أول ما يدخل، عشان ميلاقيش الجدول فاضي.
+  if(view==='users') renderUsersTable();
+  if(view==='withdrawals') renderWithdrawals();
 }
 document.getElementById('nav').addEventListener('click', e=>{
   const item = e.target.closest('.nav-item');
@@ -824,11 +842,18 @@ document.getElementById('refreshBtn').addEventListener('click', ()=>{ toast('ا�
 /* =========================================================
    DASHBOARD + USERS  (single users listener drives both)
    ========================================================= */
-db.ref('users').on('value', snap=>{
-  usersCache = snap.val() || {};
+const handleUsersUpdate = debounce(function(){
   renderDashboardStats();
   renderLatestUsers();
-  if(currentView==='users' || true) renderUsersTable();
+  // جدول المستخدمين (لغاية 300 صف بصور) بيتبني بس لو المستخدم فاتح تبويب
+  // "المستخدمين" فعليًا — تبنيه من غير ما حد شايفه كان بيستهلك وقت ومعالجة
+  // من غير أي فايدة.
+  if(currentView==='users') renderUsersTable();
+}, 700);
+
+db.ref('users').on('value', snap=>{
+  usersCache = snap.val() || {};
+  handleUsersUpdate();
 });
 
 function renderDashboardStats(){
@@ -988,30 +1013,154 @@ function openViewUser(id){
     <div class="mini-row"><span>تمت إحالته بواسطة</span><b>${escapeHtml(u.referredBy||'—')}</b></div>
     <div class="mini-row"><span>إعلانات اليوم</span><b>${fmt(adsToday)}</b></div>
     <div class="mini-row"><span>إجمالي الإعلانات</span><b>${fmt(u.totalAdsWatched)}</b></div>
+    <div class="mini-row"><span>إجمالي الإحالات</span><b id="vu_refTotal">جارٍ التحميل...</b></div>
+    <div class="mini-row"><span>الإحالات النشطة</span><b id="vu_refActive">جارٍ التحميل...</b></div>
     <div class="mini-row"><span>اجتاز الاشتراك الإجباري</span><b>${u.forceSubPassed?'نعم':'لا'}</b></div>
     <div class="mini-row"><span>محفظة TON</span><b style="font-size:11px">${escapeHtml(u.tonWallet||u.wallet||'—')}</b></div>
     <div class="mini-row"><span>تاريخ الانضمام</span><b>${fmtDate(u.createdAt)}</b></div>
     <div class="mini-row"><span>آخر ظهور</span><b>${timeAgo(u.lastLogin)}</b></div>
+    <div class="row-actions" style="margin-top:10px">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="loadUserReferrals('${id}')">عرض الإحالات ودرجة النشاط</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="loadUserHistory('${id}')">آخر 5 عمليات من السجل</button>
+    </div>
+    <div id="vu_extra"></div>
   `;
   document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-gold" onclick="closeModal();openEditUser('${id}')">تعديل الرصيد</button>`;
   showModal();
+
+  // إجمالي/نشطة الإحالات: بنجيبها بشكل منفصل وخفيف (once، مش listener دائم)
+  // عشان ما نحمّلش شجرة referrals/ كاملة لكل المستخدمين طول الوقت.
+  db.ref('referrals/'+id).once('value').then(snap=>{
+    const refs = snap.val() || {};
+    const list = Object.values(refs);
+    const total = list.length;
+    const active = list.filter(r=> r && (r.status==='active' || r.status==='completed')).length;
+    const totalEl = document.getElementById('vu_refTotal');
+    const activeEl = document.getElementById('vu_refActive');
+    if(totalEl) totalEl.textContent = fmt(total);
+    if(activeEl) activeEl.textContent = fmt(active);
+  }).catch(()=>{
+    const totalEl = document.getElementById('vu_refTotal');
+    const activeEl = document.getElementById('vu_refActive');
+    if(totalEl) totalEl.textContent = '—';
+    if(activeEl) activeEl.textContent = '—';
+  });
+}
+
+// عرض قائمة إحالات المستخدم (اللي هو دعاهم) + درجة نشاط كل واحد فيهم:
+// كل إحالة محتاجة (payoutDays أيام، افتراضيًا 3) وكل يوم 10 إعلانات
+// عشان تتحول من "معلّق" إلى "نشط" ثم "مكتمل" (نفس منطق referralDays في السيرفر).
+function loadUserReferrals(id){
+  const box = document.getElementById('vu_extra');
+  if(!box) return;
+  box.innerHTML = '<div class="loader" style="padding:14px 0"><span class="spin"></span></div>';
+  db.ref('referrals/'+id).once('value').then(snap=>{
+    const refs = snap.val() || {};
+    const entries = Object.entries(refs);
+    if(!entries.length){
+      box.innerHTML = '<div class="empty" style="padding:14px 0">لا يوجد إحالات لهذا المستخدم</div>';
+      return;
+    }
+    const payoutDays = Math.max(1, Math.floor(Number(configCache.referralPayoutDays) || 3));
+    entries.sort((a,b)=>(b[1].joinedAt||0)-(a[1].joinedAt||0));
+    const dayHeaders = Array.from({length:payoutDays}, (_,i)=>`<th>يوم ${i+1}</th>`).join('');
+    const rows = entries.map(([rid, r])=>{
+      const dr = r.dailyRewards || {};
+      const statusBadge = r.status==='completed' ? '<span class="badge b-green">مكتمل</span>'
+        : r.status==='active' ? '<span class="badge b-gold">نشط</span>'
+        : '<span class="badge b-gray">معلّق</span>';
+      const dayCells = Array.from({length:payoutDays}, (_,i)=>{
+        const d = dr['day'+(i+1)] || {};
+        const claimed = !!d.claimed;
+        const watched = Number(d.adsWatched || 0);
+        return `<td class="mono" style="font-size:11.5px">${claimed ? '✅ 10/10' : (watched+'/10')}</td>`;
+      }).join('');
+      return `<tr>
+        <td><div class="u-name" style="font-size:12.5px">${escapeHtml(r.firstName || (r.username?'@'+r.username:'') || rid)}</div><div class="u-sub mono" style="font-size:10.5px">${escapeHtml(rid)}</div></td>
+        <td>${statusBadge}</td>
+        ${dayCells}
+      </tr>`;
+    }).join('');
+    box.innerHTML = `
+      <div style="margin:12px 0 6px;font-size:12.5px;font-weight:800;color:var(--muted)">قائمة الإحالات ودرجة النشاط (${entries.length})</div>
+      <div class="table-wrap" style="max-height:260px;overflow-y:auto">
+        <table style="width:100%">
+          <thead><tr><th>المُحال</th><th>الحالة</th>${dayHeaders}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }).catch(err=>{
+    box.innerHTML = '<div class="empty" style="padding:14px 0">تعذر تحميل الإحالات: '+escapeHtml(err.message)+'</div>';
+  });
+}
+
+// أسماء عربية مبسّطة لأنواع العمليات المسجّلة في balanceLogs/{telegramId}
+const HISTORY_TYPE_LABELS = {
+  daily_bonus: 'المكافأة اليومية',
+  redeem_code: 'استخدام كود برومو',
+  ad_reward: 'مشاهدة إعلان',
+  mining_reward: 'مكافأة التعدين',
+  game_reward: 'مكافأة لعبة',
+  task_reward: 'مكافأة مهمة (قناة/بوت)',
+  claim_task: 'استلام مكافأة مهمة',
+  wheel_spin: 'عجلة الحظ',
+  combo_claim: 'الكومبو اليومي',
+  referral_daily_reward: 'مكافأة إحالة يومية',
+  referral_commission: 'عمولة إحالة',
+  task_promotion_payment: 'دفع ترويج قناة (TON)',
+  withdrawal: 'طلب سحب',
+  deposit: 'إيداع TON',
+  pmt_to_ton: 'تحويل PMT إلى TON',
+};
+
+// آخر 5 عمليات من سجل رصيد المستخدم (balanceLogs/{telegramId})
+function loadUserHistory(id){
+  const box = document.getElementById('vu_extra');
+  if(!box) return;
+  box.innerHTML = '<div class="loader" style="padding:14px 0"><span class="spin"></span></div>';
+  db.ref('balanceLogs/'+id).limitToLast(5).once('value').then(snap=>{
+    const logs = snap.val() || {};
+    const entries = Object.entries(logs).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+    if(!entries.length){
+      box.innerHTML = '<div class="empty" style="padding:14px 0">لا يوجد عمليات مسجّلة لهذا المستخدم</div>';
+      return;
+    }
+    const rows = entries.map(([lid, l])=>{
+      const amt = Number(l.amount || 0);
+      const sign = amt >= 0 ? '+' : '';
+      const color = amt >= 0 ? '#7ee6a0' : '#ff92a6';
+      const label = HISTORY_TYPE_LABELS[l.type] || l.type || 'عملية';
+      const currency = l.currency || 'PMT';
+      return `<div class="mini-row"><span>${escapeHtml(label)} — ${fmtDate(l.ts)}</span><b style="color:${color}">${sign}${fmt(amt)} ${escapeHtml(currency)}</b></div>`;
+    }).join('');
+    box.innerHTML = `
+      <div style="margin:12px 0 6px;font-size:12.5px;font-weight:800;color:var(--muted)">آخر 5 عمليات من السجل</div>
+      ${rows}
+    `;
+  }).catch(err=>{
+    box.innerHTML = '<div class="empty" style="padding:14px 0">تعذر تحميل السجل: '+escapeHtml(err.message)+'</div>';
+  });
 }
 
 /* =========================================================
    WITHDRAWALS
    ========================================================= */
+const handleWithdrawalsUpdate = debounce(function(){ renderWithdrawals(); }, 700);
 db.ref('withdrawals').on('value', snap=>{
   withdrawalsCache = snap.val() || {};
-  renderWithdrawals();
+  handleWithdrawalsUpdate();
 });
 // نظام دفع آلي منفصل (مش موجود في هذا الملف) بيعالج طلبات السحب ويكتب
 // نتيجة كل عملية تحت withdrawQueue/{wdId} بحقل status:"paid" (أو "failed")،
 // لكنه لا يُحدّث status الأصلي تحت withdrawals/{uid}/{wid} — فكانت الطلبات
 // المدفوعة فعليًا تظل تظهر "معلّقة" في اللوحة. نربط الاثنين هنا عبر wdId.
+// ملحوظة: البوت ده بيكتب فيها بشكل مستمر ومتكرر، وهو سبب رئيسي في تقيل
+// اللوحة قبل إضافة الـ debounce والـ Map (buildQueueIndex) تحت.
 let withdrawQueueCache = {};
 db.ref('withdrawQueue').on('value', snap=>{
   withdrawQueueCache = snap.val() || {};
-  renderWithdrawals();
+  handleWithdrawalsUpdate();
 });
 document.getElementById('wdFilterPills').addEventListener('click', e=>{
   const p = e.target.closest('.pill'); if(!p) return;
@@ -1029,52 +1178,88 @@ function flattenWithdrawals(){
   return out.sort((a,b)=>(b.ts||0)-(a.ts||0));
 }
 
-// يبحث عن قيد في withdrawQueue يطابق طلب السحب ده (بواسطة wdId أو مفتاح
-// العقدة نفسه) ويرجّع الحالة الفعلية بعد الدفع الآلي، لو موجودة.
-function findQueueEntry(w){
-  for(const [qid, q] of Object.entries(withdrawQueueCache)){
-    if(!q) continue;
-    if((q.wdId && q.wdId===w.wid) || qid===w.wid){
-      if(q.userId===undefined || String(q.userId)===String(w.uid)) return q;
-    }
-  }
+// فهرس سريع (Map) لـ withdrawQueue مبني على wdId/مفتاح العقدة، بدل ما كنا
+// بنعمل بحث خطي (loop) جوه كل صف من طلبات السحب — ده كان بيخلي وقت البناء
+// يكبر بشكل تربيعي (عدد الطلبات × عدد قيود الطابور) وهو من أكبر أسباب تقيل
+// اللوحة، خصوصًا إن فيه بوت خارجي بيكتب في withdrawQueue باستمرار.
+function buildQueueIndex(){
+  const map = new Map();
+  Object.entries(withdrawQueueCache).forEach(([qid, q])=>{
+    if(!q) return;
+    map.set(q.wdId || qid, q);
+  });
+  return map;
+}
+
+// يرجّع قيد withdrawQueue المطابق لطلب السحب ده (لو موجود) من الفهرس الجاهز.
+function findQueueEntry(w, queueIndex){
+  const q = queueIndex.get(w.wid);
+  if(!q) return null;
+  if(q.userId===undefined || String(q.userId)===String(w.uid)) return q;
   return null;
 }
 
+// بيوحّد حالة طلب السحب لتكون واحدة من ٣ قيم فقط دايمًا: completed / rejected /
+// pending. المشكلة اللي كانت موجودة: أي قيمة غريبة في w.status (مسافة زيادة،
+// حالة قديمة، حقل ناقص...) كانت بتفضل زي ما هي وتوصف في الجدول كـ"معلّق" (لأن
+// شارة الحالة كانت بتعتبر أي حاجة غير completed/rejected = معلّق)، لكن فلتر
+// تبويب "معلّقة" كان بيقارن بالنص 'pending' بالظبط فمش بيطابقها، فتختفي الطلب
+// من تبويب "معلّقة" وتفضل تظهر بس في "الكل". دلوقتي أي قيمة مش معروفة بتترد
+// صراحة لـ 'pending' فتتطابق مع الفلتر والشارة في نفس الوقت.
 function resolveWithdrawalStatus(w, q){
   if(q){
     if(q.status==='paid' || q.status==='sent' || q.status==='completed') return 'completed';
     if(q.status==='failed' || q.status==='rejected') return 'rejected';
   }
-  return w.status || 'pending';
+  const s = String(w.status || '').trim().toLowerCase();
+  if(s==='completed' || s==='paid' || s==='sent') return 'completed';
+  if(s==='rejected' || s==='failed') return 'rejected';
+  return 'pending';
 }
 
 function renderWithdrawals(){
+  const queueIndex = buildQueueIndex();
   let list = flattenWithdrawals().map(w=>{
-    const q = findQueueEntry(w);
+    const q = findQueueEntry(w, queueIndex);
     return { ...w, _queue: q, _resolvedStatus: resolveWithdrawalStatus(w, q) };
   });
+  // العداد والبادچ لازم يفضلوا محدّثين دايمًا (حتى لو المستخدم مش فاتح تبويب
+  // السحوبات دلوقتي)، لكن بناء الجدول نفسه (تقيل لأنه بيحتوي صور) بيتأجّل
+  // لحد ما التبويب يبقى فعلاً ظاهر — نفس فكرة جدول المستخدمين فوق.
   const pendingCount = list.filter(w=>w._resolvedStatus==='pending').length;
   const badge = document.getElementById('wdBadge');
   if(pendingCount>0){ badge.style.display='inline-flex'; badge.textContent = pendingCount; } else { badge.style.display='none'; }
   document.getElementById('statPendingWd').textContent = 'طلبات سحب معلّقة: ' + fmt(pendingCount);
 
+  if(currentView!=='withdrawals') return;
+
   if(wdFilter!=='all') list = list.filter(w=>w._resolvedStatus===wdFilter);
   const body = document.getElementById('wdBody');
   if(!list.length){ body.innerHTML = emptyRow(8,'لا توجد طلبات سحب في هذا التصنيف'); return; }
 
-  body.innerHTML = list.map(w=>{
+  // مع تراكم آلاف الطلبات المكتملة بمرور الوقت، عرضها كلها في جدول واحد كل
+  // مرة بيتقيل المتصفح — فبنعرض آخر 200 بس (الأحدث)، وبنقول للمستخدم لو
+  // فيه أكتر عشان يستخدم التصنيفات فوق (معلّقة/مكتملة/مرفوضة) لتضييق البحث.
+  const RENDER_LIMIT = 200;
+  const shownList = list.slice(0, RENDER_LIMIT);
+  const truncatedNote = list.length > RENDER_LIMIT
+    ? `<tr><td colspan="8"><div class="empty">بيتم عرض آخر ${fmt(RENDER_LIMIT)} طلب فقط من أصل ${fmt(list.length)} — استخدم التصنيفات فوق لتضييق النتائج</div></td></tr>`
+    : '';
+
+  body.innerHTML = shownList.map(w=>{
     const u = usersCache[w.uid] || {};
     const q = w._queue;
     const statusBadge = w._resolvedStatus==='completed' ? '<span class="badge b-green">مكتمل</span>'
       : w._resolvedStatus==='rejected' ? '<span class="badge b-red">مرفوض</span>'
       : '<span class="badge b-gold">معلّق</span>';
     const paidTitle = (w._resolvedStatus==='completed' && q) ? ` title="دُفع آليًا — TX: ${escapeHtml(q.txHash||'')}"` : '';
+    const viewUserBtn = `<div class="iconbtn" title="عرض تفاصيل المستخدم" onclick="openViewUser('${w.uid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>`;
     const actions = (w._resolvedStatus!=='completed' && w._resolvedStatus!=='rejected') ? `
       <div class="row-actions">
+        ${viewUserBtn}
         <button class="btn btn-gold btn-sm" onclick="approveWithdrawal('${w.uid}','${w.wid}')">موافقة</button>
         <button class="btn btn-danger btn-sm" onclick="rejectWithdrawal('${w.uid}','${w.wid}', ${w.requestedAmount||w.amount||0})">رفض</button>
-      </div>` : (q ? '<span class="muted" title="تم الدفع تلقائيًا عبر نظام الدفع الآلي">آليًا ✓</span>' : '<span class="muted">—</span>');
+      </div>` : `<div class="row-actions">${viewUserBtn}${q ? '<span class="muted" title="تم الدفع تلقائيًا عبر نظام الدفع الآلي">آليًا ✓</span>' : '<span class="muted">—</span>'}</div>`;
     return `<tr>
       <td><div class="u-cell"><img src="${u.photoUrl||AVATAR_FALLBACK}" onerror="this.src='${AVATAR_FALLBACK}'"><div><div class="u-name">${escapeHtml(displayName(u))}</div><div class="u-sub mono">${w.uid}</div></div></div></td>
       <td class="mono">${fmtTon(w.requestedAmount)}</td>
@@ -1085,7 +1270,7 @@ function renderWithdrawals(){
       <td${paidTitle}>${statusBadge}</td>
       <td>${actions}</td>
     </tr>`;
-  }).join('');
+  }).join('') + truncatedNote;
 }
 
 function approveWithdrawal(uid, wid){
@@ -1422,7 +1607,7 @@ db.ref('blocked_accounts').on('value', snap=>{
   blockedCache = snap.val() || {};
   renderBlocked();
   renderDashboardStats();
-  renderUsersTable();
+  if(currentView==='users') renderUsersTable();
 });
 function renderBlocked(){
   const entries = Object.entries(blockedCache).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
