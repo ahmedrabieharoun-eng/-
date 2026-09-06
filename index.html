@@ -581,8 +581,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .forcesub-verify-btn:active{transform:scale(0.97)}
 .forcesub-verify-btn:disabled{opacity:0.6}
 
-/* ── صفحة الحظر (Ban Screen) — تظهر بدلاً من التطبيق بالكامل عند اكتشاف
-   تعدد الحسابات على نفس الجهاز (Device Fingerprint) ───────────────── */
+/* ── Ban Screen — shown instead of the entire app when multiple
+   accounts are detected on the same device (Device Fingerprint) ───── */
 .ban-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px;text-align:center}
 .ban-screen.show{display:flex}
 .ban-card{width:100%;max-width:380px}
@@ -1335,8 +1335,8 @@ async function api(action, data){
     body: JSON.stringify(payload)
   }).then(function(r){ return r.json(); }).then(function(res){
     if (res && typeof res.serverTime === 'number') S.clockOffsetMs = res.serverTime - Date.now();
-    // أي استجابة من أي إندبوينت (وليس getState فقط) قد تُبلّغ عن حظر
-    // الحساب — مثلاً لو تم اكتشاف تعدد الحسابات في منتصف الجلسة.
+    // Any response from any endpoint (not just getState) can report an
+    // account ban — e.g. if multi-accounting is detected mid-session.
     if (res && res.blocked) showBannedScreen(res);
     return res;
   });
@@ -1367,10 +1367,12 @@ function loadState(){
   });
 }
 
-// ── صفحة الحظر (Multi-Account Ban Screen) ───────────────────────────
-// تظهر بمجرد ما أي طلب من طلبات الـAPI يرجّع blocked:true (أول اكتشاف
-// لتعدد الحسابات على نفس الجهاز، أو أي طلب لاحق لحساب محظور مسبقًا).
-// تُخفي التطبيق الرئيسي بالكامل وتوقف الـheartbeat، ولا يمكن تجاوزها.
+// ── Multi-Account Ban Screen ─────────────────────────────────────────
+// Shown as soon as any API request returns blocked:true (either the
+// first detection of multi-accounting on the same device, or any
+// later request for an already-banned account).
+// Hides the main app entirely and stops the heartbeat; cannot be
+// bypassed.
 var _bannedShown = false;
 function showBannedScreen(res){
   if (_bannedShown) return;
@@ -1982,15 +1984,17 @@ function updateLbTimer(){
   var data = S.lb;
   var elT = document.getElementById('lbTimer');
   if (!data || !elT) return;
-  // بنستخدم S.clockOffsetMs (الفرق بين وقت السيرفر ووقت الجهاز) عشان
-  // العد التنازلي يكون دقيق حتى لو ساعة المستخدم مش مضبوطة.
+  // We use S.clockOffsetMs (the difference between server time and
+  // device time) so the countdown stays accurate even if the user's
+  // clock is wrong.
   var now = Date.now() + (S.clockOffsetMs || 0);
   var remain = Math.max(0, (data.weekEndTs || 0) - now);
   if (remain <= 0){
     elT.textContent = 'Distributing prizes…';
     clearInterval(lbTimerInterval);
-    // بنعيد تحميل التصنيف بعد شوية عشان نلقط بداية الأسبوع الجديد
-    // بمجرد ما السيرفر يخلص التوزيع التلقائي.
+    // We reload the leaderboard shortly after to catch the start of
+    // the new week as soon as the server finishes the automatic
+    // distribution.
     setTimeout(loadRecordPage, 5000);
     return;
   }
