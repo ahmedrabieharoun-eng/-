@@ -7,7 +7,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
-<script src="https://libtl.com/sdk.js" data-zone="11638380" data-sdk="show_11638380"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="anti-fraud-frontend.js"></script>
@@ -282,6 +281,121 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .record-amount{font-size:14px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0}
 .record-view-btn{width:100%;margin-top:10px;padding:9px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer}
 .record-view-btn:active{background:rgba(255,255,255,.12)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   REFERRAL LEADERBOARD — full redesign
+   ══════════════════════════════════════════════════════════════════════ */
+@keyframes lbGlowPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,197,66,.45),0 8px 24px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 8px rgba(255,197,66,0),0 8px 24px rgba(0,0,0,.35)}}
+@keyframes lbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes lbSheen{0%{background-position:-160% 0}100%{background-position:260% 0}}
+@keyframes lbPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes lbSpin{to{transform:rotate(360deg)}}
+
+.lb-page-header{padding:16px 20px 4px}
+.lb-page-title{font-size:21px;font-weight:900;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.lb-page-sub{font-size:12.5px;color:var(--text3);margin-top:4px}
+
+/* Hero card: current user's own standing */
+.lb-hero{position:relative;margin:10px 16px 14px;padding:18px 16px;border-radius:22px;overflow:hidden;
+  background:linear-gradient(150deg,rgba(35,183,243,.28),rgba(89,120,245,.16) 45%,rgba(20,17,16,.96));
+  border:1px solid rgba(35,183,243,.4);box-shadow:0 10px 30px rgba(0,0,0,.35);animation:lbPop .45s ease both}
+.lb-hero::before{content:'';position:absolute;inset:-40% -20%;background:
+  radial-gradient(closest-side,rgba(255,255,255,.16),transparent 70%);
+  transform:rotate(8deg);pointer-events:none;opacity:.7}
+.lb-hero-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.lb-hero-avatar-wrap{position:relative;flex-shrink:0}
+.lb-hero-avatar{width:58px;height:58px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#2d1f00,#1a1500);
+  display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;
+  border:2.5px solid rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.lb-hero-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.lb-hero-medal{position:absolute;bottom:-4px;right:-4px;font-size:18px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.lb-hero-info{flex:1;min-width:0}
+.lb-hero-name{font-size:15.5px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-hero-label{font-size:11.5px;color:rgba(255,255,255,.72);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-top:1px}
+.lb-hero-rank{text-align:center;flex-shrink:0;padding-left:6px}
+.lb-hero-rank-num{font-size:26px;font-weight:900;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+.lb-hero-rank-tag{font-size:10px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:.4px;margin-top:2px}
+.lb-hero-stats{display:flex;gap:8px;margin-top:14px;position:relative;z-index:1}
+.lb-hero-stat{flex:1;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:9px 8px;text-align:center;backdrop-filter:blur(2px)}
+.lb-hero-stat-val{font-size:16px;font-weight:800;color:#fff}
+.lb-hero-stat-lbl{font-size:10px;color:rgba(255,255,255,.68);font-weight:600;margin-top:1px}
+
+/* Timer card */
+.lb-timer-card{margin:0 16px 14px;padding:15px 16px;border-radius:18px;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,197,66,.16),rgba(24,21,20,.94));
+  border:1px solid rgba(255,197,66,.35);display:flex;align-items:center;gap:12px}
+.lb-timer-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:19px;background:rgba(255,197,66,.16);border:1px solid rgba(255,197,66,.3);animation:lbFloat 2.6s ease-in-out infinite}
+.lb-timer-body{flex:1;min-width:0}
+.lb-timer-label{font-size:11.5px;color:var(--text2);font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.lb-timer-value{font-size:22px;font-weight:900;color:var(--text);margin-top:2px;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+
+.lb-note{margin:0 16px 16px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);font-size:11.5px;color:var(--text3);line-height:1.55;display:flex;gap:8px;align-items:flex-start}
+.lb-note-icon{flex-shrink:0;font-size:14px;margin-top:1px}
+
+.lb-prizes-strip{display:flex;gap:8px;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none}
+.lb-prizes-strip::-webkit-scrollbar{display:none}
+.lb-prize-chip{flex-shrink:0;padding:7px 13px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);font-size:12px;color:var(--text2);white-space:nowrap;font-weight:600}
+.lb-prize-chip b{color:var(--text)}
+
+/* Section label */
+.lb-section-label{padding:0 20px 10px;font-size:12px;font-weight:800;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.lb-section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.15),transparent)}
+
+/* Podium (top 3) */
+.lb-podium{display:flex;align-items:flex-end;gap:8px;padding:4px 16px 22px;position:relative}
+.lb-podium-slot{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;animation:lbPop .5s ease both}
+.lb-podium-slot.rank2{animation-delay:.05s}
+.lb-podium-slot.rank1{animation-delay:0s;order:2;margin-bottom:14px}
+.lb-podium-slot.rank2{order:1}
+.lb-podium-slot.rank3{order:3;animation-delay:.1s}
+.lb-podium-crown{font-size:20px;margin-bottom:2px;animation:lbFloat 2.2s ease-in-out infinite}
+.lb-podium-avatar-wrap{position:relative;margin-bottom:8px}
+.lb-podium-avatar{border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,#2d1f00,#1a1500);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.lb-podium-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.rank1 .lb-podium-avatar{width:70px;height:70px;font-size:26px;border:3px solid #ffd558;animation:lbGlowPulse 2.4s ease-in-out infinite}
+.rank2 .lb-podium-avatar{width:58px;height:58px;font-size:21px;border:3px solid #cfd8e3}
+.rank3 .lb-podium-avatar{width:58px;height:58px;font-size:21px;border:3px solid #e3a56b}
+.lb-podium-rank-badge{position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#1a1500;border:2px solid rgba(24,21,20,.9)}
+.rank1 .lb-podium-rank-badge{background:linear-gradient(135deg,#ffe08a,#ffb636)}
+.rank2 .lb-podium-rank-badge{background:linear-gradient(135deg,#eef3f8,#b9c4d0)}
+.rank3 .lb-podium-rank-badge{background:linear-gradient(135deg,#f0b57e,#c97a3d)}
+.lb-podium-name{font-size:12.5px;font-weight:700;color:var(--text);max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.lb-podium-count{font-size:11px;color:var(--orange);font-weight:800;margin-top:2px;display:flex;align-items:center;gap:3px}
+.lb-podium-plinth{width:100%;margin-top:9px;border-radius:12px 12px 0 0;text-align:center;padding-top:6px;font-size:15px;font-weight:900;
+  color:rgba(0,0,0,.55);position:relative;overflow:hidden}
+.rank1 .lb-podium-plinth{height:64px;background:linear-gradient(180deg,#ffe08a,#d9a53e)}
+.rank2 .lb-podium-plinth{height:46px;background:linear-gradient(180deg,#eef3f8,#a9b6c4)}
+.rank3 .lb-podium-plinth{height:36px;background:linear-gradient(180deg,#f0b57e,#b56a34)}
+.lb-podium-plinth::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.55) 15%,transparent 30%);
+  background-size:250% 100%;animation:lbSheen 3.2s ease-in-out infinite}
+
+/* List rows (rank 4+) */
+.lb-list{padding:0 16px 8px}
+.lb-item{border-radius:16px;background:linear-gradient(145deg,rgba(52,38,30,.55),rgba(24,21,20,.9));border:1px solid rgba(255,255,255,.1);
+  margin-bottom:8px;padding:11px 13px;display:flex;align-items:center;gap:11px;animation:lbPop .4s ease both;transition:transform .15s ease}
+.lb-item:active{transform:scale(.98)}
+.lb-item.lb-item-me{border-color:rgba(35,183,243,.55);background:linear-gradient(145deg,rgba(35,183,243,.18),rgba(24,21,20,.94));box-shadow:0 0 0 1px rgba(35,183,243,.25) inset}
+.lb-rank-badge{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:800;color:var(--text2);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.lb-avatar{width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#2d1f00,#1a1500);
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--orange);border:1.5px solid rgba(147,92,246,.22)}
+.lb-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.lb-item-info{flex:1;min-width:0}
+.lb-item-name{font-size:13.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-item-you{font-size:10px;color:var(--orange);font-weight:800;margin-left:5px}
+.lb-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.lb-count{font-size:12.5px;color:var(--text2);font-weight:700;display:flex;align-items:center;gap:4px}
+.lb-count b{color:var(--green);font-weight:800}
+.lb-prize-tag{font-size:10.5px;font-weight:800;color:#ffd558}
+
+.lb-loading-row{border-radius:16px;background:rgba(255,255,255,.04);height:58px;margin-bottom:8px;position:relative;overflow:hidden}
+.lb-loading-row::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.08) 20%,transparent 40%);
+  background-size:250% 100%;animation:lbSheen 1.5s ease-in-out infinite}
+
+.lb-refresh-spin{display:inline-block;animation:lbSpin 1s linear infinite}
 .tx-detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:13px}
 .tx-detail-row:last-child{border-bottom:none}
 .tx-detail-label{color:var(--text3);flex-shrink:0}
@@ -467,6 +581,20 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .forcesub-verify-btn:active{transform:scale(0.97)}
 .forcesub-verify-btn:disabled{opacity:0.6}
 
+/* ── صفحة الحظر (Ban Screen) — تظهر بدلاً من التطبيق بالكامل عند اكتشاف
+   تعدد الحسابات على نفس الجهاز (Device Fingerprint) ───────────────── */
+.ban-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px;text-align:center}
+.ban-screen.show{display:flex}
+.ban-card{width:100%;max-width:380px}
+.ban-emoji{font-size:60px;margin-bottom:14px}
+.ban-title{font-size:21px;font-weight:800;color:var(--red);margin-bottom:10px}
+.ban-desc{font-size:13.5px;color:var(--text2);line-height:1.8;margin-bottom:16px}
+.ban-reason-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:14px 16px;margin-bottom:16px;text-align:right;direction:rtl}
+.ban-reason-label{font-size:10.5px;color:var(--red);letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.ban-reason-text{font-size:13px;color:var(--text2);line-height:1.7}
+.ban-id-box{font-size:10.5px;color:var(--text3);margin-top:14px;word-break:break-all;direction:ltr}
+.ban-note{font-size:11.5px;color:var(--text3);margin-top:10px;line-height:1.6}
+
 /* PMT home refresh */
 .home-header{padding-top:20px}
 .balance-card{background:linear-gradient(135deg,#13a8df 0%,#198ee0 48%,#5969ef 100%);border:0;box-shadow:0 14px 34px rgba(18,154,230,.22)}
@@ -520,6 +648,21 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <div class="forcesub-desc">You must join the channels below to use the bot and unlock your referral reward.</div>
     <div class="forcesub-list" id="forceSubList"></div>
     <button class="forcesub-verify-btn" id="forceSubVerifyBtn" onclick="verifyForceSub()">✅ Verify Membership</button>
+  </div>
+</div>
+
+<!-- Multi-Account Ban Screen -->
+<div class="ban-screen" id="banScreen">
+  <div class="ban-card">
+    <div class="ban-emoji">🚫</div>
+    <div class="ban-title">Account Banned</div>
+    <div class="ban-desc">This account has been permanently blocked from using the bot for violating the usage policy.</div>
+    <div class="ban-reason-box">
+      <div class="ban-reason-label">Reason</div>
+      <div class="ban-reason-text" id="banReasonText">Multiple accounts detected on the same device. Only the first account created on this device is allowed to use the bot.</div>
+    </div>
+    <div class="ban-note">Changing your network or IP address will not lift this restriction — the block is tied to this specific device.</div>
+    <div class="ban-id-box" id="banIdText"></div>
   </div>
 </div>
 
@@ -635,7 +778,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
        <div class="ref-banner">
          <div class="ref-banner-title">Invite friends and earn</div>
           <span class="ref-banner-pct" id="refPct">4,000 PMT</span>
-          <div class="ref-banner-desc">Each referral watches 10 ads per day for 3 days.<br>You earn a daily bonus plus 10% of everything they make after activation.</div>
+          <div class="ref-banner-desc">Each referral watches 10 ads — you get paid instantly, one time.<br>Plus 10% of everything they make after activation, forever.</div>
       </div>
 
       <div class="ref-link-section">
@@ -670,7 +813,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
 
       <div class="ref-list-section">
-       <div class="ref-list-title">Referral List · 3 Daily Bonuses</div>
+       <div class="ref-list-title">Referral List · One-Time Bonus</div>
         <div id="refList"><div class="empty-state">No referrals yet</div></div>
         <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMoreRefs()">Load More</button>
       </div>
@@ -759,12 +902,31 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       </div>
     </div>
 
-    <!-- RECORD -->
+    <!-- REFERRAL LEADERBOARD -->
     <div class="page" id="page-record">
-      <div class="record-header"><div class="page-title">Record</div><div style="font-size:13px;color:var(--text3);margin-top:5px">Latest completed withdrawals from our users</div></div>
-      <div class="record-list-section">
-        <div id="recordList"><div class="empty-state">Loading...</div></div>
+      <div class="lb-page-header">
+        <div class="lb-page-title">🏆 Referral Leaderboard</div>
+        <div class="lb-page-sub">Ranked by <b style="color:var(--text2)">active referrals</b> only — top 10 win TON prizes every round, automatically</div>
       </div>
+
+      <div id="lbMyRank"></div>
+
+      <div class="lb-timer-card">
+        <div class="lb-timer-icon">⏳</div>
+        <div class="lb-timer-body">
+          <div class="lb-timer-label">Round ends in</div>
+          <div class="lb-timer-value" id="lbTimer">--:--:--</div>
+        </div>
+      </div>
+
+      <div class="lb-prizes-strip" id="lbPrizesStrip"></div>
+
+      <div class="lb-note"><span class="lb-note-icon">💡</span><span>Only <b style="color:var(--text)">active</b> referrals count toward your rank — invites that haven't completed the required subscription (or were made before this round began) are excluded.</span></div>
+
+      <div id="lbPodiumWrap"></div>
+
+      <div class="lb-section-label" id="lbListLabel">Top 25</div>
+      <div class="lb-list" id="leaderboardList"><div class="lb-loading-row"></div><div class="lb-loading-row"></div><div class="lb-loading-row"></div></div>
     </div>
 
     <!-- LUCKY WHEEL -->
@@ -822,7 +984,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
     </div>
     <div class="nav-item" onclick="switchPage('record')" id="nav-record">
-      <div class="nav-icon">🏆</div><div class="nav-label">Record</div>
+      <div class="nav-icon">🏆</div><div class="nav-label">Ranking</div>
     </div>
   </div>
 </div>
@@ -910,23 +1072,6 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
   </div>
 </div>
 
-<!-- Transaction Detail Modal (Record page) -->
-<div class="modal-overlay" id="txDetailModal" onclick="closeModalOutside(event,'txDetailModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">💸 Transaction Details</div>
-    <div class="tx-detail-row"><span class="tx-detail-label">User</span><span class="tx-detail-value" id="txDetailUser">-</span></div>
-    <div class="tx-detail-row"><span class="tx-detail-label">Amount</span><span class="tx-detail-value" id="txDetailAmount">-</span></div>
-    <div class="tx-detail-row"><span class="tx-detail-label">Fee</span><span class="tx-detail-value" id="txDetailFee">-</span></div>
-    <div class="tx-detail-row"><span class="tx-detail-label">Wallet</span><span class="tx-detail-value" id="txDetailWallet">-</span></div>
-    <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span class="tx-detail-value" id="txDetailStatus">-</span></div>
-    <div class="tx-detail-row"><span class="tx-detail-label">Date</span><span class="tx-detail-value" id="txDetailDate">-</span></div>
-    <div class="tx-detail-row"><span class="tx-detail-label">Transaction ID</span><span class="tx-detail-value" id="txDetailId">-</span></div>
-    <a class="modal-close" id="txDetailTonscanLink" href="#" target="_blank" rel="noopener" style="display:none;margin-top:8px;text-align:center;text-decoration:none">🔗 View on Tonscan</a>
-    <button class="modal-close" style="margin-top:8px" onclick="closeModal('txDetailModal')">Close</button>
-  </div>
-</div>
-
 <!-- Security Captcha Modal (Cloudflare Turnstile) -->
 <div class="modal-overlay" id="captchaModal" onclick="if(event.target.id==='captchaModal')cancelCaptcha()">
   <div class="modal">
@@ -1011,13 +1156,9 @@ var wheelSpinning = false;
 var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gameFinished = false;
 
 // ── State ───────────────────────────────────────────────────────────
-var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[], record:[], recordLoaded:false };
+var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[], lb:null, lbLoaded:false };
 
 var currentTab = 'ads';
-var adWatchBusy = false;
-var adCooldownUntil = 0;
-var adTimerId = null;
-var adWatchStartedAt = 0;
 
 // ── AdsGram ─────────────────────────────────────────────────────────
 var ADSGRAM_BLOCK_ID = '45349';
@@ -1139,7 +1280,7 @@ function renderCaptchaWidget(){
       if (resolve) resolve(token);
     },
     'error-callback': function(){
-      showToast('Verification failed, please try again','error');
+      showToast('Verification failed','error');
     },
     'expired-callback': function(){
       if (captchaWidgetId !== null) turnstile.reset(captchaWidgetId);
@@ -1194,6 +1335,9 @@ async function api(action, data){
     body: JSON.stringify(payload)
   }).then(function(r){ return r.json(); }).then(function(res){
     if (res && typeof res.serverTime === 'number') S.clockOffsetMs = res.serverTime - Date.now();
+    // أي استجابة من أي إندبوينت (وليس getState فقط) قد تُبلّغ عن حظر
+    // الحساب — مثلاً لو تم اكتشاف تعدد الحسابات في منتصف الجلسة.
+    if (res && res.blocked) showBannedScreen(res);
     return res;
   });
 }
@@ -1201,6 +1345,10 @@ async function api(action, data){
 // ── Load state ───────────────────────────────────────────────────────
 function loadState(){
   api('getState', { _initData: S.initData, _startParam: S.startParam }).then(function(res){
+    if (res && res.blocked){
+      showBannedScreen(res);
+      return;
+    }
     if (!res || !res.success){
        if (S.inTelegram) showLoadError((res && res.error) || 'Unable to load your Telegram account');
       else showMockData();
@@ -1217,6 +1365,38 @@ function loadState(){
      if (S.inTelegram) showLoadError('Unable to connect to the server. Open the app from the bot button inside Telegram.');
     else showMockData();
   });
+}
+
+// ── صفحة الحظر (Multi-Account Ban Screen) ───────────────────────────
+// تظهر بمجرد ما أي طلب من طلبات الـAPI يرجّع blocked:true (أول اكتشاف
+// لتعدد الحسابات على نفس الجهاز، أو أي طلب لاحق لحساب محظور مسبقًا).
+// تُخفي التطبيق الرئيسي بالكامل وتوقف الـheartbeat، ولا يمكن تجاوزها.
+var _bannedShown = false;
+function showBannedScreen(res){
+  if (_bannedShown) return;
+  _bannedShown = true;
+  clearInterval(_ldTimer);
+  if (_heartbeatTimer){ clearInterval(_heartbeatTimer); _heartbeatTimer = null; }
+
+  var loading = document.getElementById('loadingScreen');
+  if (loading) loading.classList.add('hidden');
+  var forceSub = document.getElementById('forceSubScreen');
+  if (forceSub) forceSub.classList.remove('show');
+  var app = document.getElementById('mainApp');
+  if (app) app.style.display = 'none';
+
+  var reasonEl = document.getElementById('banReasonText');
+  if (reasonEl && res && res.error) reasonEl.textContent = res.error;
+
+  var idEl = document.getElementById('banIdText');
+  if (idEl){
+    var tgId = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe &&
+      Telegram.WebApp.initDataUnsafe.user && Telegram.WebApp.initDataUnsafe.user.id) || '';
+    idEl.textContent = tgId ? ('ID: ' + tgId) : '';
+  }
+
+  var screen = document.getElementById('banScreen');
+  if (screen) screen.classList.add('show');
 }
 
 function showLoadError(message){
@@ -1322,7 +1502,7 @@ function verifyForceSub(){
       S.data.forceSub = S.data.forceSub || {};
       S.data.forceSub.channels = res.data.channels;
       renderForceSub(S.data.forceSub);
-      showToast('You haven\u2019t joined all channels yet. Join them, then verify again.','error');
+      showToast('Join all channels first','error');
     }
   }).catch(function(){
     btn.disabled = false; btn.textContent = '✅ Verify Membership';
@@ -1367,7 +1547,7 @@ function render(){
    var activity = document.getElementById('homeActivity');
    if (activity) renderActivity(d.balanceLogs || []);
   // Refs page
-   document.getElementById('refPct').textContent = fmtShiba(refReward)+' PMT / day × 3';
+   document.getElementById('refPct').textContent = fmtShiba(refReward)+' PMT';
   document.getElementById('refLinkUrl').textContent = buildRefLink(u.referralCode);
   document.getElementById('refTotal').textContent = totalRefs;
   document.getElementById('refActive').textContent = activeRefs;
@@ -1423,7 +1603,7 @@ function watchMiningAd(){
   if (miningAdBusy || !btn) return;
   if (Number((S.data && S.data.mining && S.data.mining.startedAt) || 0)) return;
   var controller = ensureAdsgramInit();
-  if (!controller){ showToast('Ad service is loading, try again','error'); return; }
+  if (!controller){ showToast('Ad loading, try again','error'); return; }
   miningAdBusy = true; btn.disabled = true;
   controller.show().then(function(){
     return api('startMining', {});
@@ -1440,7 +1620,7 @@ function watchMiningAd(){
 // ── Shared: require a completed AdsGram ad view before running an action ──
 function watchAdThen(onSuccess, onFail){
   var controller = ensureAdsgramInit();
-  if (!controller){ showToast('Ad service is loading, try again','error'); if (onFail) onFail(); return; }
+  if (!controller){ showToast('Ad loading, try again','error'); if (onFail) onFail(); return; }
   controller.show().then(function(){
     onSuccess();
   }).catch(function(err){
@@ -1576,28 +1756,24 @@ function renderRefs(page){
       var name = r.firstName || r.name || 'Unknown';
       if (typeof name !== 'string' || !name.length) name = 'Unknown';
       var handle = r.username ? '@'+r.username : '';
-      var isActive = r.status === 'active';
+      var isCompleted = r.status === 'completed' || r.status === 'active';
        var earned = fmtShiba(r.totalReferralEarned || 0);
        var badge = r.fraudMultipleAccounts
         ? '<span class="ref-user-badge fraud">Multiple Accounts</span>'
-         : r.status === 'completed'
+         : isCompleted
            ? '<span class="ref-user-badge active">Completed</span>'
-           : isActive
-          ? '<span class="ref-user-badge active">Active</span>'
-          : '<span class="ref-user-badge inactive">Inactive</span>';
+          : '<span class="ref-user-badge inactive">Pending</span>';
        var av = r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
        var date = r.joinedAt ? new Date(r.joinedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-        var days = r.days || [1,2,3].map(function(day){ return {day:day,adsWatched:0,adsRequired:10,claimed:false}; });
-        var completedDays = days.filter(function(d){ return d.claimed || Number(d.adsWatched || 0) >= 10; }).length;
-       var daysHtml = '<div class="ref-days">'+days.map(function(d){
-          var dayDone = d.claimed || Number(d.adsWatched || 0) >= 10;
-          return '<div class="ref-day '+(dayDone?'done':'')+'">'+
-            '<div class="ref-day-title">'+(dayDone?'✓ ':'')+'Day '+d.day+'</div>'+
-           '<div>ads '+Math.min(d.adsWatched||0,10)+'/10</div>'+
-         '</div>';
-       }).join('')+'</div>';
-        var earnedTotal = completedDays >= 3
-          ? '<div class="ref-earned-total">All 3 daily bonuses earned — '+earned+' PMT total ✓</div>'
+        var adsWatched = Math.min(Number(r.adsWatched || 0), 10);
+        var progressHtml = '<div class="ref-days">'+
+            '<div class="ref-day '+(isCompleted?'done':'')+'">'+
+              '<div class="ref-day-title">'+(isCompleted?'✓ ':'')+(isCompleted?'Reward claimed':'Watching ads')+'</div>'+
+              '<div>ads '+adsWatched+'/10</div>'+
+            '</div>'+
+          '</div>';
+        var earnedTotal = isCompleted
+          ? '<div class="ref-earned-total">Reward claimed — '+earned+' PMT total ✓</div>'
           : '<div class="ref-earned-total">You earned '+earned+' PMT from this user</div>';
        htmlParts.push('<div class="ref-user-item">'+
         '<div class="ref-user-avatar">'+av+'</div>'+
@@ -1610,12 +1786,12 @@ function renderRefs(page){
            '<span class="ref-user-earn-val">'+earned+'</span>'+
            '<span class="ref-user-earn-lbl">Total earned</span>'+
         '</div>'+
-         daysHtml+
+         progressHtml+
          earnedTotal+
          '<div class="ref-user-details">'+
             (r.fraudMultipleAccounts ? '⚠️ Flagged as multiple accounts from the same device' :
-            completedDays >= 3 ? '✅ All 3 daily bonuses have been earned' :
-              '📺 Watches 10 ads per day for 3 days · Daily reward: <b>'+fmtShiba(r.reward||0)+' PMT</b>')+
+            isCompleted ? '✅ The one-time referral bonus has been credited' :
+              '📺 Watches 10 ads to unlock a one-time reward of <b>'+fmtShiba(r.reward||0)+' PMT</b>')+
         '</div>'+
       '</div>');
     } catch (err) {
@@ -1664,80 +1840,167 @@ function renderWalletHistory(logs){
   }).join('');
 }
 
-// ── Record page (public feed of completed withdrawals) ────────────────
+// ── Weekly Referral Leaderboard page ──────────────────────────────────
+var LB_MEDALS = ['🥇','🥈','🥉'];
+var lbTimerInterval = null;
+
 function loadRecordPage(){
-  var el = document.getElementById('recordList');
+  var el = document.getElementById('leaderboardList');
   if (!el) return;
-  if (!S.recordLoaded) el.innerHTML = '<div class="empty-state">Loading...</div>';
-  api('getWithdrawalsRecord', {}).then(function(res){
+  if (!S.lbLoaded) el.innerHTML = '<div class="lb-loading-row"></div><div class="lb-loading-row"></div><div class="lb-loading-row"></div>';
+  api('getWeeklyLeaderboard', {}).then(function(res){
     if (!res || !res.success){
-      if (!S.recordLoaded) el.innerHTML = '<div class="empty-state">Unable to load record</div>';
+      if (!S.lbLoaded) el.innerHTML = '<div class="empty-state">Unable to load the leaderboard right now</div>';
       return;
     }
-    S.record = res.data.withdrawals || [];
-    S.recordLoaded = true;
-    renderRecord();
+    S.lb = res.data;
+    S.lbLoaded = true;
+    renderLeaderboard();
+    startLbTimer();
   }).catch(function(){
-    if (!S.recordLoaded) el.innerHTML = '<div class="empty-state">Unable to load record</div>';
+    if (!S.lbLoaded) el.innerHTML = '<div class="empty-state">Unable to load the leaderboard right now</div>';
   });
 }
 
-function renderRecord(){
-  var el = document.getElementById('recordList');
-  if (!el) return;
-  var list = S.record || [];
-  if (!list.length){ el.innerHTML = '<div class="empty-state">No completed withdrawals yet</div>'; return; }
-  el.innerHTML = list.map(function(w, i){
-    var name = w.firstName || (w.username ? '@'+w.username : '') || 'User';
-    var av = w.photoUrl ? '<img src="'+w.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase());
-    var amount = Number(w.amount||0).toFixed(4)+' '+(w.currency||'TON');
-    return '<div class="record-item">'+
-        '<div class="record-item-top">'+
-          '<div class="record-user">'+
-            '<div class="record-avatar">'+av+'</div>'+
-            '<div class="record-name">'+esc(name)+'</div>'+
+function renderLeaderboard(){
+  var data = S.lb;
+  if (!data) return;
+  var list = data.leaderboard || [];
+
+  // ── "My rank" hero card ──────────────────────────────────────────
+  var myRankEl = document.getElementById('lbMyRank');
+  if (myRankEl){
+    var myCount = data.myActiveReferrals || data.myReferralsThisWeek || 0;
+    var myRank = data.myRank || null;
+    var myRankTxt = myRank ? ('#'+myRank) : '—';
+    var u = S.user || {};
+    var myName = u.firstName || (u.username ? '@'+u.username : '') || 'You';
+    var myAv = u.photoUrl ? '<img src="'+u.photoUrl+'" alt="">' : esc(myName.charAt(0).toUpperCase());
+    var myMedal = myRank && LB_MEDALS[myRank-1] ? '<div class="lb-hero-medal">'+LB_MEDALS[myRank-1]+'</div>' : '';
+    var totalRanked = list.length ? (data.topLimit || 25) : 0;
+    myRankEl.innerHTML =
+      '<div class="lb-hero">'+
+        '<div class="lb-hero-top">'+
+          '<div class="lb-hero-avatar-wrap"><div class="lb-hero-avatar">'+myAv+'</div>'+myMedal+'</div>'+
+          '<div class="lb-hero-info">'+
+            '<div class="lb-hero-name">'+esc(myName)+'</div>'+
+            '<div class="lb-hero-label">Your standing</div>'+
           '</div>'+
-          '<div class="record-amount">-'+amount+'</div>'+
+          '<div class="lb-hero-rank"><div class="lb-hero-rank-num">'+myRankTxt+'</div><div class="lb-hero-rank-tag">RANK</div></div>'+
         '</div>'+
-        '<button class="record-view-btn" onclick="openRecordTx('+i+')">View Transaction</button>'+
+        '<div class="lb-hero-stats">'+
+          '<div class="lb-hero-stat"><div class="lb-hero-stat-val">'+myCount+'</div><div class="lb-hero-stat-lbl">Active referrals</div></div>'+
+          '<div class="lb-hero-stat"><div class="lb-hero-stat-val">'+(myRank ? 'Top '+Math.max(1,myRank) : '—')+'</div><div class="lb-hero-stat-lbl">This round</div></div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  // ── Prize chips ──────────────────────────────────────────────────
+  var prizesEl = document.getElementById('lbPrizesStrip');
+  if (prizesEl){
+    var prizes = data.prizesTon || [];
+    prizesEl.innerHTML = prizes.map(function(p, i){
+      var medal = LB_MEDALS[i] || ('#'+(i+1));
+      return '<div class="lb-prize-chip">'+medal+' <b>'+p+'</b> TON</div>';
+    }).join('');
+  }
+
+  var podiumWrap = document.getElementById('lbPodiumWrap');
+  var listEl = document.getElementById('leaderboardList');
+  var listLabel = document.getElementById('lbListLabel');
+  if (!listEl) return;
+
+  if (!list.length){
+    if (podiumWrap) podiumWrap.innerHTML = '';
+    if (listLabel) listLabel.style.display = 'none';
+    listEl.innerHTML = '<div class="empty-state">No active referrals yet this round — invite a friend to claim #1! 🚀</div>';
+    return;
+  }
+  if (listLabel) listLabel.style.display = '';
+
+  var isMe = function(r){ return S.user && String(r.telegramId) === String(S.user.telegramId); };
+  var nameOf = function(r){ return r.firstName || (r.username ? '@'+r.username : '') || 'User'; };
+  var avatarOf = function(r, name){ return r.photoUrl ? '<img src="'+r.photoUrl+'" alt="">' : esc(name.charAt(0).toUpperCase()); };
+  var countOf = function(r){ return r.activeReferrals != null ? r.activeReferrals : (r.referralsThisWeek || 0); };
+
+  // ── Podium for top 3 ─────────────────────────────────────────────
+  var top3 = list.slice(0, 3);
+  var rest = list.slice(3);
+  if (podiumWrap && top3.length){
+    var order = ['rank1','rank2','rank3'];
+    podiumWrap.innerHTML = '<div class="lb-podium">'+
+      top3.map(function(r, i){
+        var name = nameOf(r);
+        var cls = order[i] || ('rank'+(i+1));
+        var crown = i === 0 ? '<div class="lb-podium-crown">👑</div>' : '';
+        return '<div class="lb-podium-slot '+cls+'">'+
+          crown+
+          '<div class="lb-podium-avatar-wrap">'+
+            '<div class="lb-podium-avatar">'+avatarOf(r, name)+'</div>'+
+            '<div class="lb-podium-rank-badge">'+r.rank+'</div>'+
+          '</div>'+
+          '<div class="lb-podium-name">'+esc(name)+(isMe(r)?' <span class="lb-item-you">YOU</span>':'')+'</div>'+
+          '<div class="lb-podium-count">👥 '+countOf(r)+'</div>'+
+          '<div class="lb-podium-plinth">'+(r.prizeTon ? '+'+r.prizeTon+' TON' : '#'+r.rank)+'</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  } else if (podiumWrap){
+    podiumWrap.innerHTML = '';
+  }
+
+  // ── List for rank 4+ ─────────────────────────────────────────────
+  if (!rest.length){
+    listEl.innerHTML = list.length <= 3 ? '' : '<div class="empty-state">That\'s everyone in this round so far!</div>';
+    if (!rest.length && list.length <= 3) listLabel.style.display = 'none';
+    return;
+  }
+  listEl.innerHTML = rest.map(function(r, idx){
+    var name = nameOf(r);
+    var av = avatarOf(r, name);
+    var me = isMe(r);
+    var delay = Math.min(idx * 0.03, 0.4);
+    return '<div class="lb-item'+(me?' lb-item-me':'')+'" style="animation-delay:'+delay+'s">'+
+        '<div class="lb-rank-badge">#'+r.rank+'</div>'+
+        '<div class="lb-avatar">'+av+'</div>'+
+        '<div class="lb-item-info"><div class="lb-item-name">'+esc(name)+(me?'<span class="lb-item-you">YOU</span>':'')+'</div></div>'+
+        '<div class="lb-item-right">'+
+          '<div class="lb-count">👥 <b>'+countOf(r)+'</b></div>'+
+          (r.prizeTon ? '<div class="lb-prize-tag">+'+r.prizeTon+' TON</div>' : '')+
+        '</div>'+
       '</div>';
   }).join('');
 }
 
-function openRecordTx(i){
-  var w = (S.record||[])[i];
-  if (!w) return;
-  if (w.txHash){
-    // Opens the transaction link on Tonscan in a new tab directly, without opening the modal
-    window.open('https://tonscan.org/tx/' + w.txHash, '_blank');
-  } else {
-    // If there's no txHash (e.g. still processing), show the withdrawal details instead of opening a broken link
-    openTxDetail(i);
-  }
+function startLbTimer(){
+  if (lbTimerInterval) clearInterval(lbTimerInterval);
+  updateLbTimer();
+  lbTimerInterval = setInterval(updateLbTimer, 1000);
 }
 
-function openTxDetail(i){
-  var w = (S.record||[])[i];
-  if (!w) return;
-  var name = w.firstName || 'User';
-  var handle = w.username ? '@'+w.username : name;
-  document.getElementById('txDetailUser').textContent = handle;
-  document.getElementById('txDetailAmount').textContent = Number(w.amount||0).toFixed(4)+' '+(w.currency||'TON');
-  document.getElementById('txDetailFee').textContent = Number(w.fee||0).toFixed(4)+' '+(w.currency||'TON');
-  var wallet = w.walletAddress || '';
-  document.getElementById('txDetailWallet').textContent = wallet.length > 12 ? (wallet.slice(0,6)+'...'+wallet.slice(-4)) : (wallet || '-');
-  document.getElementById('txDetailStatus').textContent = 'Completed ✅';
-  var d = w.completedAt || w.ts || Date.now();
-  document.getElementById('txDetailDate').textContent = new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  document.getElementById('txDetailId').textContent = w.id || '-';
-  var tonscanLink = document.getElementById('txDetailTonscanLink');
-  if (w.txHash){
-    tonscanLink.href = 'https://tonscan.org/tx/' + w.txHash;
-    tonscanLink.style.display = 'block';
-  } else {
-    tonscanLink.style.display = 'none';
+function updateLbTimer(){
+  var data = S.lb;
+  var elT = document.getElementById('lbTimer');
+  if (!data || !elT) return;
+  // بنستخدم S.clockOffsetMs (الفرق بين وقت السيرفر ووقت الجهاز) عشان
+  // العد التنازلي يكون دقيق حتى لو ساعة المستخدم مش مضبوطة.
+  var now = Date.now() + (S.clockOffsetMs || 0);
+  var remain = Math.max(0, (data.weekEndTs || 0) - now);
+  if (remain <= 0){
+    elT.textContent = 'Distributing prizes…';
+    clearInterval(lbTimerInterval);
+    // بنعيد تحميل التصنيف بعد شوية عشان نلقط بداية الأسبوع الجديد
+    // بمجرد ما السيرفر يخلص التوزيع التلقائي.
+    setTimeout(loadRecordPage, 5000);
+    return;
   }
-  openModal('txDetailModal');
+  var totalSec = Math.floor(remain / 1000);
+  var d = Math.floor(totalSec / 86400);
+  var h = Math.floor((totalSec % 86400) / 3600);
+  var m = Math.floor((totalSec % 3600) / 60);
+  var s = totalSec % 60;
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  elT.textContent = (d > 0 ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s);
 }
 
 // ── TON Wallet ───────────────────────────────────────────────────────────
@@ -1780,7 +2043,7 @@ function submitWithdrawal(){
   var wallet = document.getElementById('withdrawWallet').value.trim();
   var amount = parseFloat(document.getElementById('withdrawAmount').value);
   if (!wallet){ showToast('Enter your TON wallet address','error'); return; }
-  if (!/^([UE]Q)[A-Za-z0-9_-]{46}$/.test(wallet)){ showToast('Invalid TON wallet address. It must start with UQ or EQ.','error'); return; }
+  if (!/^([UE]Q)[A-Za-z0-9_-]{46}$/.test(wallet)){ showToast('Invalid wallet address','error'); return; }
   if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
   if (S.user && amount > Number(S.user.tonBalance || 0)){ showToast('Insufficient TON balance','error'); return; }
   var btn = document.getElementById('withdrawSubmitBtn');
@@ -1932,15 +2195,13 @@ function renderTasks(tab){
     var companies = stats.adCompanies || {};
     var fallbackLimit = stats.adCompanyDailyLimit || cfg.adCompanyDailyLimit || 10;
     var fallbackReward = cfg.adReward || 200;
-    var monetagCfg = companies.monetag || { reward: fallbackReward, dailyLimit: fallbackLimit };
     var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var totalLimit = stats.adDailyTotalLimit || cfg.adDailyLimit || (fallbackLimit * 2);
+    var totalLimit = stats.adDailyTotalLimit || cfg.adDailyLimit || fallbackLimit;
      var watchedTotal = Number(stats.adsWatchedToday || 0);
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
-       adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-       adTask('📺','Monetag','+'+fmtShiba(monetagCfg.reward)+' PMT','Watch', 'watchMonetag()', false, Number(adsByCompany.monetag||0), monetagCfg.dailyLimit);
+       adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit);
     return;
   }
 
@@ -1967,91 +2228,18 @@ function renderTasks(tab){
 }
 
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
-  var isMonetag = name === 'Monetag';
   var isAdsgram = name === 'Adsgram';
-  var busy = isMonetag ? adWatchBusy : isAdsgram ? adsgramWatchBusy : false;
-  var cooldownUntilVal = isMonetag ? adCooldownUntil : isAdsgram ? adsgramCooldownUntil : 0;
-  var btnId = isMonetag ? 'monetagWatchBtn' : isAdsgram ? 'adsgramWatchBtn' : '';
+  var busy = isAdsgram ? adsgramWatchBusy : false;
+  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : 0;
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
-  var isLocked = (isMonetag || isAdsgram) && (busy || cooldownSeconds > 0);
+  var isLocked = isAdsgram && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
    return '<div class="task-item"><div class="task-logo">'+icon+'</div><div class="task-info"><div class="task-name">'+name+'</div>'+
      '<div class="task-reward">'+(disabled?'<span class="maintenance">Under maintenance</span>':reward)+counter+'</div></div>'+
     '<button '+(btnId?'id="'+btnId+'" ':'')+'class="task-btn '+(disabled?'verify':'join')+'" '+((disabled||isLocked)?'disabled':'onclick="'+action+'"')+'>'+displayButton+'</button></div>';
-}
-
-function watchMonetag(){
-  if (adWatchBusy || Date.now() < adCooldownUntil) return;
-  var fn = window.show_11638380;
-  if (typeof fn !== 'function'){ showToast('Ad service is loading, try again','error'); return; }
-  adWatchBusy = true;
-  adWatchStartedAt = Date.now();
-  renderTasks('ads');
-  startAdButtonTimer();
-  Promise.resolve().then(function(){ return fn(); }).then(function(){
-    var watchedFor = Date.now() - adWatchStartedAt;
-    if (watchedFor < 15000){
-      adWatchBusy = false;
-      adCooldownUntil = Date.now() + 5000;
-      startAdButtonTimer();
-      renderTasks('ads');
-       showToast('You must watch the ad for 15 seconds to receive the reward','error');
-      return;
-    }
-     apiCaptcha('claimAdReward', {company:'monetag'}).then(function(res){
-      if (!res.success){
-        adWatchBusy = false;
-        stopAdButtonTimer();
-        renderTasks('ads');
-        showToast(res.error||'Ad reward unavailable','error');
-        return;
-      }
-      S.user.balance = res.data.shibaBalance;
-      updatePmtTonValueDisplays();
-      S.data.stats = S.data.stats || {};
-      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
-       S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-       S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
-       S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
-      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      adWatchBusy = false;
-      adCooldownUntil = Date.now() + 5000;
-      startAdButtonTimer();
-      renderTasks('ads');
-      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-    });
-  }).catch(function(){
-    adWatchBusy = false;
-    stopAdButtonTimer();
-    renderTasks('ads');
-    showToast('The ad could not be completed','error');
-  });
-}
-
-function startAdButtonTimer(){
-  stopAdButtonTimer();
-  adTimerId = setInterval(function(){
-    var btn = document.getElementById('monetagWatchBtn');
-    if (adWatchBusy){
-      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
-      return;
-    }
-    var cooldown = Math.max(0, Math.ceil((adCooldownUntil - Date.now()) / 1000));
-    if (cooldown > 0){
-      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
-    } else {
-      stopAdButtonTimer();
-      adCooldownUntil = 0;
-      renderTasks('ads');
-    }
-  }, 250);
-}
-
-function stopAdButtonTimer(){
-  if (adTimerId){ clearInterval(adTimerId); adTimerId = null; }
 }
 
 // ── AdsGram (rewarded format) ────────────────────────────────────────
@@ -2065,7 +2253,7 @@ function ensureAdsgramInit(){
 function watchAdsgram(){
   if (adsgramWatchBusy || Date.now() < adsgramCooldownUntil) return;
   var controller = ensureAdsgramInit();
-  if (!controller){ showToast('Ad service is loading, try again','error'); return; }
+  if (!controller){ showToast('Ad loading, try again','error'); return; }
   adsgramWatchBusy = true;
   renderTasks('ads');
   startAdsgramButtonTimer();
@@ -2088,7 +2276,7 @@ function watchAdsgram(){
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
       adsgramWatchBusy = false;
-      adsgramCooldownUntil = Date.now() + 5000;
+      adsgramCooldownUntil = Date.now() + 15000;
       startAdsgramButtonTimer();
       renderTasks('ads');
       showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
@@ -2145,7 +2333,7 @@ function doJoinTask(id, btn){
     }
     S.taskJoined[id] = true;
     renderTasks(currentTab);
-    showToast(task.category === 'bots' ? 'Open the bot, wait 3 seconds, then click Verify ✓' : 'Join the channel, then click Verify ✓');
+    showToast(task.category === 'bots' ? 'Open bot, wait 5s, then Verify ✓' : 'Join channel, then Verify ✓');
     if (task.link && window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink){
       try { Telegram.WebApp.openTelegramLink(task.link); } catch(_){}
     } else if (task.link){
