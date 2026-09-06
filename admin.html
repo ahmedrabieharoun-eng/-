@@ -119,6 +119,8 @@ body{
 .btn-danger:hover{background:rgba(255,84,112,.2)}
 .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:9px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-warning{background:rgba(255,165,0,.15);color:#ffb347;border-color:rgba(255,165,0,.3)}
+.btn-warning:hover{background:rgba(255,165,0,.25)}
 
 .content{padding:24px 26px 60px;max-width:1440px;width:100%;margin:0 auto}
 .view{display:none;animation:fadein .25s ease}
@@ -153,6 +155,7 @@ body{
 .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
 .panel-head h2{font-size:16px;font-weight:800}
 .panel-head .hint{font-size:12px;color:var(--muted);margin-top:3px}
+.panel-head .actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ===== tables ===== */
 .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border-soft)}
@@ -176,6 +179,7 @@ tbody tr:last-child td{border-bottom:none}
 .b-gray{background:#1c2338;color:var(--muted)}
 .b-gold{background:rgba(242,184,75,.14);color:var(--gold)}
 .b-red{background:rgba(255,84,112,.14);color:#ff92a6}
+.b-orange{background:rgba(255,165,0,.14);color:#ffb347}
 
 .iconbtn{
   width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;
@@ -490,6 +494,12 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
         <div class="panel">
           <div class="panel-head">
             <div><h2>إدارة المستخدمين</h2><div class="hint" id="usersCount">جارِ التحميل...</div></div>
+            <div class="actions">
+              <button class="btn btn-warning btn-sm" onclick="openResetBalanceModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M8 12l3 3 5-5"/><path d="M12 8v4"/></svg>
+                تصفير الأرصدة
+              </button>
+            </div>
           </div>
           <div class="table-wrap"><table>
             <thead><tr><th>المستخدم</th><th>آيدي تيليجرام</th><th>رصيد PMT</th><th>رصيد TON</th><th>إعلانات اليوم</th><th>إجمالي الإعلانات</th><th>آخر ظهور</th><th>الحالة</th><th>إجراءات</th></tr></thead>
@@ -739,11 +749,6 @@ let configCache = {};
 let currentView = 'dashboard';
 let wdFilter = 'pending';
 
-// بيجمّع أي تحديثات متتالية سريعة (Firebase بيبعت event لكل تغيير بسيط، ولو
-// عندك مستخدمين كتير بيفتحوا البوت باستمرار الـ users/ node بتتغيّر مرات
-// كتير جدًا في الثانية) وينفّذ الدالة مرة واحدة بس بعد فترة هدوء قصيرة، بدل
-// ما يعيد بناء الجدول بالكامل (مع كل الصور) في كل مرة — وده كان السبب
-// الرئيسي في بطء وتقيل لوحة التحكم.
 function debounce(fn, wait){
   let t = null;
   return function(...args){
@@ -826,9 +831,6 @@ function switchView(view){
   document.getElementById('pageSub').textContent = titles[view][1];
   document.getElementById('globalSearchBox').style.display = (view==='users') ? 'flex' : 'none';
   if(window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
-  // الجداول التقيلة (المستخدمين وطلبات السحب) اتأجّل رسمها لحد ما المستخدم
-  // يدخل التبويب بتاعها فعليًا (شوف debounce التحديثات تحت) — فلازم نرسمها
-  // فورًا هنا أول ما يدخل، عشان ميلاقيش الجدول فاضي.
   if(view==='users') renderUsersTable();
   if(view==='withdrawals') renderWithdrawals();
 }
@@ -845,9 +847,6 @@ document.getElementById('refreshBtn').addEventListener('click', ()=>{ toast('ا�
 const handleUsersUpdate = debounce(function(){
   renderDashboardStats();
   renderLatestUsers();
-  // جدول المستخدمين (لغاية 300 صف بصور) بيتبني بس لو المستخدم فاتح تبويب
-  // "المستخدمين" فعليًا — تبنيه من غير ما حد شايفه كان بيستهلك وقت ومعالجة
-  // من غير أي فايدة.
   if(currentView==='users') renderUsersTable();
 }, 700);
 
@@ -946,8 +945,8 @@ function renderUsersTable(){
     <tr>
       <td><div class="u-cell"><img src="${u.photoUrl||AVATAR_FALLBACK}" onerror="this.src='${AVATAR_FALLBACK}'"><div><div class="u-name">${escapeHtml(displayName(u))}</div><div class="u-sub">${u.username?'@'+escapeHtml(u.username):'—'}</div></div></div></td>
       <td class="mono muted">${id}</td>
-      <td class="mono">${fmt(u.balance)}</td>
-      <td class="mono">${fmtTon(u.tonBalance)}</td>
+      <td class="mono" id="bal_${id}">${fmt(u.balance)}</td>
+      <td class="mono" id="ton_${id}">${fmtTon(u.tonBalance)}</td>
       <td class="mono">${fmt(adsToday)}</td>
       <td class="mono">${fmt(u.totalAdsWatched)}</td>
       <td class="muted">${timeAgo(u.lastLogin)}</td>
@@ -955,6 +954,7 @@ function renderUsersTable(){
       <td><div class="row-actions">
         <div class="iconbtn" title="تعديل الرصيد" onclick="openEditUser('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></div>
         <div class="iconbtn" title="عرض التفاصيل" onclick="openViewUser('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="iconbtn" title="تصفير الرصيد" onclick="openResetSingleUser('${id}')" style="color:#ffb347"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M8 12l3 3 5-5"/></svg></div>
       </div></td>
     </tr>`;
   }).join('');
@@ -1028,8 +1028,6 @@ function openViewUser(id){
   document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-gold" onclick="closeModal();openEditUser('${id}')">تعديل الرصيد</button>`;
   showModal();
 
-  // إجمالي/نشطة الإحالات: بنجيبها بشكل منفصل وخفيف (once، مش listener دائم)
-  // عشان ما نحمّلش شجرة referrals/ كاملة لكل المستخدمين طول الوقت.
   db.ref('referrals/'+id).once('value').then(snap=>{
     const refs = snap.val() || {};
     const list = Object.values(refs);
@@ -1047,9 +1045,6 @@ function openViewUser(id){
   });
 }
 
-// عرض قائمة إحالات المستخدم (اللي هو دعاهم) + درجة نشاط كل واحد فيهم:
-// كل إحالة محتاجة (payoutDays أيام، افتراضيًا 3) وكل يوم 10 إعلانات
-// عشان تتحول من "معلّق" إلى "نشط" ثم "مكتمل" (نفس منطق referralDays في السيرفر).
 function loadUserReferrals(id){
   const box = document.getElementById('vu_extra');
   if(!box) return;
@@ -1095,7 +1090,6 @@ function loadUserReferrals(id){
   });
 }
 
-// أسماء عربية مبسّطة لأنواع العمليات المسجّلة في balanceLogs/{telegramId}
 const HISTORY_TYPE_LABELS = {
   daily_bonus: 'المكافأة اليومية',
   redeem_code: 'استخدام كود برومو',
@@ -1114,7 +1108,6 @@ const HISTORY_TYPE_LABELS = {
   pmt_to_ton: 'تحويل PMT إلى TON',
 };
 
-// آخر 5 عمليات من سجل رصيد المستخدم (balanceLogs/{telegramId})
 function loadUserHistory(id){
   const box = document.getElementById('vu_extra');
   if(!box) return;
@@ -1144,6 +1137,135 @@ function loadUserHistory(id){
 }
 
 /* =========================================================
+   RESET BALANCES
+   ========================================================= */
+function openResetBalanceModal(){
+  document.getElementById('modalTitle').textContent = '⚠️ تصفير أرصدة المستخدمين';
+  document.getElementById('modalBody').innerHTML = `
+    <div style="background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.2);border-radius:10px;padding:12px;color:#ffb347;font-size:13px;margin-bottom:4px">
+      ⚠️ هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم تصفير جميع أرصدة PMT و TON للمستخدمين المختارين.
+    </div>
+    <div class="field">
+      <label>نطاق التصفير</label>
+      <select id="reset_scope" style="background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:var(--sans);font-size:13.5px;outline:none;width:100%">
+        <option value="all">جميع المستخدمين</option>
+        <option value="single">مستخدم واحد فقط (سأدخل الآيدي)</option>
+      </select>
+    </div>
+    <div class="field" id="reset_userid_field" style="display:none">
+      <label>آيدي المستخدم (Telegram ID)</label>
+      <input type="text" class="mono" id="reset_userid" placeholder="مثال: 123456789">
+    </div>
+    <div class="field">
+      <label>العملات المطلوب تصفيرها</label>
+      <div style="display:flex;gap:14px;padding:6px 0">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:500;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="reset_pmt" checked> PMT
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:500;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="reset_ton" checked> TON
+        </label>
+      </div>
+    </div>
+  `;
+  document.getElementById('reset_scope').addEventListener('change', function(){
+    document.getElementById('reset_userid_field').style.display = this.value === 'single' ? 'flex' : 'none';
+  });
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    <button class="btn btn-danger" onclick="executeResetBalances()">تأكيد التصفير</button>
+  `;
+  showModal();
+}
+
+function openResetSingleUser(id){
+  const u = usersCache[id] || {};
+  document.getElementById('modalTitle').textContent = '⚠️ تصفير رصيد: ' + displayName(u);
+  document.getElementById('modalBody').innerHTML = `
+    <div style="background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.2);border-radius:10px;padding:12px;color:#ffb347;font-size:13px;margin-bottom:4px">
+      ⚠️ سيتم تصفير رصيد المستخدم <strong>${escapeHtml(displayName(u))}</strong> (${id})
+    </div>
+    <div class="field">
+      <label>العملات المطلوب تصفيرها</label>
+      <div style="display:flex;gap:14px;padding:6px 0">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:500;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="reset_single_pmt" checked> PMT
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:500;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="reset_single_ton" checked> TON
+        </label>
+      </div>
+    </div>
+    <input type="hidden" id="reset_single_id" value="${id}">
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    <button class="btn btn-danger" onclick="executeResetSingleUser()">تأكيد التصفير</button>
+  `;
+  showModal();
+}
+
+function executeResetSingleUser(){
+  const id = document.getElementById('reset_single_id').value;
+  const resetPMT = document.getElementById('reset_single_pmt').checked;
+  const resetTON = document.getElementById('reset_single_ton').checked;
+  if(!resetPMT && !resetTON){
+    toast('يرجى اختيار عملة واحدة على الأقل للتصفير', true);
+    return;
+  }
+  if(!confirm(`⚠️ هل أنت متأكد من تصفير رصيد المستخدم ${id} نهائيًا؟ لا يمكن التراجع!`)) return;
+  const updates = {};
+  if(resetPMT) updates.balance = 0;
+  if(resetTON) updates.tonBalance = 0;
+  db.ref('users/'+id).update(updates)
+    .then(()=>{
+      toast('✓ تم تصفير رصيد المستخدم ' + id);
+      closeModal();
+    })
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+
+function executeResetBalances(){
+  const scope = document.getElementById('reset_scope').value;
+  const resetPMT = document.getElementById('reset_pmt').checked;
+  const resetTON = document.getElementById('reset_ton').checked;
+  if(!resetPMT && !resetTON){
+    toast('يرجى اختيار عملة واحدة على الأقل للتصفير', true);
+    return;
+  }
+  if(scope === 'single'){
+    const userId = document.getElementById('reset_userid').value.trim();
+    if(!userId){
+      toast('يرجى إدخال آيدي المستخدم', true);
+      return;
+    }
+    if(!confirm(`⚠️ هل أنت متأكد من تصفير رصيد المستخدم ${userId} نهائيًا؟ لا يمكن التراجع!`)) return;
+    const updates = {};
+    if(resetPMT) updates.balance = 0;
+    if(resetTON) updates.tonBalance = 0;
+    db.ref('users/'+userId).update(updates)
+      .then(()=>{ toast('✓ تم تصفير رصيد المستخدم ' + userId); closeModal(); })
+      .catch(err=>toast('خطأ: '+err.message, true));
+    return;
+  }
+  // ALL users
+  const list = Object.keys(usersCache);
+  if(!list.length){ toast('لا يوجد مستخدمين للتصفير', true); return; }
+  if(!confirm(`⚠️ هل أنت متأكد من تصفير أرصدة جميع المستخدمين (${list.length} مستخدم) نهائيًا؟ لا يمكن التراجع!`)) return;
+
+  const updates = {};
+  list.forEach(id=>{
+    const u = {};
+    if(resetPMT) u.balance = 0;
+    if(resetTON) u.tonBalance = 0;
+    if(Object.keys(u).length) updates['users/'+id] = u;
+  });
+  db.ref().update(updates)
+    .then(()=>{ toast('✓ تم تصفير أرصدة ' + list.length + ' مستخدم'); closeModal(); })
+    .catch(err=>toast('خطأ: '+err.message, true));
+}
+
+/* =========================================================
    WITHDRAWALS
    ========================================================= */
 const handleWithdrawalsUpdate = debounce(function(){ renderWithdrawals(); }, 700);
@@ -1151,12 +1273,6 @@ db.ref('withdrawals').on('value', snap=>{
   withdrawalsCache = snap.val() || {};
   handleWithdrawalsUpdate();
 });
-// نظام دفع آلي منفصل (مش موجود في هذا الملف) بيعالج طلبات السحب ويكتب
-// نتيجة كل عملية تحت withdrawQueue/{wdId} بحقل status:"paid" (أو "failed")،
-// لكنه لا يُحدّث status الأصلي تحت withdrawals/{uid}/{wid} — فكانت الطلبات
-// المدفوعة فعليًا تظل تظهر "معلّقة" في اللوحة. نربط الاثنين هنا عبر wdId.
-// ملحوظة: البوت ده بيكتب فيها بشكل مستمر ومتكرر، وهو سبب رئيسي في تقيل
-// اللوحة قبل إضافة الـ debounce والـ Map (buildQueueIndex) تحت.
 let withdrawQueueCache = {};
 db.ref('withdrawQueue').on('value', snap=>{
   withdrawQueueCache = snap.val() || {};
@@ -1178,10 +1294,6 @@ function flattenWithdrawals(){
   return out.sort((a,b)=>(b.ts||0)-(a.ts||0));
 }
 
-// فهرس سريع (Map) لـ withdrawQueue مبني على wdId/مفتاح العقدة، بدل ما كنا
-// بنعمل بحث خطي (loop) جوه كل صف من طلبات السحب — ده كان بيخلي وقت البناء
-// يكبر بشكل تربيعي (عدد الطلبات × عدد قيود الطابور) وهو من أكبر أسباب تقيل
-// اللوحة، خصوصًا إن فيه بوت خارجي بيكتب في withdrawQueue باستمرار.
 function buildQueueIndex(){
   const map = new Map();
   Object.entries(withdrawQueueCache).forEach(([qid, q])=>{
@@ -1191,7 +1303,6 @@ function buildQueueIndex(){
   return map;
 }
 
-// يرجّع قيد withdrawQueue المطابق لطلب السحب ده (لو موجود) من الفهرس الجاهز.
 function findQueueEntry(w, queueIndex){
   const q = queueIndex.get(w.wid);
   if(!q) return null;
@@ -1199,13 +1310,6 @@ function findQueueEntry(w, queueIndex){
   return null;
 }
 
-// بيوحّد حالة طلب السحب لتكون واحدة من ٣ قيم فقط دايمًا: completed / rejected /
-// pending. المشكلة اللي كانت موجودة: أي قيمة غريبة في w.status (مسافة زيادة،
-// حالة قديمة، حقل ناقص...) كانت بتفضل زي ما هي وتوصف في الجدول كـ"معلّق" (لأن
-// شارة الحالة كانت بتعتبر أي حاجة غير completed/rejected = معلّق)، لكن فلتر
-// تبويب "معلّقة" كان بيقارن بالنص 'pending' بالظبط فمش بيطابقها، فتختفي الطلب
-// من تبويب "معلّقة" وتفضل تظهر بس في "الكل". دلوقتي أي قيمة مش معروفة بتترد
-// صراحة لـ 'pending' فتتطابق مع الفلتر والشارة في نفس الوقت.
 function resolveWithdrawalStatus(w, q){
   if(q){
     if(q.status==='paid' || q.status==='sent' || q.status==='completed') return 'completed';
@@ -1223,9 +1327,6 @@ function renderWithdrawals(){
     const q = findQueueEntry(w, queueIndex);
     return { ...w, _queue: q, _resolvedStatus: resolveWithdrawalStatus(w, q) };
   });
-  // العداد والبادچ لازم يفضلوا محدّثين دايمًا (حتى لو المستخدم مش فاتح تبويب
-  // السحوبات دلوقتي)، لكن بناء الجدول نفسه (تقيل لأنه بيحتوي صور) بيتأجّل
-  // لحد ما التبويب يبقى فعلاً ظاهر — نفس فكرة جدول المستخدمين فوق.
   const pendingCount = list.filter(w=>w._resolvedStatus==='pending').length;
   const badge = document.getElementById('wdBadge');
   if(pendingCount>0){ badge.style.display='inline-flex'; badge.textContent = pendingCount; } else { badge.style.display='none'; }
@@ -1237,9 +1338,6 @@ function renderWithdrawals(){
   const body = document.getElementById('wdBody');
   if(!list.length){ body.innerHTML = emptyRow(8,'لا توجد طلبات سحب في هذا التصنيف'); return; }
 
-  // مع تراكم آلاف الطلبات المكتملة بمرور الوقت، عرضها كلها في جدول واحد كل
-  // مرة بيتقيل المتصفح — فبنعرض آخر 200 بس (الأحدث)، وبنقول للمستخدم لو
-  // فيه أكتر عشان يستخدم التصنيفات فوق (معلّقة/مكتملة/مرفوضة) لتضييق البحث.
   const RENDER_LIMIT = 200;
   const shownList = list.slice(0, RENDER_LIMIT);
   const truncatedNote = list.length > RENDER_LIMIT
@@ -1521,7 +1619,6 @@ function openPromoCodeModal(code){
 
 function savePromoCode(existingCode){
   const rawCode = existingCode || document.getElementById('p_code').value.trim();
-  // نفس تعقيم الكود المستخدم في handleRedeemCode بالبوت بالضبط
   const code = rawCode.toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,64);
   const reward = Math.floor(Number(document.getElementById('p_reward').value))||0;
   const maxUsesRaw = document.getElementById('p_maxUses').value.trim();
