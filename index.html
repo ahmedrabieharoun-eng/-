@@ -594,6 +594,13 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 .ban-reason-text{font-size:13px;color:var(--text2);line-height:1.7}
 .ban-id-box{font-size:10.5px;color:var(--text3);margin-top:14px;word-break:break-all;direction:ltr}
 .ban-note{font-size:11.5px;color:var(--text3);margin-top:10px;line-height:1.6}
+.ban-linked-accounts{margin-top:16px;text-align:left;direction:ltr}
+.ban-linked-accounts:empty{display:none}
+.ban-linked-label{font-size:10.5px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.ban-linked-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px}
+.ban-linked-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.08)}
+.ban-linked-name{font-size:13px;font-weight:700;color:var(--text)}
+.ban-linked-username{font-size:11.5px;color:var(--text3)}
 
 /* PMT home refresh */
 .home-header{padding-top:20px}
@@ -662,6 +669,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
       <div class="ban-reason-text" id="banReasonText">Multiple accounts detected on the same device. Only the first account created on this device is allowed to use the bot.</div>
     </div>
     <div class="ban-note">Changing your network or IP address will not lift this restriction — the block is tied to this specific device.</div>
+    <div class="ban-linked-accounts" id="banLinkedAccounts"></div>
     <div class="ban-id-box" id="banIdText"></div>
   </div>
 </div>
@@ -1323,9 +1331,10 @@ async function api(action, data){
   try {
     if (window.AntiFraud) {
       var fraud = await window.AntiFraud.collect();
-      payload._deviceFingerprint = fraud.fingerprint;
+      payload._deviceFingerprint = fraud.fingerprint;   // deprecated combined hash — kept for backward compat with the server only
       payload._deviceId          = fraud.deviceId;
       payload._suspiciousFlags   = fraud.suspiciousFlags;
+      payload._signals           = fraud.signals;       // NEW: per-signal hashes so the server can score matches instead of one all-or-nothing compare
     }
   } catch(_) {}
   // ─────────────────────────────────────────────────────────────────
@@ -1390,6 +1399,12 @@ function showBannedScreen(res){
   var reasonEl = document.getElementById('banReasonText');
   if (reasonEl && res && res.error) reasonEl.textContent = res.error;
 
+  // Expects the server to include, on the blocked response, a
+  // `linkedAccounts` array of the other accounts it found sharing this
+  // device: [{ name, username, photoUrl }, ...]. Purely informational —
+  // rendering an empty/missing array just leaves the box empty.
+  renderLinkedAccounts(res && res.linkedAccounts);
+
   var idEl = document.getElementById('banIdText');
   if (idEl){
     var tgId = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe &&
@@ -1399,6 +1414,31 @@ function showBannedScreen(res){
 
   var screen = document.getElementById('banScreen');
   if (screen) screen.classList.add('show');
+}
+
+function escapeHtmlClient(str){
+  return String(str == null ? '' : str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function renderLinkedAccounts(accounts){
+  var box = document.getElementById('banLinkedAccounts');
+  if (!box) return;
+  if (!accounts || !accounts.length){ box.innerHTML = ''; return; }
+  var label = '<div class="ban-linked-label">Other accounts on this device</div>';
+  var items = accounts.map(function(a){
+    var photo = a && a.photoUrl ? escapeHtmlClient(a.photoUrl) : '';
+    var name  = escapeHtmlClient((a && a.name) || 'Unknown');
+    var uname = a && a.username ? ('@' + escapeHtmlClient(a.username)) : '—';
+    var avatar = photo
+      ? '<img class="ban-linked-avatar" src="' + photo + '" alt="">'
+      : '<div class="ban-linked-avatar"></div>';
+    return '<div class="ban-linked-item">' + avatar +
+      '<div><div class="ban-linked-name">' + name + '</div>' +
+      '<div class="ban-linked-username">' + uname + '</div></div></div>';
+  }).join('');
+  box.innerHTML = label + items;
 }
 
 function showLoadError(message){
