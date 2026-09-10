@@ -8,7 +8,7 @@
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-<script src="https://cdn.adexium.tech/assets/js/adexium-widget.min.js"></script>
+<script type="text/javascript" src="https://cdn.techtg.space/assets/js/tg-ads-co-widget.min.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="anti-fraud-frontend.js"></script>
 <style>
@@ -1175,11 +1175,14 @@ var adsgramController = null;
 var adsgramWatchBusy = false;
 var adsgramCooldownUntil = 0;
 var adsgramTimerId = null;
+
+// ── Adexium ─────────────────────────────────────────────────────────
 var ADEXIUM_WIDGET_ID = 'be8d1855-db81-4a16-84ea-d8d5ed0c5de7';
-var adexiumController = null;
+var adexiumInstance = null;
 var adexiumWatchBusy = false;
 var adexiumCooldownUntil = 0;
 var adexiumTimerId = null;
+
 var miningTimerId = null;
 var miningAdBusy = false;
 
@@ -2245,15 +2248,15 @@ function renderTasks(tab){
     var companies = stats.adCompanies || {};
     var fallbackLimit = stats.adCompanyDailyLimit || cfg.adCompanyDailyLimit || 10;
     var fallbackReward = cfg.adReward || 200;
-     var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
-     var adexiumCfg = companies.adexium || { reward: fallbackReward, dailyLimit: fallbackLimit };
+    var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
+    var adexiumCfg = companies.adexium || { reward: fallbackReward, dailyLimit: fallbackLimit };
     var totalLimit = stats.adDailyTotalLimit || cfg.adDailyLimit || fallbackLimit;
      var watchedTotal = Number(stats.adsWatchedToday || 0);
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
-        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-        adTask('📣','ADEXUIM','+'+fmtShiba(adexiumCfg.reward)+' PMT','Watch', 'watchAdexium()', false, Number(adsByCompany.adexium||0), adexiumCfg.dailyLimit);
+       adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
+       adTask('📢','Adexium','+'+fmtShiba(adexiumCfg.reward)+' PMT','Watch', 'watchAdexium()', false, Number(adsByCompany.adexium||0), adexiumCfg.dailyLimit);
     return;
   }
 
@@ -2280,13 +2283,13 @@ function renderTasks(tab){
 }
 
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
-   var isAdsgram = name === 'Adsgram';
-   var isAdexium = name === 'ADEXUIM';
-   var busy = isAdsgram ? adsgramWatchBusy : isAdexium ? adexiumWatchBusy : false;
-   var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isAdexium ? adexiumCooldownUntil : 0;
-   var btnId = isAdsgram ? 'adsgramWatchBtn' : isAdexium ? 'adexiumWatchBtn' : '';
+  var isAdsgram = name === 'Adsgram';
+  var isAdexium = name === 'Adexium';
+  var busy = isAdsgram ? adsgramWatchBusy : isAdexium ? adexiumWatchBusy : false;
+  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isAdexium ? adexiumCooldownUntil : 0;
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : isAdexium ? 'adexiumWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
-   var isLocked = (isAdsgram || isAdexium) && (busy || cooldownSeconds > 0);
+  var isLocked = (isAdsgram || isAdexium) && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
@@ -2365,87 +2368,75 @@ function stopAdsgramButtonTimer(){
   if (adsgramTimerId){ clearInterval(adsgramTimerId); adsgramTimerId = null; }
 }
 
-// ── ADEXUIM (Adexium interstitial format) ────────────────────────────
+// ── Adexium (rewarded format) ────────────────────────────────────────
 function ensureAdexiumInit(){
-  if (adexiumController) return adexiumController;
+  if (adexiumInstance) return adexiumInstance;
   if (!window.AdexiumWidget) return null;
-  try {
-    adexiumController = new window.AdexiumWidget({
-      wid: ADEXIUM_WIDGET_ID,
-      adFormat: 'interstitial',
-      debug: false
-    });
-  } catch (_) {
-    adexiumController = null;
-  }
-  return adexiumController;
+  adexiumInstance = new window.AdexiumWidget({
+    wid: ADEXIUM_WIDGET_ID,
+    adFormat: 'interstitial',
+    debug: false
+  });
+  return adexiumInstance;
 }
 
 function watchAdexium(){
   if (adexiumWatchBusy || Date.now() < adexiumCooldownUntil) return;
-  var controller = ensureAdexiumInit();
-  if (!controller){ showToast('ADEXUIM ad loading, try again','error'); return; }
-
+  var instance = ensureAdexiumInit();
+  if (!instance){ showToast('Ad loading, try again','error'); return; }
   adexiumWatchBusy = true;
   renderTasks('ads');
+  startAdexiumButtonTimer();
 
-  var adPromise = new Promise(function(resolve, reject){
-    var settled = false;
-    var receivedListener = function(ad){
-      try { controller.displayAd(ad); }
-      catch (_) { if (!settled){ settled = true; cleanup(); reject(new Error('Ad display failed')); } }
-    };
-    var completedListener = function(){
-      if (settled) return;
-      settled = true; cleanup(); resolve();
-    };
-    var noAdListener = function(){
-      if (settled) return;
-      settled = true; cleanup(); reject(new Error('No ADEXUIM ad found'));
-    };
-    var closedListener = function(){
-      if (settled) return;
-      settled = true; cleanup(); reject(new Error('Ad was not completed'));
-    };
-    function cleanup(){
-      try { controller.off('adReceived', receivedListener); } catch (_) {}
-      try { controller.off('adPlaybackCompleted', completedListener); } catch (_) {}
-      try { controller.off('noAdFound', noAdListener); } catch (_) {}
-      try { controller.off('adClosed', closedListener); } catch (_) {}
-    }
-    try {
-      controller.on('adReceived', receivedListener);
-      controller.on('adPlaybackCompleted', completedListener);
-      controller.on('noAdFound', noAdListener);
-      controller.on('adClosed', closedListener);
-      controller.requestAd('interstitial');
-    } catch (_) {
-      if (!settled){ settled = true; cleanup(); reject(new Error('ADEXUIM unavailable')); }
-    }
-  });
-
-  adPromise.then(function(){
-    return apiCaptcha('claimAdReward', {company:'adexium'});
-  }).then(function(res){
-    if (!res.success) throw new Error(res.error || 'Ad reward unavailable');
-    S.user.balance = res.data.shibaBalance;
-    S.data.stats = S.data.stats || {};
-    S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
-    S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-    S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
-    S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
-    S.data.stats.earnedToday = (S.data.stats.earnedToday || 0) + res.data.shibaAdded;
-    updatePmtTonValueDisplays();
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    adexiumCooldownUntil = Date.now() + 15000;
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉', null, true);
-  }).catch(function(err){
-    showToast((err && err.message) || 'ADEXUIM ad was not completed','error');
-  }).then(function(){
+  var settled = false;
+  function cleanup(){
+    instance.off('adReceived', onReceived);
+    instance.off('noAdFound', onNoAd);
+    instance.off('adPlaybackCompleted', onCompleted);
+  }
+  function onReceived(ad){
+    instance.displayAd(ad);
+  }
+  function onNoAd(){
+    if (settled) return;
+    settled = true; cleanup();
     adexiumWatchBusy = false;
-    startAdexiumButtonTimer();
+    stopAdexiumButtonTimer();
     renderTasks('ads');
-  });
+    showToast('No ad available, try again later','error');
+  }
+  function onCompleted(){
+    if (settled) return;
+    settled = true; cleanup();
+    apiCaptcha('claimAdReward', {company:'adexium'}).then(function(res){
+      if (!res.success){
+        adexiumWatchBusy = false;
+        stopAdexiumButtonTimer();
+        renderTasks('ads');
+        showToast(res.error||'Ad reward unavailable','error');
+        return;
+      }
+      S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
+      S.data.stats = S.data.stats || {};
+      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
+      S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
+      S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
+      S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
+      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      adexiumWatchBusy = false;
+      adexiumCooldownUntil = Date.now() + 15000;
+      startAdexiumButtonTimer();
+      renderTasks('ads');
+      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+    });
+  }
+
+  instance.on('adReceived', onReceived);
+  instance.on('noAdFound', onNoAd);
+  instance.on('adPlaybackCompleted', onCompleted);
+  instance.requestAd('interstitial');
 }
 
 function startAdexiumButtonTimer(){
