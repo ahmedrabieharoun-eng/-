@@ -865,7 +865,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
          </div>
          <input class="wallet-input" id="withdrawWallet" placeholder="TON Wallet Address (UQ...)">
          <input class="wallet-input" id="withdrawAmount" type="number" step="0.01" inputmode="decimal" placeholder="TON amount">
-          <div class="withdraw-fee-card">Withdrawal fee: <b>5%</b><div class="withdraw-net"><span>Amount you will receive after the fee</span><strong id="withdrawNetAmount">0.0000 TON</strong></div></div>
+          <div class="withdraw-fee-card">Withdrawal fee: <b>10%</b><div class="withdraw-net"><span>Amount you will receive after the fee</span><strong id="withdrawNetAmount">0.0000 TON</strong></div></div>
          <button class="wallet-submit" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit TON Withdrawal</button>
         <button class="modal-close" style="margin-top:8px" onclick="closeWithdrawForm()">Cancel</button>
       </div>
@@ -2069,7 +2069,7 @@ function updateWithdrawalNetAmount(){
   var output = document.getElementById('withdrawNetAmount');
   if (!input || !output) return;
   var amount = Number(input.value || 0);
-  var net = Number.isFinite(amount) && amount > 0 ? amount * 0.95 : 0;
+  var net = Number.isFinite(amount) && amount > 0 ? amount * 0.90 : 0;
   output.textContent = net.toFixed(4) + ' TON';
 }
 
