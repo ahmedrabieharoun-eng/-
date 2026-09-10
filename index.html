@@ -2375,7 +2375,7 @@ function ensureAdexiumInit(){
   adexiumInstance = new window.AdexiumWidget({
     wid: ADEXIUM_WIDGET_ID,
     adFormat: 'interstitial',
-    debug: false
+    debug: true // ⚠️ TEMP: مؤقتًا للتجربة فقط - رجّعها false قبل النشر النهائي
   });
   return adexiumInstance;
 }
