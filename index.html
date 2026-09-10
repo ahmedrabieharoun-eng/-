@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,6 @@
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-<script src="https://pl31238802.profitableratecpmnetwork.com/45/11/a6/4511a652e85f22654dc1e4daf61b8036.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="anti-fraud-frontend.js"></script>
 <style>
@@ -1184,11 +1184,6 @@ var adexiumWatchBusy = false;
 var adexiumCooldownUntil = 0;
 var adexiumTimerId = null;
 
-// ── Adstera ─────────────────────────────────────────────────────────
-var adsteraWatchBusy = false;
-var adsteraCooldownUntil = 0;
-var adsteraTimerId = null;
-
 var miningTimerId = null;
 var miningAdBusy = false;
 
@@ -2256,15 +2251,13 @@ function renderTasks(tab){
     var fallbackReward = cfg.adReward || 200;
     var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
     var adexiumCfg = companies.adexium || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var adsteraCfg = companies.adstera || { reward: fallbackReward, dailyLimit: fallbackLimit };
     var totalLimit = stats.adDailyTotalLimit || cfg.adDailyLimit || fallbackLimit;
      var watchedTotal = Number(stats.adsWatchedToday || 0);
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-       adTask('📢','Adexium','+'+fmtShiba(adexiumCfg.reward)+' PMT','Watch', 'watchAdexium()', false, Number(adsByCompany.adexium||0), adexiumCfg.dailyLimit)+
-       adTask('🟠','Adstera','+'+fmtShiba(adsteraCfg.reward)+' PMT','Watch', 'watchAdstera()', false, Number(adsByCompany.adstera||0), adsteraCfg.dailyLimit);
+       adTask('📢','Adexium','+'+fmtShiba(adexiumCfg.reward)+' PMT','Watch', 'watchAdexium()', false, Number(adsByCompany.adexium||0), adexiumCfg.dailyLimit);
     return;
   }
 
@@ -2293,12 +2286,11 @@ function renderTasks(tab){
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isAdsgram = name === 'Adsgram';
   var isAdexium = name === 'Adexium';
-  var isAdstera = name === 'Adstera';
-  var busy = isAdsgram ? adsgramWatchBusy : isAdexium ? adexiumWatchBusy : isAdstera ? adsteraWatchBusy : false;
-  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isAdexium ? adexiumCooldownUntil : isAdstera ? adsteraCooldownUntil : 0;
-  var btnId = isAdsgram ? 'adsgramWatchBtn' : isAdexium ? 'adexiumWatchBtn' : isAdstera ? 'adsteraWatchBtn' : '';
+  var busy = isAdsgram ? adsgramWatchBusy : isAdexium ? adexiumWatchBusy : false;
+  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isAdexium ? adexiumCooldownUntil : 0;
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : isAdexium ? 'adexiumWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
-  var isLocked = (isAdsgram || isAdexium || isAdstera) && (busy || cooldownSeconds > 0);
+  var isLocked = (isAdsgram || isAdexium) && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
@@ -2469,72 +2461,6 @@ function startAdexiumButtonTimer(){
 
 function stopAdexiumButtonTimer(){
   if (adexiumTimerId){ clearInterval(adexiumTimerId); adexiumTimerId = null; }
-}
-
-// ── Adstera (Social Bar — no native "ad completed" callback) ─────────
-// Adstera's Social Bar script self-injects and has no SDK method that
-// returns a promise when a view finishes (unlike Adsgram/Adexium), so we
-// simulate a short watch period, then claim the reward the same way.
-var ADSTERA_WATCH_SECONDS = 5;
-
-function watchAdstera(){
-  if (adsteraWatchBusy || Date.now() < adsteraCooldownUntil) return;
-  adsteraWatchBusy = true;
-  renderTasks('ads');
-  startAdsteraButtonTimer();
-  setTimeout(function(){
-    apiCaptcha('claimAdReward', {company:'adstera'}).then(function(res){
-      if (!res.success){
-        adsteraWatchBusy = false;
-        stopAdsteraButtonTimer();
-        renderTasks('ads');
-        showToast(res.error||'Ad reward unavailable','error');
-        return;
-      }
-      S.user.balance = res.data.shibaBalance;
-      updatePmtTonValueDisplays();
-      S.data.stats = S.data.stats || {};
-      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
-      S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-      S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
-      S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
-      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      adsteraWatchBusy = false;
-      adsteraCooldownUntil = Date.now() + 15000;
-      startAdsteraButtonTimer();
-      renderTasks('ads');
-      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-    }).catch(function(){
-      adsteraWatchBusy = false;
-      stopAdsteraButtonTimer();
-      renderTasks('ads');
-      showToast('Network error','error');
-    });
-  }, ADSTERA_WATCH_SECONDS * 1000);
-}
-
-function startAdsteraButtonTimer(){
-  stopAdsteraButtonTimer();
-  adsteraTimerId = setInterval(function(){
-    var btn = document.getElementById('adsteraWatchBtn');
-    if (adsteraWatchBusy){
-      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
-      return;
-    }
-    var cooldown = Math.max(0, Math.ceil((adsteraCooldownUntil - Date.now()) / 1000));
-    if (cooldown > 0){
-      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
-    } else {
-      stopAdsteraButtonTimer();
-      adsteraCooldownUntil = 0;
-      renderTasks('ads');
-    }
-  }, 250);
-}
-
-function stopAdsteraButtonTimer(){
-  if (adsteraTimerId){ clearInterval(adsteraTimerId); adsteraTimerId = null; }
 }
 
 function switchTab(el, tab){
