@@ -2279,7 +2279,6 @@ function renderTasks(tab){
     // adexium is kept only as a backward-compatible Firebase alias. The
     // canonical company name exposed to users and the API is USL.
     var uslCfg = companies.usl || companies.adexium || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var gigapubCfg = companies.gigapub || { reward: fallbackReward, dailyLimit: fallbackLimit };
     adsgramCfg = {
       reward: getAdNumber(adsgramCfg.reward, fallbackReward),
       dailyLimit: getAdNumber(adsgramCfg.dailyLimit, fallbackLimit)
@@ -2288,6 +2287,7 @@ function renderTasks(tab){
       reward: getAdNumber(uslCfg.reward, fallbackReward),
       dailyLimit: getAdNumber(uslCfg.dailyLimit, fallbackLimit)
     };
+    var gigapubCfg = companies.gigapub || { reward: fallbackReward, dailyLimit: fallbackLimit };
     gigapubCfg = {
       reward: getAdNumber(gigapubCfg.reward, fallbackReward),
       dailyLimit: getAdNumber(gigapubCfg.dailyLimit, fallbackLimit)
@@ -2299,7 +2299,7 @@ function renderTasks(tab){
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
        adTask('🗼','USL','+'+fmtShiba(uslCfg.reward)+' PMT','Watch', 'watchUsl()', false, Number(adsByCompany.usl != null ? adsByCompany.usl : (adsByCompany.adexium || 0)), uslCfg.dailyLimit)+
-       adTask('📢','GigaPub','+'+fmtShiba(gigapubCfg.reward)+' PMT','Watch', 'watchGigapub()', false, Number(adsByCompany.gigapub||0), gigapubCfg.dailyLimit);
+       adTask('📦','GigaPub','+'+fmtShiba(gigapubCfg.reward)+' PMT','Watch', 'watchGigapub()', false, Number(adsByCompany.gigapub||0), gigapubCfg.dailyLimit);
     return;
   }
 
@@ -2405,6 +2405,63 @@ function startAdsgramButtonTimer(){
 
 function stopAdsgramButtonTimer(){
   if (adsgramTimerId){ clearInterval(adsgramTimerId); adsgramTimerId = null; }
+}
+
+// ── GigaPub (rewarded format) ───────────────────────────────────────────
+function watchGigapub(){
+  if (gigapubWatchBusy || Date.now() < gigapubCooldownUntil) return;
+  if (typeof window.showGiga !== 'function'){ showToast('Ad loading, try again','error'); return; }
+  gigapubWatchBusy = true;
+  renderTasks('ads');
+  startGigapubButtonTimer();
+  window.showGiga().then(function(){
+    return apiCaptcha('claimAdReward', {company:'gigapub'});
+  }).then(function(res){
+    if (!res.success){
+      gigapubWatchBusy = false;
+      stopGigapubButtonTimer();
+      renderTasks('ads');
+      showToast(res.error||'Ad reward unavailable','error');
+      return;
+    }
+    S.user.balance = res.data.shibaBalance;
+    updatePmtTonValueDisplays();
+    applyAdRewardState(res.data);
+    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+    gigapubWatchBusy = false;
+    gigapubCooldownUntil = Date.now() + 15000;
+    startGigapubButtonTimer();
+    renderTasks('ads');
+    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+  }).catch(function(err){
+    gigapubWatchBusy = false;
+    stopGigapubButtonTimer();
+    renderTasks('ads');
+    showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
+  });
+}
+
+function startGigapubButtonTimer(){
+  stopGigapubButtonTimer();
+  gigapubTimerId = setInterval(function(){
+    var btn = document.getElementById('gigapubWatchBtn');
+    if (gigapubWatchBusy){
+      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
+      return;
+    }
+    var cooldown = Math.max(0, Math.ceil((gigapubCooldownUntil - Date.now()) / 1000));
+    if (cooldown > 0){
+      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
+    } else {
+      stopGigapubButtonTimer();
+      gigapubCooldownUntil = 0;
+      renderTasks('ads');
+    }
+  }, 250);
+}
+
+function stopGigapubButtonTimer(){
+  if (gigapubTimerId){ clearInterval(gigapubTimerId); gigapubTimerId = null; }
 }
 
 // ── USL (rewarded format) ──────────────────────────────────────────────
@@ -2599,63 +2656,6 @@ function startUslButtonTimer(){
 
 function stopUslButtonTimer(){
   if (uslTimerId){ clearInterval(uslTimerId); uslTimerId = null; }
-}
-
-// ── GigaPub (rewarded format) ──────────────────────────────────────────
-function watchGigapub(){
-  if (gigapubWatchBusy || Date.now() < gigapubCooldownUntil) return;
-  if (typeof window.showGiga !== 'function'){ showToast('Ad loading, try again','error'); return; }
-  gigapubWatchBusy = true;
-  renderTasks('ads');
-  startGigapubButtonTimer();
-  window.showGiga().then(function(){
-    return apiCaptcha('claimAdReward', {company:'gigapub'});
-  }).then(function(res){
-    if (!res.success){
-      gigapubWatchBusy = false;
-      stopGigapubButtonTimer();
-      renderTasks('ads');
-      showToast(res.error||'Ad reward unavailable','error');
-      return;
-    }
-    S.user.balance = res.data.shibaBalance;
-    updatePmtTonValueDisplays();
-    applyAdRewardState(res.data);
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    gigapubWatchBusy = false;
-    gigapubCooldownUntil = Date.now() + 15000;
-    startGigapubButtonTimer();
-    renderTasks('ads');
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-  }).catch(function(err){
-    gigapubWatchBusy = false;
-    stopGigapubButtonTimer();
-    renderTasks('ads');
-    showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
-  });
-}
-
-function startGigapubButtonTimer(){
-  stopGigapubButtonTimer();
-  gigapubTimerId = setInterval(function(){
-    var btn = document.getElementById('gigapubWatchBtn');
-    if (gigapubWatchBusy){
-      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
-      return;
-    }
-    var cooldown = Math.max(0, Math.ceil((gigapubCooldownUntil - Date.now()) / 1000));
-    if (cooldown > 0){
-      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
-    } else {
-      stopGigapubButtonTimer();
-      gigapubCooldownUntil = 0;
-      renderTasks('ads');
-    }
-  }, 250);
-}
-
-function stopGigapubButtonTimer(){
-  if (gigapubTimerId){ clearInterval(gigapubTimerId); gigapubTimerId = null; }
 }
 
 function switchTab(el, tab){
