@@ -1183,6 +1183,7 @@ var uslInstance = null;
 var uslWatchBusy = false;
 var uslCooldownUntil = 0;
 var uslTimerId = null;
+var uslRetrying = false; // true while auto-retrying a transient network failure
 
 var miningTimerId = null;
 var miningAdBusy = false;
@@ -2426,22 +2427,47 @@ function resetUslInstance(){
   uslInstance = null;
 }
 
-function uslErrorMessage(error){
+// Classifies a USL/TowerAds error into a machine-readable type plus a
+// user-facing message. The type is what lets watchUsl() decide whether an
+// auto-retry makes sense (transient network hiccups) or not (genuine no-fill,
+// closed-before-finish, bad config — retrying those just wastes the user's
+// time and cooldown).
+function classifyUslError(error){
   var raw = (error && (error.message || error.type || error.code || error)) || '';
   var text = String(raw).toLowerCase();
   if (text.indexOf('network') > -1 || text.indexOf('connection') > -1 || text.indexOf('timeout') > -1){
-    return 'Connection to the ad network was interrupted — please try again';
+    return { type: 'network', message: 'Connection to the ad network was interrupted — please try again' };
   }
   if (text.indexOf('no ad') > -1 || text.indexOf('fill') > -1){
-    return 'No ad available right now, try again shortly';
+    return { type: 'no_fill', message: 'No ad available right now, try again shortly' };
   }
   if (text.indexOf('placement') > -1 || text.indexOf('apikey') > -1 || text.indexOf('api key') > -1){
-    return 'Ad placement is temporarily unavailable';
+    return { type: 'placement', message: 'Ad placement is temporarily unavailable' };
   }
   if (text.indexOf('not completed') > -1 || text.indexOf('incomplete') > -1 || text.indexOf('ad_not_completed') > -1){
-    return 'The ad was closed before completion — watch until it finishes';
+    return { type: 'not_completed', message: 'The ad was closed before it finished — please watch it fully' };
   }
-  return 'Ad not completed';
+  // Unknown/unrecognized shape from the SDK — still tell the user something
+  // actionable instead of the flat, unhelpful "Ad not completed" for every
+  // unmapped case.
+  return { type: 'unknown', message: 'Something went wrong loading the ad — please try again' };
+}
+
+// Structured console logging so unmapped/unexpected SDK error shapes are
+// actually diagnosable from the browser console instead of disappearing
+// into a generic toast.
+function logUslError(context, error){
+  try {
+    console.error('USL error ['+context+']:', {
+      message: error && error.message,
+      code: error && error.code,
+      type: error && error.type,
+      status: error && (error.status || error.state || error.result),
+      raw: error
+    });
+  } catch(_){
+    console.error('USL error ['+context+']:', error);
+  }
 }
 
 function isUslAdCompleted(result){
@@ -2458,14 +2484,21 @@ function isUslAdCompleted(result){
     status !== 'closed';
 }
 
+var USL_MAX_AUTO_RETRIES = 1; // one silent retry for transient network drops
+
 function watchUsl(){
   if (uslWatchBusy || Date.now() < uslCooldownUntil) return;
   var instance = ensureUslInit();
   if (!instance){ showToast('Ad loading, try again','error'); return; }
   uslWatchBusy = true;
+  uslRetrying = false;
   uslLastError = null;
   renderTasks('ads');
   startUslButtonTimer();
+  runUslAttempt(instance, 0);
+}
+
+function runUslAttempt(instance, attempt){
   instance.loadAndShow().then(function(result){
     if (!isUslAdCompleted(result)) throw new Error('ad_not_completed');
     // The reward is only credited after our backend verifies things
@@ -2474,34 +2507,62 @@ function watchUsl(){
     // on its own to award SHIBA.
     return apiCaptcha('claimAdReward', {company:'usl'});
   }).then(function(res){
-      if (!res.success){
-        uslWatchBusy = false;
-        stopUslButtonTimer();
+    finishUslWatch(res);
+  }).catch(function(error){
+    var actualError = error || uslLastError;
+    logUslError('watch attempt '+(attempt+1), actualError);
+    var classified = classifyUslError(actualError);
+
+    // Only auto-retry genuinely transient issues (dropped connection /
+    // timeout mid-waterfall). No-fill, placement/config problems, and
+    // "closed before completion" are not going to fix themselves on an
+    // immediate retry, so surface those to the user right away instead
+    // of silently stalling the button.
+    if (attempt < USL_MAX_AUTO_RETRIES && classified.type === 'network'){
+      resetUslInstance();
+      var retryInstance = ensureUslInit();
+      if (retryInstance){
+        uslRetrying = true;
         renderTasks('ads');
-        showToast(res.error||'Ad reward unavailable','error');
+        setTimeout(function(){
+          uslRetrying = false;
+          runUslAttempt(retryInstance, attempt + 1);
+        }, 1200);
         return;
       }
-      S.user.balance = res.data.shibaBalance;
-      updatePmtTonValueDisplays();
-      applyAdRewardState(res.data);
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      uslWatchBusy = false;
-      uslCooldownUntil = Date.now() + 15000;
-      startUslButtonTimer();
-      renderTasks('ads');
-      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-  }).catch(function(error){
-    console.error('USL watch error:', error || uslLastError);
-    var message = uslErrorMessage(error || uslLastError);
+    }
+
     resetUslInstance();
     uslWatchBusy = false;
+    uslRetrying = false;
     // Give it a short cooldown instead of letting the user instantly
     // retry into the same connection problem.
     uslCooldownUntil = Date.now() + 8000;
     startUslButtonTimer();
     renderTasks('ads');
-    showToast(message,'error');
+    showToast(classified.message,'error');
   });
+}
+
+function finishUslWatch(res){
+  if (!res.success){
+    uslWatchBusy = false;
+    uslRetrying = false;
+    stopUslButtonTimer();
+    renderTasks('ads');
+    showToast(res.error||'Ad reward unavailable','error');
+    return;
+  }
+  S.user.balance = res.data.shibaBalance;
+  updatePmtTonValueDisplays();
+  applyAdRewardState(res.data);
+  document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+  uslWatchBusy = false;
+  uslRetrying = false;
+  uslCooldownUntil = Date.now() + 15000;
+  startUslButtonTimer();
+  renderTasks('ads');
+  showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
 }
 
 function startUslButtonTimer(){
@@ -2509,7 +2570,7 @@ function startUslButtonTimer(){
   uslTimerId = setInterval(function(){
     var btn = document.getElementById('uslWatchBtn');
     if (uslWatchBusy){
-      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
+      if (btn){ btn.disabled = true; btn.textContent = uslRetrying ? 'Retrying...' : 'Watching...'; }
       return;
     }
     var cooldown = Math.max(0, Math.ceil((uslCooldownUntil - Date.now()) / 1000));
