@@ -8,7 +8,6 @@
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-<script src="https://uslads.com/sdk/tower-ads-v4.js"></script>
 <script src="https://ad.gigapub.tech/script?id=4102"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="anti-fraud-frontend.js"></script>
@@ -1177,15 +1176,6 @@ var adsgramWatchBusy = false;
 var adsgramCooldownUntil = 0;
 var adsgramTimerId = null;
 
-// ── USL (TowerAds SDK) ──────────────────────────────────────────────
-var USL_API_KEY = '1c9841475bc588d65fa794bdd5df1067';
-var USL_PLACEMENT_ID = 'plc_ead642de9ddda65b';
-var uslInstance = null;
-var uslWatchBusy = false;
-var uslCooldownUntil = 0;
-var uslTimerId = null;
-var uslRetrying = false; // true while auto-retrying a transient network failure
-
 // ── GigaPub ───────────────────────────────────────────────────────────
 var gigapubWatchBusy = false;
 var gigapubCooldownUntil = 0;
@@ -2276,16 +2266,9 @@ function renderTasks(tab){
     var fallbackLimit = getAdNumber(stats.adCompanyDailyLimit, cfg.adCompanyDailyLimit != null ? cfg.adCompanyDailyLimit : 10);
     var fallbackReward = getAdNumber(cfg.adReward, 200);
     var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    // adexium is kept only as a backward-compatible Firebase alias. The
-    // canonical company name exposed to users and the API is USL.
-    var uslCfg = companies.usl || companies.adexium || { reward: fallbackReward, dailyLimit: fallbackLimit };
     adsgramCfg = {
       reward: getAdNumber(adsgramCfg.reward, fallbackReward),
       dailyLimit: getAdNumber(adsgramCfg.dailyLimit, fallbackLimit)
-    };
-    uslCfg = {
-      reward: getAdNumber(uslCfg.reward, fallbackReward),
-      dailyLimit: getAdNumber(uslCfg.dailyLimit, fallbackLimit)
     };
     var gigapubCfg = companies.gigapub || { reward: fallbackReward, dailyLimit: fallbackLimit };
     gigapubCfg = {
@@ -2298,7 +2281,6 @@ function renderTasks(tab){
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-       adTask('🗼','USL','+'+fmtShiba(uslCfg.reward)+' PMT','Watch', 'watchUsl()', false, Number(adsByCompany.usl != null ? adsByCompany.usl : (adsByCompany.adexium || 0)), uslCfg.dailyLimit)+
        adTask('📦','GigaPub','+'+fmtShiba(gigapubCfg.reward)+' PMT','Watch', 'watchGigapub()', false, Number(adsByCompany.gigapub||0), gigapubCfg.dailyLimit);
     return;
   }
@@ -2327,13 +2309,12 @@ function renderTasks(tab){
 
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isAdsgram = name === 'Adsgram';
-  var isUsl = name === 'USL' || name === 'Adexium';
   var isGigapub = name === 'GigaPub';
-  var busy = isAdsgram ? adsgramWatchBusy : isUsl ? uslWatchBusy : isGigapub ? gigapubWatchBusy : false;
-  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isUsl ? uslCooldownUntil : isGigapub ? gigapubCooldownUntil : 0;
-  var btnId = isAdsgram ? 'adsgramWatchBtn' : isUsl ? 'uslWatchBtn' : isGigapub ? 'gigapubWatchBtn' : '';
+  var busy = isAdsgram ? adsgramWatchBusy : isGigapub ? gigapubWatchBusy : false;
+  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isGigapub ? gigapubCooldownUntil : 0;
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : isGigapub ? 'gigapubWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
-  var isLocked = (isAdsgram || isUsl || isGigapub) && (busy || cooldownSeconds > 0);
+  var isLocked = (isAdsgram || isGigapub) && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
@@ -2462,200 +2443,6 @@ function startGigapubButtonTimer(){
 
 function stopGigapubButtonTimer(){
   if (gigapubTimerId){ clearInterval(gigapubTimerId); gigapubTimerId = null; }
-}
-
-// ── USL (rewarded format) ──────────────────────────────────────────────
-var uslLastError = null;
-
-function ensureUslInit(){
-  if (uslInstance) return uslInstance;
-  if (!window.TowerAds) return null;
-  uslLastError = null;
-  uslInstance = new window.TowerAds({
-    apiKey: USL_API_KEY,
-    placementId: USL_PLACEMENT_ID,
-    // The SDK can report failures here even outside the loadAndShow()
-    // promise rejection (e.g. a provider drops mid-waterfall after ad
-    // selection). Capture it so we can show the real reason and decide
-    // whether the SDK instance needs to be recreated.
-    onError: function(error){
-      console.error('USL SDK error:', error);
-      uslLastError = error;
-    }
-  });
-  return uslInstance;
-}
-
-// A dropped/failed connection to the ad provider is usually transient and
-// happens on their side, not ours — but if it happens the SDK instance can
-// be left in a stale state, so we throw it away and rebuild it from
-// scratch next time instead of reusing a possibly-broken instance.
-function resetUslInstance(){
-  try {
-    if (uslInstance && typeof uslInstance.destroy === 'function') uslInstance.destroy();
-  } catch(_){}
-  uslInstance = null;
-}
-
-// Classifies a USL/TowerAds error into a machine-readable type plus a
-// user-facing message. The type is what lets watchUsl() decide whether an
-// auto-retry makes sense (transient network hiccups) or not (genuine no-fill,
-// closed-before-finish, bad config — retrying those just wastes the user's
-// time and cooldown).
-function classifyUslError(error){
-  var raw = (error && (error.message || error.type || error.code || error)) || '';
-  var text = String(raw).toLowerCase();
-  if (text.indexOf('network') > -1 || text.indexOf('connection') > -1 || text.indexOf('timeout') > -1){
-    return { type: 'network', message: 'Connection to the ad network was interrupted — please try again' };
-  }
-  if (text.indexOf('no ad') > -1 || text.indexOf('fill') > -1){
-    return { type: 'no_fill', message: 'No ad available right now, try again shortly' };
-  }
-  if (text.indexOf('placement') > -1 || text.indexOf('apikey') > -1 || text.indexOf('api key') > -1){
-    return { type: 'placement', message: 'Ad placement is temporarily unavailable' };
-  }
-  if (text.indexOf('not completed') > -1 || text.indexOf('incomplete') > -1 || text.indexOf('ad_not_completed') > -1){
-    return { type: 'not_completed', message: 'The ad was closed before it finished — please watch it fully' };
-  }
-  // Unknown/unrecognized shape from the SDK — still tell the user something
-  // actionable instead of the flat, unhelpful "Ad not completed" for every
-  // unmapped case.
-  return { type: 'unknown', message: 'Something went wrong loading the ad — please try again' };
-}
-
-// Structured console logging so unmapped/unexpected SDK error shapes are
-// actually diagnosable from the browser console instead of disappearing
-// into a generic toast.
-function logUslError(context, error){
-  try {
-    console.error('USL error ['+context+']:', {
-      message: error && error.message,
-      code: error && error.code,
-      type: error && error.type,
-      status: error && (error.status || error.state || error.result),
-      raw: error
-    });
-  } catch(_){
-    console.error('USL error ['+context+']:', error);
-  }
-}
-
-function isUslAdCompleted(result){
-  // TowerAds versions differ: some resolve with no value, while others
-  // return a status object. Treat only explicit failure/incomplete values
-  // as an unfinished ad; undefined is a successful completion in older SDKs.
-  if (result === false) return false;
-  if (!result || typeof result !== 'object') return true;
-  var status = String(result.status || result.state || result.result || '').toLowerCase();
-  return result.completed !== false &&
-    status !== 'incomplete' &&
-    status !== 'not_completed' &&
-    status !== 'cancelled' &&
-    status !== 'closed';
-}
-
-var USL_MAX_AUTO_RETRIES = 1; // one silent retry for transient network drops
-
-function watchUsl(){
-  if (uslWatchBusy || Date.now() < uslCooldownUntil) return;
-  var instance = ensureUslInit();
-  if (!instance){ showToast('Ad loading, try again','error'); return; }
-  uslWatchBusy = true;
-  uslRetrying = false;
-  uslLastError = null;
-  renderTasks('ads');
-  startUslButtonTimer();
-  runUslAttempt(instance, 0);
-}
-
-function runUslAttempt(instance, attempt){
-  instance.loadAndShow().then(function(result){
-    if (!isUslAdCompleted(result)) throw new Error('ad_not_completed');
-    // The reward is only credited after our backend verifies things
-    // (daily limits + the periodic Turnstile captcha), same as the
-    // other ad networks — the SDK finishing playback is not enough
-    // on its own to award SHIBA.
-    return apiCaptcha('claimAdReward', {company:'usl'});
-  }).then(function(res){
-    finishUslWatch(res);
-  }).catch(function(error){
-    var actualError = error || uslLastError;
-    logUslError('watch attempt '+(attempt+1), actualError);
-    var classified = classifyUslError(actualError);
-
-    // Only auto-retry genuinely transient issues (dropped connection /
-    // timeout mid-waterfall). No-fill, placement/config problems, and
-    // "closed before completion" are not going to fix themselves on an
-    // immediate retry, so surface those to the user right away instead
-    // of silently stalling the button.
-    if (attempt < USL_MAX_AUTO_RETRIES && classified.type === 'network'){
-      resetUslInstance();
-      var retryInstance = ensureUslInit();
-      if (retryInstance){
-        uslRetrying = true;
-        renderTasks('ads');
-        setTimeout(function(){
-          uslRetrying = false;
-          runUslAttempt(retryInstance, attempt + 1);
-        }, 1200);
-        return;
-      }
-    }
-
-    resetUslInstance();
-    uslWatchBusy = false;
-    uslRetrying = false;
-    // Give it a short cooldown instead of letting the user instantly
-    // retry into the same connection problem.
-    uslCooldownUntil = Date.now() + 8000;
-    startUslButtonTimer();
-    renderTasks('ads');
-    showToast(classified.message,'error');
-  });
-}
-
-function finishUslWatch(res){
-  if (!res.success){
-    uslWatchBusy = false;
-    uslRetrying = false;
-    stopUslButtonTimer();
-    renderTasks('ads');
-    showToast(res.error||'Ad reward unavailable','error');
-    return;
-  }
-  S.user.balance = res.data.shibaBalance;
-  updatePmtTonValueDisplays();
-  applyAdRewardState(res.data);
-  document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-  uslWatchBusy = false;
-  uslRetrying = false;
-  uslCooldownUntil = Date.now() + 15000;
-  startUslButtonTimer();
-  renderTasks('ads');
-  showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-}
-
-function startUslButtonTimer(){
-  stopUslButtonTimer();
-  uslTimerId = setInterval(function(){
-    var btn = document.getElementById('uslWatchBtn');
-    if (uslWatchBusy){
-      if (btn){ btn.disabled = true; btn.textContent = uslRetrying ? 'Retrying...' : 'Watching...'; }
-      return;
-    }
-    var cooldown = Math.max(0, Math.ceil((uslCooldownUntil - Date.now()) / 1000));
-    if (cooldown > 0){
-      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
-    } else {
-      stopUslButtonTimer();
-      uslCooldownUntil = 0;
-      renderTasks('ads');
-    }
-  }, 250);
-}
-
-function stopUslButtonTimer(){
-  if (uslTimerId){ clearInterval(uslTimerId); uslTimerId = null; }
 }
 
 function switchTab(el, tab){
