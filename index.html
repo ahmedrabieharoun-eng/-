@@ -1176,7 +1176,7 @@ var adsgramWatchBusy = false;
 var adsgramCooldownUntil = 0;
 var adsgramTimerId = null;
 
-// ── USL ─────────────────────────────────────────────────────────────
+// ── Adexium (USL SDK) ───────────────────────────────────────────────
 var USL_API_KEY = '1c9841475bc588d65fa794bdd5df1067';
 var USL_PLACEMENT_ID = 'plc_ead642de9ddda65b';
 var uslInstance = null;
@@ -2234,6 +2234,24 @@ function submitConvert(){
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────
+function getAdNumber(value, fallback){
+  var n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : Number(fallback || 0);
+}
+
+function applyAdRewardState(data){
+  if (!data) return;
+  S.data = S.data || {};
+  S.data.stats = S.data.stats || {};
+  var stats = S.data.stats;
+  if (data.adsWatchedToday != null) stats.adsWatchedToday = getAdNumber(data.adsWatchedToday);
+  if (data.adsWatchedByCompany) stats.adsWatchedByCompany = data.adsWatchedByCompany;
+  if (data.adCompanies) stats.adCompanies = data.adCompanies;
+  if (data.adDailyTotalLimit != null) stats.adDailyTotalLimit = getAdNumber(data.adDailyTotalLimit);
+  if (data.adCompanyDailyLimit != null) stats.adCompanyDailyLimit = getAdNumber(data.adCompanyDailyLimit);
+  if (data.shibaAdded != null) stats.earnedToday = getAdNumber(stats.earnedToday) + getAdNumber(data.shibaAdded);
+}
+
 function renderTasks(tab){
   var labels = { ads:'Advertisements', channels:'User Channels & Bots' };
   document.getElementById('tasksGroupLabel').textContent = labels[tab];
@@ -2248,17 +2266,27 @@ function renderTasks(tab){
     // Each ad network's settings (reward + daily limit) individually come from Firebase
     // via stats.adCompanies; if not present, it falls back to a general default value.
     var companies = stats.adCompanies || {};
-    var fallbackLimit = stats.adCompanyDailyLimit || cfg.adCompanyDailyLimit || 10;
-    var fallbackReward = cfg.adReward || 200;
+    var fallbackLimit = getAdNumber(stats.adCompanyDailyLimit, cfg.adCompanyDailyLimit != null ? cfg.adCompanyDailyLimit : 10);
+    var fallbackReward = getAdNumber(cfg.adReward, 200);
     var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var uslCfg = companies.usl || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var totalLimit = stats.adDailyTotalLimit || cfg.adDailyLimit || fallbackLimit;
-     var watchedTotal = Number(stats.adsWatchedToday || 0);
+    // usl is kept only as a backward-compatible Firebase alias. The
+    // canonical company name exposed to users and the API is Adexium.
+    var adexiumCfg = companies.adexium || companies.usl || { reward: fallbackReward, dailyLimit: fallbackLimit };
+    adsgramCfg = {
+      reward: getAdNumber(adsgramCfg.reward, fallbackReward),
+      dailyLimit: getAdNumber(adsgramCfg.dailyLimit, fallbackLimit)
+    };
+    adexiumCfg = {
+      reward: getAdNumber(adexiumCfg.reward, fallbackReward),
+      dailyLimit: getAdNumber(adexiumCfg.dailyLimit, fallbackLimit)
+    };
+    var totalLimit = getAdNumber(stats.adDailyTotalLimit, cfg.adDailyLimit != null ? cfg.adDailyLimit : fallbackLimit);
+     var watchedTotal = getAdNumber(stats.adsWatchedToday, 0);
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-       adTask('🗼','USL','+'+fmtShiba(uslCfg.reward)+' PMT','Watch', 'watchUsl()', false, Number(adsByCompany.usl||0), uslCfg.dailyLimit);
+       adTask('🗼','Adexium','+'+fmtShiba(adexiumCfg.reward)+' PMT','Watch', 'watchUsl()', false, Number(adsByCompany.adexium != null ? adsByCompany.adexium : (adsByCompany.usl || 0)), adexiumCfg.dailyLimit);
     return;
   }
 
@@ -2286,10 +2314,10 @@ function renderTasks(tab){
 
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isAdsgram = name === 'Adsgram';
-  var isUsl = name === 'USL';
+  var isUsl = name === 'Adexium' || name === 'USL';
   var busy = isAdsgram ? adsgramWatchBusy : isUsl ? uslWatchBusy : false;
   var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isUsl ? uslCooldownUntil : 0;
-  var btnId = isAdsgram ? 'adsgramWatchBtn' : isUsl ? 'uslWatchBtn' : '';
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : isUsl ? 'adexiumWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
   var isLocked = (isAdsgram || isUsl) && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
@@ -2326,12 +2354,7 @@ function watchAdsgram(){
       }
       S.user.balance = res.data.shibaBalance;
       updatePmtTonValueDisplays();
-      S.data.stats = S.data.stats || {};
-      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
-      S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-      S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
-      S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
-      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
+      applyAdRewardState(res.data);
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
       adsgramWatchBusy = false;
       adsgramCooldownUntil = Date.now() + 15000;
@@ -2339,11 +2362,11 @@ function watchAdsgram(){
       renderTasks('ads');
       showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
     });
-  }).catch(function(){
+  }).catch(function(err){
     adsgramWatchBusy = false;
     stopAdsgramButtonTimer();
     renderTasks('ads');
-    showToast('Ad not completed','error');
+    showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
   });
 }
 
@@ -2415,7 +2438,24 @@ function uslErrorMessage(error){
   if (text.indexOf('placement') > -1 || text.indexOf('apikey') > -1 || text.indexOf('api key') > -1){
     return 'Ad placement is temporarily unavailable';
   }
+  if (text.indexOf('not completed') > -1 || text.indexOf('incomplete') > -1 || text.indexOf('ad_not_completed') > -1){
+    return 'The ad was closed before completion — watch until it finishes';
+  }
   return 'Ad not completed';
+}
+
+function isUslAdCompleted(result){
+  // TowerAds versions differ: some resolve with no value, while others
+  // return a status object. Treat only explicit failure/incomplete values
+  // as an unfinished ad; undefined is a successful completion in older SDKs.
+  if (result === false) return false;
+  if (!result || typeof result !== 'object') return true;
+  var status = String(result.status || result.state || result.result || '').toLowerCase();
+  return result.completed !== false &&
+    status !== 'incomplete' &&
+    status !== 'not_completed' &&
+    status !== 'cancelled' &&
+    status !== 'closed';
 }
 
 function watchUsl(){
@@ -2426,12 +2466,14 @@ function watchUsl(){
   uslLastError = null;
   renderTasks('ads');
   startUslButtonTimer();
-  instance.loadAndShow().then(function(){
+  instance.loadAndShow().then(function(result){
+    if (!isUslAdCompleted(result)) throw new Error('ad_not_completed');
     // The reward is only credited after our backend verifies things
     // (daily limits + the periodic Turnstile captcha), same as the
     // other ad networks — the SDK finishing playback is not enough
     // on its own to award SHIBA.
-    apiCaptcha('claimAdReward', {company:'usl'}).then(function(res){
+    return apiCaptcha('claimAdReward', {company:'adexium'});
+  }).then(function(res){
       if (!res.success){
         uslWatchBusy = false;
         stopUslButtonTimer();
@@ -2441,19 +2483,13 @@ function watchUsl(){
       }
       S.user.balance = res.data.shibaBalance;
       updatePmtTonValueDisplays();
-      S.data.stats = S.data.stats || {};
-      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
-      S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-      S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
-      S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
-      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
+      applyAdRewardState(res.data);
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
       uslWatchBusy = false;
       uslCooldownUntil = Date.now() + 15000;
       startUslButtonTimer();
       renderTasks('ads');
       showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-    });
   }).catch(function(error){
     console.error('USL watch error:', error || uslLastError);
     var message = uslErrorMessage(error || uslLastError);
@@ -2471,7 +2507,7 @@ function watchUsl(){
 function startUslButtonTimer(){
   stopUslButtonTimer();
   uslTimerId = setInterval(function(){
-    var btn = document.getElementById('uslWatchBtn');
+    var btn = document.getElementById('adexiumWatchBtn');
     if (uslWatchBusy){
       if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
       return;
