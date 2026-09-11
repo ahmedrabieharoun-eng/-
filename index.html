@@ -8,7 +8,6 @@
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-<script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 <script src="https://uslads.com/sdk/tower-ads-v4.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="anti-fraud-frontend.js"></script>
@@ -1177,20 +1176,13 @@ var adsgramWatchBusy = false;
 var adsgramCooldownUntil = 0;
 var adsgramTimerId = null;
 
-// ── Adexium ─────────────────────────────────────────────────────────
-var ADEXIUM_WIDGET_ID = 'be8d1855-db81-4a16-84ea-d8d5ed0c5de7';
-var adexiumInstance = null;
-var adexiumWatchBusy = false;
-var adexiumCooldownUntil = 0;
-var adexiumTimerId = null;
-
-// ── TowerAds ────────────────────────────────────────────────────────
-var TOWERADS_API_KEY = '1c9841475bc588d65fa794bdd5df1067';
-var TOWERADS_PLACEMENT_ID = 'plc_ead642de9ddda65b';
-var toweradsInstance = null;
-var toweradsWatchBusy = false;
-var toweradsCooldownUntil = 0;
-var toweradsTimerId = null;
+// ── USL ─────────────────────────────────────────────────────────────
+var USL_API_KEY = '1c9841475bc588d65fa794bdd5df1067';
+var USL_PLACEMENT_ID = 'plc_ead642de9ddda65b';
+var uslInstance = null;
+var uslWatchBusy = false;
+var uslCooldownUntil = 0;
+var uslTimerId = null;
 
 var miningTimerId = null;
 var miningAdBusy = false;
@@ -2259,16 +2251,14 @@ function renderTasks(tab){
     var fallbackLimit = stats.adCompanyDailyLimit || cfg.adCompanyDailyLimit || 10;
     var fallbackReward = cfg.adReward || 200;
     var adsgramCfg = companies.adsgram || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var adexiumCfg = companies.adexium || { reward: fallbackReward, dailyLimit: fallbackLimit };
-    var toweradsCfg = companies.towerads || { reward: fallbackReward, dailyLimit: fallbackLimit };
+    var uslCfg = companies.usl || { reward: fallbackReward, dailyLimit: fallbackLimit };
     var totalLimit = stats.adDailyTotalLimit || cfg.adDailyLimit || fallbackLimit;
      var watchedTotal = Number(stats.adsWatchedToday || 0);
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-       adTask('📢','Adexium','+'+fmtShiba(adexiumCfg.reward)+' PMT','Watch', 'watchAdexium()', false, Number(adsByCompany.adexium||0), adexiumCfg.dailyLimit)+
-       adTask('🗼','TowerAds','+'+fmtShiba(toweradsCfg.reward)+' PMT','Watch', 'watchTowerAds()', false, Number(adsByCompany.towerads||0), toweradsCfg.dailyLimit);
+       adTask('🗼','USL','+'+fmtShiba(uslCfg.reward)+' PMT','Watch', 'watchUsl()', false, Number(adsByCompany.usl||0), uslCfg.dailyLimit);
     return;
   }
 
@@ -2296,13 +2286,12 @@ function renderTasks(tab){
 
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isAdsgram = name === 'Adsgram';
-  var isAdexium = name === 'Adexium';
-  var isTowerAds = name === 'TowerAds';
-  var busy = isAdsgram ? adsgramWatchBusy : isAdexium ? adexiumWatchBusy : isTowerAds ? toweradsWatchBusy : false;
-  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isAdexium ? adexiumCooldownUntil : isTowerAds ? toweradsCooldownUntil : 0;
-  var btnId = isAdsgram ? 'adsgramWatchBtn' : isAdexium ? 'adexiumWatchBtn' : isTowerAds ? 'toweradsWatchBtn' : '';
+  var isUsl = name === 'USL';
+  var busy = isAdsgram ? adsgramWatchBusy : isUsl ? uslWatchBusy : false;
+  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isUsl ? uslCooldownUntil : 0;
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : isUsl ? 'uslWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
-  var isLocked = (isAdsgram || isAdexium || isTowerAds) && (busy || cooldownSeconds > 0);
+  var isLocked = (isAdsgram || isUsl) && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
@@ -2381,128 +2370,71 @@ function stopAdsgramButtonTimer(){
   if (adsgramTimerId){ clearInterval(adsgramTimerId); adsgramTimerId = null; }
 }
 
-// ── Adexium (rewarded format) ────────────────────────────────────────
-function ensureAdexiumInit(){
-  if (adexiumInstance) return adexiumInstance;
-  if (!window.AdexiumWidget) return null;
-  adexiumInstance = new window.AdexiumWidget({
-    wid: ADEXIUM_WIDGET_ID,
-    adFormat: 'interstitial',
-    debug: true // ⚠️ TEMP: مؤقتًا للتجربة فقط - رجّعها false قبل النشر النهائي
-  });
-  return adexiumInstance;
-}
+// ── USL (rewarded format) ──────────────────────────────────────────────
+var uslLastError = null;
 
-function watchAdexium(){
-  if (adexiumWatchBusy || Date.now() < adexiumCooldownUntil) return;
-  var instance = ensureAdexiumInit();
-  if (!instance){ showToast('Ad loading, try again','error'); return; }
-  adexiumWatchBusy = true;
-  renderTasks('ads');
-  startAdexiumButtonTimer();
-
-  var settled = false;
-  function cleanup(){
-    instance.off('adReceived', onReceived);
-    instance.off('noAdFound', onNoAd);
-    instance.off('adPlaybackCompleted', onCompleted);
-  }
-  function onReceived(ad){
-    instance.displayAd(ad);
-  }
-  function onNoAd(){
-    if (settled) return;
-    settled = true; cleanup();
-    adexiumWatchBusy = false;
-    stopAdexiumButtonTimer();
-    renderTasks('ads');
-    showToast('No ad available, try again later','error');
-  }
-  function onCompleted(){
-    if (settled) return;
-    settled = true; cleanup();
-    apiCaptcha('claimAdReward', {company:'adexium'}).then(function(res){
-      if (!res.success){
-        adexiumWatchBusy = false;
-        stopAdexiumButtonTimer();
-        renderTasks('ads');
-        showToast(res.error||'Ad reward unavailable','error');
-        return;
-      }
-      S.user.balance = res.data.shibaBalance;
-      updatePmtTonValueDisplays();
-      S.data.stats = S.data.stats || {};
-      S.data.stats.adsWatchedToday = res.data.adsWatchedToday;
-      S.data.stats.adsWatchedByCompany = res.data.adsWatchedByCompany || S.data.stats.adsWatchedByCompany || {};
-      S.data.stats.adCompanyDailyLimit = res.data.adCompanyDailyLimit || S.data.stats.adCompanyDailyLimit || 10;
-      S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
-      S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      adexiumWatchBusy = false;
-      adexiumCooldownUntil = Date.now() + 15000;
-      startAdexiumButtonTimer();
-      renderTasks('ads');
-      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-    });
-  }
-
-  instance.on('adReceived', onReceived);
-  instance.on('noAdFound', onNoAd);
-  instance.on('adPlaybackCompleted', onCompleted);
-  instance.requestAd('interstitial');
-}
-
-function startAdexiumButtonTimer(){
-  stopAdexiumButtonTimer();
-  adexiumTimerId = setInterval(function(){
-    var btn = document.getElementById('adexiumWatchBtn');
-    if (adexiumWatchBusy){
-      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
-      return;
-    }
-    var cooldown = Math.max(0, Math.ceil((adexiumCooldownUntil - Date.now()) / 1000));
-    if (cooldown > 0){
-      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
-    } else {
-      stopAdexiumButtonTimer();
-      adexiumCooldownUntil = 0;
-      renderTasks('ads');
-    }
-  }, 250);
-}
-
-function stopAdexiumButtonTimer(){
-  if (adexiumTimerId){ clearInterval(adexiumTimerId); adexiumTimerId = null; }
-}
-
-// ── TowerAds (rewarded format) ─────────────────────────────────────────
-function ensureTowerAdsInit(){
-  if (toweradsInstance) return toweradsInstance;
+function ensureUslInit(){
+  if (uslInstance) return uslInstance;
   if (!window.TowerAds) return null;
-  toweradsInstance = new window.TowerAds({
-    apiKey: TOWERADS_API_KEY,
-    placementId: TOWERADS_PLACEMENT_ID,
-    onError: function(){ /* surfaced via the promise rejection in watchTowerAds() */ }
+  uslLastError = null;
+  uslInstance = new window.TowerAds({
+    apiKey: USL_API_KEY,
+    placementId: USL_PLACEMENT_ID,
+    // The SDK can report failures here even outside the loadAndShow()
+    // promise rejection (e.g. a provider drops mid-waterfall after ad
+    // selection). Capture it so we can show the real reason and decide
+    // whether the SDK instance needs to be recreated.
+    onError: function(error){
+      console.error('USL SDK error:', error);
+      uslLastError = error;
+    }
   });
-  return toweradsInstance;
+  return uslInstance;
 }
 
-function watchTowerAds(){
-  if (toweradsWatchBusy || Date.now() < toweradsCooldownUntil) return;
-  var instance = ensureTowerAdsInit();
+// A dropped/failed connection to the ad provider is usually transient and
+// happens on their side, not ours — but if it happens the SDK instance can
+// be left in a stale state, so we throw it away and rebuild it from
+// scratch next time instead of reusing a possibly-broken instance.
+function resetUslInstance(){
+  try {
+    if (uslInstance && typeof uslInstance.destroy === 'function') uslInstance.destroy();
+  } catch(_){}
+  uslInstance = null;
+}
+
+function uslErrorMessage(error){
+  var raw = (error && (error.message || error.type || error.code || error)) || '';
+  var text = String(raw).toLowerCase();
+  if (text.indexOf('network') > -1 || text.indexOf('connection') > -1 || text.indexOf('timeout') > -1){
+    return 'Connection to the ad network was interrupted — please try again';
+  }
+  if (text.indexOf('no ad') > -1 || text.indexOf('fill') > -1){
+    return 'No ad available right now, try again shortly';
+  }
+  if (text.indexOf('placement') > -1 || text.indexOf('apikey') > -1 || text.indexOf('api key') > -1){
+    return 'Ad placement is temporarily unavailable';
+  }
+  return 'Ad not completed';
+}
+
+function watchUsl(){
+  if (uslWatchBusy || Date.now() < uslCooldownUntil) return;
+  var instance = ensureUslInit();
   if (!instance){ showToast('Ad loading, try again','error'); return; }
-  toweradsWatchBusy = true;
+  uslWatchBusy = true;
+  uslLastError = null;
   renderTasks('ads');
-  startTowerAdsButtonTimer();
+  startUslButtonTimer();
   instance.loadAndShow().then(function(){
     // The reward is only credited after our backend verifies things
     // (daily limits + the periodic Turnstile captcha), same as the
     // other ad networks — the SDK finishing playback is not enough
     // on its own to award SHIBA.
-    apiCaptcha('claimAdReward', {company:'towerads'}).then(function(res){
+    apiCaptcha('claimAdReward', {company:'usl'}).then(function(res){
       if (!res.success){
-        toweradsWatchBusy = false;
-        stopTowerAdsButtonTimer();
+        uslWatchBusy = false;
+        stopUslButtonTimer();
         renderTasks('ads');
         showToast(res.error||'Ad reward unavailable','error');
         return;
@@ -2516,41 +2448,47 @@ function watchTowerAds(){
       S.data.stats.adDailyTotalLimit = res.data.adDailyTotalLimit || S.data.stats.adDailyTotalLimit || 20;
       S.data.stats.earnedToday = (S.data.stats.earnedToday||0) + res.data.shibaAdded;
       document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      toweradsWatchBusy = false;
-      toweradsCooldownUntil = Date.now() + 15000;
-      startTowerAdsButtonTimer();
+      uslWatchBusy = false;
+      uslCooldownUntil = Date.now() + 15000;
+      startUslButtonTimer();
       renderTasks('ads');
       showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
     });
-  }).catch(function(){
-    toweradsWatchBusy = false;
-    stopTowerAdsButtonTimer();
+  }).catch(function(error){
+    console.error('USL watch error:', error || uslLastError);
+    var message = uslErrorMessage(error || uslLastError);
+    resetUslInstance();
+    uslWatchBusy = false;
+    // Give it a short cooldown instead of letting the user instantly
+    // retry into the same connection problem.
+    uslCooldownUntil = Date.now() + 8000;
+    startUslButtonTimer();
     renderTasks('ads');
-    showToast('Ad not completed','error');
+    showToast(message,'error');
   });
 }
 
-function startTowerAdsButtonTimer(){
-  stopTowerAdsButtonTimer();
-  toweradsTimerId = setInterval(function(){
-    var btn = document.getElementById('toweradsWatchBtn');
-    if (toweradsWatchBusy){
+function startUslButtonTimer(){
+  stopUslButtonTimer();
+  uslTimerId = setInterval(function(){
+    var btn = document.getElementById('uslWatchBtn');
+    if (uslWatchBusy){
       if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
       return;
     }
-    var cooldown = Math.max(0, Math.ceil((toweradsCooldownUntil - Date.now()) / 1000));
+    var cooldown = Math.max(0, Math.ceil((uslCooldownUntil - Date.now()) / 1000));
     if (cooldown > 0){
       if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
     } else {
-      stopTowerAdsButtonTimer();
-      toweradsCooldownUntil = 0;
+      stopUslButtonTimer();
+      uslCooldownUntil = 0;
       renderTasks('ads');
     }
   }, 250);
 }
 
-function stopTowerAdsButtonTimer(){
-  if (toweradsTimerId){ clearInterval(toweradsTimerId); toweradsTimerId = null; }
+function stopUslButtonTimer(){
+  if (uslTimerId){ clearInterval(uslTimerId); uslTimerId = null; }
 }
 
 function switchTab(el, tab){
