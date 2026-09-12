@@ -9,6 +9,7 @@
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script src="https://ad.gigapub.tech/script?id=8123"></script>
+<script src="https://www.monetixads.online/ads.js" data-mxid="MX-700356D4"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="anti-fraud-frontend.js"></script>
 <style>
@@ -1181,6 +1182,11 @@ var gigapubWatchBusy = false;
 var gigapubCooldownUntil = 0;
 var gigapubTimerId = null;
 
+// ── Monetix ───────────────────────────────────────────────────────────
+var monetixWatchBusy = false;
+var monetixCooldownUntil = 0;
+var monetixTimerId = null;
+
 var miningTimerId = null;
 var miningAdBusy = false;
 
@@ -2275,13 +2281,19 @@ function renderTasks(tab){
       reward: getAdNumber(gigapubCfg.reward, fallbackReward),
       dailyLimit: getAdNumber(gigapubCfg.dailyLimit, fallbackLimit)
     };
+    var monetixCfg = companies.monetix || { reward: fallbackReward, dailyLimit: fallbackLimit };
+    monetixCfg = {
+      reward: getAdNumber(monetixCfg.reward, fallbackReward),
+      dailyLimit: getAdNumber(monetixCfg.dailyLimit, fallbackLimit)
+    };
     var totalLimit = getAdNumber(stats.adDailyTotalLimit, cfg.adDailyLimit != null ? cfg.adDailyLimit : fallbackLimit);
      var watchedTotal = getAdNumber(stats.adsWatchedToday, 0);
      var adsByCompany = stats.adsWatchedByCompany || {};
     document.getElementById('tasksContent').innerHTML =
        '<div class="ad-summary"><span><b>Today’s ads</b><br>'+watchedTotal+' of '+totalLimit+' watched today · resets daily</span><b>'+watchedTotal+'/'+totalLimit+'</b></div>'+
        adTask('🎟️','Adsgram','+'+fmtShiba(adsgramCfg.reward)+' PMT','Watch', 'watchAdsgram()', false, Number(adsByCompany.adsgram||0), adsgramCfg.dailyLimit)+
-       adTask('📦','GigaPub','+'+fmtShiba(gigapubCfg.reward)+' PMT','Watch', 'watchGigapub()', false, Number(adsByCompany.gigapub||0), gigapubCfg.dailyLimit);
+       adTask('📦','GigaPub','+'+fmtShiba(gigapubCfg.reward)+' PMT','Watch', 'watchGigapub()', false, Number(adsByCompany.gigapub||0), gigapubCfg.dailyLimit)+
+       adTask('🚀','Monetix','+'+fmtShiba(monetixCfg.reward)+' PMT','Watch', 'watchMonetix()', false, Number(adsByCompany.monetix||0), monetixCfg.dailyLimit);
     return;
   }
 
@@ -2310,11 +2322,12 @@ function renderTasks(tab){
  function adTask(icon, name, reward, button, action, disabled, watched, limit){
   var isAdsgram = name === 'Adsgram';
   var isGigapub = name === 'GigaPub';
-  var busy = isAdsgram ? adsgramWatchBusy : isGigapub ? gigapubWatchBusy : false;
-  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isGigapub ? gigapubCooldownUntil : 0;
-  var btnId = isAdsgram ? 'adsgramWatchBtn' : isGigapub ? 'gigapubWatchBtn' : '';
+  var isMonetix = name === 'Monetix';
+  var busy = isAdsgram ? adsgramWatchBusy : isGigapub ? gigapubWatchBusy : isMonetix ? monetixWatchBusy : false;
+  var cooldownUntilVal = isAdsgram ? adsgramCooldownUntil : isGigapub ? gigapubCooldownUntil : isMonetix ? monetixCooldownUntil : 0;
+  var btnId = isAdsgram ? 'adsgramWatchBtn' : isGigapub ? 'gigapubWatchBtn' : isMonetix ? 'monetixWatchBtn' : '';
   var cooldownSeconds = Math.max(0, Math.ceil((cooldownUntilVal - Date.now()) / 1000));
-  var isLocked = (isAdsgram || isGigapub) && (busy || cooldownSeconds > 0);
+  var isLocked = (isAdsgram || isGigapub || isMonetix) && (busy || cooldownSeconds > 0);
   var displayButton = busy ? 'Watching...' :
     cooldownSeconds > 0 ? 'Wait '+cooldownSeconds+'s' : button;
    var counter = !disabled && typeof watched === 'number' ? '<span class="task-limit">'+watched+'/'+limit+' today</span>' : '';
@@ -2443,6 +2456,74 @@ function startGigapubButtonTimer(){
 
 function stopGigapubButtonTimer(){
   if (gigapubTimerId){ clearInterval(gigapubTimerId); gigapubTimerId = null; }
+}
+
+// ── Monetix (rewarded format) ────────────────────────────────────────
+function watchMonetix(){
+  if (monetixWatchBusy || Date.now() < monetixCooldownUntil) return;
+  if (typeof window.showRewardAd !== 'function'){ showToast('Ad loading, try again','error'); return; }
+  monetixWatchBusy = true;
+  renderTasks('ads');
+  startMonetixButtonTimer();
+  window.showRewardAd(function(res){
+    // Monetix's callback fires with { status: 'completed', ... } once the
+    // ad was actually watched/closed properly, or { status: 'skipped', ... }
+    // if no ad was available or the user bailed out early — only the
+    // former should ever grant a reward.
+    if (!res || res.status !== 'completed'){
+      monetixWatchBusy = false;
+      stopMonetixButtonTimer();
+      renderTasks('ads');
+      showToast('Ad was not completed','error');
+      return;
+    }
+    apiCaptcha('claimAdReward', {company:'monetix'}).then(function(result){
+      if (!result.success){
+        monetixWatchBusy = false;
+        stopMonetixButtonTimer();
+        renderTasks('ads');
+        showToast(result.error||'Ad reward unavailable','error');
+        return;
+      }
+      S.user.balance = result.data.shibaBalance;
+      updatePmtTonValueDisplays();
+      applyAdRewardState(result.data);
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      monetixWatchBusy = false;
+      monetixCooldownUntil = Date.now() + 15000;
+      startMonetixButtonTimer();
+      renderTasks('ads');
+      showToast('+'+fmtShiba(result.data.shibaAdded)+' PMT added 🎉',null,true);
+    }).catch(function(){
+      monetixWatchBusy = false;
+      stopMonetixButtonTimer();
+      renderTasks('ads');
+      showToast('Network error','error');
+    });
+  });
+}
+
+function startMonetixButtonTimer(){
+  stopMonetixButtonTimer();
+  monetixTimerId = setInterval(function(){
+    var btn = document.getElementById('monetixWatchBtn');
+    if (monetixWatchBusy){
+      if (btn){ btn.disabled = true; btn.textContent = 'Watching...'; }
+      return;
+    }
+    var cooldown = Math.max(0, Math.ceil((monetixCooldownUntil - Date.now()) / 1000));
+    if (cooldown > 0){
+      if (btn){ btn.disabled = true; btn.textContent = 'Wait '+cooldown+'s'; }
+    } else {
+      stopMonetixButtonTimer();
+      monetixCooldownUntil = 0;
+      renderTasks('ads');
+    }
+  }, 250);
+}
+
+function stopMonetixButtonTimer(){
+  if (monetixTimerId){ clearInterval(monetixTimerId); monetixTimerId = null; }
 }
 
 function switchTab(el, tab){
