@@ -1653,19 +1653,31 @@ function deletePromoCode(code){
 // عشان الأدمن يقدر يشوفها ويعدّل عليها من هنا مباشرة بدل ما يضطر
 // يضيفها يدويًا كـ"شركة جديدة". أي شركة تانية اتضافت فعليًا في Firebase
 // (زي شركة خاصة عملتها إنت) بتتعرض عادي زي ما هي حتى لو مش في القائمة دي.
+// الشركات المعروفة في كود التطبيق (server.js) — بيتم عرضها هنا حتى لو
+// لسه ملهاش نود في Firebase، بقيم افتراضية (200 مكافأة / 10 حد يومي)،
+// عشان الأدمن يقدر يشوفها ويعدّل عليها من هنا مباشرة بدل ما يضطر
+// يضيفها يدويًا كـ"شركة جديدة". أي شركة تانية اتضافت فعليًا في Firebase
+// (زي شركة خاصة عملتها إنت) بتتعرض عادي زي ما هي حتى لو مش في القائمة دي.
 const KNOWN_AD_COMPANIES_DEFAULTS = {
-  monetag: { reward: 200, dailyLimit: 10 },
   adsgram: { reward: 200, dailyLimit: 10 },
   gigapub: { reward: 200, dailyLimit: 10 },
   monetix: { reward: 200, dailyLimit: 10 },
 };
+
+// شركات اتشالت من لوحة التحكم عمدًا (زي Monetag) — حتى لو النود بتاعها
+// لسه موجود في Firebase (config/adCompanies/monetag)، مش هتتعرض هنا
+// خالص. لو حبيت ترجّعها تاني يوم من الأيام، امسح اسمها من القائمة دي.
+const HIDDEN_AD_COMPANIES = ['monetag'];
 
 function renderAdCompanies(){
   const saved = (configCache.adCompanies) || {};
   // ندمج: كل شركة معروفة في الكود ولسه مش محفوظة في Firebase بتتضاف
   // مؤقتًا بالقيم الافتراضية (علشان تتعرض)، وأي شركة محفوظة فعليًا
   // (سواء معروفة أو شركة إضافية عملها الأدمن) بتاخد قيمتها الحقيقية.
-  const companies = { ...KNOWN_AD_COMPANIES_DEFAULTS, ...saved };
+  const merged = { ...KNOWN_AD_COMPANIES_DEFAULTS, ...saved };
+  const companies = Object.fromEntries(
+    Object.entries(merged).filter(([name]) => !HIDDEN_AD_COMPANIES.includes(name))
+  );
   const wrap = document.getElementById('adsCards');
   const html = Object.entries(companies).map(([name,c])=>{
     const isUnsaved = !saved[name];
