@@ -1648,24 +1648,43 @@ function deletePromoCode(code){
 /* =========================================================
    AD COMPANIES  (config/adCompanies)
    ========================================================= */
+// الشركات المعروفة في كود التطبيق (server.js) — بيتم عرضها هنا حتى لو
+// لسه ملهاش نود في Firebase، بقيم افتراضية (200 مكافأة / 10 حد يومي)،
+// عشان الأدمن يقدر يشوفها ويعدّل عليها من هنا مباشرة بدل ما يضطر
+// يضيفها يدويًا كـ"شركة جديدة". أي شركة تانية اتضافت فعليًا في Firebase
+// (زي شركة خاصة عملتها إنت) بتتعرض عادي زي ما هي حتى لو مش في القائمة دي.
+const KNOWN_AD_COMPANIES_DEFAULTS = {
+  monetag: { reward: 200, dailyLimit: 10 },
+  adsgram: { reward: 200, dailyLimit: 10 },
+  gigapub: { reward: 200, dailyLimit: 10 },
+  monetix: { reward: 200, dailyLimit: 10 },
+};
+
 function renderAdCompanies(){
-  const companies = (configCache.adCompanies) || {};
+  const saved = (configCache.adCompanies) || {};
+  // ندمج: كل شركة معروفة في الكود ولسه مش محفوظة في Firebase بتتضاف
+  // مؤقتًا بالقيم الافتراضية (علشان تتعرض)، وأي شركة محفوظة فعليًا
+  // (سواء معروفة أو شركة إضافية عملها الأدمن) بتاخد قيمتها الحقيقية.
+  const companies = { ...KNOWN_AD_COMPANIES_DEFAULTS, ...saved };
   const wrap = document.getElementById('adsCards');
-  const html = Object.entries(companies).map(([name,c])=>`
+  const html = Object.entries(companies).map(([name,c])=>{
+    const isUnsaved = !saved[name];
+    return `
     <div class="mini-card">
-      <h4><span style="text-transform:capitalize">${escapeHtml(name)}</span></h4>
+      <h4><span style="text-transform:capitalize">${escapeHtml(name)}</span>${isUnsaved?' <span class="badge" style="font-size:10px;font-weight:700;color:var(--gold,#c9a44a);opacity:.75">غير محفوظة بعد</span>':''}</h4>
       <div class="mini-row"><span>مكافأة الإعلان</span><b>${fmt(c.reward)} PMT</b></div>
       <div class="mini-row"><span>الحد اليومي</span><b>${fmt(c.dailyLimit)}</b></div>
       <div class="row-actions" style="margin-top:10px">
         <button class="btn btn-ghost btn-sm" style="flex:1" onclick='openAdCompanyModal(${JSON.stringify(name)})'>تعديل</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteAdCompany('${name}')">حذف</button>
+        <button class="btn btn-danger btn-sm" ${isUnsaved?'disabled title="لسه مش محفوظة، مفيش حاجة تتحذف"':''} onclick="deleteAdCompany('${name}')">حذف</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   wrap.innerHTML = html + `<div class="add-card" onclick="openAdCompanyModal()">+ إضافة شركة</div>`;
 }
 
 function openAdCompanyModal(name){
-  const c = name ? ((configCache.adCompanies||{})[name]||{}) : {};
+  const c = name ? ((configCache.adCompanies||{})[name] || KNOWN_AD_COMPANIES_DEFAULTS[name] || {}) : {};
   document.getElementById('modalTitle').textContent = name ? 'تعديل: '+name : 'شركة إعلانات جديدة';
   document.getElementById('modalBody').innerHTML = `
     <div class="field"><label>اسم الشركة (بالإنجليزية، مطابق للكود)</label><input type="text" class="sans" id="a_name" value="${escapeHtml(name||'')}" ${name?'disabled':''}></div>
@@ -1686,6 +1705,7 @@ function saveAdCompany(existingName){
     .catch(err=>toast('خطأ: '+err.message, true));
 }
 function deleteAdCompany(name){
+  if(!((configCache.adCompanies||{})[name])){ toast('الشركة دي لسه مش محفوظة في Firebase أصلًا', true); return; }
   if(!confirm('حذف شركة "'+name+'" من قائمة الإعلانات؟')) return;
   db.ref('config/adCompanies/'+name).remove().then(()=>toast('تم الحذف')).catch(err=>toast('خطأ: '+err.message, true));
 }
