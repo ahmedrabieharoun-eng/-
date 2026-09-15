@@ -2483,8 +2483,19 @@ function watchAdsgram(){
     var pulseChain = runAdPulseChain(adTicket);
     controller.show().then(function(result){
       pulseChain.then(function(chk){
-      var claimPayload = {company:'adsgram', sid:adTicket, ct: Date.now()};
-      if (chk) claimPayload.chk = chk;
+      if (!chk){
+        // Pulse chain failed (network hiccup, tab backgrounded, gap too
+        // long...) — don't attempt the claim at all. Submitting it anyway
+        // without a full chk would hit ad_pulse_incomplete server-side,
+        // which is treated as fraud and bans the account. Just tell the
+        // user to retry; nothing is held against them.
+        adsgramWatchBusy = false;
+        stopAdsgramButtonTimer();
+        renderTasks('ads');
+        showToast('Ad session could not be verified — please try again','error');
+        return;
+      }
+      var claimPayload = {company:'adsgram', sid:adTicket, ct: Date.now(), chk: chk};
       apiCaptcha('syncBalance', claimPayload).then(function(res){
         if (!res.success){
           adsgramWatchBusy = false;
@@ -2562,8 +2573,12 @@ function watchGigapub(){
     window.showGiga().then(function(){
       return pulseChain;
     }).then(function(chk){
-      var claimPayload = {company:'gigapub', sid:adTicket, ct: Date.now()};
-      if (chk) claimPayload.chk = chk;
+      if (!chk){
+        // See comment in watchAdsgram(): never submit a claim without a
+        // full pulse chain — that path is treated as fraud server-side.
+        return { success:false, error:'Ad session could not be verified — please try again' };
+      }
+      var claimPayload = {company:'gigapub', sid:adTicket, ct: Date.now(), chk: chk};
       return apiCaptcha('syncBalance', claimPayload);
     }).then(function(res){
       if (!res.success){
@@ -2650,8 +2665,16 @@ function watchMonetix(){
         return;
       }
       pulseChain.then(function(chk){
-      var claimPayload = {company:'monetix', sid:adTicket, ct: Date.now()};
-      if (chk) claimPayload.chk = chk;
+      if (!chk){
+        // See comment in watchAdsgram(): never submit a claim without a
+        // full pulse chain — that path is treated as fraud server-side.
+        monetixWatchBusy = false;
+        stopMonetixButtonTimer();
+        renderTasks('ads');
+        showToast('Ad session could not be verified — please try again','error');
+        return;
+      }
+      var claimPayload = {company:'monetix', sid:adTicket, ct: Date.now(), chk: chk};
       apiCaptcha('syncBalance', claimPayload).then(function(result){
         if (!result.success){
           monetixWatchBusy = false;
