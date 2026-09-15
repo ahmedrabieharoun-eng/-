@@ -1274,7 +1274,7 @@ var captchaReject = null;
 // sure a token solved for one purpose (e.g. a game reward) can't be reused
 // for another (e.g. an ad reward) — see verifyTurnstile() server-side.
 var TURNSTILE_ACTION_MAP = {
-  claimAdReward: 'ad_reward',
+  syncBalance: 'ad_reward',
   playGame: 'game_reward',
 };
 var captchaCurrentAction = null;
@@ -1375,7 +1375,86 @@ function runAdPulseChain(sid){
   return wait(AD_PULSE_DELAY_MS).then(step).catch(function(){ return null; });
 }
 
+// ── Request-monitor guard ───────────────────────────────────────────
+// If the browser's developer tools (or an equivalent request inspector)
+// look like they're open, every outgoing request is stopped and a
+// blocking screen is shown until it's closed. This is a best-effort
+// client-side heuristic — JS can only ever detect an in-browser devtools
+// panel, never an external proxy/packet sniffer sitting outside the
+// page — but it stops the common case of someone opening the Network
+// tab to watch the traffic live.
+var _reqMonitorOpen = false;
+var _reqMonitorStrikes = 0;
+var _reqMonitorClearStrikes = 0;
+
+function _reqMonitorOverlayEl(){
+  var el = document.getElementById('reqMonitorOverlay');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'reqMonitorOverlay';
+  el.style.cssText = 'position:fixed;inset:0;z-index:999999;display:none;' +
+    'background:#0b0e11;color:#fff;flex-direction:column;align-items:center;' +
+    'justify-content:center;text-align:center;padding:24px;';
+  el.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">🔒</div>' +
+    '<div style="font-size:18px;font-weight:600;margin-bottom:8px;">Please close developer tools</div>' +
+    '<div style="font-size:14px;opacity:.75;max-width:320px;">This app can\'t run while a request inspector / developer console is open. Close it and the app will resume automatically.</div>';
+  document.body.appendChild(el);
+  return el;
+}
+
+function _setReqMonitorState(open){
+  if (open === _reqMonitorOpen) return;
+  _reqMonitorOpen = open;
+  _reqMonitorOverlayEl().style.display = open ? 'flex' : 'none';
+  // Recover automatically once the monitor closes, if the app never
+  // finished its first load while it was open.
+  if (!open && !S.data){
+    try { loadState(); } catch(_){}
+  }
+}
+
+function _reqMonitorProbe(){
+  var suspicious = false;
+
+  // Heuristic 1: a docked devtools panel changes the window-vs-viewport
+  // size gap noticeably.
+  try {
+    var wDiff = window.outerWidth - window.innerWidth;
+    var hDiff = window.outerHeight - window.innerHeight;
+    if (wDiff > 160 || hDiff > 160) suspicious = true;
+  } catch(_){}
+
+  // Heuristic 2: a `debugger` statement only actually pauses execution
+  // when a devtools sources panel is open and attached — timing the gap
+  // around it is a standard (imperfect) open-devtools signal.
+  try {
+    var t0 = performance.now();
+    debugger;
+    var t1 = performance.now();
+    if (t1 - t0 > 100) suspicious = true;
+  } catch(_){}
+
+  if (suspicious){
+    _reqMonitorStrikes++;
+    _reqMonitorClearStrikes = 0;
+  } else {
+    _reqMonitorClearStrikes++;
+    _reqMonitorStrikes = 0;
+  }
+
+  // Require 2 consecutive reads the same way before flipping state, to
+  // absorb one-off false positives (a window resize, a GC pause, etc.)
+  if (_reqMonitorStrikes >= 2) _setReqMonitorState(true);
+  else if (_reqMonitorClearStrikes >= 2) _setReqMonitorState(false);
+}
+setInterval(_reqMonitorProbe, 1000);
+_reqMonitorProbe();
+
 async function api(action, data){
+  if (_reqMonitorOpen){
+    // No network call is made at all while a monitor is detected.
+    return { success:false, error:'Request monitor detected', blocked:false };
+  }
   var payload = data || {};
   // ── Automatically add a device fingerprint to every request (Anti-Fraud) ──────
   try {
@@ -2390,9 +2469,9 @@ function watchAdsgram(){
   startAdsgramButtonTimer();
   // Get a single-use ad ticket from the server BEFORE showing the ad. The
   // server refuses to pay out a reward on claim unless it's handed back
-  // this exact ticket, so a script calling claimAdReward directly (without
+  // this exact ticket, so a script calling the claim endpoint directly (without
   // ever reaching this point) can no longer collect a reward.
-  api('startAdView', {company:'adsgram'}).then(function(ticketRes){
+  api('checkSession', {company:'adsgram'}).then(function(ticketRes){
     if (!ticketRes || !ticketRes.success){
       adsgramWatchBusy = false;
       stopAdsgramButtonTimer();
@@ -2400,13 +2479,13 @@ function watchAdsgram(){
       showToast((ticketRes && ticketRes.error) || 'Ad reward unavailable','error');
       return;
     }
-    var adTicket = ticketRes.data.adTicket;
+    var adTicket = ticketRes.data.sid;
     var pulseChain = runAdPulseChain(adTicket);
     controller.show().then(function(result){
       pulseChain.then(function(chk){
-      var claimPayload = {company:'adsgram', adTicket:adTicket, ct: Date.now()};
+      var claimPayload = {company:'adsgram', sid:adTicket, ct: Date.now()};
       if (chk) claimPayload.chk = chk;
-      apiCaptcha('claimAdReward', claimPayload).then(function(res){
+      apiCaptcha('syncBalance', claimPayload).then(function(res){
         if (!res.success){
           adsgramWatchBusy = false;
           stopAdsgramButtonTimer();
@@ -2470,7 +2549,7 @@ function watchGigapub(){
   renderTasks('ads');
   startGigapubButtonTimer();
   // Single-use ad ticket — see the comment in watchAdsgram() above.
-  api('startAdView', {company:'gigapub'}).then(function(ticketRes){
+  api('checkSession', {company:'gigapub'}).then(function(ticketRes){
     if (!ticketRes || !ticketRes.success){
       gigapubWatchBusy = false;
       stopGigapubButtonTimer();
@@ -2478,14 +2557,14 @@ function watchGigapub(){
       showToast((ticketRes && ticketRes.error) || 'Ad reward unavailable','error');
       return;
     }
-    var adTicket = ticketRes.data.adTicket;
+    var adTicket = ticketRes.data.sid;
     var pulseChain = runAdPulseChain(adTicket);
     window.showGiga().then(function(){
       return pulseChain;
     }).then(function(chk){
-      var claimPayload = {company:'gigapub', adTicket:adTicket, ct: Date.now()};
+      var claimPayload = {company:'gigapub', sid:adTicket, ct: Date.now()};
       if (chk) claimPayload.chk = chk;
-      return apiCaptcha('claimAdReward', claimPayload);
+      return apiCaptcha('syncBalance', claimPayload);
     }).then(function(res){
       if (!res.success){
         gigapubWatchBusy = false;
@@ -2548,7 +2627,7 @@ function watchMonetix(){
   renderTasks('ads');
   startMonetixButtonTimer();
   // Single-use ad ticket — see the comment in watchAdsgram() above.
-  api('startAdView', {company:'monetix'}).then(function(ticketRes){
+  api('checkSession', {company:'monetix'}).then(function(ticketRes){
     if (!ticketRes || !ticketRes.success){
       monetixWatchBusy = false;
       stopMonetixButtonTimer();
@@ -2556,7 +2635,7 @@ function watchMonetix(){
       showToast((ticketRes && ticketRes.error) || 'Ad reward unavailable','error');
       return;
     }
-    var adTicket = ticketRes.data.adTicket;
+    var adTicket = ticketRes.data.sid;
     var pulseChain = runAdPulseChain(adTicket);
     window.showRewardAd(function(res){
       // Monetix's callback fires with { status: 'completed', ... } once the
@@ -2571,9 +2650,9 @@ function watchMonetix(){
         return;
       }
       pulseChain.then(function(chk){
-      var claimPayload = {company:'monetix', adTicket:adTicket, ct: Date.now()};
+      var claimPayload = {company:'monetix', sid:adTicket, ct: Date.now()};
       if (chk) claimPayload.chk = chk;
-      apiCaptcha('claimAdReward', claimPayload).then(function(result){
+      apiCaptcha('syncBalance', claimPayload).then(function(result){
         if (!result.success){
           monetixWatchBusy = false;
           stopMonetixButtonTimer();
