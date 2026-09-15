@@ -1745,7 +1745,10 @@ function renderBlocked(){
   body.innerHTML = entries.map(([id,b])=>`
     <tr>
       <td class="mono">${id}</td>
-      <td>${escapeHtml(b.reason||'—')}</td>
+      <td>
+        <div>${escapeHtml(b.reason||'—')}</div>
+        ${b.reasonCode?`<div class="u-sub mono" style="margin-top:3px">${escapeHtml(b.reasonCode)}</div>`:''}
+      </td>
       <td><span class="badge ${Number(b.score)>=70?'b-red':'b-gold'}">${fmt(b.score)}</span></td>
       <td class="muted">${fmtDate(b.ts)}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="unblockUser('${id}')">فك الحظر</button></td>
