@@ -1313,11 +1313,11 @@ function findQueueEntry(w, queueIndex){
 function resolveWithdrawalStatus(w, q){
   if(q){
     if(q.status==='paid' || q.status==='sent' || q.status==='completed') return 'completed';
-    if(q.status==='failed' || q.status==='rejected') return 'rejected';
+    if(q.status==='failed' || q.status==='rejected' || q.status==='cancelled' || q.status==='canceled') return 'rejected';
   }
   const s = String(w.status || '').trim().toLowerCase();
   if(s==='completed' || s==='paid' || s==='sent') return 'completed';
-  if(s==='rejected' || s==='failed') return 'rejected';
+  if(s==='rejected' || s==='failed' || s==='cancelled' || s==='canceled') return 'rejected';
   return 'pending';
 }
 
