@@ -1351,28 +1351,54 @@ function apiCaptcha(action, data){
 }
 
 // Runs alongside the ad while it's on screen: pings the server every ~2s
-// (5 times total) so it can confirm the ad session is still genuinely
-// active, echoing back the value received last time. Resolves with the
-// ordered list of values to attach to the reward claim, or null if the
-// chain couldn't be completed (claim will then simply be rejected server
-// side rather than paid out). Endpoint/field names are deliberately
-// generic so this isn't identifiable from the network tab alone.
+// (up to 5 times) so it can confirm the ad session is still genuinely
+// active, echoing back the value received last time. Not every ad lasts
+// long enough for all 5 pings to land — short ads (under ~5s) may close
+// after just one or two — so this doesn't wait for a fixed count. Instead
+// it returns a controller: call .finish() once the ad has actually closed
+// and it stops the chain (no more pings) and hands back whatever pulses
+// were collected so far (at least one, if the ad was open long enough for
+// a single ~2s round-trip; null if it closed before that). The server
+// enforces its own minimum watch time separately, so a short-but-genuine
+// view still gets paid as long as at least one real pulse came through.
+// Endpoint/field names are deliberately generic so this isn't identifiable
+// from the network tab alone.
 function runAdPulseChain(sid){
-  var AD_PULSE_STEPS = 5;
+  var AD_PULSE_MAX_STEPS = 5;
   var AD_PULSE_DELAY_MS = 2000;
   var collected = [];
   var prev = '';
-  function wait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
-  function step(){
-    return api('sessionSync', { sid: sid, p: prev }).then(function(res){
-      if (!res || !res.success || !res.data || !res.data.n) throw new Error('sync_failed');
-      prev = res.data.n;
-      collected.push(prev);
-      if (collected.length >= AD_PULSE_STEPS) return collected;
-      return wait(AD_PULSE_DELAY_MS).then(step);
-    });
+  var stopped = false;
+  var timer = null;
+  var currentStep = null; // promise for whichever /sessionSync call is in flight, if any
+
+  function scheduleNext(){
+    if (stopped || collected.length >= AD_PULSE_MAX_STEPS) return;
+    timer = setTimeout(function(){
+      timer = null;
+      currentStep = api('sessionSync', { sid: sid, p: prev }).then(function(res){
+        currentStep = null;
+        if (stopped) return;
+        if (!res || !res.success || !res.data || !res.data.n){ stopped = true; return; }
+        prev = res.data.n;
+        collected.push(prev);
+        scheduleNext();
+      }).catch(function(){ currentStep = null; stopped = true; });
+    }, AD_PULSE_DELAY_MS);
   }
-  return wait(AD_PULSE_DELAY_MS).then(step).catch(function(){ return null; });
+  scheduleNext();
+
+  return {
+    finish: function(){
+      stopped = true;
+      if (timer){ clearTimeout(timer); timer = null; }
+      // Wait for a pulse that's already in flight so we don't hand back a
+      // chk list that's shorter than what the server actually recorded.
+      return Promise.resolve(currentStep).then(function(){
+        return collected.length ? collected.slice() : null;
+      });
+    }
+  };
 }
 
 // ── Request-monitor guard ───────────────────────────────────────────
@@ -2482,20 +2508,9 @@ function watchAdsgram(){
     var adTicket = ticketRes.data.sid;
     var pulseChain = runAdPulseChain(adTicket);
     controller.show().then(function(result){
-      pulseChain.then(function(chk){
-      if (!chk){
-        // Pulse chain failed (network hiccup, tab backgrounded, gap too
-        // long...) — don't attempt the claim at all. Submitting it anyway
-        // without a full chk would hit ad_pulse_incomplete server-side,
-        // which is treated as fraud and bans the account. Just tell the
-        // user to retry; nothing is held against them.
-        adsgramWatchBusy = false;
-        stopAdsgramButtonTimer();
-        renderTasks('ads');
-        showToast('Ad session could not be verified — please try again','error');
-        return;
-      }
-      var claimPayload = {company:'adsgram', sid:adTicket, ct: Date.now(), chk: chk};
+      pulseChain.finish().then(function(chk){
+      var claimPayload = {company:'adsgram', sid:adTicket, ct: Date.now()};
+      if (chk) claimPayload.chk = chk;
       apiCaptcha('syncBalance', claimPayload).then(function(res){
         if (!res.success){
           adsgramWatchBusy = false;
@@ -2571,14 +2586,10 @@ function watchGigapub(){
     var adTicket = ticketRes.data.sid;
     var pulseChain = runAdPulseChain(adTicket);
     window.showGiga().then(function(){
-      return pulseChain;
+      return pulseChain.finish();
     }).then(function(chk){
-      if (!chk){
-        // See comment in watchAdsgram(): never submit a claim without a
-        // full pulse chain — that path is treated as fraud server-side.
-        return { success:false, error:'Ad session could not be verified — please try again' };
-      }
-      var claimPayload = {company:'gigapub', sid:adTicket, ct: Date.now(), chk: chk};
+      var claimPayload = {company:'gigapub', sid:adTicket, ct: Date.now()};
+      if (chk) claimPayload.chk = chk;
       return apiCaptcha('syncBalance', claimPayload);
     }).then(function(res){
       if (!res.success){
@@ -2664,17 +2675,9 @@ function watchMonetix(){
         showToast('Ad was not completed','error');
         return;
       }
-      pulseChain.then(function(chk){
-      if (!chk){
-        // See comment in watchAdsgram(): never submit a claim without a
-        // full pulse chain — that path is treated as fraud server-side.
-        monetixWatchBusy = false;
-        stopMonetixButtonTimer();
-        renderTasks('ads');
-        showToast('Ad session could not be verified — please try again','error');
-        return;
-      }
-      var claimPayload = {company:'monetix', sid:adTicket, ct: Date.now(), chk: chk};
+      pulseChain.finish().then(function(chk){
+      var claimPayload = {company:'monetix', sid:adTicket, ct: Date.now()};
+      if (chk) claimPayload.chk = chk;
       apiCaptcha('syncBalance', claimPayload).then(function(result){
         if (!result.success){
           monetixWatchBusy = false;
