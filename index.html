@@ -1269,7 +1269,18 @@ var captchaWidgetId = null;
 var captchaResolve = null;
 var captchaReject = null;
 
-function openCaptchaModal(){
+// Maps our internal API action names to the Turnstile "action" value sent
+// to Cloudflare siteverify, so the server can check data.action and make
+// sure a token solved for one purpose (e.g. a game reward) can't be reused
+// for another (e.g. an ad reward) — see verifyTurnstile() server-side.
+var TURNSTILE_ACTION_MAP = {
+  claimAdReward: 'ad_reward',
+  playGame: 'game_reward',
+};
+var captchaCurrentAction = null;
+
+function openCaptchaModal(apiAction){
+  captchaCurrentAction = TURNSTILE_ACTION_MAP[apiAction] || 'verify';
   return new Promise(function(resolve, reject){
     captchaResolve = resolve;
     captchaReject = reject;
@@ -1294,6 +1305,7 @@ function renderCaptchaWidget(){
   captchaWidgetId = turnstile.render(box, {
     sitekey: TURNSTILE_SITE_KEY,
     theme: 'dark',
+    action: captchaCurrentAction || 'verify',
     callback: function(token){
       var resolve = captchaResolve;
       captchaResolve = null; captchaReject = null;
@@ -1327,7 +1339,7 @@ function apiCaptcha(action, data){
   var payload = data || {};
   return api(action, payload).then(function(res){
     if (res && res.requiresCaptcha){
-      return openCaptchaModal().then(function(token){
+      return openCaptchaModal(action).then(function(token){
         var retryPayload = Object.assign({}, payload, { turnstileToken: token });
         return api(action, retryPayload);
       }).catch(function(){
@@ -1336,6 +1348,31 @@ function apiCaptcha(action, data){
     }
     return res;
   });
+}
+
+// Runs alongside the ad while it's on screen: pings the server every ~2s
+// (5 times total) so it can confirm the ad session is still genuinely
+// active, echoing back the value received last time. Resolves with the
+// ordered list of values to attach to the reward claim, or null if the
+// chain couldn't be completed (claim will then simply be rejected server
+// side rather than paid out). Endpoint/field names are deliberately
+// generic so this isn't identifiable from the network tab alone.
+function runAdPulseChain(sid){
+  var AD_PULSE_STEPS = 5;
+  var AD_PULSE_DELAY_MS = 2000;
+  var collected = [];
+  var prev = '';
+  function wait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+  function step(){
+    return api('sessionSync', { sid: sid, p: prev }).then(function(res){
+      if (!res || !res.success || !res.data || !res.data.n) throw new Error('sync_failed');
+      prev = res.data.n;
+      collected.push(prev);
+      if (collected.length >= AD_PULSE_STEPS) return collected;
+      return wait(AD_PULSE_DELAY_MS).then(step);
+    });
+  }
+  return wait(AD_PULSE_DELAY_MS).then(step).catch(function(){ return null; });
 }
 
 async function api(action, data){
@@ -2351,30 +2388,54 @@ function watchAdsgram(){
   adsgramWatchBusy = true;
   renderTasks('ads');
   startAdsgramButtonTimer();
-  controller.show().then(function(result){
-    apiCaptcha('claimAdReward', {company:'adsgram'}).then(function(res){
-      if (!res.success){
-        adsgramWatchBusy = false;
-        stopAdsgramButtonTimer();
-        renderTasks('ads');
-        showToast(res.error||'Ad reward unavailable','error');
-        return;
-      }
-      S.user.balance = res.data.shibaBalance;
-      updatePmtTonValueDisplays();
-      applyAdRewardState(res.data);
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+  // Get a single-use ad ticket from the server BEFORE showing the ad. The
+  // server refuses to pay out a reward on claim unless it's handed back
+  // this exact ticket, so a script calling claimAdReward directly (without
+  // ever reaching this point) can no longer collect a reward.
+  api('startAdView', {company:'adsgram'}).then(function(ticketRes){
+    if (!ticketRes || !ticketRes.success){
       adsgramWatchBusy = false;
-      adsgramCooldownUntil = Date.now() + 15000;
-      startAdsgramButtonTimer();
+      stopAdsgramButtonTimer();
       renderTasks('ads');
-      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+      showToast((ticketRes && ticketRes.error) || 'Ad reward unavailable','error');
+      return;
+    }
+    var adTicket = ticketRes.data.adTicket;
+    var pulseChain = runAdPulseChain(adTicket);
+    controller.show().then(function(result){
+      pulseChain.then(function(chk){
+      var claimPayload = {company:'adsgram', adTicket:adTicket, ct: Date.now()};
+      if (chk) claimPayload.chk = chk;
+      apiCaptcha('claimAdReward', claimPayload).then(function(res){
+        if (!res.success){
+          adsgramWatchBusy = false;
+          stopAdsgramButtonTimer();
+          renderTasks('ads');
+          showToast(res.error||'Ad reward unavailable','error');
+          return;
+        }
+        S.user.balance = res.data.shibaBalance;
+        updatePmtTonValueDisplays();
+        applyAdRewardState(res.data);
+        document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+        adsgramWatchBusy = false;
+        adsgramCooldownUntil = Date.now() + 15000;
+        startAdsgramButtonTimer();
+        renderTasks('ads');
+        showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+      });
+      });
+    }).catch(function(err){
+      adsgramWatchBusy = false;
+      stopAdsgramButtonTimer();
+      renderTasks('ads');
+      showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
     });
-  }).catch(function(err){
+  }).catch(function(){
     adsgramWatchBusy = false;
     stopAdsgramButtonTimer();
     renderTasks('ads');
-    showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
+    showToast('Network error','error');
   });
 }
 
@@ -2408,30 +2469,51 @@ function watchGigapub(){
   gigapubWatchBusy = true;
   renderTasks('ads');
   startGigapubButtonTimer();
-  window.showGiga().then(function(){
-    return apiCaptcha('claimAdReward', {company:'gigapub'});
-  }).then(function(res){
-    if (!res.success){
+  // Single-use ad ticket — see the comment in watchAdsgram() above.
+  api('startAdView', {company:'gigapub'}).then(function(ticketRes){
+    if (!ticketRes || !ticketRes.success){
       gigapubWatchBusy = false;
       stopGigapubButtonTimer();
       renderTasks('ads');
-      showToast(res.error||'Ad reward unavailable','error');
+      showToast((ticketRes && ticketRes.error) || 'Ad reward unavailable','error');
       return;
     }
-    S.user.balance = res.data.shibaBalance;
-    updatePmtTonValueDisplays();
-    applyAdRewardState(res.data);
-    document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-    gigapubWatchBusy = false;
-    gigapubCooldownUntil = Date.now() + 15000;
-    startGigapubButtonTimer();
-    renderTasks('ads');
-    showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
-  }).catch(function(err){
+    var adTicket = ticketRes.data.adTicket;
+    var pulseChain = runAdPulseChain(adTicket);
+    window.showGiga().then(function(){
+      return pulseChain;
+    }).then(function(chk){
+      var claimPayload = {company:'gigapub', adTicket:adTicket, ct: Date.now()};
+      if (chk) claimPayload.chk = chk;
+      return apiCaptcha('claimAdReward', claimPayload);
+    }).then(function(res){
+      if (!res.success){
+        gigapubWatchBusy = false;
+        stopGigapubButtonTimer();
+        renderTasks('ads');
+        showToast(res.error||'Ad reward unavailable','error');
+        return;
+      }
+      S.user.balance = res.data.shibaBalance;
+      updatePmtTonValueDisplays();
+      applyAdRewardState(res.data);
+      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+      gigapubWatchBusy = false;
+      gigapubCooldownUntil = Date.now() + 15000;
+      startGigapubButtonTimer();
+      renderTasks('ads');
+      showToast('+'+fmtShiba(res.data.shibaAdded)+' PMT added 🎉',null,true);
+    }).catch(function(err){
+      gigapubWatchBusy = false;
+      stopGigapubButtonTimer();
+      renderTasks('ads');
+      showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
+    });
+  }).catch(function(){
     gigapubWatchBusy = false;
     stopGigapubButtonTimer();
     renderTasks('ads');
-    showToast((err && (err.description || err.message)) || 'Ad was not completed','error');
+    showToast('Network error','error');
   });
 }
 
@@ -2465,41 +2547,62 @@ function watchMonetix(){
   monetixWatchBusy = true;
   renderTasks('ads');
   startMonetixButtonTimer();
-  window.showRewardAd(function(res){
-    // Monetix's callback fires with { status: 'completed', ... } once the
-    // ad was actually watched/closed properly, or { status: 'skipped', ... }
-    // if no ad was available or the user bailed out early — only the
-    // former should ever grant a reward.
-    if (!res || res.status !== 'completed'){
+  // Single-use ad ticket — see the comment in watchAdsgram() above.
+  api('startAdView', {company:'monetix'}).then(function(ticketRes){
+    if (!ticketRes || !ticketRes.success){
       monetixWatchBusy = false;
       stopMonetixButtonTimer();
       renderTasks('ads');
-      showToast('Ad was not completed','error');
+      showToast((ticketRes && ticketRes.error) || 'Ad reward unavailable','error');
       return;
     }
-    apiCaptcha('claimAdReward', {company:'monetix'}).then(function(result){
-      if (!result.success){
+    var adTicket = ticketRes.data.adTicket;
+    var pulseChain = runAdPulseChain(adTicket);
+    window.showRewardAd(function(res){
+      // Monetix's callback fires with { status: 'completed', ... } once the
+      // ad was actually watched/closed properly, or { status: 'skipped', ... }
+      // if no ad was available or the user bailed out early — only the
+      // former should ever grant a reward.
+      if (!res || res.status !== 'completed'){
         monetixWatchBusy = false;
         stopMonetixButtonTimer();
         renderTasks('ads');
-        showToast(result.error||'Ad reward unavailable','error');
+        showToast('Ad was not completed','error');
         return;
       }
-      S.user.balance = result.data.shibaBalance;
-      updatePmtTonValueDisplays();
-      applyAdRewardState(result.data);
-      document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
-      monetixWatchBusy = false;
-      monetixCooldownUntil = Date.now() + 15000;
-      startMonetixButtonTimer();
-      renderTasks('ads');
-      showToast('+'+fmtShiba(result.data.shibaAdded)+' PMT added 🎉',null,true);
-    }).catch(function(){
-      monetixWatchBusy = false;
-      stopMonetixButtonTimer();
-      renderTasks('ads');
-      showToast('Network error','error');
+      pulseChain.then(function(chk){
+      var claimPayload = {company:'monetix', adTicket:adTicket, ct: Date.now()};
+      if (chk) claimPayload.chk = chk;
+      apiCaptcha('claimAdReward', claimPayload).then(function(result){
+        if (!result.success){
+          monetixWatchBusy = false;
+          stopMonetixButtonTimer();
+          renderTasks('ads');
+          showToast(result.error||'Ad reward unavailable','error');
+          return;
+        }
+        S.user.balance = result.data.shibaBalance;
+        updatePmtTonValueDisplays();
+        applyAdRewardState(result.data);
+        document.getElementById('homeTon').textContent = fmtShiba(S.user.balance);
+        monetixWatchBusy = false;
+        monetixCooldownUntil = Date.now() + 15000;
+        startMonetixButtonTimer();
+        renderTasks('ads');
+        showToast('+'+fmtShiba(result.data.shibaAdded)+' PMT added 🎉',null,true);
+      }).catch(function(){
+        monetixWatchBusy = false;
+        stopMonetixButtonTimer();
+        renderTasks('ads');
+        showToast('Network error','error');
+      });
+      });
     });
+  }).catch(function(){
+    monetixWatchBusy = false;
+    stopMonetixButtonTimer();
+    renderTasks('ads');
+    showToast('Network error','error');
   });
 }
 
