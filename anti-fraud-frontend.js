@@ -104,71 +104,7 @@
       var info = gl.getExtension('WEBGL_debug_renderer_info');
       var vendor = info ? gl.getParameter(info.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
       var renderer = info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
-      // إشارات إضافية أكتر تفصيلاً (مش مجرد vendor/renderer) — بتساعد
-      // تفرّق بين GPUs مختلفة حتى لو الموديل العام للموبايل نفسه، وكلها
-      // بتُشتق مباشرة من الجهاز/المتصفح فمش بتتأثر بتطبيق تيليجرام
-      // المستخدَم لفتح الميني-آب ولا بتتغيّر لو المستخدم غيّر الـ IP.
-      var extensions = safe(function () { return (gl.getSupportedExtensions() || []).sort().join(','); }, '');
-      var maxTexSize = safe(function () { return gl.getParameter(gl.MAX_TEXTURE_SIZE); }, '');
-      var maxViewport = safe(function () { return (gl.getParameter(gl.MAX_VIEWPORT_DIMS) || []).join('x'); }, '');
-      var aliasedLineWidth = safe(function () { return (gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE) || []).join(','); }, '');
-      var vsHighFloat = safe(function () {
-        var p = gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT);
-        return p ? [p.rangeMin, p.rangeMax, p.precision].join('/') : '';
-      }, '');
-      var fsHighFloat = safe(function () {
-        var p = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
-        return p ? [p.rangeMin, p.rangeMax, p.precision].join('/') : '';
-      }, '');
-      return [
-        vendor, renderer, gl.getParameter(gl.VERSION), gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
-        maxTexSize, maxViewport, aliasedLineWidth, vsHighFloat, fsHighFloat, extensions,
-      ].join('||');
-    }, '');
-  }
-
-  // معرّف تفاصيل الجهاز عالي الدقة (User-Agent Client Hints) — متاح في
-  // متصفحات Chromium (بما فيها الـ WebView جوه تطبيقات تيليجرام المبنية
-  // على Chromium على أندرويد). بيرجع موديل الجهاز بالتحديد ونسخة النظام،
-  // وده بيفرّق بين أجهزة أندرويد مختلفة أدق بكتير من الـ userAgent العادي
-  // — وبرضه لا يعتمد على أي تخزين محلي ولا على IP، ومش بيتأثر بتغيير
-  // تطبيق تيليجرام المستخدَم لأنه خاصية جهاز/متصفح مش تخزين تطبيق.
-  function getUaHighEntropySignal() {
-    return new Promise(function (resolve) {
-      try {
-        if (!(navigator.userAgentData && navigator.userAgentData.getHighEntropyValues)) return resolve('');
-        navigator.userAgentData.getHighEntropyValues(
-          ['model', 'platformVersion', 'architecture', 'bitness', 'fullVersionList', 'uaFullVersion']
-        ).then(function (ua) {
-          resolve(safe(function () {
-            var brands = (ua.fullVersionList || []).map(function (b) { return b.brand + ':' + b.version; }).sort().join(',');
-            return [ua.model || '', ua.platform || '', ua.platformVersion || '', ua.architecture || '', ua.bitness || '', brands].join('||');
-          }, ''));
-        }).catch(function () { resolve(''); });
-      } catch (_) { resolve(''); }
-    });
-  }
-
-  // بصمة الوسائط: قائمة الأكواد المدعومة (codecs) + أصوات تحويل النص
-  // لكلام المتاحة على الجهاز. زي إشارات الـ WebGL، دي خصائص جهاز/نظام
-  // تشغيل مباشرة، مش مرتبطة بتخزين المتصفح ولا بالـ IP.
-  function getMediaSignal() {
-    return safe(function () {
-      var codecs = [
-        'video/mp4; codecs="avc1.42E01E"', 'video/webm; codecs="vp9"', 'video/webm; codecs="vp8"',
-        'audio/mp4; codecs="mp4a.40.2"', 'audio/ogg; codecs="opus"', 'video/mp4; codecs="hvc1"',
-      ];
-      var v = document.createElement('video');
-      var a = document.createElement('audio');
-      var support = codecs.map(function (c) {
-        var el = c.indexOf('audio') === 0 ? a : v;
-        return safe(function () { return el.canPlayType(c); }, '');
-      }).join(',');
-      var voices = safe(function () {
-        return (global.speechSynthesis ? global.speechSynthesis.getVoices() : [])
-          .map(function (v) { return v.name + ':' + v.lang; }).sort().join(',');
-      }, '');
-      return support + '##' + voices;
+      return [vendor, renderer, gl.getParameter(gl.VERSION), gl.getParameter(gl.SHADING_LANGUAGE_VERSION)].join('||');
     }, '');
   }
 
@@ -228,12 +164,6 @@
   function getHardwareSignal() {
     return safe(function () {
       var scr = global.screen || {};
-      // فحوصات media queries بتعكس إعدادات/قدرات الجهاز الفعلية (مش
-      // تخزين تطبيق)، فبتزود التفاصيل من غير ما تتأثر بتغيير تطبيق
-      // تيليجرام أو الـ IP.
-      var mq = function (query) {
-        return safe(function () { return global.matchMedia(query).matches ? '1' : '0'; }, '?');
-      };
       return [
         navigator.platform || '',
         navigator.language || '',
@@ -244,16 +174,10 @@
         scr.width + 'x' + scr.height,
         scr.colorDepth || '',
         scr.pixelDepth || '',
-        global.devicePixelRatio || '',
         Intl.DateTimeFormat().resolvedOptions().timeZone || '',
         new Date().getTimezoneOffset(),
         navigator.userAgent || '',
         ('ontouchstart' in global) ? 'touch' : 'notouch',
-        mq('(prefers-color-scheme: dark)'),
-        mq('(prefers-reduced-motion: reduce)'),
-        mq('(color-gamut: p3)'),
-        mq('(any-hover: hover)'),
-        mq('(pointer: fine)'),
       ].join('||');
     }, '');
   }
@@ -378,25 +302,18 @@
       var webglRaw     = getWebglFingerprint();
       var hardwareRaw  = getHardwareSignal();
       var fontsRaw     = getFontsSignal();
-      var mediaRaw     = getMediaSignal();
       var audioRaw     = await getAudioFingerprint();
-      var uaRaw        = await getUaHighEntropySignal();
 
       var canvasHash   = canvasRaw   ? await sha256Hex(canvasRaw)   : '';
       var webglHash    = webglRaw    ? await sha256Hex(webglRaw)    : '';
       var hardwareHash = hardwareRaw ? await sha256Hex(hardwareRaw) : '';
       var fontsHash    = fontsRaw    ? await sha256Hex(fontsRaw)    : '';
-      var mediaHash    = mediaRaw    ? await sha256Hex(mediaRaw)    : '';
-      // uaHash ممكن يرجع فاضي لو الميزة مش متاحة في المتصفح (زي iOS
-      // Safari/WebKit مثلاً) — بنسيبها '' عادي (مش "unavailable") لأن
-      // غيابها بيبقى ثابت لكل أجهزة نفس النظام مش حالة عشوائية.
-      var uaHash       = uaRaw ? await sha256Hex(uaRaw) : '';
       // audio ممكن يرجع فاضي لو استعجل التايم-آوت (800ms) — بنميّز الحالة
       // دي صراحةً بدل ما نسيبها '' عادي، عشان السيرفر ميحسبهاش "تطابق"
       // بين جهازين لمجرد إن الاتنين مالحقوش يجيبوا قيمة الصوت.
       var audioHash    = audioRaw ? await sha256Hex(audioRaw) : 'unavailable';
 
-      var rawSignature = [canvasRaw, webglRaw, hardwareRaw, fontsRaw, audioRaw, mediaRaw, uaRaw].join('##');
+      var rawSignature = [canvasRaw, webglRaw, hardwareRaw, fontsRaw, audioRaw].join('##');
       var fingerprint  = await sha256Hex(rawSignature); // للتوافق الخلفي فقط
       var deviceId     = await getOrCreateDeviceId();
       var suspiciousFlags = getSuspiciousFlags();
@@ -405,18 +322,12 @@
         fingerprint: fingerprint, // deprecated: كان بيُستخدم كمطابقة كاملة/جزئية — استخدم signals بدل منه
         deviceId: deviceId,
         suspiciousFlags: suspiciousFlags,
-        // كل إشارة دي مُشتقة من الجهاز/النظام مباشرة، مش من تخزين
-        // التطبيق (localStorage/IndexedDB) ومش من الـ IP — فبتفضل ثابتة
-        // حتى لو المستخدم فتح البوت من تطبيق تيليجرام تاني أو غيّر شبكته.
-        // القرار النهائي والـ threshold بياخدهم السيرفر (server.js).
         signals: {
           canvasHash: canvasHash,
           webglHash: webglHash,
           hardwareHash: hardwareHash,
           fontsHash: fontsHash,
-          audioHash: audioHash,
-          mediaHash: mediaHash,
-          uaHash: uaHash
+          audioHash: audioHash
         }
       };
       return _cache;
