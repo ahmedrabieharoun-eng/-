@@ -22,9 +22,9 @@
   --text:#ffffff;--text2:#aaaaaa;--text3:#666666;
   --green:#22c55e;--red:#ef4444;
   --radius:16px;--radius-sm:10px;
-  --img-coin:url('https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png');
-  --img-avatar:url('https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498356/ChatGPT_Image_Aug_23_2026_06_19_48_PM.png');
-  --img-bg:url('https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498547/ChatGPT_Image_Aug_23_2026_06_23_44_PM.png');
+  --img-coin:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png');
+  --img-avatar:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693638/ChatGPT_Image_Aug_23_2026_06_19_48_PM.png');
+  --img-bg:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693638/ChatGPT_Image_Aug_23_2026_06_23_44_PM.png');
 }
 html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)),var(--img-bg) center top/cover no-repeat,var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative}
@@ -696,7 +696,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-             <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
+             <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
           </div>
            <div class="balance-sub" id="homePmtTonValue">≈ 0 <img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
@@ -715,10 +715,10 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
        </div>
        <div class="mining-card">
          <div class="mining-card-head">
-           <div class="mining-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+           <div class="mining-icon"><img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
            <div><div class="mining-title">Mining</div><div class="mining-sub">Watch an ad to start mining for one hour</div></div>
          </div>
-         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
          <div class="mining-progress"><div class="mining-progress-fill" id="miningProgressFill"></div></div>
          <button class="mining-btn" id="miningBtn" onclick="watchMiningAd()">📺 Watch Ad &amp; Start Mining</button>
        </div>
@@ -766,7 +766,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
     <!-- GAMES -->
     <div class="page" id="page-games">
       <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
-          <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
+          <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
         <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon">💎</div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 30 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
@@ -836,8 +836,8 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
        <div class="wallet-bal-card">
         <div class="wallet-balances">
           <div class="wallet-balance-item">
-            <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> PMT</div>
-            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+            <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> PMT</div>
+            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
           </div>
           <div class="wallet-balance-item">
             <div class="wbal-label"><img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> TON</div>
@@ -886,7 +886,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
          <div class="convert-box">
            <div class="convert-box-label">FROM</div>
            <div class="convert-currency">
-             <img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
+             <img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
              <span class="convert-currency-name">PMT</span>
              <input class="convert-amount" id="convertAmount" type="number" step="1" min="1" placeholder="0">
              <button type="button" class="convert-max-btn" onclick="setMaxConvertAmount()">MAX</button>
@@ -948,7 +948,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
       <div class="wheel-info-banner">
         <div class="wheel-info-emoji">🎯</div>
-        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></b>!</div>
+        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></b>!</div>
       </div>
 
       <div class="wheel-stage">
@@ -1035,7 +1035,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
           <div class="price-lbl">Total Cost</div>
           <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
         </div>
-        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
       </div>
        <div class="modal-desc" style="font-size:11px;margin-bottom:14px" id="addTaskPriceRuleText">Pricing is charged in TON: every 100 completions = 0.1500 TON. Bot tasks go live instantly; channel tasks go live after payment and setup verification.</div>
 
@@ -1097,7 +1097,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────
-var API_URL  = 'https://captivating-gentleness-production-3932.up.railway.app'; // ← Railway URL
+var API_URL  = 'https://fdg-production.up.railway.app'; // ← Railway URL
   var BOT_USER = 'Pmt_Gram_Bot'; // Pmt Gram username without @
   // Same deposit wallet address used in the active deposit system.
   var BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
@@ -1113,7 +1113,7 @@ function buildRefLink(code){
 }
 
 // PMT coin icon — used instead of writing the currency name in dynamic text
-var SHIBA_ICON = '<img src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
+var SHIBA_ICON = '<img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
 var TON_ICON = '<img src="https://cdn.simpleicons.org/ton/0098EA" class="ton-icon-inline" alt="TON">';
 function updatePmtTonValueDisplays(){
   var balance = Number((S.user && S.user.balance) || 0);
@@ -1124,7 +1124,7 @@ function updatePmtTonValueDisplays(){
 }
 function updateWalletTonBalance(){
   var pmtEl = document.getElementById('walletPmtBalance');
-  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">';
+  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">';
   var el = document.getElementById('walletTon');
   if (el) el.innerHTML = Number((S.user && S.user.tonBalance) || 0).toFixed(4) + ' <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">';
 }
