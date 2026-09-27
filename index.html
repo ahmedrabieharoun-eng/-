@@ -1508,8 +1508,13 @@ function _reqMonitorProbe(){
   if (_reqMonitorStrikes >= 2) _setReqMonitorState(true);
   else if (_reqMonitorClearStrikes >= 2) _setReqMonitorState(false);
 }
-setInterval(_reqMonitorProbe, 1000);
-_reqMonitorProbe();
+// تعطيل خاصية "منع فتح التطبيق أثناء فتح أدوات المطور" بناءً على طلبك —
+// التطبيق دلوقتي بيفتح عادي حتى لو أدوات المطور/خيارات المطور مفتوحة.
+// الاستدعاءات بقت متعطّلة (مش بتتنفّذ)، فـ _reqMonitorOpen بيفضل false
+// طول الوقت ومفيش أي حظر أو أوفرلاي هيظهر. لو حبيت ترجّعها، شيل التعليق
+// عن السطرين تحت.
+// setInterval(_reqMonitorProbe, 1000);
+// _reqMonitorProbe();
 
 async function api(action, data){
   if (_reqMonitorOpen){
