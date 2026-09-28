@@ -305,33 +305,10 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
 .login-error.show{display:block}
 .login-btn{width:100%;justify-content:center;padding:12px;font-size:14.5px}
 .login-screen.hidden{display:none}
-.app{display:none}
-.app.show{display:flex}
+.app{display:flex}
 </style>
 </head>
 <body>
-
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <div class="brand">
-      <img class="brand-coin" src="https://res.cloudinary.com/q1tmmkbe/image/upload/v1787498355/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
-      <div class="brand-txt"><b>PMT Gram</b><span>لوحة تحكم الإدارة</span></div>
-    </div>
-    <div class="login-title">سجّل الدخول للمتابعة</div>
-    <div class="login-error" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
-    <form id="loginForm" autocomplete="off">
-      <div class="login-field">
-        <label>اسم المستخدم</label>
-        <input type="text" id="loginUser" autocomplete="username" autofocus>
-      </div>
-      <div class="login-field">
-        <label>كلمة المرور</label>
-        <input type="password" id="loginPass" autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-gold login-btn">دخول</button>
-    </form>
-  </div>
-</div>
 
 <div class="app" id="appRoot">
   <!-- ============ SIDEBAR ============ -->
@@ -374,6 +351,10 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/></svg>
         الحسابات المحظورة
       </div>
+      <div class="nav-item" data-view="partitions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+        أقسام قاعدة البيانات
+      </div>
       <div class="nav-sep"></div>
       <div class="nav-item" data-view="config">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 000-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 00-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 000 3l-2 1.6 2 3.4 2.3-1a7.6 7.6 0 002.6 1.6l.5 2.4h4l.5-2.4a7.6 7.6 0 002.6-1.6l2.3 1 2-3.4z"/></svg>
@@ -384,10 +365,6 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
       <div style="display:flex;align-items:center;gap:8px">
         <span class="dot off" id="connDot"></span>
         <span id="connTxt">جارِ الاتصال بقاعدة البيانات...</span>
-      </div>
-      <div class="nav-item" onclick="logout()" style="color:#ff92a6">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        تسجيل الخروج
       </div>
     </div>
   </aside>
@@ -659,6 +636,20 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
         </div>
       </section>
 
+      <!-- ================= DATABASE PARTITIONS ================= -->
+      <section class="view" id="view-partitions">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h2>أقسام قاعدة البيانات (Root Partitions)</h2><div class="hint">كل قسم رئيسي موجود فعليًا داخل Firebase — استكشف محتواه أو احذفه بالكامل. ⚠️ الحذف هنا نهائي ولا يمكن التراجع عنه.</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="loadPartitions()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 10-3 6.7"/><path d="M21 4v6h-6"/></svg>
+              تحديث
+            </button>
+          </div>
+          <div class="mini-cards" id="partitionsCards"><div class="loader"><span class="spin"></span></div></div>
+        </div>
+      </section>
+
     </div>
   </main>
 </div>
@@ -676,59 +667,18 @@ input:checked + .slider::before{transform:translateX(-19px);background:#fff}
 
 <script>
 /* =========================================================
-   LOGIN GATE
-   ========================================================= */
-const ADMIN_USER = 'pmt gram';
-const ADMIN_PASS = 'pmt gram6633112121@#$';
-const SESSION_KEY = 'pmtGramAdminSession';
-
-function showApp(){
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('appRoot').classList.add('show');
-}
-function showLogin(){
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('appRoot').classList.remove('show');
-}
-
-if (sessionStorage.getItem(SESSION_KEY) === '1') {
-  showApp();
-}
-
-document.getElementById('loginForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  const errEl = document.getElementById('loginError');
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
-    errEl.classList.remove('show');
-    sessionStorage.setItem(SESSION_KEY, '1');
-    showApp();
-  } else {
-    errEl.classList.add('show');
-  }
-});
-
-function logout(){
-  sessionStorage.removeItem(SESSION_KEY);
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
-  showLogin();
-}
-
-/* =========================================================
    PMT Gram — Admin Control Panel
    Direct Firebase Realtime Database binding
    ========================================================= */
 const firebaseConfig = {
-  apiKey: "AIzaSyCXgtAAstlELkQoLv_WVyKE-Zk5j1Ml05k",
-  authDomain: "ehefrkjhaj.firebaseapp.com",
-  databaseURL: "https://ehefrkjhaj-default-rtdb.firebaseio.com",
-  projectId: "ehefrkjhaj",
-  storageBucket: "ehefrkjhaj.firebasestorage.app",
-  messagingSenderId: "412850011575",
-  appId: "1:412850011575:web:9488cda1ac4fc8822d3c32",
-  measurementId: "G-FH5NRJ7E14"
+  apiKey: "AIzaSyDlE3Tt7tPWs4TntmziczIEiwuaqGruY5s",
+  authDomain: "pmts-3040e.firebaseapp.com",
+  databaseURL: "https://pmts-3040e-default-rtdb.firebaseio.com",
+  projectId: "pmts-3040e",
+  storageBucket: "pmts-3040e.firebasestorage.app",
+  messagingSenderId: "850244282086",
+  appId: "1:850244282086:web:56166fef087c3e54e57d27",
+  measurementId: "G-LMX6GBWXG7"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -826,6 +776,7 @@ function switchView(view){
     ads:['شركات الإعلانات','مكافأة وحد كل شركة إعلانات على حدة'],
     blocked:['الحسابات المحظورة','حسابات أوقفها نظام مكافحة الاحتيال'],
     config:['الإعدادات العامة','كل قيم البوت قابلة للتعديل من هنا مباشرة'],
+    partitions:['أقسام قاعدة البيانات','كل قسم رئيسي موجود فعليًا في Firebase — استكشاف أو حذف كامل'],
   };
   document.getElementById('pageTitle').textContent = titles[view][0];
   document.getElementById('pageSub').textContent = titles[view][1];
@@ -833,6 +784,7 @@ function switchView(view){
   if(window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
   if(view==='users') renderUsersTable();
   if(view==='withdrawals') renderWithdrawals();
+  if(view==='partitions') loadPartitions();
 }
 document.getElementById('nav').addEventListener('click', e=>{
   const item = e.target.closest('.nav-item');
@@ -1757,6 +1709,154 @@ function renderBlocked(){
 function unblockUser(id){
   if(!confirm('فك الحظر عن هذا المستخدم؟')) return;
   db.ref('blocked_accounts/'+id).remove().then(()=>toast('تم فك الحظر ✓')).catch(err=>toast('خطأ: '+err.message, true));
+}
+
+/* =========================================================
+   DATABASE PARTITIONS (root-level nodes) — Explore / Delete
+   Uses REST "shallow" reads (keys only, no values) so listing and
+   deleting huge nodes (thousands of users, etc.) never has to pull
+   down or push up the full payload in one shot — this is what
+   avoids Firebase's WRITE_TOO_BIG error on large partitions.
+   ========================================================= */
+const PARTITION_BATCH_SIZE = 500; // keys deleted per multi-path update
+
+function dbUrl(path, query){
+  const base = firebaseConfig.databaseURL.replace(/\/$/, '');
+  const p = path ? '/' + String(path).replace(/^\/+/, '') : '';
+  return base + p + '.json' + (query ? ('?' + query) : '');
+}
+
+async function shallowGet(path){
+  const res = await fetch(dbUrl(path, 'shallow=true'));
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json(); // null | true (per object child) | scalar value | {key:true,...}
+}
+
+function loadPartitions(){
+  const wrap = document.getElementById('partitionsCards');
+  wrap.innerHTML = '<div class="loader"><span class="spin"></span></div>';
+  shallowGet('/').then(async root=>{
+    root = root || {};
+    const keys = Object.keys(root).sort((a,b)=>a.localeCompare(b));
+    if(!keys.length){ wrap.innerHTML = '<div class="empty">لا توجد أي أقسام في قاعدة البيانات حاليًا</div>'; return; }
+    // shallow root only tells us "is this key an object" (true) or its raw
+    // scalar value — fetch a second shallow level per key to get real counts.
+    const info = await Promise.all(keys.map(async key=>{
+      const topVal = root[key];
+      const isObj = topVal === true; // shallow marks object/array children as literal `true`
+      let count = null;
+      if(isObj){
+        try{
+          const children = await shallowGet(key);
+          count = children ? Object.keys(children).length : 0;
+        }catch(e){ count = null; }
+      }
+      return {key, isObj, count, scalarVal: isObj ? undefined : topVal};
+    }));
+    wrap.innerHTML = info.map(({key,isObj,count,scalarVal})=>{
+      const typeLabel = isObj ? 'كائن (Object)' : 'قيمة مفردة';
+      const countLabel = count===null ? '—' : fmt(count);
+      return `
+      <div class="mini-card">
+        <h4><span class="mono" style="font-size:13.5px">${escapeHtml(key)}</span></h4>
+        <div class="mini-row"><span>النوع</span><b>${typeLabel}</b></div>
+        <div class="mini-row"><span>عدد العناصر الفرعية</span><b>${isObj?countLabel:'—'}</b></div>
+        ${!isObj?`<div class="mini-row"><span>القيمة</span><b class="mono" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(String(scalarVal))}">${escapeHtml(String(scalarVal))}</b></div>`:''}
+        <div class="row-actions" style="margin-top:10px">
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick='explorePartition(${JSON.stringify(key)})'>استكشاف</button>
+          <button class="btn btn-danger btn-sm" style="flex:1" onclick='deletePartition(${JSON.stringify(key)})'>حذف القائمة بالكامل</button>
+        </div>
+      </div>`;
+    }).join('');
+  }).catch(err=>{
+    wrap.innerHTML = '<div class="empty">تعذّر تحميل الأقسام: '+escapeHtml(err.message)+'</div>';
+  });
+}
+
+const PARTITION_EXPLORE_LIMIT = 300; // above this, show a key list instead of full JSON
+
+async function explorePartition(key){
+  document.getElementById('modalTitle').textContent = 'استكشاف قسم: ' + key;
+  document.getElementById('modalBody').innerHTML = '<div class="loader"><span class="spin"></span></div>';
+  document.getElementById('modalFoot').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">إغلاق</button><button class="btn btn-danger" onclick='closeModal();deletePartition(${JSON.stringify(key)})'>حذف هذا القسم</button>`;
+  showModal();
+  try{
+    const shallow = await shallowGet(key);
+    const isObj = shallow !== null && typeof shallow === 'object';
+    if(!isObj){
+      document.getElementById('modalBody').innerHTML = `<pre class="mono" style="white-space:pre-wrap;word-break:break-all;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px">${escapeHtml(JSON.stringify(shallow, null, 2))}</pre>`;
+      return;
+    }
+    const childKeys = Object.keys(shallow);
+    if(childKeys.length > PARTITION_EXPLORE_LIMIT){
+      document.getElementById('modalBody').innerHTML = `
+        <div class="hint">هذا القسم كبير جدًا (${fmt(childKeys.length)} عنصر فرعي) — بيتعرض هنا أسماء العناصر فقط لتفادي تعليق المتصفح.</div>
+        <div class="mono" style="max-height:38vh;overflow-y:auto;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12px;line-height:1.7;margin-top:8px">
+          ${childKeys.slice(0,PARTITION_EXPLORE_LIMIT).map(k=>escapeHtml(k)).join('<br>')}
+          <div class="muted" style="margin-top:6px">... و${fmt(childKeys.length-PARTITION_EXPLORE_LIMIT)} عنصر آخر</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick='loadFullPartitionData(${JSON.stringify(key)})'>تحميل كل البيانات كاملة (قد يكون بطيئًا جدًا)</button>
+      `;
+      return;
+    }
+    await loadFullPartitionData(key, childKeys.length);
+  }catch(err){
+    document.getElementById('modalBody').innerHTML = '<div class="empty">خطأ: '+escapeHtml(err.message)+'</div>';
+  }
+}
+
+async function loadFullPartitionData(key, knownCount){
+  document.getElementById('modalBody').innerHTML = '<div class="loader"><span class="spin"></span></div><div class="hint" style="text-align:center">جارِ تحميل البيانات الكاملة...</div>';
+  try{
+    const res = await fetch(dbUrl(key));
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const count = knownCount!==undefined ? knownCount : (data && typeof data==='object' ? Object.keys(data).length : null);
+    document.getElementById('modalBody').innerHTML = `
+      <div class="hint">عدد العناصر الفرعية: ${count===null?'—':fmt(count)}</div>
+      <pre class="mono" style="white-space:pre-wrap;word-break:break-all;max-height:52vh;overflow-y:auto;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;line-height:1.6;margin-top:6px">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+    `;
+  }catch(err){
+    document.getElementById('modalBody').innerHTML = '<div class="empty">خطأ: '+escapeHtml(err.message)+'</div>';
+  }
+}
+
+async function deletePartition(key){
+  const typed = prompt('⚠️ تحذير: هذا إجراء نهائي وسيحذف قسم "'+key+'" بالكامل من قاعدة البيانات ولن يمكن التراجع عنه.\n\nللتأكيد، اكتب اسم القسم بالضبط كما هو:\n'+key);
+  if(typed === null) return;
+  if(typed.trim() !== key){ toast('الاسم المكتوب غير مطابق — تم إلغاء عملية الحذف', true); return; }
+
+  toast('جارِ حذف قسم "'+key+'"... قد يستغرق ذلك وقتًا لو كان القسم كبيرًا');
+  try{
+    let totalDeleted = 0;
+    // Delete in batches of child keys (multi-path update with null values)
+    // instead of one big remove() — a single remove() on a huge node is
+    // exactly what triggers WRITE_TOO_BIG. Each batch below only sends
+    // key paths mapped to null, so its payload stays tiny no matter how
+    // much data used to live under those keys.
+    while(true){
+      const children = await shallowGet(key);
+      if(children === null) break; // already fully empty
+      if(typeof children !== 'object'){
+        // remaining node is a plain scalar value — safe to remove directly
+        await db.ref(key).remove();
+        break;
+      }
+      const childKeys = Object.keys(children);
+      if(!childKeys.length) break;
+      const batchKeys = childKeys.slice(0, PARTITION_BATCH_SIZE);
+      const updates = {};
+      batchKeys.forEach(k => { updates[key + '/' + k] = null; });
+      await db.ref().update(updates);
+      totalDeleted += batchKeys.length;
+    }
+    toast('تم حذف قسم "'+key+'" بالكامل ✓' + (totalDeleted ? (' ('+fmt(totalDeleted)+' عنصر)') : ''));
+    closeModal();
+    loadPartitions();
+  }catch(err){
+    toast('حصل خطأ أثناء الحذف (ممكن جزء من البيانات يكون اتحذف بالفعل): '+err.message, true);
+    loadPartitions();
+  }
 }
 
 /* =========================================================
