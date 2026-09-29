@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fdg-production.up.railway.app" crossorigin>
 <!-- Critical for boot: Telegram SDK + device fingerprint (must be ready before the first API call) -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="anti-fraud-frontend.js"></script>
 <!-- Non-critical SDKs (wallet + ad networks): `async` so a slow/blocked CDN can no longer freeze the loading page.
      Every one of them is only used on a click, behind a "is it loaded yet?" check. -->
 <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js" async></script>
@@ -1399,21 +1398,87 @@ var activeGame = null, gameTimerId = null, gameStartedAt = 0, gameScore = 0, gam
 // ── State ───────────────────────────────────────────────────────────
 var S = { initData:'', startParam:'', inTelegram:false, user:null, data:null, refs:[], refPage:0, comboFilled:0, comboSel:[], lb:null, lbLoaded:false };
 
-// Device fingerprinting can be slow and used to run again before EVERY request. Now it starts as
-// soon as the page is ready (in parallel with the Telegram/network setup) and the result is reused
-// for 60 s. After that it is collected again, exactly like before.
-var _afCache = { p: null, at: 0 };
-function collectFraudCached(){
-  if (!window.AntiFraud) return Promise.resolve(null);
-  var now = Date.now();
-  if (_afCache.p && now - _afCache.at < 60000) return _afCache.p;
-  _afCache.at = now;
-  var p = Promise.resolve().then(function(){ return window.AntiFraud.collect(); }).catch(function(){ if (_afCache.p === p) _afCache.p = null; return null; });
-  _afCache.p = p;
-  return p;
+// ── Device fingerprint (multi-account protection) ────────────────────
+// Same method as client-module.js: SHA-256 over stable device traits (independent of IP/VPN).
+// Computed ONCE per page load and reused for every request, so a request pair like
+// startAdView -> claimAdReward always carries the exact same value.
+// Note: screen orientation and the timezone *offset* were left out of the hash on purpose
+// (they change when the phone rotates / at DST, which would give one device two fingerprints).
+async function generateDeviceFingerprint() {
+  var components = [];
+  try {
+    components.push(navigator.userAgent);
+    components.push(Math.min(screen.width, screen.height) + 'x' + Math.max(screen.width, screen.height) + 'x' + screen.colorDepth);
+    components.push(navigator.platform);
+    components.push(navigator.language);
+
+    if (window.WebGLRenderingContext) {
+      var canvasGl = document.createElement('canvas');
+      var gl = canvasGl.getContext('webgl') || canvasGl.getContext('experimental-webgl');
+      if (gl) {
+        var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL));
+          components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL));
+        }
+      }
+    }
+
+    components.push('ontouchstart' in window);
+    components.push(navigator.hardwareConcurrency || 'unknown');
+    components.push(navigator.deviceMemory || 'unknown');
+    components.push(navigator.cookieEnabled);
+    components.push(navigator.doNotTrack || 'unknown');
+    components.push(navigator.maxTouchPoints || 0);
+    components.push('devicePixelRatio' in window ? window.devicePixelRatio : 'unknown');
+
+    try { components.push(Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown'); }
+    catch (e) { components.push('unknown-tz'); }
+
+    try {
+      var c = document.createElement('canvas');
+      c.width = 220; c.height = 40;
+      var ctx = c.getContext('2d');
+      ctx.textBaseline = 'top';
+      ctx.font = "14px 'Arial'";
+      ctx.fillStyle = '#f60';
+      ctx.fillRect(0, 0, 100, 20);
+      ctx.fillStyle = '#069';
+      ctx.fillText('Taskora-fp:%$#@!', 2, 2);
+      ctx.strokeStyle = 'rgba(102,204,0,0.7)';
+      ctx.beginPath();
+      ctx.arc(50, 20, 15, 0, Math.PI * 2);
+      ctx.stroke();
+      components.push(c.toDataURL());
+    } catch (e) { components.push('canvas-unsupported'); }
+
+    try {
+      var AudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (AudioCtx) {
+        var audioCtx = new AudioCtx(1, 44100, 44100);
+        components.push(audioCtx.sampleRate);
+        components.push(audioCtx.destination.channelCount);
+        components.push(audioCtx.destination.maxChannelCount);
+      }
+    } catch (e) { components.push('audio-unsupported'); }
+
+    var data = new TextEncoder().encode(components.join('|'));
+    var hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer)).map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+  } catch (error) {
+    // Not a SHA-256 hex string, so the server ignores it for bans (no false bans) — it only
+    // keeps the ad-ticket start/claim comparison consistent.
+    var fb = [navigator.userAgent, screen.width, screen.height, navigator.platform, navigator.language];
+    return btoa(fb.join('|')).slice(0, 64);
+  }
+}
+var _fpPromise = null;
+function getDeviceFingerprintCached(){
+  if (!_fpPromise) _fpPromise = generateDeviceFingerprint().catch(function(){ _fpPromise = null; return null; });
+  return _fpPromise;
 }
 (function(){
-  function warm(){ try { collectFraudCached(); } catch(_){} }
+  function warm(){ try { getDeviceFingerprintCached(); } catch(_){} }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', warm); else warm();
 })();
 
@@ -1748,17 +1813,10 @@ async function api(action, data){
     return { success:false, error:'Request monitor detected', blocked:false };
   }
   var payload = data || {};
-  // ── Automatically add a device fingerprint to every request (Anti-Fraud) ──────
+  // ── Automatically add the device fingerprint to every request (multi-account protection) ──
   try {
-    if (window.AntiFraud) {
-      var fraud = await collectFraudCached();
-      if (fraud) {
-        payload._deviceFingerprint = fraud.fingerprint;   // deprecated combined hash — kept for backward compat with the server only
-        payload._deviceId          = fraud.deviceId;
-        payload._suspiciousFlags   = fraud.suspiciousFlags;
-        payload._signals           = fraud.signals;       // NEW: per-signal hashes so the server can score matches instead of one all-or-nothing compare
-      }
-    }
+    var fp = await getDeviceFingerprintCached();
+    if (fp) payload._deviceFingerprint = fp;
   } catch(_) {}
   // ─────────────────────────────────────────────────────────────────
   return fetch(API_URL.replace(/\/$/,'') + '/' + action, {
