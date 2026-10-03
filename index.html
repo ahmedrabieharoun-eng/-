@@ -1117,6 +1117,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
          <div class="wallet-form-title"><span>💸</span><span>Withdraw TON</span></div>
          <div class="withdraw-requirements" aria-label="Withdrawal requirements">
            <div class="withdraw-requirement min"><span>MIN</span><span id="withdrawMinValue">0.1 TON</span></div>
+           <div class="withdraw-requirement ads"><span>ADS</span><span id="withdrawAdsValue">0/15</span></div>
          </div>
          <input class="wallet-input" id="withdrawWallet" placeholder="TON Wallet Address (UQ...)">
          <input class="wallet-input" id="withdrawAmount" type="number" step="0.01" inputmode="decimal" placeholder="TON amount">
@@ -1329,7 +1330,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 var API_URL  = 'https://fdg-production.up.railway.app'; // ← Railway URL
   var BOT_USER = 'Pmt_Gram_Bot'; // Pmt Gram username without @
   // Same deposit wallet address used in the active deposit system.
-  var BOT_DEPOSIT_WALLET = 'UQAgojfr8CDwvappmX7lf6UWNHGtsl-aloEnyPW4v8JJ-7Gt';
+  var BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
   var tonConnectUI = null;
 // The Mini App name registered in BotFather (Short Name) — must be set here because
 // this bot is a "button bot" and its Mini App is not the default Main App, so the link
@@ -1974,7 +1975,7 @@ function showMockData(){
     ],
     completedTasks:[],
     wheel:{ segments:WHEEL_DEFAULT_SEGMENTS, spinsAvailable:1, spinsUsed:0, referralsPerSpin:2 },
-    config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, minWithdrawalTon:0.1, withdrawalEnabled:true, tonConversionRate:10000 },
+    config:{ referralReward:4000, dailyBonusReward:500, botUsername:BOT_USER, minWithdrawal:50000, withdrawalEnabled:true, tonConversionRate:10000 },
     daily:{ reward:500, claimed:false },
     stats:{ adsWatchedToday:0, friendsInvited:0, earnedToday:0 },
     gamePlays:{coin:0,merge:0,flappy:0,gem:0},
@@ -2710,10 +2711,12 @@ function openWithdrawForm(){
   setWalletActionActive('walletActionWithdraw');
   var cfg = (S.data && S.data.config) || {};
   if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
-  var minTon = Number(cfg.minWithdrawalTon != null ? cfg.minWithdrawalTon : 0.1);
-  var hasPending = ((S.data && S.data.withdrawals) || []).some(function(w){ return w.status === 'pending'; });
-  if (hasPending){ showToast('You already have a pending withdrawal. Wait until it is approved or rejected.','error'); return; }
-  document.getElementById('withdrawMinValue').textContent = minTon+' TON';
+  var adsByCompanyW = (S.data && S.data.stats && S.data.stats.adsWatchedByCompany) || {};
+  var watched = Number(adsByCompanyW.adsgram || 0);
+  var count = ((S.data && S.data.withdrawals) || []).length;
+  var rule = [{min:0.1,ads:15},{min:0.2,ads:20},{min:0.3,ads:25}][Math.min(count,2)];
+  document.getElementById('withdrawMinValue').textContent = rule.min.toFixed(1)+' TON';
+  document.getElementById('withdrawAdsValue').textContent = Math.min(watched, rule.ads)+'/'+rule.ads;
   document.getElementById('withdrawWallet').value = (S.user && S.user.tonWallet) || '';
   document.getElementById('withdrawAmount').value = '';
   updateWithdrawalNetAmount();
@@ -2746,9 +2749,6 @@ function submitWithdrawal(){
   if (!wallet){ showToast('Enter a TON wallet address','error'); return; }
   if (!/^([UE]Q)[A-Za-z0-9_-]{46}$/.test(wallet)){ showToast('Invalid wallet address','error'); return; }
   if (!amount || amount<=0){ showToast('Enter a valid amount','error'); return; }
-  var minTonCfg = Number(((S.data && S.data.config) || {}).minWithdrawalTon != null ? S.data.config.minWithdrawalTon : 0.1);
-  if (amount < minTonCfg){ showToast('Minimum withdrawal is '+minTonCfg+' TON','error'); return; }
-  if (((S.data && S.data.withdrawals) || []).some(function(w){ return w.status === 'pending'; })){ showToast('You already have a pending withdrawal','error'); return; }
   if (S.user && amount > Number(S.user.tonBalance || 0)){ showToast('Insufficient TON balance','error'); return; }
   var btn = document.getElementById('withdrawSubmitBtn');
   btn.disabled = true; btn.textContent = 'Submitting...';
@@ -2758,6 +2758,12 @@ function submitWithdrawal(){
     S.user.tonBalance = res.data.tonBalance;
     S.user.tonWallet = wallet;
     updateWalletTonBalance();
+    // The counter resets on the server after any successful withdrawal (in addition to the daily reset),
+    // so we reflect the zero value immediately in the UI as well.
+    if (S.data && S.data.stats) {
+      S.data.stats.adsWatchedToday = 0;
+      S.data.stats.adsWatchedByCompany = {};
+    }
     S.data.withdrawals = S.data.withdrawals || [];
     S.data.withdrawals.unshift({ id:res.data.withdrawalId, walletAddress:wallet, amount:res.data.netAmount, requestedAmount:amount, fee:res.data.fee, currency:'TON', status:'pending', ts:Date.now() });
     renderWalletHistory(S.data.balanceLogs||[]);
@@ -2775,7 +2781,7 @@ function openDepositForm(){
   closeWalletForm('convertFormCard'); closeWithdrawForm();
   document.getElementById('depositFormCard').style.display='block';
   // The address comes from the active deposit system; we don't rely on an old value stored in Firebase.
-  BOT_DEPOSIT_WALLET = 'UQAgojfr8CDwvappmX7lf6UWNHGtsl-aloEnyPW4v8JJ-7Gt';
+  BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
   if (!tonConnectUI && window.TON_CONNECT_UI) {
     tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: API_URL.replace(/\/$/,'') + '/tonconnect-manifest.json',
