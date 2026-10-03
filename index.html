@@ -1329,7 +1329,7 @@ html,body{height:100%;background:linear-gradient(rgba(8,6,4,.78),rgba(8,6,4,.78)
 var API_URL  = 'https://fdg-production.up.railway.app'; // ← Railway URL
   var BOT_USER = 'Pmt_Gram_Bot'; // Pmt Gram username without @
   // Same deposit wallet address used in the active deposit system.
-  var BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
+  var BOT_DEPOSIT_WALLET = 'UQAgojfr8CDwvappmX7lf6UWNHGtsl-aloEnyPW4v8JJ-7Gt';
   var tonConnectUI = null;
 // The Mini App name registered in BotFather (Short Name) — must be set here because
 // this bot is a "button bot" and its Mini App is not the default Main App, so the link
@@ -2775,7 +2775,7 @@ function openDepositForm(){
   closeWalletForm('convertFormCard'); closeWithdrawForm();
   document.getElementById('depositFormCard').style.display='block';
   // The address comes from the active deposit system; we don't rely on an old value stored in Firebase.
-  BOT_DEPOSIT_WALLET = 'UQAACNWWtTtN7ILkhRERwYUTzo06Bd1Tv_8Yk5gPioIMFoUD';
+  BOT_DEPOSIT_WALLET = 'UQAgojfr8CDwvappmX7lf6UWNHGtsl-aloEnyPW4v8JJ-7Gt';
   if (!tonConnectUI && window.TON_CONNECT_UI) {
     tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: API_URL.replace(/\/$/,'') + '/tonconnect-manifest.json',
