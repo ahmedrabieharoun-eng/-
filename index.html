@@ -6,7 +6,6 @@
 <title>Pmt Gram</title>
 <meta name="theme-color" content="#000000">
 <!-- Open the connection to the API (DNS + TLS) while the page is still loading -->
-<link rel="preconnect" href="https://i.ibb.co" crossorigin>
 <link rel="preconnect" href="https://fdg-production.up.railway.app" crossorigin>
 <!-- Critical for boot: Telegram SDK + device fingerprint (must be ready before the first API call) -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -28,7 +27,7 @@
   --text:#ffffff;--text2:#b5b5b5;--text3:#7d7d7d;
   --green:#e4e4e4;--red:#ef4444;
   --radius:16px;--radius-sm:10px;
-  --img-coin:url('https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png');
+  --img-coin:url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E');
   --img-avatar:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693638/ChatGPT_Image_Aug_23_2026_06_19_48_PM.png');
   --img-bg:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693638/ChatGPT_Image_Aug_23_2026_06_23_44_PM.png');
 }
@@ -39,7 +38,7 @@ html,body{height:100%;background:#000000;color:var(--text);font-family:-apple-sy
 .shiba-icon-inline,.ton-icon-inline{height:0.95em;width:0.95em;vertical-align:-0.15em;object-fit:contain;display:inline-block;margin:0 1px}
 
 /* Loading */
-.loading-screen{position:fixed;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 45%),url('https://i.ibb.co/JFKgtft0/e961abc4-e79e-4577-8d63-52a459c54293.png') center/cover no-repeat,#000;background-color:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px;z-index:999;padding:0 24px 56px;overflow:hidden;text-align:center}
+.loading-screen{position:fixed;inset:0;background:rgba(0,0,0,.9);background-color:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px;z-index:999;padding:0 24px 56px;overflow:hidden;text-align:center}
 .loading-screen.hidden{display:none}
 
 .ld-coin{position:absolute;border-radius:50%;overflow:hidden;box-shadow:0 0 18px rgba(126,126,126,0.55),0 4px 10px rgba(0,0,0,0.5);animation:ld-float 3.6s ease-in-out infinite}
@@ -1040,63 +1039,7 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
 .ref-day.done{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.55);color:#bae6fd}
 .withdraw-requirement.min{color:#F5B942}.withdraw-requirement.ads{color:#7DD3FC}
 img[src*="simpleicons"]{filter:drop-shadow(0 0 6px rgba(56,189,248,.5))!important}
-img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!important}
-
-/* ===== LUXE LAYOUT v2 ===== */
-.bonus-card,.redeem-card,.mining-card,.stat-card,.game-card,.task-item,.ref-link-card,.ref-stat-card,.wallet-form-card,.tx-item,.ad-summary,.wallet-action-btn,.ref-user-item,.games-balance,.wallet-bal-card{background:linear-gradient(160deg,#12151f,#0b0e17) padding-box,linear-gradient(135deg,rgba(56,189,248,.6),rgba(255,255,255,.07) 38%,rgba(255,255,255,.04) 62%,rgba(245,185,66,.45)) border-box;border:1px solid transparent}
-.page{padding-bottom:110px}
-.nav{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));height:66px;padding:0 6px;border-radius:26px;border:1px solid rgba(56,189,248,.28);box-shadow:0 14px 40px rgba(0,0,0,.7),0 0 26px rgba(14,165,233,.14)}
-.nav-item.active{background:rgba(56,189,248,.15);border-radius:20px}
-.nav-item.active::before{display:none}
-#page-home.active{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 16px 110px;align-content:start}
-#page-home>*{margin:0!important}
-#page-home>.home-header{grid-column:1/-1;order:1;padding:22px 4px 0}
-#page-home>.balance-section{grid-column:1/-1;order:2;padding:0}
-#page-home>.mining-card{grid-column:1/-1;order:3}
-#page-home>.bonus-card{order:4}
-#page-home>.redeem-card{order:5}
-#page-home>.stats-section{grid-column:1/-1;order:6;padding:0}
-.avatar{width:54px;height:54px;border:2px solid rgba(56,189,248,.65);box-shadow:0 0 20px rgba(56,189,248,.45)}
-.user-name{font-size:19px;letter-spacing:.3px}
-.balance-card{border-radius:34px;padding:30px 24px 24px}
-.balance-num{font-size:54px;letter-spacing:-2px}
-.home-action{border-radius:18px;padding:15px 10px}
-.bonus-card,.redeem-card{flex-direction:column;align-items:flex-start;gap:12px;padding:18px 16px;border-radius:28px;min-height:168px}
-.bonus-card .feature-copy,.redeem-card .feature-copy{flex:1;width:100%}
-.bonus-card .feature-btn,.redeem-card .feature-btn{width:100%;border-radius:16px;padding:12px}
-.feature-icon{width:54px;height:54px;border-radius:50%;font-size:26px}
-.mining-card{padding:22px 20px;border-radius:32px}
-.mining-icon{width:66px;height:66px;border-radius:50%}
-.mining-icon img{width:50px;height:50px}
-.mining-amount{font-size:36px}
-.mining-btn{border-radius:20px}
-.stats-grid{gap:10px}
-.stat-card{padding:20px 6px 16px;border-radius:24px;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:linear-gradient(90deg,transparent,#38BDF8,transparent)}
-.stat-val{font-size:24px}
-.tabs{border-radius:999px;padding:5px}
-.tab{border-radius:999px;padding:11px 6px}
-.add-task-btn{border-radius:24px;padding:18px}
-.task-item{border-radius:24px;padding:16px}
-.task-logo{width:52px;height:52px;border-radius:18px}
-.task-btn{border-radius:14px;padding:10px 20px}
-.games-grid{gap:14px}
-.game-card{border-radius:30px;padding:24px 12px 18px}
-.game-card-icon{width:66px;height:66px;border-radius:24px;font-size:32px}
-.game-card:first-child{grid-column:1/-1;display:grid;grid-template-columns:84px 1fr;column-gap:18px;text-align:left;align-items:center;padding:20px}
-.game-card:first-child .game-card-icon{grid-row:1/5;width:84px;height:84px;margin:0;font-size:40px}
-.game-card:first-child .game-card-limit,.game-card:first-child .game-card-plays{justify-self:start}
-.games-balance{border-radius:28px}
-.wallet-bal-card{border-radius:30px;padding:24px 18px}
-.wallet-balance-item{border-radius:22px}
-.wallet-actions{gap:12px}
-.wallet-action-btn{border-radius:26px;padding:20px 8px}
-.wallet-action-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4)}
-.wallet-form-card,.convert-box{border-radius:28px}
-.ref-banner{border-radius:32px;padding:32px 20px}
-.ref-link-card,.ref-stat-card,.ref-user-item{border-radius:24px}
-.tx-item{border-radius:20px}
-.copy-btn{border-radius:14px}
+img[src^="data:image/svg"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!important}
 </style>
 </head>
 <body>
@@ -1158,7 +1101,7 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-             <span class="balance-currency"><img class="shiba-icon-inline" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></span>
+             <span class="balance-currency"><img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></span>
           </div>
            <div class="balance-sub" id="homePmtTonValue">≈ 0 <img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
@@ -1177,10 +1120,10 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
        </div>
        <div class="mining-card">
          <div class="mining-card-head">
-           <div class="mining-icon"><img src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></div>
+           <div class="mining-icon"><img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
            <div><div class="mining-title">Mining</div><div class="mining-sub">Watch an ad to start mining for one hour</div></div>
          </div>
-         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></div>
+         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
          <div class="mining-progress"><div class="mining-progress-fill" id="miningProgressFill"></div></div>
          <button class="mining-btn" id="miningBtn" onclick="watchMiningAd()"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="15" x="2" y="7" rx="2"/><path d="m17 2-5 5-5-5"/></svg> Watch Ad &amp; Start Mining</button>
        </div>
@@ -1228,7 +1171,7 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
     <!-- GAMES -->
     <div class="page" id="page-games">
       <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
-          <div class="games-balance"><div class="games-balance-icon"><img src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
+          <div class="games-balance"><div class="games-balance-icon"><img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
         <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg></div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 30 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
@@ -1298,8 +1241,8 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
        <div class="wallet-bal-card">
         <div class="wallet-balances">
           <div class="wallet-balance-item">
-            <div class="wbal-label"><img class="shiba-icon-inline" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"> PMT</div>
-            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></div>
+            <div class="wbal-label"><img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"> PMT</div>
+            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
           </div>
           <div class="wallet-balance-item">
             <div class="wbal-label"><img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> TON</div>
@@ -1348,7 +1291,7 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
          <div class="convert-box">
            <div class="convert-box-label">FROM</div>
            <div class="convert-currency">
-             <img src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT">
+             <img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT">
              <span class="convert-currency-name">PMT</span>
              <input class="convert-amount" id="convertAmount" type="number" step="1" min="1" placeholder="0">
              <button type="button" class="convert-max-btn" onclick="setMaxConvertAmount()">MAX</button>
@@ -1386,7 +1329,7 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
 
       <div class="wheel-info-banner">
         <div class="wheel-info-emoji"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></b>!</div>
+        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></b>!</div>
       </div>
 
       <div class="wheel-stage">
@@ -1473,7 +1416,7 @@ img[src*="PMT-Silver-Blue"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impo
           <div class="price-lbl">Total Cost</div>
           <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
         </div>
-        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT"></div>
+        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
       </div>
        <div class="modal-desc" style="font-size:11px;margin-bottom:14px" id="addTaskPriceRuleText">Pricing is charged in TON: every 100 completions = 0.1500 TON. Bot tasks go live instantly; channel tasks go live after payment and setup verification.</div>
 
@@ -1555,7 +1498,7 @@ function buildRefLink(code){
 }
 
 // PMT coin icon — used instead of writing the currency name in dynamic text
-var SHIBA_ICON = '<img src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" class="shiba-icon-inline" alt="PMT">';
+var SHIBA_ICON = '<img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" class="shiba-icon-inline" alt="PMT">';
 var TON_ICON = '<img src="https://cdn.simpleicons.org/ton/0098EA" class="ton-icon-inline" alt="TON">';
 function updatePmtTonValueDisplays(){
   var balance = Number((S.user && S.user.balance) || 0);
@@ -1566,7 +1509,7 @@ function updatePmtTonValueDisplays(){
 }
 function updateWalletTonBalance(){
   var pmtEl = document.getElementById('walletPmtBalance');
-  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="https://i.ibb.co/qFhC6mMM/PMT-Silver-Blue-Crypto-Coin.png" alt="PMT">';
+  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT">';
   var el = document.getElementById('walletTon');
   if (el) el.innerHTML = Number((S.user && S.user.tonBalance) || 0).toFixed(4) + ' <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">';
 }
