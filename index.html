@@ -1209,7 +1209,7 @@ img[src^="data:image/svg"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impor
        <div class="ref-banner">
          <div class="ref-banner-title">Invite friends and earn</div>
           <span class="ref-banner-pct" id="refPct">4,000 PMT</span>
-          <div class="ref-banner-desc">Each referral watches 10 ads — you get paid instantly, one time.<br>Plus 10% of everything they make after activation, forever.</div>
+          <div class="ref-banner-desc">Each referral must watch 10 AdsGram ads — you get paid instantly, one time.<br>Only AdsGram ads count toward the 10.<br>Plus 10% of everything they make after activation, forever.</div>
       </div>
 
       <div class="ref-link-section">
@@ -1283,9 +1283,10 @@ img[src^="data:image/svg"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impor
       <div class="wallet-form-card" id="withdrawFormCard" style="display:none">
          <div class="wallet-form-title"><span><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg></span><span>Withdraw USD</span></div>
          <div class="withdraw-requirements" aria-label="Withdrawal requirements">
-           <div class="withdraw-requirement min"><span>MIN</span><span id="withdrawMinValue">$0.1</span></div>
-           <div class="withdraw-requirement ads"><span>ADS</span><span id="withdrawAdsValue">0/20</span></div>
+           <div class="withdraw-requirement min"><span>MIN</span><span id="withdrawMinValue">$0.2</span></div>
+           <div class="withdraw-requirement ads"><span>ADSGRAM ADS</span><span id="withdrawAdsValue">0/20</span></div>
          </div>
+         <div class="wallet-form-help" style="margin:-6px 0 12px">Only ads watched through AdsGram count toward the withdrawal requirement.</div>
          <input class="wallet-input" id="withdrawWallet" placeholder="TON Wallet Address (UQ...) — you receive TON here">
          <input class="wallet-input" id="withdrawAmount" type="number" step="0.01" inputmode="decimal" placeholder="Amount in USD ($)">
           <div class="withdraw-fee-card">Withdrawal fee: <b>10%</b><div class="withdraw-net"><span>Amount you will receive after the fee</span><strong id="withdrawNetAmount">$0.0000</strong></div><div class="withdraw-net"><span>You will receive in TON</span><strong id="withdrawTonAmount">0.0000 TON</strong></div><div class="withdraw-net"><span>Rate</span><strong id="withdrawRateLabel">1 TON = $1.50</strong></div></div>
@@ -2508,7 +2509,7 @@ function renderRefs(page){
         var progressHtml = '<div class="ref-days">'+
             '<div class="ref-day '+(isCompleted?'done':'')+'">'+
               '<div class="ref-day-title">'+(isCompleted?IC('check')+' ':'')+(isCompleted?'Reward claimed':'Watching ads')+'</div>'+
-              '<div>ads '+adsWatched+'/10</div>'+
+              '<div>AdsGram ads '+adsWatched+'/10</div>'+
             '</div>'+
           '</div>';
         var earnedTotal = isCompleted
@@ -2530,7 +2531,7 @@ function renderRefs(page){
          '<div class="ref-user-details">'+
             (r.fraudMultipleAccounts ? IC('alert')+' Flagged as multiple accounts from the same device' :
             isCompleted ? IC('checkc')+' The one-time referral bonus has been credited' :
-              IC('tv')+' Watches 10 ads to unlock a one-time reward of <b>'+fmtShiba(r.reward||0)+' PMT</b>')+
+              IC('tv')+' Watches 10 AdsGram ads to unlock a one-time reward of <b>'+fmtShiba(r.reward||0)+' PMT</b>')+
         '</div>'+
       '</div>');
     } catch (err) {
@@ -2906,7 +2907,7 @@ function openWithdrawForm(){
   if (cfg.withdrawalEnabled === false){ showToast('Withdrawals are currently disabled','error'); return; }
   var adsByCompanyW = (S.data && S.data.stats && S.data.stats.adsWatchedByCompany) || {};
   var watched = Number(adsByCompanyW.adsgram || 0);
-  var minUsd = Number(cfg.minWithdrawalUsd); if (!(minUsd > 0)) minUsd = 0.1;
+  var minUsd = Number(cfg.minWithdrawalUsd); if (!(minUsd > 0)) minUsd = 0.2;
   var rule = { min: minUsd, ads: 20 };
   document.getElementById('withdrawMinValue').textContent = '$'+rule.min;
   var rl = document.getElementById('withdrawRateLabel'); if (rl) rl.textContent = '1 TON = $'+usdPerTon().toFixed(2);
