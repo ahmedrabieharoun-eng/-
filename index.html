@@ -27,7 +27,7 @@
   --text:#ffffff;--text2:#b5b5b5;--text3:#7d7d7d;
   --green:#e4e4e4;--red:#ef4444;
   --radius:16px;--radius-sm:10px;
-  --img-coin:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png');
+  --img-coin:url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E');
   --img-avatar:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693638/ChatGPT_Image_Aug_23_2026_06_19_48_PM.png');
   --img-bg:url('https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693638/ChatGPT_Image_Aug_23_2026_06_23_44_PM.png');
 }
@@ -952,6 +952,31 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
 .cp-pr .v .ico{width:18px;height:18px}
 .cp-pr .v small{color:var(--gold);font-size:11px}
 .cp-pool{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,rgba(251,191,36,.16),rgba(139,92,246,.12));border:1px solid rgba(251,191,36,.3);font-size:12px;font-weight:800;color:#fde68a}
+
+/* ===== VIBRANCY BOOST ===== */
+:root{--text2:#cfcfd6;--text3:#9c9ca6;--btn:linear-gradient(145deg,#74747e,#3d3d44 55%,#2b2b30)}
+#bgFx .grid{background-image:linear-gradient(rgba(255,255,255,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.13) 1px,transparent 1px)}
+#bgFx .diag{background:repeating-linear-gradient(115deg,transparent 0 90px,rgba(255,255,255,.10) 90px 91px)}
+#bgFx .beam{height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent)}
+#bgFx::before{content:'';position:absolute;inset:-20%;background:radial-gradient(40% 30% at 30% 20%,rgba(255,255,255,.13),transparent 70%),radial-gradient(35% 28% at 80% 70%,rgba(255,255,255,.09),transparent 70%);animation:bgGlow 16s ease-in-out infinite alternate}
+@keyframes bgGlow{to{transform:translate3d(6%,8%,0) scale(1.1)}}
+.glass-card,.stat-card,.task-item,.reward-item,.ref-link-card,.ref-stat-card,.wallet-form-card,.tx-item,.mining-card,.bonus-card,.redeem-card,.how-card,.game-card,.ad-summary,.convert-box,.wallet-action-btn,.tabs,.ref-user-item,.record-item,.wheel-info-banner,.combo-card,.games-balance,.ref-banner,.price-box,.wallet-bal-card,.promo-card{background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 12px 30px rgba(0,0,0,.5)}
+.balance-card{background:linear-gradient(145deg,#585862 0%,#2c2c32 42%,#131316 100%);border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 18px 44px rgba(0,0,0,.65),0 0 40px rgba(255,255,255,.07)}
+.balance-card::before{background:radial-gradient(circle,rgba(255,255,255,.28),transparent 68%)}
+.balance-logo{top:16px;bottom:auto;right:18px;font-size:30px;opacity:.55}
+.balance-num{text-shadow:0 0 22px rgba(255,255,255,.35)}
+.balance-label,.balance-sub{color:rgba(255,255,255,.82)}
+.home-action.withdraw{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35)}
+.stat-val,.stat-val.orange{text-shadow:0 0 14px rgba(255,255,255,.25)}
+.nav-label,.nav-icon{color:#b0b0ba}
+.nav{background:rgba(14,14,17,.9);border-top-color:rgba(255,255,255,.18)}
+.feature-icon,.game-card-icon,.reward-icon,.task-logo{color:#fff}
+.game-card-icon,.feature-icon.gold,.feature-icon.purple,.reward-icon{background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.06));border-color:rgba(255,255,255,.28)}
+.section-title,.page-title,.feature-title,.task-name{color:#fff}
+.task-btn.verify,.task-btn.done{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
+.modal{background:linear-gradient(180deg,#26262b,#101012)}
+.wallet-input,.modal-input,.modal-textarea{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22)}
+.game-board,.game-board.gem,.game-board.merge{background:linear-gradient(160deg,#2a2a30,#0f0f11)}
 </style>
 </head>
 <body>
@@ -1013,7 +1038,7 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
           <div class="balance-label">Your Balance</div>
           <div class="balance-amount">
             <span class="balance-num" id="homeTon">0</span>
-             <span class="balance-currency"><img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></span>
+             <span class="balance-currency"><img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></span>
           </div>
            <div class="balance-sub" id="homePmtTonValue">≈ 0 <img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"></div>
           <div class="balance-sub" id="homeTonUsd">Keep earning every day!</div>
@@ -1032,10 +1057,10 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
        </div>
        <div class="mining-card">
          <div class="mining-card-head">
-           <div class="mining-icon"><img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+           <div class="mining-icon"><img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
            <div><div class="mining-title">Mining</div><div class="mining-sub">Watch an ad to start mining for one hour</div></div>
          </div>
-         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+         <div class="mining-amount-row"><span>Mining Balance</span><b class="mining-amount" id="miningAmount">0.00</b><img class="mining-amount-icon" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
          <div class="mining-progress"><div class="mining-progress-fill" id="miningProgressFill"></div></div>
          <button class="mining-btn" id="miningBtn" onclick="watchMiningAd()"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="15" x="2" y="7" rx="2"/><path d="m17 2-5 5-5-5"/></svg> Watch Ad &amp; Start Mining</button>
        </div>
@@ -1083,7 +1108,7 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
     <!-- GAMES -->
     <div class="page" id="page-games">
       <div class="games-header"><div class="page-title">Games</div><div class="games-subtitle">Play, win and get paid straight to your balance</div></div>
-          <div class="games-balance"><div class="games-balance-icon"><img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
+          <div class="games-balance"><div class="games-balance-icon"><img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div><div class="games-balance-copy"><div class="games-balance-label">Your balance</div><div class="games-balance-value" id="gamesBalance">0 <span>PMT</span></div></div></div>
       <div class="games-section-title">— MINI GAMES</div>
       <div class="games-grid">
         <div class="game-card" onclick="startGame('gem')"><div class="game-card-icon"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg></div><div class="game-card-title">Gem Rush</div><div class="game-card-type">6 gems · 3 bombs</div><span class="game-card-limit">up to 30 PMT</span><span class="game-card-plays" id="plays-gem">3/3 left today</span></div>
@@ -1153,8 +1178,8 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
        <div class="wallet-bal-card">
         <div class="wallet-balances">
           <div class="wallet-balance-item">
-            <div class="wbal-label"><img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"> PMT</div>
-            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+            <div class="wbal-label"><img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"> PMT</div>
+            <div class="wbal-amount" id="walletPmtBalance">0 <img class="wallet-pmt-icon" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
           </div>
           <div class="wallet-balance-item">
             <div class="wbal-label"><img class="ton-icon-inline" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON"> TON</div>
@@ -1203,7 +1228,7 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
          <div class="convert-box">
            <div class="convert-box-label">FROM</div>
            <div class="convert-currency">
-             <img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">
+             <img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT">
              <span class="convert-currency-name">PMT</span>
              <input class="convert-amount" id="convertAmount" type="number" step="1" min="1" placeholder="0">
              <button type="button" class="convert-max-btn" onclick="setMaxConvertAmount()">MAX</button>
@@ -1241,7 +1266,7 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
 
       <div class="wheel-info-banner">
         <div class="wheel-info-emoji"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></b>!</div>
+        <div class="wheel-info-text">Earn <b>1 free spin</b> for every <b id="wheelRefsPerSpin">2</b> active referrals. Spin to win up to <b>10,000 <img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></b>!</div>
       </div>
 
       <div class="wheel-stage">
@@ -1328,7 +1353,7 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
           <div class="price-lbl">Total Cost</div>
           <div class="price-usd" id="addTaskPriceUsd">≈ $0</div>
         </div>
-        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT"></div>
+        <div class="price-val" id="addTaskPriceShiba">0 <img class="shiba-icon-inline" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT"></div>
       </div>
        <div class="modal-desc" style="font-size:11px;margin-bottom:14px" id="addTaskPriceRuleText">Pricing is charged in TON: every 100 completions = 0.1500 TON. Bot tasks go live instantly; channel tasks go live after payment and setup verification.</div>
 
@@ -1410,7 +1435,7 @@ function buildRefLink(code){
 }
 
 // PMT coin icon — used instead of writing the currency name in dynamic text
-var SHIBA_ICON = '<img src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" class="shiba-icon-inline" alt="PMT">';
+var SHIBA_ICON = '<img src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" class="shiba-icon-inline" alt="PMT">';
 var TON_ICON = '<img src="https://cdn.simpleicons.org/ton/0098EA" class="ton-icon-inline" alt="TON">';
 function updatePmtTonValueDisplays(){
   var balance = Number((S.user && S.user.balance) || 0);
@@ -1421,7 +1446,7 @@ function updatePmtTonValueDisplays(){
 }
 function updateWalletTonBalance(){
   var pmtEl = document.getElementById('walletPmtBalance');
-  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="https://res.cloudinary.com/w8zhbc4b/image/upload/v1789693637/ChatGPT_Image_Aug_23_2026_06_20_10_PM.png" alt="PMT">';
+  if (pmtEl) pmtEl.innerHTML = fmtShiba((S.user && S.user.balance) || 0) + ' <img class="wallet-pmt-icon" src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id=%27g%27%20cx=%2735%25%27%20cy=%2730%25%27%20r=%2780%25%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23fff%27/%3E%3Cstop%20offset=%27.55%27%20stop-color=%27%23bdbdc4%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%234a4a52%27/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2730%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2723%27%20fill=%27none%27%20stroke=%27%232a2a30%27%20stroke-opacity=%27.5%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M24%2046V18h11a9%209%200%200%201%200%2018H24%27%20fill=%27none%27%20stroke=%27%231c1c20%27%20stroke-width=%275%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E" alt="PMT">';
   var el = document.getElementById('walletTon');
   if (el) el.innerHTML = Number((S.user && S.user.tonBalance) || 0).toFixed(4) + ' <img class="wallet-ton-icon" src="https://cdn.simpleicons.org/ton/0098EA" alt="TON">';
 }
