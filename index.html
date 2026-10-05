@@ -1056,6 +1056,19 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
 .withdraw-requirement.min{color:#F5B942}.withdraw-requirement.ads{color:#7DD3FC}
 img[src*="simpleicons"]{filter:drop-shadow(0 0 6px rgba(56,189,248,.5))!important}
 img[src^="data:image/svg"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!important}
+
+/* ═══════════ Contest page — lightweight overrides ═══════════ */
+#page-record *,#page-record *::before,#page-record *::after{animation:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.cp-ov,.cp-ov *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.cp-bg .stars{opacity:.55}
+.cp-skel::after{display:none}
+.cp-spark{display:none}
+#page-record .ico{filter:none}
+#page-record .ico .a-sw,#page-record .ico .gl{display:none}
+#page-record .ic-hourglass .sT,#page-record .ic-hourglass .sB{transform:scaleY(.55)}
+.cp-plinth::after,.cp-ind::after,.cp-me::before{display:none}
+.cp-ind{transition:transform .25s ease}
+#cpPanel{transition:opacity .15s ease}
 </style>
 </head>
 <body>
@@ -1525,8 +1538,9 @@ var API_URL  = 'https://fdg-production.up.railway.app'; // ← Railway URL
 // t.me/BOT/APP_SHORT_NAME?startapp=CODE (make sure this value matches
 // exactly the short name you created with /newapp in BotFather)
 var BOT_APP_SHORT_NAME = 'app';
+var BOT_DIRECT_LINK = 'https://t.me/Pmt_Gram_Bot/app'; // Direct Link of the Mini App
 function buildRefLink(code){
-  return 'https://t.me/'+BOT_USER+'/'+BOT_APP_SHORT_NAME+'?startapp='+code;
+  return BOT_DIRECT_LINK+'?startapp='+encodeURIComponent(code);
 }
 
 // PMT coin icon — used instead of writing the currency name in dynamic text
@@ -2691,19 +2705,13 @@ function cpIcon(name, size, st){
       '<path class="dot" d="'+cpSp(24,37,2.600)+'" fill="'+G+'"/></g>';
   } else return '';
   var sz = size ? ' style="width:'+size+'px;height:'+size+'px"' : '';
-  var svg = '<svg class="ico ic-'+name+(st?' st':'')+'" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"'+sz+' aria-hidden="true">'+defs+clip+'</clipPath></defs>'+body+'</svg>';
+  var svg = '<svg class="ico ic-'+name+' st" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"'+sz+' aria-hidden="true">'+defs+clip+'</clipPath></defs>'+body+'</svg>';
   return name === 'coin' ? '<span class="k-cw">'+svg+'</span>' : svg;
 }
 
 // ---------- Background (CSS/JS generated, no images) ----------
 function cpBgHtml(){
-  var p = '', i;
-  for (i=0;i<16;i++){
-    var sz = 2+Math.round(Math.random()*3);
-    p += '<span class="pt" style="left:'+Math.round(Math.random()*100)+'%;width:'+sz+'px;height:'+sz+'px;--dx:'+(Math.round(Math.random()*60)-30)+'px;animation-duration:'+(16+Math.random()*16).toFixed(1)+'s;animation-delay:-'+(Math.random()*20).toFixed(1)+'s"></span>';
-  }
-  return '<div class="cp-bg"><div class="stars"></div><div class="grid"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>'+p+
-    '<div class="streak" style="top:18%"></div><div class="streak" style="top:58%;animation-delay:-7s"></div></div>';
+  return '<div class="cp-bg"><div class="stars"></div></div>';
 }
 
 // ---------- Page shell + tabs ----------
