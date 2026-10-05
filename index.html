@@ -977,6 +977,69 @@ img[src*="cloudinary"],img[src*="simpleicons"]{filter:grayscale(1) contrast(1.1)
 .modal{background:linear-gradient(180deg,#26262b,#101012)}
 .wallet-input,.modal-input,.modal-textarea{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22)}
 .game-board,.game-board.gem,.game-board.merge{background:linear-gradient(160deg,#2a2a30,#0f0f11)}
+
+/* ===== NAVY + TON BLUE + GOLD ===== */
+:root{--bg:#070A12;--bg2:#11141D;--bg3:#191C27;--orange:#38BDF8;--orange2:#0EA5E9;--gold:#F5B942;--text2:#c3c9d8;--text3:#8b93a7;--green:#7DD3FC;--btn:linear-gradient(135deg,#38BDF8,#0EA5E9 55%,#0369a1)}
+#bgFx{background:radial-gradient(120% 80% at 50% -10%,#0d1a33 0%,#070A12 55%,#04060c 100%)}
+#bgFx .grid{background-image:linear-gradient(rgba(56,189,248,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.10) 1px,transparent 1px)}
+#bgFx .diag{background:repeating-linear-gradient(115deg,transparent 0 90px,rgba(56,189,248,.07) 90px 91px)}
+#bgFx .beam{background:linear-gradient(90deg,transparent,rgba(56,189,248,.8),transparent)}
+#bgFx::before{background:radial-gradient(40% 30% at 30% 20%,rgba(14,165,233,.16),transparent 70%),radial-gradient(35% 28% at 80% 70%,rgba(56,189,248,.10),transparent 70%)}
+.forcesub-screen,.ban-screen{background:rgba(5,8,16,.9)}
+.glass-card,.stat-card,.task-item,.reward-item,.ref-link-card,.ref-stat-card,.wallet-form-card,.tx-item,.mining-card,.bonus-card,.redeem-card,.how-card,.game-card,.ad-summary,.convert-box,.wallet-action-btn,.tabs,.ref-user-item,.record-item,.wheel-info-banner,.combo-card,.games-balance,.ref-banner,.price-box,.wallet-bal-card,.promo-card{background:linear-gradient(160deg,#11141D,#191C27);border:1px solid rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.5)}
+.balance-card{background:linear-gradient(145deg,#0f4c81 0%,#11213f 48%,#0c1020 100%);border:1px solid rgba(56,189,248,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 40px rgba(14,165,233,.28),0 18px 44px rgba(0,0,0,.6)}
+.balance-card::before{background:radial-gradient(circle,rgba(56,189,248,.35),transparent 68%)}
+.balance-logo{color:#7DD3FC}
+.balance-num{text-shadow:0 0 24px rgba(56,189,248,.6)}
+.home-action.earn{background:var(--btn);color:#fff;box-shadow:0 6px 22px rgba(14,165,233,.5),inset 0 1px 0 rgba(255,255,255,.35)}
+.home-action.withdraw{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.45);color:#e0f2fe}
+.invite-btn,.promo-btn,.combo-check-btn,.task-btn.join,.copy-btn,.wallet-submit,.modal-submit,.forcesub-item-btn,.forcesub-verify-btn,.wheel-card-btn,.game-action,.wheel-hub,.tab.active{background:var(--btn);border:1px solid rgba(125,211,252,.55);box-shadow:0 6px 20px rgba(14,165,233,.35),inset 0 1px 0 rgba(255,255,255,.3)}
+.fruit-spin,.rush-cashout{background:linear-gradient(135deg,#F5B942,#d99a1f);color:#1a1200;border:1px solid rgba(255,225,150,.6);box-shadow:0 6px 20px rgba(245,185,66,.35)}
+.qty-chip.active{background:var(--btn);border-color:rgba(125,211,252,.6)}
+.feature-btn{background:rgba(245,185,66,.1);color:#F5B942;border:1px solid rgba(245,185,66,.6);box-shadow:0 0 16px rgba(245,185,66,.18)}
+.mining-btn,.mining-card.mining-on .mining-btn{background:linear-gradient(135deg,#38BDF8,#0EA5E9 55%,#0369a1);color:#fff;border:1px solid rgba(186,230,253,.7);padding:15px;font-size:15px;box-shadow:0 0 26px rgba(14,165,233,.65),0 8px 22px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.mining-btn:disabled{box-shadow:none}
+.mining-card{border-color:rgba(56,189,248,.35);box-shadow:0 0 30px rgba(14,165,233,.14),0 10px 28px rgba(0,0,0,.5)}
+.mining-icon{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.45);box-shadow:0 0 22px rgba(56,189,248,.5)}
+.mining-progress{background:rgba(56,189,248,.1)}
+.mining-progress-fill,.mining-on .mining-progress-fill,.loading-fill{background:linear-gradient(90deg,#0369a1,#0EA5E9,#7DD3FC);box-shadow:0 0 14px rgba(56,189,248,.7)}
+.loading-percent{color:#7DD3FC}
+.task-btn.verify,.task-btn.done{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.4);color:#bae6fd}
+.nav{background:rgba(10,13,22,.92);border-top:1px solid rgba(56,189,248,.18)}
+.nav-icon,.nav-label{color:#8b93a7}
+.nav-item.active .nav-icon{color:#38BDF8;filter:drop-shadow(0 0 8px rgba(56,189,248,.8))}
+.nav-item.active .nav-label{color:#7DD3FC}
+.nav-item.active::before{background:linear-gradient(90deg,transparent,#38BDF8,transparent)}
+#nav-record .nav-icon{color:#F5B942}#nav-record.active .nav-icon{filter:drop-shadow(0 0 8px rgba(245,185,66,.8))}
+.feature-icon,.game-card-icon,.reward-icon,.task-logo,.wallet-action-icon,.invite-icon,.wheel-info-emoji,.forcesub-emoji,.forcesub-item-icon,.modal-success-icon,.avatar{color:#38BDF8}
+.feature-icon.gold,.reward-icon,.game-card:nth-child(1) .game-card-icon{color:#F5B942;background:rgba(245,185,66,.12);border:1px solid rgba(245,185,66,.4);box-shadow:0 0 18px rgba(245,185,66,.2)}
+.feature-icon.purple,.game-card-icon,.task-logo{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.35);box-shadow:0 0 18px rgba(14,165,233,.2)}
+.game-card:nth-child(1) .game-card-icon{background:rgba(245,185,66,.12);border-color:rgba(245,185,66,.4)}
+.task-logo{filter:none}
+.stat-val.orange,.ref-stat-val.orange{color:#38BDF8;text-shadow:0 0 14px rgba(56,189,248,.5)}
+.reward-amount,.task-reward,.ref-user-earn-val,.price-val,.game-card-limit{color:#F5B942}
+.game-card-limit{background:rgba(245,185,66,.12)}
+.modal{background:linear-gradient(180deg,#141826,#0a0d16);border-top:1px solid rgba(56,189,248,.25)}
+.wallet-input,.modal-input,.modal-textarea{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14)}
+.wallet-input:focus,.modal-input:focus,.modal-textarea:focus{border-color:#38BDF8;box-shadow:0 0 0 3px rgba(56,189,248,.18)}
+.toast{background:rgba(11,16,30,.97);border:1px solid rgba(56,189,248,.5);box-shadow:0 8px 28px rgba(14,165,233,.3)}
+.game-board,.game-board.gem,.game-board.merge{background:linear-gradient(160deg,#0f2a4a,#080c18);border:1px solid rgba(56,189,248,.3)}
+.rush-cell.safe{background:rgba(245,185,66,.14);border-color:rgba(245,185,66,.65);color:#F5B942}
+.rush-status span{color:#F5B942}
+.number-dial{color:#7DD3FC;border-color:#38BDF8;background:radial-gradient(circle,#0f3558,#060b16 65%);box-shadow:0 0 26px rgba(56,189,248,.5),inset 0 0 20px rgba(56,189,248,.2)}
+.dial-result{color:#bae6fd}
+.xo-cell.x{color:#38BDF8}.xo-cell.o{color:#F5B942}
+.fruit-machine{background:linear-gradient(145deg,#0f2a4a,#080c18);border:2px solid rgba(56,189,248,.6);box-shadow:0 0 26px rgba(14,165,233,.3)}
+.fruit-cell{background:#0b1426;color:#7DD3FC}
+.fruit-cell.win{outline:3px solid #F5B942;box-shadow:0 0 18px rgba(245,185,66,.7)}
+.wheel-outer{background:linear-gradient(145deg,#12395c,#070A12);box-shadow:0 0 0 4px rgba(56,189,248,.35),0 0 34px rgba(14,165,233,.35),0 10px 30px rgba(0,0,0,.6)}
+.wheel-pointer{color:#F5B942}
+.convert-arrow{background:var(--btn);box-shadow:0 0 22px rgba(56,189,248,.5)}
+.convert-rate{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.4);color:#bae6fd}
+.ref-day.done{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.55);color:#bae6fd}
+.withdraw-requirement.min{color:#F5B942}.withdraw-requirement.ads{color:#7DD3FC}
+img[src*="simpleicons"]{filter:drop-shadow(0 0 6px rgba(56,189,248,.5))!important}
+img[src^="data:image/svg"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!important}
 </style>
 </head>
 <body>
@@ -3502,7 +3565,7 @@ function renderWheelInfo(){
 function renderWheelCircle(segments){
   var n = segments.length;
   var slice = 360 / n;
-  var colorA = '#101012', colorB = '#34343a';
+  var colorA = '#0b1220', colorB = '#12395c';
   var gradParts = [];
   var labelsHtml = '';
   for (var i=0;i<n;i++){
