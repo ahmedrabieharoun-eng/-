@@ -1069,6 +1069,43 @@ img[src^="data:image/svg"]{filter:drop-shadow(0 0 7px rgba(56,189,248,.7))!impor
 .cp-plinth::after,.cp-ind::after,.cp-me::before{display:none}
 .cp-ind{transition:transform .25s ease}
 #cpPanel{transition:opacity .15s ease}
+
+/* ═══════════ Contest page — ultra-light mode ═══════════ */
+/* global animated background is hidden while the contest page is open */
+.cp-on #bgFx{display:none!important}
+.cp-on .nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#0b0e18!important}
+#page-record,#page-record *{box-shadow:none!important;text-shadow:none!important;filter:none!important;will-change:auto!important}
+#page-record .cp-bg .stars{animation:none!important;opacity:.5}
+#page-record .cp-root{background:#0d0722}
+#page-record .cp-timer,#page-record .cp-me,#page-record .cp-row,#page-record .cp-tabs,#page-record .cp-blk{background:#1b0d3a!important}
+#page-record .cp-row.me{background:#2d1566!important}
+#page-record .cp-tbox{background:#120826!important}
+/* rows are only painted when near the viewport */
+#page-record .cp-row{contain:layout paint style;content-visibility:auto;contain-intrinsic-size:auto 58px}
+#page-record .cp-av img{image-rendering:auto}
+.cp-ov{background:rgba(5,2,14,.85)!important}
+.cp-sheet{box-shadow:none!important}
+
+/* ═══════════ GLOBAL PERFORMANCE MODE — whole app ═══════════ */
+/* 1) background: static, no moving grid / beams / glow */
+#bgFx .diag,#bgFx .beam{display:none!important}
+#bgFx .grid,#bgFx::before,#bgFx *{animation:none!important}
+/* 2) no backdrop blur anywhere (biggest scroll/navigation cost on phones) */
+*,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.nav{background:#0b0e18!important}
+.modal-overlay,#addTaskModal{background:rgba(3,4,8,.92)!important}
+/* 3) no big blurred shadows / glows */
+*,*::before,*::after{box-shadow:none!important;text-shadow:none!important}
+.ld-coin,.ld-ring{filter:none!important}
+/* 4) decorative infinite animations off (spinners/loaders stay) */
+.lb-timer-icon,.lb-podium-crown,.rank1 .lb-podium-avatar,.wheel-card-icon,.active-dot,.ld-coin,.ld-ring{animation:none!important}
+.lb-podium-plinth::after{display:none!important}
+.lb-loading-row::after{animation:none!important;display:none!important}
+/* 5) cheaper layout/paint during navigation + scrolling */
+.page{contain:layout style;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.nav-item,.nav-icon,.nav-label{transition:none!important}
+html,body{touch-action:manipulation}
+img{content-visibility:auto}
 </style>
 </head>
 <body>
@@ -2755,6 +2792,7 @@ function loadRecordPage(){
   cpRefreshInterval = setInterval(function(){
     var pg = document.getElementById('page-record');
     if (!pg || !pg.classList.contains('active')) { clearInterval(cpRefreshInterval); cpRefreshInterval = null; return; }
+    if (document.hidden) return;
     cpLoad();
   }, 30000);
 }
@@ -2766,8 +2804,10 @@ function cpLoad(){
       if (!cpCache[type] && type === cpActive) document.getElementById('cpPanel').innerHTML = '<div class="cp-empty">Unable to load the leaderboard right now</div>';
       return;
     }
+    var _prev = cpCache[type], _same = false;
+    try { _same = !!_prev && JSON.stringify(_prev) === JSON.stringify(res.data); } catch(_){}
     cpCache[type] = res.data;
-    if (type === cpActive){ cpRender(); }
+    if (type === cpActive && !_same){ cpRender(); }
   }).catch(function(){
     if (!cpCache[type] && type === cpActive) document.getElementById('cpPanel').innerHTML = '<div class="cp-empty">Unable to load the leaderboard right now</div>';
   });
@@ -2839,6 +2879,23 @@ function cpRender(){
   panel.innerHTML = html;
   cpStartTimer();
 }
+
+// ---------- Perf: toggle light mode when the contest page is visible ----------
+(function(){
+  function sync(){
+    var pg = document.getElementById('page-record');
+    var on = !!(pg && pg.classList.contains('active'));
+    document.documentElement.classList.toggle('cp-on', on);
+    if (!on && cpTimerInterval){ clearInterval(cpTimerInterval); cpTimerInterval = null; }
+  }
+  function init(){
+    var pg = document.getElementById('page-record');
+    if (!pg || !window.MutationObserver) return;
+    new MutationObserver(sync).observe(pg, {attributes:true, attributeFilter:['class']});
+    sync();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
 
 // ---------- Live countdown ----------
 function cpStartTimer(){
@@ -3938,6 +3995,7 @@ function submitAddTask(){
 // ── Daily combo countdown (resets at UTC midnight) ─────────────────────
 (function timerTick(){
   setInterval(function(){
+    if (document.hidden) return;
     var el = document.getElementById('comboTimer'); if(!el) return;
     var now = new Date();
     var nextUtcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()+1);
