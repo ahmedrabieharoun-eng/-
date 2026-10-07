@@ -1741,6 +1741,7 @@ var gigapubTimerId = null;
 
 // ── Adloop ────────────────────────────────────────────────────────────
 var ADLOOP_SLOT_ID = "748241";
+var ADLOOP_MIN_WATCH_MS = 15000; // minimum watch time before reward is allowed
 var adloopController = null;
 var adloopWatchBusy = false;
 var adloopCooldownUntil = 0;
@@ -3451,7 +3452,18 @@ function watchAdloop(){
     // Adloop: ad.show() resolves once the ad was watched, and rejects if no
     // ad was available or the user bailed out early — only a resolve may
     // ever grant a reward.
+    var adStartedAt = Date.now();
     ad.show().then(function(){
+      var watchedMs = Date.now() - adStartedAt;
+      if (watchedMs < ADLOOP_MIN_WATCH_MS){
+        // User skipped / closed the ad early -> no reward
+        pulseChain.finish();
+        adloopWatchBusy = false;
+        stopAdloopButtonTimer();
+        renderTasks('ads');
+        showToast('Watch the full ad (15s)','error');
+        return;
+      }
       pulseChain.finish().then(function(chk){
       var claimPayload = {company:'adloop', sid:adTicket, ct: Date.now()};
       if (chk) claimPayload.chk = chk;
@@ -3480,6 +3492,7 @@ function watchAdloop(){
       });
       });
     }).catch(function(){
+      pulseChain.finish();
       adloopWatchBusy = false;
       stopAdloopButtonTimer();
       renderTasks('ads');
